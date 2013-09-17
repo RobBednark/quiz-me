@@ -1,0 +1,108 @@
+QuizMe notes can be found in these places:
+    o here (git repo /README)
+    o notebooks
+    o Portland Python quiz program (~/bin/learn/quiz.python/quiz.py)
+
+[The rest of this file was moved from bin/learn/quiz.python/db/db_app_designs 9/16/13]
+
+Code: Dropbox/git/quizme_site
+
+================================================================================
+User Stories
+================================================================================
+o users can create accounts for themselves
+o users can edit other peoples questions/answers
+o users can create quizzes (list of questions)
+o bulk upload
+o modify a question while it's being asked
+o modify an answer while it's being shown
+o send emails with questions
+o answer question in email
+o view facts (no Q&A)
+o algorithm based on Steven Jonas SuperMemo (Piotr Wozniak)
+o spelling (sound clips)
+o recognize photos
+o time how long it takes to answer
+o give Atlatl interview candidates quizzes
+o ask in reverse (show answers, guess questions)
+o study mode: show questions and answers together
+o movie clips / YouTube videos
+
+================================================================================
+Django Apps
+================================================================================
+Word meaning "piece of information":
+chunk / game / info / piece of info / library / article / meme / agents / chapter / quiz / 
+tidbit / interesting thing / atom / main / unit / info unit / knowledge / 
+feature
+segment
+part
+entity
+noun
+thing
+bit
+thing that stands alone
+article
+InfoEntity
+component
+portion
+piece
+fragment
+building block
+monad
+constituent
+
+entities
+================================================================================
+MVP:
+================================================================================
+    Questions:
+        - text
+    Answers:
+        - text
+    Attempts:
+        - answer
+        - date
+        - user
+        - 
+
+================================================================================
+Entities
+================================================================================
+answers
+hints
+questions
+quizzes (collection of questions)
+tags
+users
+================================================================================
+Screens:
+================================================================================
+  New user (use the admin initially)
+  Add a question/answer (use the admin initially)
+  Edit a question/answer (use the admin initially)
+  Quiz - ask questions, record answers
+
+================================================================================
+Ultimate:
+================================================================================
+
+Question Types:
+        - multiple choice
+        - true/false
+        - fill in the blank
+        - essay
+        - audio clip
+        - video clip
+        - image
+        - click on photo (e.g., US map, states)
+Hints:
+
+Modes:
+
+================================================================================
+Use Cases:
+================================================================================
+o want to quiz myself for a specify tag
+
+''',},
