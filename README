@@ -8,14 +8,22 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
-User Stories
+User Stories / Features
 ================================================================================
 o users can create accounts for themselves
-o users can edit other peoples questions/answers
+o add questions via admin
 o users can create quizzes (list of questions)
+o Edit History (see history of edits of questions, etc.)
+o web page is AJAX 
+o users can edit other peoples questions/answers
+o users can edit quizzes (add questions)
+o users can edit quizzes (remove questions)
+o users can add tags to questions
+o users can add tags to questions during quiz
+o can edit question while taking the quiz
 o bulk upload
-o modify a question while it's being asked
-o modify an answer while it's being shown
+o edit a question while it's being asked
+o edit an answer while it's being shown
 o send emails with questions
 o answer question in email
 o view facts (no Q&A)
