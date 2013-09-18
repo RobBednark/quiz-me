@@ -8,6 +8,15 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
+!Log/History/Diary
+================================================================================
+Tue 9/17/13
+  o started playing with django-versioning in learn_django-versioning_package
+        LEFT OFF: adding code to models.py
+  o researching model instance versioning approaches (capturing every time an instance is modified)
+Mon 9/16/13
+  o added models
+================================================================================
 User Stories / Features
 ================================================================================
 o users can create accounts for themselves
