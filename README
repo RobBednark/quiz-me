@@ -10,6 +10,14 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 9/19/13
+  o got it running; can see revisions in Django Admin; 
+  o need to run syncdb before versioning_setup
+  o installed django-debug-toolbar
+Wed 9/18/13
+  o ran "manage.py version_setup..." command and got:
+    ImportError: No module named debug_toolbar
+  o finished modifying code
 Tue 9/17/13
   o started playing with django-versioning in learn_django-versioning_package
         LEFT OFF: adding code to models.py
