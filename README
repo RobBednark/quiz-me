@@ -8,8 +8,20 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
+!HOW TO use django-versioning
+================================================================================
+cddjango
+cd learn_django-versioning_package
+vim README
+================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 9/30/13
+  o If I use a REST API and AJAX, what should my first feature be?
+    Being able to add questions.  Tag questions.  Modify questions.
+  o installed django REST Framework: pip install djangorestframework
+  o What should I do next?  I would like to create a REST API and use a JavaScript front-end.  Maybe I will use django-rest-framework.
+
 Thu 9/19/13
   o got it running; can see revisions in Django Admin; 
   o need to run syncdb before versioning_setup
