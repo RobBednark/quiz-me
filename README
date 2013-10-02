@@ -16,6 +16,8 @@ vim README
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 10/1/13
+  o create learn_django_rest_framework project
 Mon 9/30/13
   o If I use a REST API and AJAX, what should my first feature be?
     Being able to add questions.  Tag questions.  Modify questions.
