@@ -17,6 +17,8 @@ vim README
 !Log/History/Diary
 ================================================================================
 Thu 10/3/13
+  o NEXT STEP: create a basic question and answer models, and add the Django REST Framework API
+  o completed the Django REST Framework Quickstart, and skimmed the tutorial
   o working on learn_django_rest_framework project
 Tue 10/1/13
   o create learn_django_rest_framework project
