@@ -8,14 +8,102 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
-!HOW TO use django-versioning
+!TODO
 ================================================================================
-cddjango
-cd learn_django-versioning_package
-vim README
+o Create a quiz where the questions are cycle through, the user inputs an attempt, and the answer
+  is shown.
+o Add users
+o Ask a question, and then show the answer.
+    quiz view:
+        form:
+            if GET:
+                ask the first question
+            elif POST:
+                tell server which question was just asked
+  Format:
+    1) Show user a question
+    2) give user an input box to put their answer
+    3) Submit (user submits their answer)
+    4) save the user's answer, and show the correct answer, along with a Next button
+    5) Next (user clicks Next to go to the next question)
+    6) go to (1)
+
+
+================================================================================
+!django-quiz
+================================================================================
+o Name of quiz is passed in the url
+o views:
+    - question, answer, quiz, previous are all loaded in the context
+o models:
+    Category
+    Quiz
+    Progress
+    Sitting
+        - user
+        - question_list (TextField; csv of questions)
+        - incorrect_question (TextField; csv of incorrect questions)
+    Question
+    Answer
+    
+
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 1/13/14 8am
+    Looking at django-quiz to see how he did it.
+    Still have to decide how to pass fields.  I want to go with hidden fields.
+    Got django-quiz up and running.  Needed to do a "django-admin.py startproject", and add the apps.  I didn't actually get the templates working.
+    Options:
+        pass hidden fields
+        pass query parameters (http://quizme.com?parm=value
+Fri 1/9/14 8pm
+    Got the hidden field working!  Now add it to quizme.
+    Want to redirect to the next question by passing the hidden value of the current question.
+    Could also pass it in the URL as the ID of the question.
+Fri 1/9/14 8am
+    working on getting hidden field working; found form.fields['myfield']['initial'] but it is not right
+Thu 1/9/14 6pm
+    Working on learn_form_hidden_field.  Got the hidden field, now need to see if it's passing a value.
+    It's passing the initial value and saving that.  Now I have to see if I can set it to something else.
+    How do I set the value for a field?
+    Set a trace and see what the values are.
+Thu 1/9/14 9am
+    o Learned how to use a hidden field.  Now need to figure out how to set the value for the hidden field in the view instead of just using the initial value.
+      Created learn_form_hidden_field.
+Wed 1/8/14 6pm
+    o Got admin working.
+    o Next: redirect to the next question; started working on; need hidden field
+Wed 1/8/14 10am
+    o Got it saving an attempt.  Now need to work on a redirect to the next question.  Also need to add Attempt to the admin.  Left off making changes to the admin.
+Tue 1/7/14 6pm
+    o Got the form displaying correctly for the GET.
+      ERROR when submitting: 'FormAttempt' object has no attribute 'cleaned_data'
+
+Tue 1/7/14 9am
+    o Working on the view and template.  Decided to use form for the answer, and just put the question in directly.  Still modifying the view code and the template.
+Mon 1/6/14 6pm:
+  o I'm trying to figure out how to do a read-only field; what I want:
+        o display the question
+        o have a box for the answer:
+        o when submitting, only allow the answer
+    Maybe what I should do is create a form just for the answer, and in the template put the questionas well.
+  
+Mon 1/6/14 8am:
+  o work on implementing the view; was going to use a form, not sure if I use Django Forms (because I have readonly field of question) or not.
+
+Fri 1/3/14:
+  
+  o got it working; added a question and answer via the admin
+  o added 'questions' to INSTALLED_APPS
+  o enabled the admin
+  o added requirements.txt file
+  o installed South
+  o got Django 1.6.1 installed
+Mon 10/14/13:
+  o LEFT OFF: working on learn_GenericForeignKey.polymorphic.contentType; can't figure out how to chain querysets together
+  o worked on the models; now figuring out how to use GenericForeignKey for the tag
+  o played with django_versioning again to see how it works; decided to continue working on the models
 Thu 10/3/13
   o NEXT STEP: create a basic question and answer models, and add the Django REST Framework API
   o completed the Django REST Framework Quickstart, and skimmed the tutorial
@@ -147,5 +235,12 @@ Modes:
 Use Cases:
 ================================================================================
 o want to quiz myself for a specify tag
+
+================================================================================
+!HOW TO use django-versioning
+================================================================================
+cddjango
+cd learn_django-versioning_package
+vim README
 
 ''',},
