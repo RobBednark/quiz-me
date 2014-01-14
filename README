@@ -50,6 +50,9 @@ o models:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 1/14/14 9am
+    Added code for next_question().  
+    Added code to pass question_id as hidden field.  Now test it.
 Mon 1/13/14 8am
     Looking at django-quiz to see how he did it.
     Still have to decide how to pass fields.  I want to go with hidden fields.

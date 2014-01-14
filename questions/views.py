@@ -26,6 +26,7 @@ def view_quiz(request):
         if request.GET.get('question'):
         question = next_question()
         form_attempt = FormAttempt()
+        form_attempt.fields['question_id'] = question.id
 
         return render(request=request, template_name='quiz.html', 
                       dictionary=dict(form_attempt=form_attempt, question=question, question_id=question.id))
@@ -35,7 +36,7 @@ def view_quiz(request):
         if form_attempt.is_valid():
             # TODO: Need to figure out which question they are answering
             attempt = Attempt(text=form_attempt.cleaned_data['text'],
-                              question=???,
+                              question=form_attempt.cleaned_data['question_id'],
                               correct=True)
             try:
                 attempt.save()
