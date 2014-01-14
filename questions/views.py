@@ -8,7 +8,7 @@ from .forms import FormAttempt
 from .models import Attempt, Question
 
 def next_question():
-    user = 'None'
+    user = User.objects.get(name='None')
     last_attempt = Attempt.objects.filter(user=user).latest(field_name='datetime_added')
     last_question = last_attempt.question
     next_question_id = last_question.id + 1
@@ -22,8 +22,6 @@ def next_question():
 
 def view_quiz(request):
     if request.method == 'GET':
-        # This is a GET, 
-        if request.GET.get('question'):
         question = next_question()
         form_attempt = FormAttempt()
         form_attempt.fields['question_id'] = question.id
