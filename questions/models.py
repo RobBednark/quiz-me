@@ -16,10 +16,15 @@ class Answer(models.Model):
     answer = models.TextField()
     question = models.ForeignKey('Question', null=True)
 
+class User(models.Model):
+    name = models.TextField()
+
 class Attempt(models.Model):
+    datetime_added = models.DateTimeField(auto_now_add=True)
     text = models.TextField()
     question = models.ForeignKey('Question', null=False)
     correct = models.BooleanField()
+    user = models.ForeignKey('User')
 
 class Hint(models.Model):
     text = models.TextField()
