@@ -24,7 +24,7 @@ class Attempt(models.Model):
     text = models.TextField()
     question = models.ForeignKey('Question', null=False)
     correct = models.BooleanField()
-    user = models.ForeignKey('User')
+    user = models.ForeignKey('User', null=True)
 
 class Hint(models.Model):
     text = models.TextField()

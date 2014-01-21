@@ -4,52 +4,42 @@ QuizMe notes can be found in these places:
     o Portland Python quiz program (~/bin/learn/quiz.python/quiz.py)
 
 [The rest of this file was moved from bin/learn/quiz.python/db/db_app_designs 9/16/13]
-
 Code: Dropbox/git/quizme_site
-
-================================================================================
-!TODO
-================================================================================
-o Create a quiz where the questions are cycle through, the user inputs an attempt, and the answer
-  is shown.
-o Add users
-o Ask a question, and then show the answer.
-    quiz view:
-        form:
-            if GET:
-                ask the first question
-            elif POST:
-                tell server which question was just asked
-  Format:
-    1) Show user a question
-    2) give user an input box to put their answer
-    3) Submit (user submits their answer)
-    4) save the user's answer, and show the correct answer, along with a Next button
-    5) Next (user clicks Next to go to the next question)
-    6) go to (1)
-
-
-================================================================================
-!django-quiz
-================================================================================
-o Name of quiz is passed in the url
-o views:
-    - question, answer, quiz, previous are all loaded in the context
-o models:
-    Category
-    Quiz
-    Progress
-    Sitting
-        - user
-        - question_list (TextField; csv of questions)
-        - incorrect_question (TextField; csv of incorrect questions)
-    Question
-    Answer
-    
 
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 1/21/14 8am
+    States:
+        - initial GET:
+            - show the question
+        - POST
+            - new template:
+                - show the answer, the user's attempt, the question
+                - have a NEXT button be a GET for the next question
+Mon 1/20/14 6pm
+    I got the hidden input to work.  Now need to figure out what to do next.
+Mon 1/20/14 8am
+    Trying different things to get the HiddenInput to work.  I think it is due to these lines in the view:
+            form_attempt.fields['question_id'] = question.id
+            form_attempt.fields['question_id'] = None
+    I think it should be something like ['initial'], otherwise I think it's overriding the widget.
+Fri 1/17/14 6pm
+    Tried putting explicit <input> in the form, and then it put the <input> widget in the "value".
+    Baffling.
+Fri 1/17/14 8am
+    Googled.  Tried .as_hidden and using ()'s when setting the widget.  Still not working.  Might not to explicitly put it in the form.
+    Look at the Django code to see what the HiddenInput widget does.
+Thu 1/16/14 8am
+    Added errors to form so can see what the error is.
+    It is saying that question_id is not present in the form.
+    I set a breakpoint and confirmed that question_id is not in request.POST.
+    Now check to see if question_id is getting in the form.  I see it as one of the fields, but because I'm not using form.as_p(), it's not getting put into the form.
+Wed 1/15/14 8am
+    Figured out that my for is not valid.  Now trying to figure out how to show Django form errors manually, and then eventually using Django generic class-based views.
+Tue 1/14/14 5pm
+    Got view to show question working, and next_question() code working.
+    Now getting an exception after clicking "submit".
 Tue 1/14/14 9am
     Added code for next_question().  
     Added code to pass question_id as hidden field.  Now test it.
@@ -133,6 +123,46 @@ Tue 9/17/13
   o researching model instance versioning approaches (capturing every time an instance is modified)
 Mon 9/16/13
   o added models
+================================================================================
+!TODO
+================================================================================
+o Create a quiz where the questions are cycle through, the user inputs an attempt, and the answer
+  is shown.
+o Add users
+o Ask a question, and then show the answer.
+    quiz view:
+        form:
+            if GET:
+                ask the first question
+            elif POST:
+                tell server which question was just asked
+  Format:
+    1) Show user a question
+    2) give user an input box to put their answer
+    3) Submit (user submits their answer)
+    4) save the user's answer, and show the correct answer, along with a Next button
+    5) Next (user clicks Next to go to the next question)
+    6) go to (1)
+
+
+================================================================================
+!django-quiz
+================================================================================
+o Name of quiz is passed in the url
+o views:
+    - question, answer, quiz, previous are all loaded in the context
+o models:
+    Category
+    Quiz
+    Progress
+    Sitting
+        - user
+        - question_list (TextField; csv of questions)
+        - incorrect_question (TextField; csv of incorrect questions)
+    Question
+    Answer
+    
+
 ================================================================================
 User Stories / Features
 ================================================================================
