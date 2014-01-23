@@ -22,21 +22,24 @@
 
             {{ form_attempt.question_id }}
             {% if question %}
-                {{ question }}
+                {{ question.question }}
             {% else %}
                 (NOTE: there are no questions)
             {% endif %}
+
             <div class="fieldWrapper">
-                {{ form_attempt.text.label_tag }}
-                {{ form_attempt.text }}
-                {{ form_attempt.text.errors }}
+                {{ form_attempt.attempt.label_tag }}
+                {{ form_attempt.attempt }}
+                {{ form_attempt.attempt.errors }}
             </div>
+
             {% if form_attempt.errors %}
-            <p> Errors:
-                <div class="fieldWrapper">
-                    {{ form_attempt.errors }}
-                </div>
+                <p> Errors:
+                    <div class="fieldWrapper">
+                        {{ form_attempt.errors }}
+                    </div>
             {% endif %}
+
             </p>
             <input type="submit" value="Submit" />
 		</form>

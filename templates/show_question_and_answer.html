@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Quiz</title>
+		<meta url-encoding="utf-8" />
+	</head>
+	<body>
+		<form action="" method="post"> {% csrf_token %}
+            {# question_id is a hidden field that contains the question #}
+            {{ form_attempt.hidden_question_id }}
+
+            <div class="fieldWrapper">
+                Answer:
+                {{ answer }}
+            </div>
+
+            <div class="fieldWrapper">
+                Your answer:
+                {{ attemp.attempt }}
+            </div>
+
+            <div class="fieldWrapper">
+                Question: 
+                {{ question }}
+            </div>
+
+            {% if form_attempt.errors %}
+            <p> Errors:
+                <div class="fieldWrapper">
+                    {{ form_attempt.errors }}
+                </div>
+            {% endif %}
+            </p>
+            <input type="submit" value="Next question" />
+		</form>
+	</body>
+</html>

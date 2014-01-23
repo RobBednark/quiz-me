@@ -38,10 +38,11 @@ def view_quiz(request):
         question = next_question()
         form_attempt = FormAttempt()
         if question:
-            form_attempt.fields['question_id'].initial = question.id
+            form_attempt.fields['hidden_question_id'].initial = question.id
         else:
-            form_attempt.fields['question_id'].initial = None
-        return render(request=request, template_name='quiz.html', 
+            form_attempt.fields['hidden_question_id'].initial = None
+        return render(request=request, 
+                      template_name='show_question.html', 
                       dictionary=dict(form_attempt=form_attempt, 
                                       question=question))
     elif request.method == 'POST':
@@ -51,9 +52,11 @@ def view_quiz(request):
         import ipdb; ipdb.set_trace()
         form_attempt = FormAttempt(request.POST)
         if form_attempt.is_valid():
+            question_id = form_attempt.cleaned_data['hidden_question_id']
+            question = Question.get(id=question_id)
             # TODO: Need to figure out which question they are answering
-            attempt = Attempt(text=form_attempt.cleaned_data['text'],
-                              question_id=form_attempt.cleaned_data['question_id'],
+            attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
+                              question=question,
                               correct=True,
                               user=None)
             try:
@@ -62,14 +65,17 @@ def view_quiz(request):
                 pass
             # Show a page that shows their attempt, the correct answer, the question, and a NEXT button
             return render(request=request, 
-                          template_name='quiz.html', 
+                          template_name='show_question_and_answer.html', 
                           dictionary=dict(form_attempt=form_attempt, 
+                                          question=question,
+                                          answer=question.answer,
+                                          attempt=attempt,
                                          ))
         else:
             # Assert: form is NOT valid
             # Need to return the errors to the template, and have the template show the errors.
             return render(request=request, 
-                          template_name='quiz.html', 
+                          template_name='show_question.html', 
                           dictionary=dict(form_attempt=form_attempt, 
                                          ))
     else:

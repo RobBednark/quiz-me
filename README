@@ -9,7 +9,14 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 1/22/14 5pm
+Wed 1/22/14 8am
+    I added a "question" field to the form, but this doesn't make any sense.  Question is not an input.  I think I just added it to make it easy to display the question.  Take it out and pass it explicitly.
+
+    Do I really want a different template for showing the first question vs showing an answer
+    and the next question?  For now it's fine.  Keep moving on.
 Tue 1/21/14 8am
+    Left off changing field names in forms and views.
     States:
         - initial GET:
             - show the question
