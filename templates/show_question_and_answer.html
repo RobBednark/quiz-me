@@ -11,18 +11,18 @@
             {{ form_attempt.hidden_question_id }}
 
             <div class="fieldWrapper">
-                Answer:
-                {{ answer }}
+                Correct Answer:
+                {{ answer.answer }}
             </div>
 
             <div class="fieldWrapper">
                 Your answer:
-                {{ attemp.attempt }}
+                {{ attempt.attempt }}
             </div>
 
             <div class="fieldWrapper">
                 Question: 
-                {{ question }}
+                {{ question.question }}
             </div>
 
             {% if form_attempt.errors %}
@@ -32,7 +32,7 @@
                 </div>
             {% endif %}
             </p>
-            <input type="submit" value="Next question" />
+            <a href="/"> Next Question </a>
 		</form>
 	</body>
 </html>

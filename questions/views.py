@@ -53,7 +53,7 @@ def view_quiz(request):
         form_attempt = FormAttempt(request.POST)
         if form_attempt.is_valid():
             question_id = form_attempt.cleaned_data['hidden_question_id']
-            question = Question.get(id=question_id)
+            question = Question.objects.get(id=question_id)
             # TODO: Need to figure out which question they are answering
             attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
                               question=question,

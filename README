@@ -10,6 +10,7 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Wed 1/22/14 5pm
+    I think I got it working.  Add another question to see if it really works.
 Wed 1/22/14 8am
     I added a "question" field to the form, but this doesn't make any sense.  Question is not an input.  I think I just added it to make it easy to display the question.  Take it out and pass it explicitly.
 
