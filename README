@@ -10,9 +10,16 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Sat 2/01/14 10am
+    Next: add tags
+    Users now work.
+    Added foreign keys to User.
+    Added a user_ app to quizme.
+    Now add user to my model.
+    Satisfied that subclassing AbstractBaseUser also has all the authentication/permission functionality.
     On plan from Charleston.
     learn_django_doc_example_custom_user -- this is done and just creates a custom user by subclassing AbstractBaseUser.
     I figured out that create_user() is a method of the manager, not of the user.
+
 Sun 1/26/14 2pm
     On plane to Charleston.  Working on creating users and logging-in.
 Fri 1/24/14 6pm
@@ -155,15 +162,32 @@ Tue 9/17/13
 Mon 9/16/13
   o added models
 ================================================================================
-!TODO
+!TODO / Backlog
 ================================================================================
-o Users (add users)
-o Anonymous users (based on a cookie?)
-o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
+o tests
+o User login
 o Tags (be able to tag questions, and then select tags from which to select questions)
+    - add tags
+    - select a single tag to use for a quiz
+    - select multiple tags to use for a quiz
+o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
+o Review mode: just show questions and answers
+o email questions
+o deploy to heroku
+
 o Questions (add questions from the web page)
 o Questions (modify questions from the web page while asking the question)
 o unique url's (e.g., either based on question words, or based on an id)
+o "Ignore" tag -- never see the question again
+o private questions/answers
+o add Google Analytics
+
+Front-end:
+o tag questions
+o add questions/answers
+o modify questions/answers on-the-fly
+o versions of questions/answers
+
 
 o Ask a question, and then show the answer.
     quiz view:

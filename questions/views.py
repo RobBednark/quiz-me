@@ -7,11 +7,9 @@ from django.views.generic.edit import FormView
 from .forms import FormAttempt
 from .models import Attempt, Question, User
 
-def next_question():
-    user, created = User.objects.get_or_create(name='None')
-
+def next_question(request):
     try:
-        last_attempt = Attempt.objects.filter(user=user).latest(field_name='datetime_added')
+        last_attempt = Attempt.objects.filter(user=request.user.id).latest(field_name='datetime_added')
     except ObjectDoesNotExist:
         last_attempt = None
 
@@ -35,7 +33,7 @@ def next_question():
 def view_quiz(request):
     if request.method == 'GET':
         # For a GET, show the next question
-        question = next_question()
+        question = next_question(request=request)
         form_attempt = FormAttempt()
         if question:
             form_attempt.fields['hidden_question_id'].initial = question.id
@@ -53,12 +51,11 @@ def view_quiz(request):
         if form_attempt.is_valid():
             question_id = form_attempt.cleaned_data['hidden_question_id']
             question = Question.objects.get(id=question_id)
-            user, created = User.objects.get_or_create(name='None')
             # TODO: Need to figure out which question they are answering
             attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
                               question=question,
                               correct=True,
-                              user=user)
+                              user=request.user.id)
             try:
                 attempt.save()
             except Exception as exception:
