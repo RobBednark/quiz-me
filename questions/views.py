@@ -49,16 +49,16 @@ def view_quiz(request):
         # ASSERT: this is a POST, so the user answered a question
         # Show the correct answer, the user's attempt, and the question
         # Show a NEXT button to do a GET and get the next question
-        import ipdb; ipdb.set_trace()
         form_attempt = FormAttempt(request.POST)
         if form_attempt.is_valid():
             question_id = form_attempt.cleaned_data['hidden_question_id']
             question = Question.objects.get(id=question_id)
+            user, created = User.objects.get_or_create(name='None')
             # TODO: Need to figure out which question they are answering
             attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
                               question=question,
                               correct=True,
-                              user=None)
+                              user=user)
             try:
                 attempt.save()
             except Exception as exception:

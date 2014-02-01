@@ -9,6 +9,29 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 2/01/14 10am
+    On plan from Charleston.
+    learn_django_doc_example_custom_user -- this is done and just creates a custom user by subclassing AbstractBaseUser.
+    I figured out that create_user() is a method of the manager, not of the user.
+Sun 1/26/14 2pm
+    On plane to Charleston.  Working on creating users and logging-in.
+Fri 1/24/14 6pm
+    Did some googling.  It doesn't look like it's easy to modify the Django authentication to use email addresses instead of usernames.
+    Decided to use Tom Christie's django-email-as-username library.
+    Working on learn_django_email_as_username
+Thu 1/23/14 5pm
+    Finished new template_django_1_6_1
+    Now working on learn_django_user_authentication
+    Left off: reading about Django user authentication
+        https://docs.djangoproject.com/en/1.6/topics/auth/
+        https://docs.djangoproject.com/en/1.6/topics/auth/customizing/
+Thu 1/23/14 9am
+    Working on creating and authenticating users.  Creating a learn project for it.  Right now, I'm creating a new template_django_1_6_1 based off of Django 1.6.1
+    Left to do: 
+        settings.py
+Wed 1/22/14 9pm
+    Got it working.  Works with 3 questions.  Cycles through.
+    Next step?  Maybe tests.
 Wed 1/22/14 5pm
     I think I got it working.  Add another question to see if it really works.
 Wed 1/22/14 8am
@@ -134,9 +157,14 @@ Mon 9/16/13
 ================================================================================
 !TODO
 ================================================================================
-o Create a quiz where the questions are cycle through, the user inputs an attempt, and the answer
-  is shown.
-o Add users
+o Users (add users)
+o Anonymous users (based on a cookie?)
+o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
+o Tags (be able to tag questions, and then select tags from which to select questions)
+o Questions (add questions from the web page)
+o Questions (modify questions from the web page while asking the question)
+o unique url's (e.g., either based on question words, or based on an id)
+
 o Ask a question, and then show the answer.
     quiz view:
         form:
