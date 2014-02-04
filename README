@@ -9,6 +9,9 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 2/4/14 8am
+    Next: implement custom login page
+    Got learn_custom_user_login_page_form_view working.
 Mon 2/3/14 5pm
     Working on learn_custom_user_login_page_form_view
     Added a custom form.  Now add a custom view, subclassed from login() view
