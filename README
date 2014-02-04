@@ -9,6 +9,34 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 2/3/14 5pm
+    Working on learn_custom_user_login_page_form_view
+    Added a custom form.  Now add a custom view, subclassed from login() view
+
+    https://docs.djangoproject.com/en/dev/topics/auth/default/
+
+    Start implementing the login form.  We'll need it anyway.
+
+    If I did implement saving an anonymous user as a user, it would have to be done
+    when they first go into a quiz.  That could potentially mean a lot of anonymous users.
+    Could choose to purge them after every n days.
+    Furthermore, might need a way to convert an anonymous user to an existing user.
+    Maybe that would be easy -- just fill in their fields (email addr, first name, last name)
+Mon 2/3/14 8am
+    Anonymous users do not have a User instance.  Figuring out how to save them as an actual user.  Created a django learn project.
+    Implementing...
+    Maybe it's not worth it.
+Sun 2/2/14 8pm
+    Fixed error.
+    Now getting another error:
+        Cannot assign "1": "Attempt.user" must be a "User" instance.
+Sun 2/2/14 11am
+    Changed from sqlite3 to postgres.  Create initial migrations again.  Now get an error:
+        column questions_attempt.datetime_updated does not exist
+        LINE 1: ...empt"."id", "questions_attempt"."datetime_added", "questions...
+    Next: need to allow superuser to add tags/questions in Django Admin.
+    Added Tag ManyToMany with Question.
+    Added ManyToMany both ways in Django Admin.
 Sat 2/01/14 10am
     Next: add tags
     Users now work.
@@ -164,8 +192,9 @@ Mon 9/16/13
 ================================================================================
 !TODO / Backlog
 ================================================================================
-o tests
 o User login
+o NewUser registration
+o tests
 o Tags (be able to tag questions, and then select tags from which to select questions)
     - add tags
     - select a single tag to use for a quiz
@@ -175,6 +204,8 @@ o Review mode: just show questions and answers
 o email questions
 o deploy to heroku
 
+o Rich Text for questions and answers
+o graph database
 o Questions (add questions from the web page)
 o Questions (modify questions from the web page while asking the question)
 o unique url's (e.g., either based on question words, or based on an id)

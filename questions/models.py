@@ -1,12 +1,14 @@
 from datetime import datetime
 
+from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from user_.models import User
+from emailusername.models import User
 
 class CreatedBy(models.Model):
-    datetime_added = models.DateTimeField(auto_now_add=True, default=datetime.now())
-    datetime_updated = models.DateTimeField(auto_now=True, default=datetime.now())
+    datetime_added = models.DateTimeField(auto_now_add=True)
+    datetime_updated = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, null=True)
 
     class Meta:
@@ -36,6 +38,7 @@ class Hint(CreatedBy):
 
 class Tag(CreatedBy):
     name = models.CharField(max_length=1000)
+    questions = models.ManyToManyField('Question', related_name='tags')
 
 class Quiz(CreatedBy):
     name = models.CharField(max_length=1000)

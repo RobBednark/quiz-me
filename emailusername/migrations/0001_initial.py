@@ -8,8 +8,8 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'MyUser'
-        db.create_table(u'user__myuser', (
+        # Adding model 'User'
+        db.create_table(u'emailusername_user', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('password', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('last_login', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
@@ -17,17 +17,17 @@ class Migration(SchemaMigration):
             ('is_active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('is_admin', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
-        db.send_create_signal(u'user_', ['MyUser'])
+        db.send_create_signal(u'emailusername', ['User'])
 
 
     def backwards(self, orm):
-        # Deleting model 'MyUser'
-        db.delete_table(u'user__myuser')
+        # Deleting model 'User'
+        db.delete_table(u'emailusername_user')
 
 
     models = {
-        u'user_.myuser': {
-            'Meta': {'object_name': 'MyUser'},
+        u'emailusername.user': {
+            'Meta': {'object_name': 'User'},
             'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '255', 'db_index': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
@@ -37,4 +37,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['user_']
+    complete_apps = ['emailusername']
