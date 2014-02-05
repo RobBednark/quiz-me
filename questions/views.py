@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -30,6 +31,7 @@ def next_question(request):
     return next_question
 
 
+@login_required(login_url='/login')
 def view_quiz(request):
     if request.method == 'GET':
         # For a GET, show the next question

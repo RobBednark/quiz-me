@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 2/4/14 6pm
+    Next: resolve the csrf error
+    Got the login screen working.  Now there is a csrf error:
+        CSRF token missing or incorrect.
+    Got the django learn project working to use the login screen.
 Tue 2/4/14 8am
     Next: implement custom login page
     Got learn_custom_user_login_page_form_view working.

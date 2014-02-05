@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     # url(r'^quizme_website/', include('quizme_website.foo.urls')),
 
     url(r'^$', 'questions.views.view_quiz', name='quiz'),
+    url(r'^login$', 'emailusername.views.login', name='login'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
