@@ -10,7 +10,7 @@ from .models import Attempt, Question, User
 
 def next_question(request):
     try:
-        last_attempt = Attempt.objects.filter(user=request.user.id).latest(field_name='datetime_added')
+        last_attempt = Attempt.objects.filter(user=request.user).latest(field_name='datetime_added')
     except ObjectDoesNotExist:
         last_attempt = None
 
@@ -54,10 +54,11 @@ def view_quiz(request):
             question_id = form_attempt.cleaned_data['hidden_question_id']
             question = Question.objects.get(id=question_id)
             # TODO: Need to figure out which question they are answering
+            import ipdb; ipdb.set_trace()
             attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
                               question=question,
                               correct=True,
-                              user=request.user.id)
+                              user=request.user)
             try:
                 attempt.save()
             except Exception as exception:

@@ -9,6 +9,12 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 2/5/14 7am
+    Problem: getting this error:
+        Cannot assign "<SimpleLazyObject: <User: rob>>": "Attempt.user" must be a "User" instance.
+    Theory: I think it's because I'm logged-in as an auth_user instead of an emailusername_user
+    Next: add a logout link
+    Status: added a base.html page.  Including it in the other 2 pages.
 Tue 2/4/14 6pm
     Next: resolve the csrf error
     Got the login screen working.  Now there is a csrf error:

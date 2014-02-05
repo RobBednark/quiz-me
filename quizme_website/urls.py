@@ -11,6 +11,7 @@ urlpatterns = patterns('',
 
     url(r'^$', 'questions.views.view_quiz', name='quiz'),
     url(r'^login$', 'emailusername.views.login', name='login'),
+    url(r'^logout$', 'emailusername.views.logout', name='logout'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
