@@ -1,3 +1,4 @@
+{% extends "base.html" %}
 {% block content %}
 
 {% if form.errors %}
@@ -21,4 +22,6 @@
     <input type="hidden" name="next" value="{{ next }}" />
 </form>
 
+{% endblock %}
+{% block logout %}
 {% endblock %}
