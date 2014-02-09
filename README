@@ -10,7 +10,8 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Thu 2/6/14 9am
-    Next: set a trace to see what the error is
+    I set a trace to see what the error is.  It is here:
+        /Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/contrib/auth/backends.py(16)authenticate()
     Added a logout link via a base.html page.
     login as rbednark@gmail.com / p: 
         Your username and password didn't match. Please try again.
