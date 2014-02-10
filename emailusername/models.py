@@ -11,6 +11,7 @@ class UserManager(BaseUserManager):
         user = self.model(
                 email=UserManager.normalize_email(email),
         )
+        import ipdb; ipdb.set_trace()
         user.set_password(password)
         user.save(using=self._db) 
         return user
@@ -40,7 +41,7 @@ class User(AbstractBaseUser):
     objects = UserManager() 
     USERNAME_FIELD = 'email'
     # REQUIRED_FIELDS specifies fields that must be provided when creating a user
-    REQUIRED_FIELDS = None
+    REQUIRED_FIELDS = []
 
     def get_full_name(self):
         # The user is identified by their email address 

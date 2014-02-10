@@ -1,6 +1,8 @@
 import os
 # Django settings for quizme_website project.
 
+AUTH_USER_MODEL = 'emailusername.User'
+
 BASEDIR=os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG

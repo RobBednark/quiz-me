@@ -9,6 +9,28 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 2/9/14 3pm
+    Next: try the learn project to see how it's storing passwords
+    Reason: it looks like creating a user through the admin is not encrypting the password.
+    Why can I login as a superuser, but not as a non-superuser?
+    deleted rbednark@gmail.com and then re-created:
+        FAIL: rbednark@gmail.com / p
+    manage.py createsuperuser
+        SUCCESS: superuser@bednark.com / p
+    attempts:
+        FAIL: rob / rob 
+        FAIL: rbednark@gmail.com / p
+    I have now set AUTH_USER_MODEL in settings.py
+
+    What is being authenticated?  auth_user or emailusername_user?
+    Currently logged-in as: [rob]
+    auth_user:
+        rob
+        rbednark
+    emailusername_user:
+        rbednark@gmail.com
+    I think it's because I forgot settings AUTH_USER_MODEL in settings.py
+
 Thu 2/6/14 9am
     I set a trace to see what the error is.  It is here:
         /Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/contrib/auth/backends.py(16)authenticate()

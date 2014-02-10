@@ -40,5 +40,8 @@ class Tag(CreatedBy):
     name = models.CharField(max_length=1000)
     questions = models.ManyToManyField('Question', related_name='tags')
 
+    def __unicode__(self):
+        return self.name
+
 class Quiz(CreatedBy):
     name = models.CharField(max_length=1000)

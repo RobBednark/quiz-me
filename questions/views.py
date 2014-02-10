@@ -54,7 +54,6 @@ def view_quiz(request):
             question_id = form_attempt.cleaned_data['hidden_question_id']
             question = Question.objects.get(id=question_id)
             # TODO: Need to figure out which question they are answering
-            import ipdb; ipdb.set_trace()
             attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
                               question=question,
                               correct=True,
