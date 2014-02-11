@@ -9,6 +9,14 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 2/11/14 7am
+    Next: implement tags via checkboxes or radio buttons.  First create a Django learn project.
+    Consider:
+        
+        event.members = form.cleaned_data['members']
+    Add saving of tags for a user:
+        default to all tags
+
 Mon 2/10/14 9am
     Next:
     It now works!!!!
@@ -246,6 +254,15 @@ Mon 9/16/13
 o Tags (be able to tag questions, and then select tags from which to select questions)
     - select a single tag to use for a quiz
     - select multiple tags to use for a quiz
+    - consider allowing a hierarchy of tags, e.g.,
+        Programming
+            Languages
+                Python
+                Perl
+                C
+            Methodologies
+                Agile
+      Maybe allowing multiple parent/child relationships.
 o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
 o NewUser registration
     - page to create account

@@ -39,6 +39,7 @@ class Hint(CreatedBy):
 class Tag(CreatedBy):
     name = models.CharField(max_length=1000)
     questions = models.ManyToManyField('Question', related_name='tags')
+    users = models.ManyToManyField('User', related_name='user_tags')
 
     def __unicode__(self):
         return self.name

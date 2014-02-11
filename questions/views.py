@@ -9,6 +9,8 @@ from .forms import FormAttempt
 from .models import Attempt, Question, User
 
 def next_question(request):
+    ''' Find and return the next question for the currently logged-in user.
+    '''
     try:
         last_attempt = Attempt.objects.filter(user=request.user).latest(field_name='datetime_added')
     except ObjectDoesNotExist:
