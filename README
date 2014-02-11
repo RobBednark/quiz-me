@@ -9,6 +9,12 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 2/10/14 9am
+    Next:
+    It now works!!!!
+    SOLUTION: add admin.py code 
+    I looked at learn_django_doc_example_custom_user_mycmd_create_users and found that I forgot
+    all the admin.py code.  I have now added it.
 Sun 2/9/14 3pm
     Next: try the learn project to see how it's storing passwords
     Reason: it looks like creating a user through the admin is not encrypting the password.
@@ -237,14 +243,20 @@ Mon 9/16/13
 ================================================================================
 !TODO / Backlog
 ================================================================================
-o User login
-o NewUser registration
-o tests
 o Tags (be able to tag questions, and then select tags from which to select questions)
-    - add tags
     - select a single tag to use for a quiz
     - select multiple tags to use for a quiz
 o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
+o NewUser registration
+    - page to create account
+    - email address verification/registration
+o tests
+o Footer: 
+    - show tags
+    - show how many times seen
+    - show how many times answered
+    - show last time seen
+    - show total number of questions
 o Review mode: just show questions and answers
 o email questions
 o deploy to heroku
@@ -264,6 +276,8 @@ o add questions/answers
 o modify questions/answers on-the-fly
 o versions of questions/answers
 
+DONE o User login
+DONE - add tags via Django Admin
 
 o Ask a question, and then show the answer.
     quiz view:
