@@ -12,7 +12,7 @@ Code: Dropbox/git/quizme_site
 Mon 2/10/14 9am
     Next:
     It now works!!!!
-    SOLUTION: add admin.py code 
+    SOLUTION: added admin.py code 
     I looked at learn_django_doc_example_custom_user_mycmd_create_users and found that I forgot
     all the admin.py code.  I have now added it.
 Sun 2/9/14 3pm
@@ -294,6 +294,12 @@ o Ask a question, and then show the answer.
     5) Next (user clicks Next to go to the next question)
     6) go to (1)
 
+================================================================================
+!Tags:
+================================================================================
+How to design tags?
+Click on each tag to toggle enable/disable it?
+Lump tags into 2 groups: those that are enabled and those that are disabled?
 
 ================================================================================
 !django-quiz
