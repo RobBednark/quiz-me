@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 2/13/14 7am
+    Working on Django learn project for checkboxes for all the tags.
 Tue 2/11/14 7am
     Next: implement tags via checkboxes or radio buttons.  First create a Django learn project.
     Consider:
