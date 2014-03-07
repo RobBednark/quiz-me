@@ -9,7 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
-Thu 3/76/14 8am
+Thu 3/6/14 6pm
+    Copied Aaron Sykes' inlineformset_factory project into learn.  
+    Read about sqlite3 in wikipedia.
+    LEFT OFF: documenting how Aaron's inlineformset_factory works.
+Thu 3/6/14 8am
     Added a boolean field to learn_ModelForm and proved that it uses a checkbox.
     Went through learn_form_1 and determined what it was doing.
     Went through learn_form_1a_customize_form_html and determined it was using html instead of {{ form.as_p }}
