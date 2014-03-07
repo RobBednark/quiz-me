@@ -9,6 +9,16 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 3/76/14 8am
+    Added a boolean field to learn_ModelForm and proved that it uses a checkbox.
+    Went through learn_form_1 and determined what it was doing.
+    Went through learn_form_1a_customize_form_html and determined it was using html instead of {{ form.as_p }}
+    Next: keep going through other learn*form* projects to get a thorough understanding of forms.
+Wed 3/5/14 5pm
+    LEFT OFF: discovered stackoverflow post of using formsets for each one
+    Looked at Postgresql bit strings.  Don't see it supported in Django.
+    Continuing to work on checkboxes project.
+
 Thu 2/13/14 7am
     Working on Django learn project for checkboxes for all the tags.
 Tue 2/11/14 7am
