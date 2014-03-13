@@ -9,6 +9,12 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 3/12/14 5pm
+    left off: exploring different tagging methods after googling; explore django-taggit by Alex Gaynor some more, and also some blog posts
+    Next: get checkboxes for the boolean values
+    + Got working with showing the page.  
+    resuming work on learn_checkboxes_for_every_boolean_record
+    + modified code for view, forms, and html template
 Tue 3/11/14 9am
     Working on the view for learn_checkboxes_for_every_boolean_record
 Mon 3/10/14 5pm
