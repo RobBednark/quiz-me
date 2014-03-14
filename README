@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 3/14/14 10am
+    detailing how the functionality should work
 Wed 3/12/14 5pm
     left off: exploring different tagging methods after googling; explore django-taggit by Alex Gaynor some more, and also some blog posts
     Next: get checkboxes for the boolean values
