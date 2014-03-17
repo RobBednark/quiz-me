@@ -9,6 +9,12 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 3/17/14 8am
+    understanding how a single checkbox should work in the follow scenarios:
+        - ManyToMany field with two specified values
+        - a new instance
+        - an existing instance
+    working on learn_form_checkbox_for_manytomany_field
 Fri 3/14/14 10am
     detailing how the functionality should work
 Wed 3/12/14 5pm
