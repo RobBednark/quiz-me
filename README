@@ -9,6 +9,12 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 3/26/14 8am
+    9:03am NEXT: figure out how to use existing field value if not specified (just like for Atlatl)
+    9:00am got learn_ModelForm working with not requiring all fields.  However, updating an existing instance does not use the existing field value if not specified.
+    8:58am got ModelForm working when creating a new instance in learn_ModelForm.  However, when updating an existing instance, the fields are still required.  Make them not required.
+    8:44am figuring how how a ModelForm takes fields
+    8:35am beginning learn_form_1 mycmd
 Tue 3/25/14 4pm
     5:10pm LEFT OFF: get learn_form_1 mycmd working
     5:09pm modified learn_form_1 mycmd to understand how to use a ModelForm;
