@@ -9,6 +9,15 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 3/25/14 4pm
+    5:10pm LEFT OFF: get learn_form_1 mycmd working
+    5:09pm modified learn_form_1 mycmd to understand how to use a ModelForm;
+    5:00pm creating a project to learn how to map an instance
+    4:53pm Now need to figure out how to map an instance to the form:
+        MyForm(instance=my_instance)
+    4:52pm Figured out how to instantiate a form.
+    4:51pm Working on learn_form_1 to figure out how to instantiate a form();
+    4:50pm Working on learn_form_checkbox_for_manytomany_field
 Mon 3/17/14 8am
     understanding how a single checkbox should work in the follow scenarios:
         - ManyToMany field with two specified values
