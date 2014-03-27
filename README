@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 3/27/14
+    8:24am learn_form_checkbox_for_manytomany_field: added instance; now need to add to template
 Wed 3/26/14 5pm
     5:20pm next: finish learn_form_checkbox_for_manytomany_field and learn_checkboxes_for_every_boolean_record
     5:19pm learn_form_1: modified mycmd to specify all the fields
