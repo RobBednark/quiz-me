@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 3/28/14 
+    5:30pm need to figure out how to process multiple forms from a template; use formsets; start with a project for learning how to use them
 Thu 3/27/14
     8:24am learn_form_checkbox_for_manytomany_field: added instance; now need to add to template
 Wed 3/26/14 5pm
