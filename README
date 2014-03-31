@@ -9,6 +9,10 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 3/31/14
+    9:08am modelformset's are tied to a queryset; does a ModelForm object have to be tied to a model instance?
+    8:20am learn_formset: started
+    8:10am learn_forms_inline_formsets: not working; start a new easier one instead
 Fri 3/28/14 
     5:30pm need to figure out how to process multiple forms from a template; use formsets; start with a project for learning how to use them
 Thu 3/27/14
