@@ -9,6 +9,10 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 4/4/14 8:35am
+    8:39am consider stepping into the Django code and seeing what the error is
+    8:35am learn_formset line 30: My formset is not valid, and there are no formset.errors or form.errors.  Why not?
+    8:34am figuring out where I left off
 Mon 3/31/14
     9:08am modelformset's are tied to a queryset; does a ModelForm object have to be tied to a model instance?
     8:20am learn_formset: started
