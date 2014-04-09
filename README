@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 4/8/14 5:29pm
+    5:36pm learn_formset: got most of attributes printing; cleaned_data is still raising an AttributeError
+    5:29pm left off in learn_formset, printing out attr's of a form/formset.
+           For some reason, dir(form) shows cleaned_data as an attribute, but it only
+           gets shown if is_valid() is run.
 Fri 4/4/14 8:35am
     8:39am consider stepping into the Django code and seeing what the error is
     8:35am learn_formset line 30: My formset is not valid, and there are no formset.errors or form.errors.  Why not?
