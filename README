@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 4/9/14 5:30pm
+    6:00pm Note that, per Django docs, for initial values:
+            These values are only displayed for unbound forms, and they’re not used as fallback values if a particular value isn’t provided.
+    5:50pm formset.is_valid() is False because it is an unbound 
+    5:30pm starting to work on cleaned_data AttributeError
 Wed 4/9/14 8:45am
     8:45am figured out how to use inspect module to check for classes and methods
 Tue 4/8/14 5:29pm
