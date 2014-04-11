@@ -9,6 +9,15 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 4/11/14 7:35am
+    8:58am vdjango -- started summarizing forms and formsets; 
+           explore further the relationship between ModelForm and not having an instance;
+           nail down how a ModelForm works before using a ModelFormset;
+           explore formsets and ModelFormsets separately
+    7:35am consider posting a stackoverflow question; start with new learn project
+Thu 4/10/14 5:45pm
+    5:45pm Cannot figure out why formset has no save() method.  Consider looping through the formset and saving each instance:
+        http://stackoverflow.com/questions/18700690/why-isnt-my-modelformset-saving
 Wed 4/9/14 5:30pm
     6:00pm Note that, per Django docs, for initial values:
             These values are only displayed for unbound forms, and they’re not used as fallback values if a particular value isn’t provided.
