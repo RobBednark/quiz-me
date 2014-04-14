@@ -9,6 +9,13 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 4/13/14 10:20pm
+    10:21pm now working on getting learn_ModelFormset working
+    10:20pm got learn_formset_stackoverflow_ask working (plain old formsets)
+Sun 4/13/14 12:20pm
+    12:20pm looking at learn_ModelForm
+                - it's working
+                - it creates a new instance, and modifies an existing instance
 Fri 4/11/14 7:35am
     8:58am vdjango -- started summarizing forms and formsets; 
            explore further the relationship between ModelForm and not having an instance;
