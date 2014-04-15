@@ -9,6 +9,10 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 4/15/14 7:38am
+    7:47am  got learn_ModelFormset_modify_existing_instances working!!!
+    7:38am  next: get learn_ModelFormset working with modifying existing instances
+            learn_ModelFormset_modify_existing_instances
 Sun 4/13/14 10:20pm
     10:24pm next: get learn_ModelFormset working with modifying existing instances
     10:23pm Got learn_ModelFormset working!
