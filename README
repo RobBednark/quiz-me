@@ -9,6 +9,10 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 4/16/14 7:32am
+    7:32am  next: work on the html template of the learn_form_checkbox_for_manytomany_field
+Tue 4/15/14 7:39pm
+    7:39pm  next: finish learn_form_checkbox_for_manytomany_field
 Tue 4/15/14 7:38am
     7:47am  got learn_ModelFormset_modify_existing_instances working!!!
     7:38am  next: get learn_ModelFormset working with modifying existing instances
