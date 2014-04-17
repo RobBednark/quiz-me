@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 4/17/14 8:05am
+    8:05am  figure out why I can't both modify an existing instance and add a new instance for learn_ModelFormset_modify_existing_instances
 Wed 4/16/14 7:32am
     7:32am  next: work on the html template of the learn_form_checkbox_for_manytomany_field
 Tue 4/15/14 7:39pm
