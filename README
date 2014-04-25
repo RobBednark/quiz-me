@@ -9,6 +9,10 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 4/24/14 6:00pm
+    6:08pm continue working on learn_form_checkbox_for_manytomany_field: views.py - adding data to modelformset
+    6:00pm see if it matters whether data is in a different order than the queryset
+           FOUND: order of existing instances doesn't matter with the queryset 
 Mon 4/21/14 8:01am
     8:01am  work on finishing learn_form_checkbox_for_manytomany_field
 Thu 4/17/14 8:05am
