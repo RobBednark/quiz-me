@@ -9,6 +9,9 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 4/27/14 4:50pm
+    4:52pm learn_ModelFormset_modify_existing_instances -- see if I can get by without add data;
+    4:50pm continue working on learn_form_checkbox_for_manytomany_field: views.py - adding data to modelformset
 Thu 4/24/14 6:00pm
     6:08pm continue working on learn_form_checkbox_for_manytomany_field: views.py - adding data to modelformset
     6:00pm see if it matters whether data is in a different order than the queryset
