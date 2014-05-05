@@ -9,6 +9,25 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 5/5/14 7:39am
+    8:03am learn_form_checkbox_for_manytomany_field - copied code to contact2(); now modify it to add new tags that don't exist
+    7:39am learn_form_checkbox_for_manytomany_field - get it working like learn_ModelFormset_modify_existing_instances_web_page
+Sun 5/4/14 8:35pm
+    9:00pm learn_ModelFormset_modify_existing_instances_web_page -- it's working!!!
+    8:55pm don't see any errors, so step through the code
+    8:40pm got one form displaying, but it's not valid, and is not showing any errors
+    8:35pm learn_forms_inline_formsets - see what is available for form options (form.as_p, ...); and see what the HTML source looks like
+Sat 5/3/14 9:23pm
+    9:54pm learn_forms_inline_formsets - got web page at least displaying; but it not displaying the data
+    9:30pm how do I put a formset into a template?
+    9:24pm learn_forms_inline_formsets - this has formset code, but I never got it working
+    9:23pm learn_ModelFormset_modify_existing_instances_web_page - work on template for GET
+Sat 5/3/14 11:47am
+    12:13pm see if I have another django learn example using a formset in a template
+    12:12pm I think I got view in place for GET, now fill in the template
+    12:03pm find another project to copy view pattern for GET and POST
+    12:00pm learn_ModelFormset_modify_existing_instances_web_page - complete this so that I know how to do it with a web page
+    11:47am consider just adding any tags that don't already exist
 Tue 4/29/14 7:56am
     7:57am next: 
 Mon 4/28/14 5:50pm
