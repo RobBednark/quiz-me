@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 5/6/14 7:43am
+    8:30am got web page running; when I added a tag, and now I'm getting an exception:
+        too many values to unpack
+         person_tag = qs_person_tags.get(tag.tag_name) 
+    7:43am learn_form_checkbox_for_manytomany_field - 
 Mon 5/5/14 7:39am
     8:03am learn_form_checkbox_for_manytomany_field - copied code to contact2(); now modify it to add new tags that don't exist
     7:39am learn_form_checkbox_for_manytomany_field - get it working like learn_ModelFormset_modify_existing_instances_web_page
