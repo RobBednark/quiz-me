@@ -9,6 +9,9 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 5/6/14 5:59pm
+    6:16pm learn_form_checkbox_for_manytomany_field - the page is now displaying, but there is no content; why not?
+    5:59pm learn_form_checkbox_for_manytomany_field - set_trace() to see why it's failing
 Tue 5/6/14 7:43am
     8:30am got web page running; when I added a tag, and now I'm getting an exception:
         too many values to unpack
