@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 5/7/14 9:18pm
+    9:18pm Got page displaying!  Was using wrong filename for the template.
+Wed 5/7/14 5:45pm
+    5:45pm try printing out as_p() stuff; look up as_p() in other projects
+    5:45pm learn_form_checkbox_for_manytomany_field - the page is now displaying, but there is no content; why not?
 Tue 5/6/14 5:59pm
     6:16pm learn_form_checkbox_for_manytomany_field - the page is now displaying, but there is no content; why not?
     5:59pm learn_form_checkbox_for_manytomany_field - set_trace() to see why it's failing
