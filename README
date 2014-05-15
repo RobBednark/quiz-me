@@ -9,6 +9,17 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 5/15/14 7:43am
+    7:44am how is it that tags for both users are showing up?
+        A: It's because I'm using 
+            queryset=PersonTag.objects.all())
+        I have now fixed it by using filter(person=person)
+    7:43am figure out how to only show checkbox and not the other two fields of the PersonTag ManyToMany field
+Wed 5/14/14 5:03pm
+    5:06pm get the POST working:
+    5:05pm getting this error when submitting:
+        NameError: global name 'ContactForm' is not defined
+    5:04pm Now what?
 Wed 5/7/14 9:18pm
     9:18pm Got page displaying!  Was using wrong filename for the template.
 Wed 5/7/14 5:45pm
