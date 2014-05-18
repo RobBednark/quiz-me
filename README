@@ -9,6 +9,19 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 5/17/14 8:22pm
+    8:59pm consider asking Aaron, Kyle, or Nick (put it in a git repo)
+    8:59pm consider asking StackOverflow
+    8:59pm I created learn_modelformset_make_field_hidden_or_remove_it and set widgets in the Meta for the form, but it didn't seem to do anything.
+    8:22pm this shows two options:
+            1) make field a HiddenInput field
+            -or-
+            2) delete it from fields
+Sat 5/17/14 4:42pm
+    5:00pm run with debugger and inspect the widgets
+    4:46pm I want to change so that only the checkbox is shown
+        consider: http://stackoverflow.com/questions/11736322/django-how-to-override-fields-of-a-modelform-in-a-modelformset
+    4:42pm learn_form_checkbox_for_manytomany_field - seems to be working; now figure out how to only show checkbox
 Thu 5/15/14 7:43am
     7:44am how is it that tags for both users are showing up?
         A: It's because I'm using 
