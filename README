@@ -9,6 +9,14 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 5/19/14 6:58am
+    2:42pm create stackoverflow question
+    7:23am fix "model = Tag" for TagForm in the other projects
+    7:22am I discovered that I had set "model = Person" for the TagForm; not sure what that was doing
+    6:58am try:
+        o look at Django code
+        o try hidden widgets
+        o try removing fields
 Sat 5/17/14 8:22pm
     8:59pm consider asking Aaron, Kyle, or Nick (put it in a git repo)
     8:59pm consider asking StackOverflow
