@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 5/20/14 7:45am
+    7:47am learn_modelform_hidden_field -- HiddenInput widgets are working; it is correctly only showing the checkbox for the GET
+Mon 5/19/14 5:30pm
+    5:41pm learn_modelform_hidden_field: LEFT OFF modifying it to use a ModelForm instead of a ModelFormset
+    5:30pm try using just a ModelForm without a formset
 Mon 5/19/14 6:58am
     2:42pm create stackoverflow question
     7:23am fix "model = Tag" for TagForm in the other projects
