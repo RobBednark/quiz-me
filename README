@@ -9,8 +9,10 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
-Tue 5/20/14 5:36pm
-    5:36pm 
+Wed 5/21/14 7:19am
+    7:55am I queried stackoverflow for "django modelformset_factory hiddeninput" and found some posts, one that mentions different behavior with the "extra" field; try extra=0 and extra=1
+    7:19am post question to stackoverflow
+        For my ModelForm, I'm specifying two fields as HiddenInput fields.  This works as desired if I use a ModelForm instance in my template.  But if I use 
 Tue 5/20/14 7:45am
     7:47am learn_modelform_hidden_field -- HiddenInput widgets are working; it is correctly only showing the checkbox for the GET, and the dropdowns are hidden fields
 Mon 5/19/14 5:30pm
