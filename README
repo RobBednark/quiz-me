@@ -9,10 +9,19 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 5/22/14 6:55am
+    7:21am now figure out how to add the tag name
+    7:21am fixed the three projects that are using it
+    7:21am it works!  
+    6:56am test out my modelformset_factory(widgets=...) fix
 Wed 5/21/14 7:19am
+    5:45pm I discovered my problem!  I'm specifying the HiddenInput widgets in the forms.PersonTagForm, but that form is not being used by the factory.  I need to pass the widgets arg to the factory.
     7:55am I queried stackoverflow for "django modelformset_factory hiddeninput" and found some posts, one that mentions different behavior with the "extra" field; try extra=0 and extra=1
     7:19am post question to stackoverflow
-        For my ModelForm, I'm specifying two fields as HiddenInput fields.  This works as desired if I use a ModelForm instance in my template.  But if I use 
+    Tags: Django django-modelformsets django-modelform factory widget
+    Title: Why doesn't Django modelformset_factory formset recognize HiddenInput widgets?
+        For my ModelForm, I'm specifying two fields as HiddenInput fields.  This works as desired if I use a ModelForm instance in my view and template.  But when I use modelformset_factory, the fields are no longer hidden.  Why not?
+
 Tue 5/20/14 7:45am
     7:47am learn_modelform_hidden_field -- HiddenInput widgets are working; it is correctly only showing the checkbox for the GET, and the dropdowns are hidden fields
 Mon 5/19/14 5:30pm
