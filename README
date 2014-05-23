@@ -9,6 +9,24 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 5/23/14 7:07am
+    7:51am tried the "for field in form", but it's now showing the widgets
+    7:07am to add the tag name, consider:
+        1) subclassing BaseFormSet.add_fields() to add an additional field
+            https://docs.djangoproject.com/en/dev/topics/forms/formsets/
+        -or-
+        2) using HiddenInputs and using the value of those in the template to specify the name
+        -or-
+        3) just adding an additional key to the formset dict in the view, and using that in the template
+        -or-
+        4)  
+            {% for field in form %}
+                <th>{{ field.label }}</th>
+                <td>{{ field.widget }}</td>
+            {% endfor %}
+
+        http://stackoverflow.com/questions/18591609/disable-display-of-field-names-in-django-forms
+    
 Thu 5/22/14 6:00pm
     6:00pm to add the tag name, consider:
         1) subclassing BaseFormSet.add_fields() to add an additional field
