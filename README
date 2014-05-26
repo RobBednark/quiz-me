@@ -9,10 +9,12 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 5/25/14 8:10pm
+    8:10pm see if I can use a HiddenInput
 Fri 5/23/14 4:16pm
     4:16pm preparing to post to stackoverflow
 Fri 5/23/14 7:07am
-    7:51am tried the "for field in form", but it's now showing the widgets
+    7:51am tried the "for field in form", but it's now showing the widgets (post to stackoverflow for this)
     7:07am to add the tag name, consider:
         1) subclassing BaseFormSet.add_fields() to add an additional field
             https://docs.djangoproject.com/en/dev/topics/forms/formsets/
@@ -28,6 +30,8 @@ Fri 5/23/14 7:07am
             {% endfor %}
         -or-
         5) Give a label to the tag field.  Maybe Django will show the label but not the HiddenInput widget
+        -or-
+        6) look at the Django source code for a widget
 
         http://stackoverflow.com/questions/18591609/disable-display-of-field-names-in-django-forms
     
