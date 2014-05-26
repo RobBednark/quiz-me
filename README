@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 5/23/14 4:16pm
+    4:16pm preparing to post to stackoverflow
 Fri 5/23/14 7:07am
     7:51am tried the "for field in form", but it's now showing the widgets
     7:07am to add the tag name, consider:
@@ -24,6 +26,8 @@ Fri 5/23/14 7:07am
                 <th>{{ field.label }}</th>
                 <td>{{ field.widget }}</td>
             {% endfor %}
+        -or-
+        5) Give a label to the tag field.  Maybe Django will show the label but not the HiddenInput widget
 
         http://stackoverflow.com/questions/18591609/disable-display-of-field-names-in-django-forms
     
