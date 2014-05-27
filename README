@@ -9,7 +9,18 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 5/27/14 8:10am
+    8:10am Got it working!  Now update learn_form_checkbox_for_manytomany_field with it.
 Sun 5/25/14 8:10pm
+    10:42pm I finished posting the question to stackoverflow.
+    10:12pm post to stackoverflow!
+    9:30pm try: >>> f.fields['name'].label = "Username"
+    9:09pm Post to stackoverflow:
+    Tags: django-forms django-modelformsets django-modelform django
+    Title: How to set formset form widget.label with value of other model field
+    Body:
+        I have a modelformset for a `PersonTag` model with 3 fields, and I want to display a checkbox widget for the `PersonTag.enabled` field, and no widget for the other two fields.  For each checkbox, I want the label to be set to the `PersonTag.tag` value for that model instance.  How might I accomplish this?
+
     8:10pm see if I can use a HiddenInput
 Fri 5/23/14 4:16pm
     4:16pm preparing to post to stackoverflow
