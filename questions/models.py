@@ -37,9 +37,15 @@ class Hint(CreatedBy):
     hint = models.TextField()
 
 class Tag(CreatedBy):
+    '''
+        Each user can have many tags applied to many questions, e.g.,
+            user_rob
+                tag1: question1, question2
+                tag2: question1, question3
+    '''
     name = models.CharField(max_length=1000)
-    questions = models.ManyToManyField('Question', related_name='tags')
-    users = models.ManyToManyField('User', related_name='user_tags')
+    questions = models.ManyToManyField('Question', related_name='tags', blank=True)
+    users = models.ManyToManyField(User, related_name='user_tags', blank=True)
 
     def __unicode__(self):
         return self.name

@@ -9,6 +9,25 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 5/27/14 5:34pm
+    6:05pm got this error when trying to create a tag in the admin:
+        ProgrammingError at /admin/questions/tag/add/
+        relation "questions_tag_users" does not exist
+        LINE 1: DELETE FROM "questions_tag_users" WHERE "questions_tag_users...
+    6:03pm creating a new tag in the admin: Users field is required; how to make it not required?  blank=True?
+    6:02pm able to login as superuser@bednark.com / p
+    6:00pm see if I have South setup
+    6:00pm create an admin account to login to the admin
+    5:52pm "manage.py runserver" giving error:
+        django.core.management.base.CommandError: One or more models did not validate:
+        questions.tag: 'users' has an m2m relation with model User, which has either not been installed or is abstract.
+        SOLUTION: make a many2many field with User instead of 'User'
+    5:51pm models are correct; see if I can add tags for a question in the admin
+    5:45pm see if models are correct
+    5:45pm get tags working on quizme program
+    5:44pm next: continue on quizme program
+    5:44pm learn_form_checkbox_for_manytomany_field working!
+    5:34pm Next: update learn_form_checkbox_for_manytomany_field 
 Tue 5/27/14 8:10am
     8:10am Got it working!  Now update learn_form_checkbox_for_manytomany_field with it.
 Sun 5/25/14 8:10pm
