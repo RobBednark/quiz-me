@@ -10,6 +10,11 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Thu 5/29/14 7:35am
+    7:57am complete the views.get_tags() function
+    7:57am added the template; added get_tags() function
+    7:37am there are two templates: 
+            GET: show_question.html (this is where to add them)
+            POST: show_question_and_answer.html
     7:35am add the tag checkboxes
 Wed 5/28/14 9:02pm
     9:12pm next: add the tag checkboxes

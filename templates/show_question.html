@@ -7,19 +7,6 @@
 	</head>
 	<body>
 		<form action="" method="post"> {% csrf_token %}
-            {% comment %}
-                <input type="hidden" name="question_id" value="{{ form_attempt.question_id }}"/>
-                {# TODO: add hidden field for question_id #}
-                {# TODO: figure out in Django how to show a widget #}
-                {{ form_attempt.question_id }}
-                "{{ form_attempt.question_id }}"
-                <input {{ form_attempt.question_id }} />
-
-                <div class="fieldWrapper">
-                    {{ form_attempt.question_id }}
-                </div>
-            {% endcomment %}
-
             {{ form_attempt.hidden_question_id }}
             {% if question %}
                 {{ question.question }}
@@ -39,6 +26,17 @@
                         {{ form_attempt.errors }}
                     </div>
             {% endif %}
+
+            {{ modelformset_persontag.management_form }}
+            {% if modelformset_persontag.non_form_errors %}
+                {{ modelformset_persontag.non_form_errors }}
+            {% endif %}
+            {% if modelformset_persontag.errors %}
+                {{ modelformset_persontag.errors }}
+            {% endif %}
+            {% for form_persontag in modelformset_persontag.forms %}
+                {{ form_persontag }} </br>
+            {% endfor %}
 
             </p>
             <input type="submit" value="Submit" />

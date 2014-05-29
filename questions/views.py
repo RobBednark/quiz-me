@@ -8,11 +8,11 @@ from django.views.generic.edit import FormView
 from .forms import FormAttempt
 from .models import Attempt, Question, User
 
-def next_question(request):
+def next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     try:
-        last_attempt = Attempt.objects.filter(user=request.user).latest(field_name='datetime_added')
+        last_attempt = Attempt.objects.filter(user=user).latest(field_name='datetime_added')
     except ObjectDoesNotExist:
         last_attempt = None
 
@@ -32,12 +32,30 @@ def next_question(request):
             next_question = None
     return next_question
 
+def get_tags(user):
+        # Get all the tags
+        tags = Tag.objects.all()
+
+        # Get all the tags associated with this person
+        qs_person_tags = PersonTag.objects.filter(person=user)
+        person_tags_by_tagname = { person_tag.tag.tag_name : person_tag for person_tag in qs_person_tags }
+
+        # Create PersonTag's for any new tags
+        for tag in tags:
+            if not tag.tag_name in person_tags_by_tagname:
+                # There isn't a tag, so create one
+                PersonTag(person=user, tag=tag, enabled=False).save()
+
+        modelformset_persontag = ModelFormset_PersonTag(queryset=PersonTag.objects.filter(person=user))
+        for form in modelformset_persontag.forms:
+            form.fields['enabled'].label = form.instance.tag.tag_name
+
 
 @login_required(login_url='/login')
 def view_quiz(request):
     if request.method == 'GET':
         # For a GET, show the next question
-        question = next_question(request=request)
+        question = next_question(user=request.user)
         form_attempt = FormAttempt()
         if question:
             form_attempt.fields['hidden_question_id'].initial = question.id
