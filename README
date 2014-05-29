@@ -9,6 +9,24 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 5/29/14 7:35am
+    7:35am add the tag checkboxes
+Wed 5/28/14 9:02pm
+    9:12pm next: add the tag checkboxes
+    9:12pm yes, tags are now working
+    9:10pm see if migration worked and I can now look at tags
+    9:10pm created and applied South migration for questions:
+        ./manage.py schemamigration questions --auto
+        ./manage.py migrate questions
+    9:07pm How to create a new South migration?
+    9:06pm Yes, I have South migrations
+    9:06pm see if I have South installed
+    9:02pm the app is working; but the admin gives the error;
+           I got the error in the admin when clicking on a tag to see details for the tag:
+            ProgrammingError at /admin/questions/tag/2/
+            relation "questions_tag_users" does not exist
+            LINE 1: ...e_user"."id" FROM "emailusername_user" INNER JOIN "questions...
+        I think I need to do a syncdb or migrate.
 Tue 5/27/14 5:34pm
     6:05pm got this error when trying to create a tag in the admin:
         ProgrammingError at /admin/questions/tag/add/
