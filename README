@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 5/29/14 5:28pm
+    5:28pm next: complete the views.get_tags() function
 Thu 5/29/14 7:35am
     7:57am complete the views.get_tags() function
     7:57am added the template; added get_tags() function
