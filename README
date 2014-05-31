@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 5/30/14 5:52pm
+    5:53pm created new db, but syncdb still gives:
+        CommandError: One or more models did not validate:
+        questions.tag: 'tags' is a manually-defined m2m relation through model UserTag, which does not have foreign keys to Tag and Tag
+    5:52pm decided to create a new db called "quizme" owned by quizme
 Thu 5/29/14 5:28pm
     5:28pm next: complete the views.get_tags() function
 Thu 5/29/14 7:35am

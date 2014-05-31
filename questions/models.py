@@ -36,11 +36,6 @@ class Hint(CreatedBy):
     answer = models.ForeignKey('Answer', null=True)
     hint = models.TextField()
 
-class UserTag(models.Model):
-    user = models.ForeignKey(User)
-    tag = models.ForeignKey('Tag')
-    enabled = models.BooleanField(default=False)
-
 class Tag(CreatedBy):
     '''
         Each user can have many tags applied to many questions, e.g.,
@@ -51,9 +46,16 @@ class Tag(CreatedBy):
     name = models.CharField(max_length=1000)
     questions = models.ManyToManyField('Question', related_name='tags', blank=True)
     users = models.ManyToManyField(User, related_name='user_tags', blank=True)
+    tags = models.ManyToManyField('Tag', through='UserTag')
 
     def __unicode__(self):
         return self.name
 
 class Quiz(CreatedBy):
     name = models.CharField(max_length=1000)
+
+class UserTag(models.Model):
+    user = models.ForeignKey(User)
+    tag = models.ForeignKey(Tag)
+    enabled = models.BooleanField(default=False)
+
