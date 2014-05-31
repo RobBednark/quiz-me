@@ -44,9 +44,8 @@ class Tag(CreatedBy):
                 tag2: question1, question3
     '''
     name = models.CharField(max_length=1000)
-    questions = models.ManyToManyField('Question', related_name='tags', blank=True)
-    users = models.ManyToManyField(User, related_name='user_tags', blank=True)
-    tags = models.ManyToManyField('Tag', through='UserTag')
+    questions = models.ManyToManyField('Question', blank=True, through='UserTag')
+    users = models.ManyToManyField(User, blank=True, through='UserTag')
 
     def __unicode__(self):
         return self.name
