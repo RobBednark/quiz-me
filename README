@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 5/31/14 8:33am
+    8:33am left off last night trying to get a new learn script with related_name to work
 Fri 5/30/14 5:52pm
     5:53pm created new db, but syncdb still gives:
         CommandError: One or more models did not validate:
