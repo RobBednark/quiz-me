@@ -10,6 +10,20 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Sat 6/7/14 9:02am
+    10:15am when running quizme, I'm getting:
+        django.core.management.base.CommandError: One or more models did not validate:
+        questions.tag: Accessor for field 'user' clashes with related m2m field 'User.tag_set'. Add a related_name argument to the definition for 'user'.
+        questions.tag: 'questions' is a manually-defined m2m relation through model UserTag, which does not have foreign keys to Question and Tag
+        questions.tag: Accessor for m2m field 'users' clashes with related field 'User.tag_set'. Add a related_name argument to the definition for 'users'.
+    10:13am next: got back to quizme and see what error is
+    10:12am I got the related_name example working
+    9:22am now I'm getting:
+         IntegrityError('myapp_book.author_id may not be NULL',))
+    9:22am SOLVED; REASON: my db is db.sqlite3 instead of my.db, so I needed to modify "mycmd"
+    9:19am commented-out the delete() lines, now I'm getting:
+         OperationalError('table myapp_book has no column named book_title',))
+    9:18am I'm getting this error:
+         OperationalError('no such column: myapp_book.author_id',))
     9:02am next: work on related_name
 Sat 5/31/14 8:33am
     8:33am left off last night trying to get a new learn script with related_name to work
