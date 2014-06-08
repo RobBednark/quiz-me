@@ -17,12 +17,17 @@ class CreatedBy(models.Model):
 class Question(CreatedBy):
     question = models.TextField()
     answer = models.ForeignKey('Answer', null=True)
+    # attempt_set = ForeignKey(Attempt)
+    # questiontag_set = ManyToMany(QuestionTag)
+    # tag_set = ManyToMany(Tag)
 
     def __unicode__(self):
         return '<Question question=[%s] datetime_added=[%s]>' % (self.question, self.datetime_added)
 
 class Answer(CreatedBy):
     answer = models.TextField()
+    # question_set = ForeignKey(Question)
+    # hint_set = ForeignKey(Hint)
 
     def __unicode__(self):
         return '<Answer answer=[%s] datetime_added=[%s]>' % (self.answer, self.datetime_added)
@@ -46,6 +51,8 @@ class Tag(CreatedBy):
     name = models.CharField(max_length=1000)
     questions = models.ManyToManyField('Question', blank=True, through='UserTag')
     users = models.ManyToManyField(User, blank=True, through='UserTag')
+    # questiontag_set = ForeignKey(QuestionTag)
+    # usertag_set = ForeignKey(UserTag)
 
     def __unicode__(self):
         return self.name
@@ -56,6 +63,7 @@ class Quiz(CreatedBy):
 class QuestionTag(CreatedBy):
     question = models.ForeignKey(Question)
     tag = models.ForeignKey(Tag)
+    enabled = models.BooleanField(default=False)
 
 class UserTag(models.Model):
     user = models.ForeignKey(User)
