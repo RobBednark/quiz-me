@@ -53,6 +53,10 @@ class Tag(CreatedBy):
 class Quiz(CreatedBy):
     name = models.CharField(max_length=1000)
 
+class QuestionTag(CreatedBy):
+    question = models.ForeignKey(Question)
+    tag = models.ForeignKey(Tag)
+
 class UserTag(models.Model):
     user = models.ForeignKey(User)
     tag = models.ForeignKey(Tag)
