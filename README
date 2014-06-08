@@ -9,6 +9,9 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 6/7/14 9:00pm
+    9:00pm next: clean up other models; add comments for related fields
+    9:00pm added QuestionTag model
 Sat 6/7/14 9:02am
     6:21pm the issue is that
         class Tag
