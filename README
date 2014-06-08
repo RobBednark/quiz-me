@@ -10,6 +10,17 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Sat 6/7/14 9:02am
+    6:21pm the issue is that
+        class Tag
+            questions = models.ManyToManyField(Question, through=UserTag)
+        so a Tag as many questions, and a question can have many tags.  But the through model doesn't have a question foreign key.
+        I think it should be a different "through" model.  Maybe a "through" model of QuestionTagM2M
+    6:18pm added related_name args; now down to this one error:
+        questions.tag: 'questions' is a manually-defined m2m relation through model UserTag, which does not have foreign keys to Question and Tag
+    6:18pm created django learn project: learn_many_to_many_with_needed_related_names_to_avoid_conflict
+    5:58pm this helps me understand it: http://stackoverflow.com/questions/9630922/multiple-m2m-in-django
+    5:47pm walk through the specific errors
+    5:39pm added some related_name's, still getting the same errors
     10:15am when running quizme, I'm getting:
         django.core.management.base.CommandError: One or more models did not validate:
         questions.tag: Accessor for field 'user' clashes with related m2m field 'User.tag_set'. Add a related_name argument to the definition for 'user'.
