@@ -9,6 +9,13 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 6/8/14 10:01pm
+    10:26pm next: add the checkboxes to quizme (the models and migrations are now in place)
+    10:02pm next: add comments for quizme model reverse accessors
+    10:01pm done: learn_many_to_many_with_needed_related_names_to_avoid_conflict now works
+Sun 6/8/14 1:40pm
+    1:40pm IN-PROGRESS: learn_many_to_many_with_needed_related_names_to_avoid_conflict -- still getting errors during syncdb
+    1:40pm learn_many_to_many_multiple_in_one_model -- finished and got working
 Sat 6/7/14 9:00pm
     9:00pm next: clean up other models; add comments for related fields
     9:00pm added QuestionTag model

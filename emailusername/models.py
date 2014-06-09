@@ -11,7 +11,6 @@ class UserManager(BaseUserManager):
         user = self.model(
                 email=UserManager.normalize_email(email),
         )
-        import ipdb; ipdb.set_trace()
         user.set_password(password)
         user.save(using=self._db) 
         return user

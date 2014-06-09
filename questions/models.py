@@ -20,6 +20,7 @@ class Question(CreatedBy):
     # attempt_set = ForeignKey(Attempt)
     # questiontag_set = ManyToMany(QuestionTag)
     # tag_set = ManyToMany(Tag)
+    # user_set
 
     def __unicode__(self):
         return '<Question question=[%s] datetime_added=[%s]>' % (self.question, self.datetime_added)
@@ -28,6 +29,7 @@ class Answer(CreatedBy):
     answer = models.TextField()
     # question_set = ForeignKey(Question)
     # hint_set = ForeignKey(Hint)
+    # user_set
 
     def __unicode__(self):
         return '<Answer answer=[%s] datetime_added=[%s]>' % (self.answer, self.datetime_added)
@@ -36,10 +38,12 @@ class Attempt(CreatedBy):
     attempt = models.TextField()
     correct = models.BooleanField()
     question = models.ForeignKey('Question', null=False)
+    # user_set
 
 class Hint(CreatedBy):
     answer = models.ForeignKey('Answer', null=True)
     hint = models.TextField()
+    # user_set
 
 class Tag(CreatedBy):
     '''
@@ -49,24 +53,26 @@ class Tag(CreatedBy):
                 tag2: question1, question3
     '''
     name = models.CharField(max_length=1000)
-    questions = models.ManyToManyField('Question', blank=True, through='UserTag')
-    users = models.ManyToManyField(User, blank=True, through='UserTag')
+    questions = models.ManyToManyField('Question', blank=True, through='QuestionTag', null=True)
+    users = models.ManyToManyField(User, blank=True, through='UserTag', related_name='users', null=True)
     # questiontag_set = ForeignKey(QuestionTag)
-    # usertag_set = ForeignKey(UserTag)
+    # user_set
 
     def __unicode__(self):
         return self.name
 
 class Quiz(CreatedBy):
     name = models.CharField(max_length=1000)
+    # user_set
 
 class QuestionTag(CreatedBy):
     question = models.ForeignKey(Question)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
+    # questions_set
+    # user_set
 
 class UserTag(models.Model):
     user = models.ForeignKey(User)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
-
