@@ -9,6 +9,9 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 6/25/14 8:00am
+    8:01am next: add the checkboxes to quizme (the models and migrations are now in place)
+    8:00am resuming work on this
 Sun 6/8/14 10:01pm
     10:26pm next: add the checkboxes to quizme (the models and migrations are now in place)
     10:02pm next: add comments for quizme model reverse accessors
