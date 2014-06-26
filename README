@@ -9,6 +9,11 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 6/25/14 4:33pm
+    4:47pm ran the app; went into the admin; added some tags, another question and answer; things seem to be working
+    4:45pm looked at the existing cddjango projects; looks like these two are almost identical:
+        learn_many_to_many_with_needed_related_names_to_avoid_conflict
+        learn_multiple_many_to_many_in_one_model_with_needed_related_names_to_avoid_conflict
 Wed 6/25/14 8:00am
     8:01am next: add the checkboxes to quizme (the models and migrations are now in place)
     8:00am resuming work on this
@@ -87,7 +92,7 @@ Tue 5/27/14 5:34pm
         relation "questions_tag_users" does not exist
         LINE 1: DELETE FROM "questions_tag_users" WHERE "questions_tag_users...
     6:03pm creating a new tag in the admin: Users field is required; how to make it not required?  blank=True?
-    6:02pm able to login as superuser@bednark.com / p
+    6:02pm able to login as superuser@bednark.com / p (admin account)
     6:00pm see if I have South setup
     6:00pm create an admin account to login to the admin
     5:52pm "manage.py runserver" giving error:

@@ -19,8 +19,8 @@ class Question(CreatedBy):
     answer = models.ForeignKey('Answer', null=True)
     # attempt_set = ForeignKey(Attempt)
     # questiontag_set = ManyToMany(QuestionTag)
-    # tag_set = ManyToMany(Tag)
-    # user_set
+    # tag_set = ManyToMany(Tag) 
+    # user_set = ForeignKey(User)
 
     def __unicode__(self):
         return '<Question question=[%s] datetime_added=[%s]>' % (self.question, self.datetime_added)
@@ -29,7 +29,7 @@ class Answer(CreatedBy):
     answer = models.TextField()
     # question_set = ForeignKey(Question)
     # hint_set = ForeignKey(Hint)
-    # user_set
+    # user_set = ForeignKey(User)
 
     def __unicode__(self):
         return '<Answer answer=[%s] datetime_added=[%s]>' % (self.answer, self.datetime_added)
@@ -43,7 +43,7 @@ class Attempt(CreatedBy):
 class Hint(CreatedBy):
     answer = models.ForeignKey('Answer', null=True)
     hint = models.TextField()
-    # user_set
+    # user_set = ForeignKey(User)
 
 class Tag(CreatedBy):
     '''
@@ -56,7 +56,7 @@ class Tag(CreatedBy):
     questions = models.ManyToManyField('Question', blank=True, through='QuestionTag', null=True)
     users = models.ManyToManyField(User, blank=True, through='UserTag', related_name='users', null=True)
     # questiontag_set = ForeignKey(QuestionTag)
-    # user_set
+    # user_set = ForeignKey(User)
 
     def __unicode__(self):
         return self.name
