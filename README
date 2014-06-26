@@ -9,6 +9,16 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 6/26/14 7:48am
+    7:55am decide what to do if form is invalid; handle it here or in the main view?
+    7:54am need to complete create_and_get_persontags(); 
+    7:54am copied-and-pasted the learn project code to a new create_and_get_persontags() function.
+    7:49am needed:
+        view:
+            create modelformset_persontag
+        template:
+            add modelformset_persontag just like in learn project
+    7:48am learn_form_checkbox_for_manytomany_field - looking at to figure out how to transfer knowledge to quizme
 Wed 6/25/14 4:33pm
     4:47pm ran the app; went into the admin; added some tags, another question and answer; things seem to be working
     4:45pm looked at the existing cddjango projects; looks like these two are almost identical:
