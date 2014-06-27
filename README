@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 6/27/14 7:58am
+    7:58am comment different models
 Thu 6/26/14 5:41pm
     5:41pm What is difference/relationship between Tag, QuestionTag, and UserTag
     5:41pm worked on _create_and_get_usertags()
