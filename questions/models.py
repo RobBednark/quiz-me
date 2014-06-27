@@ -66,6 +66,7 @@ class Quiz(CreatedBy):
     # user_set
 
 class QuestionTag(CreatedBy):
+    # This is a tag applied to a question.
     question = models.ForeignKey(Question)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
@@ -73,6 +74,8 @@ class QuestionTag(CreatedBy):
     # user_set
 
 class UserTag(models.Model):
+    # This indicates which tags a user wants to see questions for. 
+    # Eventually, will have different quizzes where each have their own set of UserTag's
     user = models.ForeignKey(User)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)

@@ -1,12 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
 from .forms import FormAttempt
-from .models import Attempt, Question, User
+from .models import Attempt, Question, User, UserTag
 
 def next_question(user):
     ''' Find and return the next question for the currently logged-in user.
@@ -32,71 +33,66 @@ def next_question(user):
             next_question = None
     return next_question
 
-def _create_and_get_persontags(request):
-    ModelFormset_PersonTag = modelformset_factory(model=PersonTag,
-                                                  extra=0,
-                                                  fields=('enabled',))
+
+
+
+def _create_and_get_usertags(request):
+    ModelFormset_UserTag = modelformset_factory(model=UserTag,
+                                                extra=0,
+                                                fields=('enabled',))
     if request.method == 'GET':
         # Get the user, find all the tags, and create a form for each tag.
         #        GET:
         #            For each of the tags, show a checkbox.
-        #            If there is no PersonTag for that tag, then show the tag and default to False.
-        person = Person.objects.all()[0]
+        #            If there is no UserTag for that tag, then show the tag and default to False.
+        user = request.user
 
         # Get all the tags
         tags = Tag.objects.all()
 
-        # Get all the tags associated with this person
-        qs_person_tags = PersonTag.objects.filter(person=person)
-        person_tags_by_tagname = { person_tag.tag.tag_name : person_tag for person_tag in qs_person_tags }
+        # Get all the tags associated with this user
+        qs_user_tags = UserTag.objects.filter(person=person)
+        user_tags_by_tagname = { person_tag.tag.tag_name : person_tag for person_tag in qs_user_tags }
 
-        # Create PersonTag's for any new tags
+        # Create UserTag's for any new tags
         for tag in tags:
-            if not tag.tag_name in person_tags_by_tagname:
+            if not tag.tag_name in user_tags_by_tagname:
                 # There isn't a tag, so create one
-                PersonTag(person=person, tag=tag, enabled=False).save()
+                UserTag(person=person, tag=tag, enabled=False).save()
 
-        modelformset_persontag = ModelFormset_PersonTag(queryset=PersonTag.objects.filter(person=person))
-        for form in modelformset_persontag.forms:
+        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(person=person))
+        for form in modelformset_usertag.forms:
             form.fields['enabled'].label = form.instance.tag.tag_name
 
-        return render(request=request, 
-                      template_name='home.html', 
-                      dictionary=dict(modelformset_persontag=modelformset_persontag,
-                      ))
+        return modelformset_persontag
     elif request.method == 'POST':
         person = Person.objects.all()[0]
-        modelformset_persontag = ModelFormset_PersonTag(queryset=PersonTag.objects.filter(person=person), data=request.POST)
-        for form in modelformset_persontag.forms:
+        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(person=person), data=request.POST)
+        for form in modelformset_usertag.forms:
             form.fields['enabled'].label = form.instance.tag.tag_name
 
-        if modelformset_persontag.is_valid(): # All validation rules pass
+        if modelformset_usertag.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
             # ...
-            modelformset_persontag.save()
-
-            return render(request=request, 
-                          template_name='home.html', 
-                          dictionary=dict(modelformset_persontag=modelformset_persontag,
-                          ))
+            modelformset_usertag.save()
         else:
-            # ASSERT: modelformset_persontag.is_valid() was called, so modelformset_persontag modified itself to contain
+            # ASSERT: modelformset_usertag.is_valid() was called, so modelformset_usertag modified itself to contain
             # any errors, and these errors will be displayed in the form using the form.as_p
             # attribute.
             #  It puts the errors in form._errors and form.errors, 
             #   e.g., form.errors['sender'] == 'Enter a valid email address.'
-            return render(request=request, 
-                          template_name='home.html', 
-                          dictionary=dict(modelformset_persontag=modelformset_persontag,
-                          ))
-    return modelformset_persontag
+            pass
+        return modelformset_persontag
+
+
+
 
 def _create_and_get_tags(user):
         # Get all the tags
         tags = Tag.objects.all()
 
         # Get all the tags associated with this person
-        qs_person_tags = PersonTag.objects.filter(person=user)
+        qs_person_tags = UserTag.objects.filter(person=user)
         person_tags_by_tagname = { person_tag.tag.tag_name : person_tag for person_tag in qs_person_tags }
 
         # Create PersonTag's for any new tags

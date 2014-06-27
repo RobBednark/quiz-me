@@ -9,6 +9,9 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 6/26/14 5:41pm
+    5:41pm What is difference/relationship between Tag, QuestionTag, and UserTag
+    5:41pm worked on _create_and_get_usertags()
 Thu 6/26/14 7:48am
     7:55am decide what to do if form is invalid; handle it here or in the main view?
     7:54am need to complete create_and_get_persontags(); 
