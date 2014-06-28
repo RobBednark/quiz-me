@@ -17,6 +17,18 @@ def next_question(user):
     except ObjectDoesNotExist:
         last_attempt = None
 
+    '''
+    TODO:
+        Query for all questions that contain at least of of the UserTags
+        Input:
+            UserTags with enabled=True
+        Output:
+            questions that have one or more QuestionTag's where 
+                    QuestionTag.enabled=True
+                AND
+                    Question.Tag.
+
+    '''
     if last_attempt:
         last_question = last_attempt.question
         next_question_id = last_question.id + 1
