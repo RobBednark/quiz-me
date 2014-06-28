@@ -1,5 +1,5 @@
 from django.core.management.base import NoArgsCommand
-import myapp.models as models
+import questions.models as models
 
 class Command(NoArgsCommand):
     help = "run this script"
