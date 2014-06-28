@@ -47,6 +47,8 @@ class Hint(CreatedBy):
 
 class Tag(CreatedBy):
     '''
+        Each tag can be applied to each question for a given user.
+
         Each user can have many tags applied to many questions, e.g.,
             user_rob
                 tag1: question1, question2
@@ -62,11 +64,15 @@ class Tag(CreatedBy):
         return self.name
 
 class Quiz(CreatedBy):
+    # Just a placeholder for now.
     name = models.CharField(max_length=1000)
     # user_set
 
 class QuestionTag(CreatedBy):
-    # This is a tag applied to a question.
+    # This is a tag applied to a question.  
+    # e.g., ques = Question(text="1 + 1 = ??")
+    #       tag_math = Tag(name="math")
+    #       QuestionTag(question=ques, tag=tag_math, enabled=True)
     question = models.ForeignKey(Question)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
@@ -74,8 +80,9 @@ class QuestionTag(CreatedBy):
     # user_set
 
 class UserTag(models.Model):
-    # This indicates which tags a user wants to see questions for. 
-    # Eventually, will have different quizzes where each have their own set of UserTag's
+    # This allows the user to dynamically tell the app which questions they want to see.
+    # For each user, they will have a UserTag for each tag, with an enable=True/False
+    # Eventually, will have different quizzes where each have their own set of UserTag's.
     user = models.ForeignKey(User)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)

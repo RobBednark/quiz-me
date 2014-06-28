@@ -32,6 +32,19 @@
                 </div>
             {% endif %}
             </p>
+
+            {{ modelformset_persontag.management_form }}
+            {% if modelformset_persontag.non_form_errors %}
+                {{ modelformset_persontag.non_form_errors }}
+            {% endif %}
+            {% if modelformset_persontag.errors %}
+                {{ modelformset_persontag.errors }}
+            {% endif %}
+            {% for form_persontag in modelformset_persontag.forms %}
+                {{ form_persontag }} </br>
+            {% endfor %}
+
+            <p>
             <a href="/"> Next Question </a>
 		</form>
 	</body>

@@ -9,8 +9,15 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 6/28/14 2:49pm
+    2:49pm Now add code to get the tags and only query for questions with those tags, and add template code
+    2:49pm Added the call to _create_and_get_usertags()
+Sat 6/28/14 11:21am
+    11:24am Figure out where to call _create_and_get_tags() from in the view.
+    11:21am I think the function is ready.
 Fri 6/27/14 7:58am
-    7:58am comment different models
+    8:13am 
+    7:58am commented different models
 Thu 6/26/14 5:41pm
     5:41pm What is difference/relationship between Tag, QuestionTag, and UserTag
     5:41pm worked on _create_and_get_usertags()

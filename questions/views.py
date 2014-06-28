@@ -7,7 +7,7 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
 from .forms import FormAttempt
-from .models import Attempt, Question, User, UserTag
+from .models import Attempt, Question, Tag, User, UserTag
 
 def next_question(user):
     ''' Find and return the next question for the currently logged-in user.
@@ -40,40 +40,37 @@ def _create_and_get_usertags(request):
     ModelFormset_UserTag = modelformset_factory(model=UserTag,
                                                 extra=0,
                                                 fields=('enabled',))
+    user = request.user
     if request.method == 'GET':
         # Get the user, find all the tags, and create a form for each tag.
         #        GET:
         #            For each of the tags, show a checkbox.
         #            If there is no UserTag for that tag, then show the tag and default to False.
-        user = request.user
 
-        # Get all the tags
+        # Get all the Tag's
         tags = Tag.objects.all()
 
-        # Get all the tags associated with this user
-        qs_user_tags = UserTag.objects.filter(person=person)
-        user_tags_by_tagname = { person_tag.tag.tag_name : person_tag for person_tag in qs_user_tags }
+        # Get all the UserTag's associated with this user
+        qs_user_tags = UserTag.objects.filter(user=user)
+        user_tags_by_tagname = { user_tag.tag.name : user_tag for user_tag in qs_user_tags }
 
         # Create UserTag's for any new tags
         for tag in tags:
-            if not tag.tag_name in user_tags_by_tagname:
+            if not tag.name in user_tags_by_tagname:
                 # There isn't a tag, so create one
-                UserTag(person=person, tag=tag, enabled=False).save()
+                UserTag(user=user, tag=tag, enabled=False).save()
 
-        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(person=person))
+        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(user=user))
         for form in modelformset_usertag.forms:
-            form.fields['enabled'].label = form.instance.tag.tag_name
+            form.fields['enabled'].label = form.instance.tag.name
 
-        return modelformset_persontag
+        return modelformset_usertag
     elif request.method == 'POST':
-        person = Person.objects.all()[0]
-        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(person=person), data=request.POST)
+        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(user=user), data=request.POST)
         for form in modelformset_usertag.forms:
-            form.fields['enabled'].label = form.instance.tag.tag_name
+            form.fields['enabled'].label = form.instance.tag.name
 
         if modelformset_usertag.is_valid(): # All validation rules pass
-            # Process the data in form.cleaned_data
-            # ...
             modelformset_usertag.save()
         else:
             # ASSERT: modelformset_usertag.is_valid() was called, so modelformset_usertag modified itself to contain
@@ -82,32 +79,15 @@ def _create_and_get_usertags(request):
             #  It puts the errors in form._errors and form.errors, 
             #   e.g., form.errors['sender'] == 'Enter a valid email address.'
             pass
-        return modelformset_persontag
+        return modelformset_usertag
 
 
-
-
-def _create_and_get_tags(user):
-        # Get all the tags
-        tags = Tag.objects.all()
-
-        # Get all the tags associated with this person
-        qs_person_tags = UserTag.objects.filter(person=user)
-        person_tags_by_tagname = { person_tag.tag.tag_name : person_tag for person_tag in qs_person_tags }
-
-        # Create PersonTag's for any new tags
-        for tag in tags:
-            if not tag.tag_name in person_tags_by_tagname:
-                # There isn't a tag, so create one
-                PersonTag(person=user, tag=tag, enabled=False).save()
-
-        modelformset_persontag = ModelFormset_PersonTag(queryset=PersonTag.objects.filter(person=user))
-        for form in modelformset_persontag.forms:
-            form.fields['enabled'].label = form.instance.tag.tag_name
 
 
 @login_required(login_url='/login')
 def view_quiz(request):
+    modelformset_usertag = _create_and_get_usertags(request=request)
+
     if request.method == 'GET':
         # For a GET, show the next question
         question = next_question(user=request.user)
@@ -153,4 +133,4 @@ def view_quiz(request):
                           dictionary=dict(form_attempt=form_attempt, 
                                          ))
     else:
-        raise Exception("Unkown request.method=[%s]" % request.method)
+        raise Exception("Unknown request.method=[%s]" % request.method)
