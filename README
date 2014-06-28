@@ -10,6 +10,10 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Sat 6/28/14 2:49pm
+    3:19pm Now add code to just query for questions with those tags enabled.
+    3:19pm It seems to be working!  
+    3:16pm Add modelformset to render() args
+    3:16pm Added template code to show_question_and_answer.html; confirmed that it was already added to show_questions.html
     2:49pm Now add code to get the tags and only query for questions with those tags, and add template code
     2:49pm Added the call to _create_and_get_usertags()
 Sat 6/28/14 11:21am

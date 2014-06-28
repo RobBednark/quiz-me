@@ -99,6 +99,7 @@ def view_quiz(request):
         return render(request=request, 
                       template_name='show_question.html', 
                       dictionary=dict(form_attempt=form_attempt, 
+                                      modelformset_usertag=modelformset_usertag,
                                       question=question))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
@@ -121,6 +122,7 @@ def view_quiz(request):
             return render(request=request, 
                           template_name='show_question_and_answer.html', 
                           dictionary=dict(form_attempt=form_attempt, 
+                                          modelformset_usertag=modelformset_usertag,
                                           question=question,
                                           answer=question.answer,
                                           attempt=attempt,

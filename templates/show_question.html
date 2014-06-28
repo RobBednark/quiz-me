@@ -9,7 +9,7 @@
 		<form action="" method="post"> {% csrf_token %}
             {{ form_attempt.hidden_question_id }}
             {% if question %}
-                {{ question.question }}
+                Q: {{ question.question }}
             {% else %}
                 (NOTE: there are no questions)
             {% endif %}
@@ -27,15 +27,17 @@
                     </div>
             {% endif %}
 
-            {{ modelformset_persontag.management_form }}
-            {% if modelformset_persontag.non_form_errors %}
-                {{ modelformset_persontag.non_form_errors }}
+            <p>
+            Ask questions with these tags:<br>
+            {{ modelformset_usertag.management_form }}
+            {% if modelformset_usertag.non_form_errors %}
+                {{ modelformset_usertag.non_form_errors }}
             {% endif %}
-            {% if modelformset_persontag.errors %}
-                {{ modelformset_persontag.errors }}
+            {% if modelformset_usertag.errors %}
+                {{ modelformset_usertag.errors }}
             {% endif %}
-            {% for form_persontag in modelformset_persontag.forms %}
-                {{ form_persontag }} </br>
+            {% for form_usertag in modelformset_usertag.forms %}
+                {{ form_usertag }} </br>
             {% endfor %}
 
             </p>
