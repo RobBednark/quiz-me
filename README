@@ -10,6 +10,9 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Sat 6/28/14 2:49pm
+    4:39pm Also tried adding management command to emailusername, but still no luck.  Aargh!
+    4:32pm I added the management command, but it isn't being seen, I don't know why.
+    4:32pm Next: add a management command to see what the data is and play around with queries
     3:19pm Now add code to just query for questions with those tags enabled.
     3:19pm It seems to be working!  
     3:16pm Add modelformset to render() args
