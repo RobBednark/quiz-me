@@ -9,7 +9,20 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 6/28/14 10:31pm
+    10:43pm Remove the existing migrations and db and create new ones.
+    10:42pm When running tests, get this error:
+        Creating test database for alias 'default'...
+        FATAL ERROR - The following SQL query failed: ALTER TABLE "questions_question" ADD CONSTRAINT "user_id_refs_id_e3223746" FOREIGN KEY ("user_id") REFERENCES "emailusername_user" ("id") DEFERRABLE INITIALLY DEFERRED;
+        The error was: relation "emailusername_user" does not exist
+
+        Error in migration: questions:0001_initial
+    10:42pm Created tests.
+    10:31pm Look at Atlatl and copy how to do tests.
+    10:31pm With the learn command I think I understand how to use the queries.  But first I want to get tests in place so I can test things.
 Sat 6/28/14 2:49pm
+    4:43pm Got learn management command working.
+           SOLUTION: needed __init__.py in /management/ directory
     4:39pm Also tried adding management command to emailusername, but still no luck.  Aargh!
     4:32pm I added the management command, but it isn't being seen, I don't know why.
     4:32pm Next: add a management command to see what the data is and play around with queries
