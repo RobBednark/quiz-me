@@ -10,6 +10,10 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Sat 6/28/14 10:31pm
+    11:21pm Now got Makefile targets and commands working for recreating the db.
+    11:20pm Now got dependency on emailusername for questions
+    11:20pm Figured out how to do South dependencies.
+    11:04pm Removed migrations.  Created new initial migrations.
     10:43pm Remove the existing migrations and db and create new ones.
     10:42pm When running tests, get this error:
         Creating test database for alias 'default'...
