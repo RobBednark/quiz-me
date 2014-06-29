@@ -4,8 +4,11 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
+import os
 
 from django.test import LiveServerTestCase
+
+from emailusername.models import User
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
@@ -36,6 +39,23 @@ class BrowserTests(LiveServerTestCase):
         cls.browser.quit()
         super(BrowserTests, cls).tearDownClass()
 
+    def setUp(self):
+        # Create users
+        self.PASSWORD = 'p'
+        self.EMAIL_USER1 = 'rbednark+user1@gmail.com'
+        self.EMAIL_USER2 = 'rbednark+user2@gmail.com'
+        user1 = User(email=self.EMAIL_USER1)
+        user2 = User(email=self.EMAIL_USER2)
+        user1.set_password(self.PASSWORD)
+        user2.set_password(self.PASSWORD)
+        user1.save()
+        user2.save()
+
     def test_1(self):
-        import pdb; pdb.set_trace()
-        pass
+        self.browser.visit(self.live_server_url)
+        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.browser.find_by_id('id_username')[0].fill(self.EMAIL_USER1)
+        self.browser.find_by_id('id_password')[0].fill(self.PASSWORD)
+        self.browser.find_by_value('login').click()
+        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.assertTrue(self.browser.is_text_present,  '(NOTE: there are no questions)')

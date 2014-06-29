@@ -1,3 +1,6 @@
 django-debug-toolbar==1.0
 Django==1.6.1
 South==0.8.4
+selenium=2.42.1
+# splinter is an interface to facilitate browser testing
+splinter==0.6.0

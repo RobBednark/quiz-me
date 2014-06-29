@@ -10,6 +10,8 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Sat 6/28/14 10:31pm
+    11:59pm Next: add more tests.
+    11:59pm Got test_1 working!  Hooray!  
     11:21pm Now got Makefile targets and commands working for recreating the db.
     11:20pm Now got dependency on emailusername for questions
     11:20pm Figured out how to do South dependencies.
