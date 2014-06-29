@@ -62,15 +62,6 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'questions', ['Tag'])
 
-        # Adding M2M table for field questions on 'Tag'
-        m2m_table_name = db.shorten_name(u'questions_tag_questions')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('tag', models.ForeignKey(orm[u'questions.tag'], null=False)),
-            ('question', models.ForeignKey(orm[u'questions.question'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['tag_id', 'question_id'])
-
         # Adding model 'Quiz'
         db.create_table(u'questions_quiz', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -80,6 +71,27 @@ class Migration(SchemaMigration):
             ('name', self.gf('django.db.models.fields.CharField')(max_length=1000)),
         ))
         db.send_create_signal(u'questions', ['Quiz'])
+
+        # Adding model 'QuestionTag'
+        db.create_table(u'questions_questiontag', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('datetime_added', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('datetime_updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['emailusername.User'], null=True)),
+            ('question', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['questions.Question'])),
+            ('tag', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['questions.Tag'])),
+            ('enabled', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal(u'questions', ['QuestionTag'])
+
+        # Adding model 'UserTag'
+        db.create_table(u'questions_usertag', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['emailusername.User'])),
+            ('tag', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['questions.Tag'])),
+            ('enabled', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal(u'questions', ['UserTag'])
 
 
     def backwards(self, orm):
@@ -98,11 +110,14 @@ class Migration(SchemaMigration):
         # Deleting model 'Tag'
         db.delete_table(u'questions_tag')
 
-        # Removing M2M table for field questions on 'Tag'
-        db.delete_table(db.shorten_name(u'questions_tag_questions'))
-
         # Deleting model 'Quiz'
         db.delete_table(u'questions_quiz')
+
+        # Deleting model 'QuestionTag'
+        db.delete_table(u'questions_questiontag')
+
+        # Deleting model 'UserTag'
+        db.delete_table(u'questions_usertag')
 
 
     models = {
@@ -151,6 +166,16 @@ class Migration(SchemaMigration):
             'question': ('django.db.models.fields.TextField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['emailusername.User']", 'null': 'True'})
         },
+        u'questions.questiontag': {
+            'Meta': {'object_name': 'QuestionTag'},
+            'datetime_added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'datetime_updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'question': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['questions.Question']"}),
+            'tag': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['questions.Tag']"}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['emailusername.User']", 'null': 'True'})
+        },
         u'questions.quiz': {
             'Meta': {'object_name': 'Quiz'},
             'datetime_added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -165,8 +190,16 @@ class Migration(SchemaMigration):
             'datetime_updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
-            'questions': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'tags'", 'symmetrical': 'False', 'to': u"orm['questions.Question']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['emailusername.User']", 'null': 'True'})
+            'questions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': u"orm['questions.Question']", 'null': 'True', 'through': u"orm['questions.QuestionTag']", 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['emailusername.User']", 'null': 'True'}),
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'users'", 'to': u"orm['emailusername.User']", 'through': u"orm['questions.UserTag']", 'blank': 'True', 'symmetrical': 'False', 'null': 'True'})
+        },
+        u'questions.usertag': {
+            'Meta': {'object_name': 'UserTag'},
+            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'tag': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['questions.Tag']"}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['emailusername.User']"})
         }
     }
 
