@@ -9,6 +9,17 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 6/30/14 8:26am
+    9:09am LEFT OFF: working on test to assert that tags get created
+    8:33am Add tests:
+        - verify that tags get created
+    8:26am DONE: Add makefile for running tests with both browsers.
+Sun 6/29/14 8:11am
+    8:21am Ran with both firefox and phantomjs.  All tests pass.
+    8:21am Added tests for bad password, username.  They pass.
+    8:11am Add these tests:
+        DONE - wrong password for login
+        DONE - run tests with both firefox and phantomjs
 Sat 6/28/14 10:31pm
     11:59pm Next: add more tests.
     11:59pm Got test_1 working!  Hooray!  
@@ -842,5 +853,22 @@ o want to quiz myself for a specify tag
 cddjango
 cd learn_django-versioning_package
 vim README
+================================================================================
+! Names:
+================================================================================
+AskMe
+FlashCards
 
-''',},
+MemoryAid
+MemoryRefresh
+MemoryRefresher
+
+QuizMe - already an iOS and Android app with this name
+Quizzer
+quizzical
+
+RefreshMyMemory
+================================================================================
+! The End.
+================================================================================
+

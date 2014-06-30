@@ -9,6 +9,7 @@ import os
 from django.test import LiveServerTestCase
 
 from emailusername.models import User
+from .models import Tag, UserTag
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
@@ -51,11 +52,48 @@ class BrowserTests(LiveServerTestCase):
         user1.save()
         user2.save()
 
-    def test_1(self):
+    def test_login_successful_no_questions(self):
+        ''' A user can login successfully with correct username and password, and the quiz has no questions. '''
         self.browser.visit(self.live_server_url)
         self.assertEquals(self.browser.title, 'Quiz Me!')
         self.browser.find_by_id('id_username')[0].fill(self.EMAIL_USER1)
         self.browser.find_by_id('id_password')[0].fill(self.PASSWORD)
         self.browser.find_by_value('login').click()
         self.assertEquals(self.browser.title, 'Quiz Me!')
-        self.assertTrue(self.browser.is_text_present,  '(NOTE: there are no questions)')
+        self.assertTrue(self.browser.is_text_present('(NOTE: there are no questions)'))
+
+    def test_login_fails_incorrect_password(self):
+        ''' A user cannot login with an incorrect password. '''
+        self.browser.visit(self.live_server_url)
+        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.browser.find_by_id('id_username')[0].fill(self.EMAIL_USER1)
+        self.browser.find_by_id('id_password')[0].fill("") # No password
+        self.browser.find_by_value('login').click()
+        self.assertTrue(self.browser.is_text_present("Your username and password didn't match. Please try again."))
+
+    def test_login_fails_incorrect_username(self):
+        ''' A user cannot login with an incorrect username. '''
+        self.browser.visit(self.live_server_url)
+        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.browser.find_by_id('id_username')[0].fill("bad username") # incorrect username
+        self.browser.find_by_id('id_password')[0].fill(self.PASSWORD) # correct password
+        self.browser.find_by_value('login').click()
+        self.assertTrue(self.browser.is_text_present("Your username and password didn't match. Please try again."))
+
+    def test_tags_created_automatically_for_user(self):
+        ''' Assert that a UserTag is created for a user when they hit an endpoint after a Tag has been created. '''
+        tag1 = Tag(name='tag1')
+        tag2 = Tag(name='tag2')
+        tag1.save()
+        tag2.save()
+        self.assertEquals(UserTag.object.count(), 0)
+
+        self.browser.visit(self.live_server_url)
+        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.browser.find_by_id('id_username')[0].fill(self.EMAIL_USER1) # incorrect username
+        self.browser.find_by_id('id_password')[0].fill(self.PASSWORD) # correct password
+        self.browser.find_by_value('login').click()
+
+        self.assertTrue(self.browser.is_text_present('(NOTE: there are no questions)'))
+
+        # Assert there are QuestionTags for this user
