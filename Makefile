@@ -15,6 +15,10 @@ recreatedb: dropdb createdb syncdb migrate
 syncdb:
 	./manage.py syncdb --noinput
 
-test:
-	ROB_SELENIUM_BROWSER=phantomjs ./manage.py test
+test: test_phantomjs test_firefox
+
+test_firefox:
 	ROB_SELENIUM_BROWSER=firefox   ./manage.py test
+
+test_phantomjs:
+	ROB_SELENIUM_BROWSER=phantomjs ./manage.py test

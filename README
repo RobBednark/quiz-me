@@ -9,6 +9,13 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Mon 6/30/14 8:41pm
+    8:41pm added test to assert that no
+Mon 6/30/14 5:41pm
+    5:58pm STATUS: line 111 is failing for some reason; see what it looks like in the browser
+    5:57pm DONE: put _login() in separate function
+    5:42pm NEXT: create a test to confirm that view only gets questions with tag selected
+    5:41pm DONE: finished test_tags_created_automatically_for_user
 Mon 6/30/14 8:26am
     9:09am LEFT OFF: working on test to assert that tags get created
     8:33am Add tests:

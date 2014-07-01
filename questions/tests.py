@@ -9,11 +9,12 @@ import os
 from django.test import LiveServerTestCase
 
 from emailusername.models import User
-from .models import Tag, UserTag
+from .models import Question, QuestionTag, Tag, UserTag
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
 # os.environ['DJANGO_LIVE_TEST_SERVER_ADDRESS'] = 'localhost:8000'
+
 
 # phantomjs archives for Windows, OSX, and Linux can be found at: http://phantomjs.org/download.html
 class BrowserTests(LiveServerTestCase):
@@ -51,33 +52,37 @@ class BrowserTests(LiveServerTestCase):
         user2.set_password(self.PASSWORD)
         user1.save()
         user2.save()
+        self.user1 = user1
+        self.user2 = user2
+
+    def _assert_no_questions(self):
+        self.assertTrue(self.browser.is_text_present('(NOTE: there are no questions)'))
+
+    def _login(self, user=None, password=None):
+        if user == None:
+            user = self.EMAIL_USER1
+        if password == None:
+            password = self.PASSWORD
+        self.browser.visit(self.live_server_url)
+        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.browser.find_by_id('id_username')[0].fill(user)
+        self.browser.find_by_id('id_password')[0].fill(password)
+        self.browser.find_by_value('login').click()
 
     def test_login_successful_no_questions(self):
         ''' A user can login successfully with correct username and password, and the quiz has no questions. '''
-        self.browser.visit(self.live_server_url)
+        self._login()
         self.assertEquals(self.browser.title, 'Quiz Me!')
-        self.browser.find_by_id('id_username')[0].fill(self.EMAIL_USER1)
-        self.browser.find_by_id('id_password')[0].fill(self.PASSWORD)
-        self.browser.find_by_value('login').click()
-        self.assertEquals(self.browser.title, 'Quiz Me!')
-        self.assertTrue(self.browser.is_text_present('(NOTE: there are no questions)'))
+        self._assert_no_questions()
 
     def test_login_fails_incorrect_password(self):
         ''' A user cannot login with an incorrect password. '''
-        self.browser.visit(self.live_server_url)
-        self.assertEquals(self.browser.title, 'Quiz Me!')
-        self.browser.find_by_id('id_username')[0].fill(self.EMAIL_USER1)
-        self.browser.find_by_id('id_password')[0].fill("") # No password
-        self.browser.find_by_value('login').click()
+        self._login(password='')
         self.assertTrue(self.browser.is_text_present("Your username and password didn't match. Please try again."))
 
     def test_login_fails_incorrect_username(self):
         ''' A user cannot login with an incorrect username. '''
-        self.browser.visit(self.live_server_url)
-        self.assertEquals(self.browser.title, 'Quiz Me!')
-        self.browser.find_by_id('id_username')[0].fill("bad username") # incorrect username
-        self.browser.find_by_id('id_password')[0].fill(self.PASSWORD) # correct password
-        self.browser.find_by_value('login').click()
+        self._login(user="bad username")
         self.assertTrue(self.browser.is_text_present("Your username and password didn't match. Please try again."))
 
     def test_tags_created_automatically_for_user(self):
@@ -86,14 +91,42 @@ class BrowserTests(LiveServerTestCase):
         tag2 = Tag(name='tag2')
         tag1.save()
         tag2.save()
-        self.assertEquals(UserTag.object.count(), 0)
+        self.assertEquals(UserTag.objects.count(), 0)
 
-        self.browser.visit(self.live_server_url)
-        self.assertEquals(self.browser.title, 'Quiz Me!')
-        self.browser.find_by_id('id_username')[0].fill(self.EMAIL_USER1) # incorrect username
-        self.browser.find_by_id('id_password')[0].fill(self.PASSWORD) # correct password
-        self.browser.find_by_value('login').click()
+        self._login()
+        self._assert_no_questions()
 
-        self.assertTrue(self.browser.is_text_present('(NOTE: there are no questions)'))
+        # Assert that QuestionTags were created for this user
+        user_tags = UserTag.objects.all()
+        self.assertEquals(len(user_tags), 2)
+        tag_ids = { user_tag.tag.id for user_tag in user_tags }
+        user_ids = { user_tag.user.id for user_tag in user_tags }
+        enabled_set = { user_tag.enabled for user_tag in user_tags }
+        self.assertEquals(tag_ids, {tag1.id, tag2.id})
+        self.assertEquals(user_ids, {self.user1.id})
+        self.assertEquals(enabled_set, {False})
 
-        # Assert there are QuestionTags for this user
+    def test_only_show_questions_with_tag_selected(self):
+        ''' Assert that only questions with a given tag are shown '''
+        tag1 = Tag(name='tag1')
+        tag2 = Tag(name='tag2')
+        tag1.save()
+        tag2.save()
+
+        question1 = Question(question="question1")
+        question2 = Question(question="question2")
+        question1.save()
+        question2.save()
+
+        self.assertEquals(Question.objects.all().count(), 2)
+        self.assertEquals(QuestionTag.objects.all().count(), 0)
+        self.assertEquals(UserTag.objects.all().count(), 0)
+
+        self._login()
+        # Assert no questions, because user doesn't have any tags selected.
+        self._assert_no_questions()
+        import pdb; pdb.set_trace()
+
+        # Now select a tag
+
+        # Assert that a question is shown
