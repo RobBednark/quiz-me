@@ -31,6 +31,7 @@ def next_question(user):
     questions = Question.objects.filter(question__in=question_tags)
     # Get the question with the oldest attempt datetime_added
     # Need to use aggregation and either Max() or Min() function
+    questions.annotate(most_recent_attempt=
 
     return next_question
 

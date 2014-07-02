@@ -10,6 +10,7 @@ Code: Dropbox/git/quizme_site
 !Log/History/Diary
 ================================================================================
 Wed 7/2/14 8:33am
+    8:34am NEXT: figure out how to annotate most recent attempt and order by that
     8:33am created learn_aggregate_annotate project
 Tue 7/1/14 8:02am
     8:39am NEXT: learn how to use aggregation to select Max()/Min() for the attempt date_created for a question;  see https://docs.djangoproject.com/en/dev/topics/db/aggregation/
