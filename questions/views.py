@@ -7,28 +7,40 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
 from .forms import FormAttempt
-from .models import Attempt, Question, Tag, User, UserTag
+from .models import Attempt, Question, QuestionTag, Tag, User, UserTag
 
 def next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
+    '''
+    TODO:
+        Query for all questions that contain at least one of the UserTags
+        Input:
+            UserTags with enabled=True
+        Output:
+            questions that have one or more QuestionTag's 
+            WHERE 
+                QuestionTag.enabled=True
+            AND
+                QuestionTag.
+
+    '''
+
+    user_tags = UserTag.objects.filter(user=user, enabled=True)
+    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags)
+    questions = Question.objects.filter(question__in=question_tags)
+    # Get the question with the oldest attempt datetime_added
+    # Need to use aggregation and either Max() or Min() function
+
+    return next_question
+
+
+    ### Previous code, which is being replaced by code above:
     try:
         last_attempt = Attempt.objects.filter(user=user).latest(field_name='datetime_added')
     except ObjectDoesNotExist:
         last_attempt = None
 
-    '''
-    TODO:
-        Query for all questions that contain at least of of the UserTags
-        Input:
-            UserTags with enabled=True
-        Output:
-            questions that have one or more QuestionTag's where 
-                    QuestionTag.enabled=True
-                AND
-                    Question.Tag.
-
-    '''
     if last_attempt:
         last_question = last_attempt.question
         next_question_id = last_question.id + 1

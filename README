@@ -9,8 +9,12 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 7/1/14 8:02am
+    8:39am NEXT: learn how to use aggregation to select Max()/Min() for the attempt date_created for a question;  see https://docs.djangoproject.com/en/dev/topics/db/aggregation/
+    8:38am DONE: got initial code in place for views.next_question()
+    8:02am NEXT: add code to select question based on tags
 Mon 6/30/14 8:41pm
-    8:41pm added test to assert that no
+    8:41pm added test to assert that no questions appear when no tags are selected
 Mon 6/30/14 5:41pm
     5:58pm STATUS: line 111 is failing for some reason; see what it looks like in the browser
     5:57pm DONE: put _login() in separate function
@@ -875,6 +879,40 @@ Quizzer
 quizzical
 
 RefreshMyMemory
+
+================================================================================
+!Examples of tables
+================================================================================
+Attempt:
+    attempt     correct     question_id  datetime_added  datetime_updated  user_id
+    ---------   -------     -----------  --------------  ----------------  -------
+    "foobar"    True            3        7/1/14 8:35am   7/1/14 8:35am        5
+
+Question:
+    question    answer_id
+    --------    ---------
+      1+1           1
+
+QuestionTag:
+    question_id tag_id  enabled
+    ----------- ------  -------
+         1        1      True
+
+Tag:
+    name
+    -----
+    my_tag
+
+UserTag
+    user_id   tag_id  enabled
+    -------   ------  -------
+       1        1       True
+
+For questions,
+    user_tags = UserTag.objects.filter(user=user, enabled=True)
+    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags)
+    questions = Question.objects.filter(question__in=question_tags)
+
 ================================================================================
 ! The End.
 ================================================================================
