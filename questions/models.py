@@ -17,19 +17,19 @@ class CreatedBy(models.Model):
 class Question(CreatedBy):
     question = models.TextField()
     answer = models.ForeignKey('Answer', null=True)
-    # attempt_set = ForeignKey(Attempt)
-    # questiontag_set = ManyToMany(QuestionTag)
-    # tag_set = ManyToMany(Tag) 
-    # user_set = ForeignKey(User)
+    # attempt_set
+    # questiontag_set
+    # tag_set
+    # user_set
 
     def __unicode__(self):
         return '<Question question=[%s] datetime_added=[%s]>' % (self.question, self.datetime_added)
 
 class Answer(CreatedBy):
     answer = models.TextField()
-    # question_set = ForeignKey(Question)
-    # hint_set = ForeignKey(Hint)
-    # user_set = ForeignKey(User)
+    # hint_set
+    # question_set
+    # user_set
 
     def __unicode__(self):
         return '<Answer answer=[%s] datetime_added=[%s]>' % (self.answer, self.datetime_added)
@@ -43,7 +43,7 @@ class Attempt(CreatedBy):
 class Hint(CreatedBy):
     answer = models.ForeignKey('Answer', null=True)
     hint = models.TextField()
-    # user_set = ForeignKey(User)
+    # user_set
 
 class Tag(CreatedBy):
     '''
@@ -57,8 +57,8 @@ class Tag(CreatedBy):
     name = models.CharField(max_length=1000)
     questions = models.ManyToManyField('Question', blank=True, through='QuestionTag', null=True)
     users = models.ManyToManyField(User, blank=True, through='UserTag', related_name='users', null=True)
-    # questiontag_set = ForeignKey(QuestionTag)
-    # user_set = ForeignKey(User)
+    # questiontag_set
+    # user_set
 
     def __unicode__(self):
         return self.name
@@ -70,9 +70,9 @@ class Quiz(CreatedBy):
 
 class QuestionTag(CreatedBy):
     # This is a tag applied to a question.  
-    # e.g., ques = Question(text="1 + 1 = ??")
+    # e.g., question = Question(text="1 + 1 = ??")
     #       tag_math = Tag(name="math")
-    #       QuestionTag(question=ques, tag=tag_math, enabled=True)
+    #       QuestionTag(question=question, tag=tag_math, enabled=True)
     question = models.ForeignKey(Question)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)

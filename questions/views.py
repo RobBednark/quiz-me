@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Max, Min
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -26,14 +27,31 @@ def next_question(user):
 
     '''
 
+    import pdb; pdb.set_trace()
+    # Find all the tags that the user has selected
     user_tags = UserTag.objects.filter(user=user, enabled=True)
-    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags)
-    questions = Question.objects.filter(question__in=question_tags)
-    # Get the question with the oldest attempt datetime_added
-    # Need to use aggregation and either Max() or Min() function
-    questions.annotate(most_recent_attempt=
+    # Find all the questions associated with selected tags
+    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags).select_related('question')
+    # Find the newest attempt for each question
+    #question_tags = question_tags.annotate(newest_attempt=Max('question__attempt_set__datetime_added'))
+    question_tags = question_tags.annotate(newest_attempt=Max('question__attempt_set__datetime_added'))
+    # Find the oldest attempt of all the newest attempts
+    # Note that None (no attempt) for a question should count as the oldest
+    question = question_tags.Min('newest_attempt')
 
-    return next_question
+
+    #questions = Question.objects.filter(id__in=[qtag.question for qtag in question_tags])
+    #questions = questions.annotate()
+    # questions = Question.objects.filter(question__in=question_tags)
+    # Select all questions with QuestionTag's that the user has enabled=True
+    # Of those questions, get the question with the oldest attempt datetime_added
+    # If a question has no attempts, consider that the oldest.
+    # Find the oldest_attempt for each question.
+    # Get the Min(oldest_attempt)
+    # Need to use aggregation and either Max() or Min() function
+    qs = questions.annotate(oldest_attempt=Min('datetime_added'))
+
+    return next_question_
 
 
     ### Previous code, which is being replaced by code above:

@@ -6,10 +6,11 @@ Replace this with more appropriate tests for your application.
 """
 import os
 
-from django.test import LiveServerTestCase
+from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
 from .models import Question, QuestionTag, Tag, UserTag
+from .views import next_question
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
@@ -130,3 +131,32 @@ class BrowserTests(LiveServerTestCase):
         # Now select a tag
 
         # Assert that a question is shown
+
+class NonBrowserTests(TestCase):
+    def test_next_question(self):
+        ''' Assert that only questions with a given tag are shown '''
+        user1 = User(email="user1@bednark.com")
+        user2 = User(email="user2@bednark.com")
+        user1.save()
+        user2.save()
+
+        tag1 = Tag(name='tag1')
+        tag2 = Tag(name='tag2')
+        tag1.save()
+        tag2.save()
+
+        question1 = Question(question="question1")
+        question2 = Question(question="question2")
+        question1.save()
+        question2.save()
+
+        self.assertEquals(Question.objects.all().count(), 2)
+        self.assertEquals(QuestionTag.objects.all().count(), 0)
+        self.assertEquals(UserTag.objects.all().count(), 0)
+
+        # Assert that user with no tags does not get a question
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertEquals(question, None)
+
+        # Assert that user with a tag and no attempts gets a question
