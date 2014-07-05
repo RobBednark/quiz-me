@@ -36,8 +36,9 @@ def next_question(user):
     #question_tags = question_tags.annotate(newest_attempt=Max('question__attempt_set__datetime_added'))
     question_tags = question_tags.annotate(attempt_newest=Max('question__attempt__datetime_added'))
     # Find the oldest attempt of all the newest attempts
-    # Note that None (no attempt) for a question should count as the older than a question with an
-    # attempt date.
+    # Note that None (no attempt) for a question should count older than a question with an
+    # attempt.
+    #question_tags = question_tags.extra(select={'null_ordering': 'question_attemp'})
     # order_by defaults to ascending order (oldest to newest dates)
     question_tags = question_tags.order_by('attempt_newest')
     question = question_tags[0].question if question_tags else None

@@ -219,9 +219,11 @@ class NonBrowserTests(TestCase):
             question = next_question(user=user1)
             self.assertEquals(question, question2)
 
-        # Not add question3, and assert that question3 is returned, because it doesn't have any attempts yet
+        # Now add question3, and assert that question3 is returned, because it doesn't have any attempts yet
         question3 = Question(question="question3")
         question3.save()
+        question3_tag1 = QuestionTag(question=question3, tag=tag1, enabled=True)
+        question3_tag1.save()
         with self.assertNumQueries(1):
             import pdb; pdb.set_trace()
             question = next_question(user=user1)
