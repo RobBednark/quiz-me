@@ -27,17 +27,20 @@ def next_question(user):
 
     '''
 
-    import pdb; pdb.set_trace()
     # Find all the tags that the user has selected
     user_tags = UserTag.objects.filter(user=user, enabled=True)
     # Find all the questions associated with selected tags
     question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags).select_related('question')
-    # Find the newest attempt for each question
+    # Find the newest attempt for each question.
+    # If a question doesn't have any attempts, then the newest attempt will be None.
     #question_tags = question_tags.annotate(newest_attempt=Max('question__attempt_set__datetime_added'))
-    question_tags = question_tags.annotate(newest_attempt=Max('question__attempt_set__datetime_added'))
+    question_tags = question_tags.annotate(attempt_newest=Max('question__attempt__datetime_added'))
     # Find the oldest attempt of all the newest attempts
-    # Note that None (no attempt) for a question should count as the oldest
-    question = question_tags.Min('newest_attempt')
+    # Note that None (no attempt) for a question should count as the older than a question with an
+    # attempt date.
+    question_tags = question_tags.order_by('attempt_newest')
+    question = question_tags[0].question if question_tags else None
+    return question
 
 
     #questions = Question.objects.filter(id__in=[qtag.question for qtag in question_tags])
@@ -49,9 +52,6 @@ def next_question(user):
     # Find the oldest_attempt for each question.
     # Get the Min(oldest_attempt)
     # Need to use aggregation and either Max() or Min() function
-    qs = questions.annotate(oldest_attempt=Min('datetime_added'))
-
-    return next_question_
 
 
     ### Previous code, which is being replaced by code above:
@@ -155,7 +155,6 @@ def view_quiz(request):
             # TODO: Need to figure out which question they are answering
             attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
                               question=question,
-                              correct=True,
                               user=request.user)
             try:
                 attempt.save()

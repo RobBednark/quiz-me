@@ -9,7 +9,7 @@ import os
 from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
-from .models import Question, QuestionTag, Tag, UserTag
+from .models import Attempt, Question, QuestionTag, Tag, UserTag
 from .views import next_question
 
 # By default, LiveServerTestCase uses port 8081.
@@ -154,9 +154,51 @@ class NonBrowserTests(TestCase):
         self.assertEquals(QuestionTag.objects.all().count(), 0)
         self.assertEquals(UserTag.objects.all().count(), 0)
 
-        # Assert that user with no tags does not get a question
+        # Assert that:
+        #   a user with no tags 
+        #   no questions with any tags
+        # does not get a question
         with self.assertNumQueries(1):
             question = next_question(user=user1)
-            self.assertEquals(question, None)
+            self.assertIsNone(question)
+
+        # Assert that user with a UserTag but no questions with that UserTag does not get a question
+        user1_tag1 = UserTag(user=user1, tag=tag1, enabled=True)
+        user1_tag1.save()
+
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertIsNone(question)
+
+        # Assert that user with a UserTag and a question with that UserTag gets that question
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertIsNone(question)
 
         # Assert that user with a tag and no attempts gets a question
+        question1_tag1 = QuestionTag(question=question1, tag=tag1, enabled=True)
+        question1_tag1.save()
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertEquals(question, question1)
+
+        # Set the QuestionTag.enabled=False and assert that no question is returned
+        question1_tag1.enabled = False
+        question1_tag1.save()
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertIsNone(question)
+
+        # Assert that the question with the oldest attempt is returned
+        question1_tag1.enabled = True
+        question1_tag1.save()
+        question2_tag1 = QuestionTag(question=question2, tag=tag1, enabled=True)
+        question2_tag1.save()
+        attempt1_question1 = Attempt(question=question1)
+        attempt1_question2 = Attempt(question=question2)
+        attempt1_question1.save()
+        attempt1_question2.save()
+        self.assertTrue(question2.datetime_added > question1.datetime_added)
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertEquals(question, question2)

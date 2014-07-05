@@ -36,7 +36,6 @@ class Answer(CreatedBy):
 
 class Attempt(CreatedBy):
     attempt = models.TextField()
-    correct = models.BooleanField()
     question = models.ForeignKey('Question', null=False)
     # user_set
 
