@@ -198,7 +198,30 @@ class NonBrowserTests(TestCase):
         attempt1_question2 = Attempt(question=question2)
         attempt1_question1.save()
         attempt1_question2.save()
-        self.assertTrue(question2.datetime_added > question1.datetime_added)
+        self.assertTrue(attempt1_question2.datetime_added > attempt1_question1.datetime_added)
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertEquals(question, question1)
+
+        # Not add an attempt to question2, and assert that question1 is returned
+        attempt2_question1 = Attempt(question=question1)
+        attempt2_question1.save()
+
         with self.assertNumQueries(1):
             question = next_question(user=user1)
             self.assertEquals(question, question2)
+
+        # Not add an attempt to question1, and assert that question2 is returned
+        attempt3_question1 = Attempt(question=question1)
+        attempt3_question1.save()
+
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertEquals(question, question2)
+
+        # Not add question3, and assert that question3 is returned, because it doesn't have any attempts yet
+        question3 = Question(question="question3")
+        question3.save()
+        with self.assertNumQueries(1):
+            question = next_question(user=user1)
+            self.assertEquals(question, question3)
