@@ -6,9 +6,7 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
-    depends_on = (
-                    ("emailusername", "0001_initial"),
-                 )
+    depends_on = (("emailusername", "0001_initial"),)
 
     def forwards(self, orm):
         # Adding model 'Question'
@@ -39,7 +37,6 @@ class Migration(SchemaMigration):
             ('datetime_updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['emailusername.User'], null=True)),
             ('attempt', self.gf('django.db.models.fields.TextField')()),
-            ('correct', self.gf('django.db.models.fields.BooleanField')()),
             ('question', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['questions.Question'])),
         ))
         db.send_create_signal(u'questions', ['Attempt'])
@@ -144,7 +141,6 @@ class Migration(SchemaMigration):
         u'questions.attempt': {
             'Meta': {'object_name': 'Attempt'},
             'attempt': ('django.db.models.fields.TextField', [], {}),
-            'correct': ('django.db.models.fields.BooleanField', [], {}),
             'datetime_added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'datetime_updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

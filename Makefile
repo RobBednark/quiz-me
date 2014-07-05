@@ -12,6 +12,12 @@ migrate:
 
 recreatedb: dropdb createdb syncdb migrate
 
+recreate_migrations:
+	rm -fr questions/migrations
+	./manage.py schemamigration --initial questions
+	# Add a dependency to the emailusername migration
+	perl -pi -e 's/(class Migration\(SchemaMigration\):)/$$1\n    depends_on = \(\("emailusername", "0001_initial"\),\)/' questions/migrations/0001_initial.py
+
 syncdb:
 	./manage.py syncdb --noinput
 
