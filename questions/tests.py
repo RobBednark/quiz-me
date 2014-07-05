@@ -223,5 +223,6 @@ class NonBrowserTests(TestCase):
         question3 = Question(question="question3")
         question3.save()
         with self.assertNumQueries(1):
+            import pdb; pdb.set_trace()
             question = next_question(user=user1)
             self.assertEquals(question, question3)

@@ -9,6 +9,9 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 7/5/14 12:14am
+    12:14am NEXT: get the latest test working to return a question with no attempts
+    12:14am Got the tests working.
 Fri 7/4/14 4:19pm
     4:19pm NEXT: figure out how to annote the newest attempt for a given Question
     4:19pm added learn projects to learn how to use backwards lowercase model name for the reverse relationship.
