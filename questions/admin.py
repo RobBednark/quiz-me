@@ -8,7 +8,7 @@ class AnswerAdmin(admin.ModelAdmin):
     list_display = ['answer', 'datetime_added', 'datetime_updated']
 
 class AttemptAdmin(admin.ModelAdmin):
-    list_display = ['attempt', 'question', 'correct']
+    list_display = ['attempt', 'question']
 
 class TagAdmin(admin.ModelAdmin):
     # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
