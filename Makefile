@@ -2,7 +2,7 @@ DB_NAME=quizme
 DB_USER=quizme
 
 create_superuser:
-	./manage.py createsuperuser --noinput --email rbednark@gmail.com
+	./manage.py createsuperuser --email rbednark@gmail.com
 
 createdb: 
 	createdb --username=${DB_USER} ${DB_NAME}

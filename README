@@ -691,9 +691,15 @@ Mon 9/16/13
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o postgres backups (via Makefile)
+o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
+o deploy to heroku
+o Import (import questions via csv / json / yaml / python data structure)
+o Export (export questions via csv / json / yaml / python data structure / plain text)
+o Questions (add questions from the web page instead of the admin)
 o Tags (be able to tag questions, and then select tags from which to select questions)
-    - select a single tag to use for a quiz
-    - select multiple tags to use for a quiz
+    DONE - select a single tag to use for a quiz
+    DONE - select multiple tags to use for a quiz
     - consider allowing a hierarchy of tags, e.g.,
         Programming
             Languages
@@ -703,7 +709,6 @@ o Tags (be able to tag questions, and then select tags from which to select ques
             Methodologies
                 Agile
       Maybe allowing multiple parent/child relationships.
-o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
 o NewUser registration
     - page to create account
     - email address verification/registration
@@ -716,11 +721,9 @@ o Footer:
     - show total number of questions
 o Review mode: just show questions and answers
 o email questions
-o deploy to heroku
 
 o Rich Text for questions and answers
 o graph database
-o Questions (add questions from the web page)
 o Questions (modify questions from the web page while asking the question)
 o unique url's (e.g., either based on question words, or based on an id)
 o "Ignore" tag -- never see the question again
