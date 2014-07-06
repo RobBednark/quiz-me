@@ -126,7 +126,6 @@ class BrowserTests(LiveServerTestCase):
         self._login()
         # Assert no questions, because user doesn't have any tags selected.
         self._assert_no_questions()
-        import pdb; pdb.set_trace()
 
         # Now select a tag
 
@@ -134,7 +133,7 @@ class BrowserTests(LiveServerTestCase):
 
 class NonBrowserTests(TestCase):
     def test_next_question(self):
-        ''' Assert that only questions with a given tag are shown '''
+        ''' Assert that only views.next_question() works correctly. '''
         user1 = User(email="user1@bednark.com")
         user2 = User(email="user2@bednark.com")
         user1.save()
@@ -155,41 +154,55 @@ class NonBrowserTests(TestCase):
         self.assertEquals(UserTag.objects.all().count(), 0)
 
         # Assert that:
-        #   a user with no tags 
-        #   no questions with any tags
+        #   a) a user with no tags 
+        #   b) no questions with any tags
         # does not get a question
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             question = next_question(user=user1)
             self.assertIsNone(question)
 
-        # Assert that user with a UserTag but no questions with that UserTag does not get a question
+        # Assert that:
+        #   a) user with a UserTag 
+        #   b) no questions with that UserTag 
+        # does not get a question
         user1_tag1 = UserTag(user=user1, tag=tag1, enabled=True)
         user1_tag1.save()
 
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             question = next_question(user=user1)
             self.assertIsNone(question)
 
-        # Assert that user with a UserTag and a question with that UserTag gets that question
-        with self.assertNumQueries(1):
+        # Assert that:
+        #    a) user with a UserTag 
+        #    b) question with that UserTag 
+        # gets that question
+        with self.assertNumQueries(2):
             question = next_question(user=user1)
             self.assertIsNone(question)
 
-        # Assert that user with a tag and no attempts gets a question
+        # Assert that 
+        #    a) user with a tag 
+        #    b) user has no attempts 
+        # gets the question
         question1_tag1 = QuestionTag(question=question1, tag=tag1, enabled=True)
         question1_tag1.save()
         with self.assertNumQueries(1):
             question = next_question(user=user1)
             self.assertEquals(question, question1)
 
-        # Set the QuestionTag.enabled=False and assert that no question is returned
+        # Given:
+        #       a) QuestionTag.enabled=False 
+        # Assert: no question is returned
         question1_tag1.enabled = False
         question1_tag1.save()
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             question = next_question(user=user1)
             self.assertIsNone(question)
 
-        # Assert that the question with the oldest attempt is returned
+        # Given:
+        #       a) two questions exist for a given tag
+        #       b) question1 has an older attempt
+        # Assert that question1 is returned because it's attempt is older
         question1_tag1.enabled = True
         question1_tag1.save()
         question2_tag1 = QuestionTag(question=question2, tag=tag1, enabled=True)
@@ -199,32 +212,43 @@ class NonBrowserTests(TestCase):
         attempt1_question1.save()
         attempt1_question2.save()
         self.assertTrue(attempt1_question2.datetime_added > attempt1_question1.datetime_added)
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             question = next_question(user=user1)
             self.assertEquals(question, question1)
 
-        # Not add an attempt to question2, and assert that question1 is returned
+        # Now add a 2nd attempt to question1, and assert that question2 is returned
+        # Given:
+        #       a) two questions exist for a given tag
+        #       b) question1 has two attempts, with the newest attempt newer than question2's newest attempt
+        # Assert that question2 is returned because it's attempt is older
         attempt2_question1 = Attempt(question=question1)
         attempt2_question1.save()
 
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             question = next_question(user=user1)
             self.assertEquals(question, question2)
 
-        # Not add an attempt to question1, and assert that question2 is returned
+        # Not add a 3rd attempt to question1, and assert that question2 is still returned
+        # Given:
+        #       a) two questions exist for a given tag
+        #       b) question1 has 3 attempts, with the newest attempt newer than question2's newest attempt
+        # Assert that question2 is returned because it's attempt is older
         attempt3_question1 = Attempt(question=question1)
         attempt3_question1.save()
 
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             question = next_question(user=user1)
             self.assertEquals(question, question2)
 
         # Now add question3, and assert that question3 is returned, because it doesn't have any attempts yet
+        # Given:
+        #       a) three questions exist for a given tag
+        #       b) question1 has 3 attempts, question2 has 2 attempts, question3 has no attempts
+        # Assert that question3 is returned because it has no attempts
         question3 = Question(question="question3")
         question3.save()
         question3_tag1 = QuestionTag(question=question3, tag=tag1, enabled=True)
         question3_tag1.save()
         with self.assertNumQueries(1):
-            import pdb; pdb.set_trace()
             question = next_question(user=user1)
             self.assertEquals(question, question3)

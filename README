@@ -9,6 +9,16 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 7/6/14 1:33pm
+    1:52pm WORKING!  Got it working:
+        - can select tags for which questions to ask
+        - questions are ordered by:
+            - no attempts get asked first
+            - older attempts get asked before newer attempts
+    1:33pm modified code to do two queries, one for no attempts, and for newest attempt
+Sun 7/6/14 8:08am
+    8:10am Modify the learn_* app to run in Postgres instead of sqlite
+    8:08am I confirmed that the quizme tests are being run in Postgres
 Sat 7/5/14 8:09am
     11:31am Work on django learn program to figure out why null's aren't the oldest in my queryset
     8:09am figured out how null is used with annotate and ordering

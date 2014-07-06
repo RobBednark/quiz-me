@@ -1,6 +1,9 @@
 DB_NAME=quizme
 DB_USER=quizme
 
+create_superuser:
+	./manage.py createsuperuser --noinput --email rbednark@gmail.com
+
 createdb: 
 	createdb --username=${DB_USER} ${DB_NAME}
 
@@ -10,7 +13,7 @@ dropdb:
 migrate:
 	./manage.py migrate
 
-recreatedb: dropdb createdb syncdb migrate
+recreatedb: dropdb createdb syncdb migrate create_superuser
 
 recreate_migrations:
 	rm -fr questions/migrations

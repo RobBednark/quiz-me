@@ -29,20 +29,31 @@ def next_question(user):
 
     # Find all the tags that the user has selected
     user_tags = UserTag.objects.filter(user=user, enabled=True)
-    # Find all the questions associated with selected tags
-    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags).select_related('question')
+    # Find all the QuestionTag's that the user selected that are  associated with selected tags
+    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags)
+    # Also get the questions so that we don't need to do additional queries
+    question_tags = question_tags.select_related('question')
+
     # Find the newest attempt for each question.
-    # If a question doesn't have any attempts, then the newest attempt will be None.
-    #question_tags = question_tags.annotate(newest_attempt=Max('question__attempt_set__datetime_added'))
     question_tags = question_tags.annotate(attempt_newest=Max('question__attempt__datetime_added'))
-    # Find the oldest attempt of all the newest attempts
-    # Note that None (no attempt) for a question should count older than a question with an
-    # attempt.
-    #question_tags = question_tags.extra(select={'null_ordering': 'question_attemp'})
-    # order_by defaults to ascending order (oldest to newest dates)
-    question_tags = question_tags.order_by('attempt_newest')
-    question = question_tags[0].question if question_tags else None
-    return question
+
+    # First look for questions without any attempts, ordered oldest to newest.
+    question_tags_no_attempt = question_tags.filter(attempt_newest=None).order_by('question__datetime_added')
+    # If there is a question with no attempts, then use that one.
+    if question_tags_no_attempt:
+        # This will be the question with the oldest datetime_added
+        question = question_tags_no_attempt[0].question
+        return question
+    else:
+        # Assert: there are no questions with no attempts
+        # Find the oldest attempt of all the newest attempts
+        # Note that None (no attempt) for a question should count older than a question with an
+        # attempt.
+        #question_tags = question_tags.extra(select={'null_ordering': 'question_attemp'})
+        # order_by defaults to ascending order (oldest to newest dates)
+        question_tags = question_tags.order_by('attempt_newest')
+        question = question_tags[0].question if question_tags else None
+        return question
 
 
     #questions = Question.objects.filter(id__in=[qtag.question for qtag in question_tags])
