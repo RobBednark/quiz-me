@@ -9,6 +9,20 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Tue 7/8/14 8:30am
+    8:30am Added questions yesterday.  Tried running it now, and got this error:
+        Errors:
+        hidden_question_id
+        This field is required.
+        (note that no tags were selected)
+      and then on the next page this error:
+        Exception Type: ValidationError
+        Exception Value:    
+        [u'ManagementForm data is missing or has been tampered with']
+        Exception Location: /Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/forms/formsets.py in management_form, line 89
+
+    I then went back to the home page and now it is working.  There might be an issue with having no tags selected to selecting some tags.
+
 Sun 7/6/14 1:33pm
     1:52pm WORKING!  Got it working:
         - can select tags for which questions to ask
@@ -691,6 +705,7 @@ Mon 9/16/13
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
 o postgres backups (via Makefile)
 o ability to change tags for the question shown
 o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
