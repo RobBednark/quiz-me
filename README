@@ -695,6 +695,8 @@ o postgres backups (via Makefile)
 o ability to change tags for the question shown
 o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
 o deploy to heroku
+o add documentation for other users to use
+o display url's as clickable url's (href's)
 o Import (import questions via csv / json / yaml / python data structure)
 o Export (export questions via csv / json / yaml / python data structure / plain text)
 o Questions (add questions from the web page instead of the admin)
