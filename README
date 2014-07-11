@@ -9,6 +9,10 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 7/11/14 7:12am
+    7:12am discovered that django-wysywig and django-tinymce store in html format; I'm thinking I might want markdown instead; markdown options:
+        django-markdown
+        Howard mentioned there there is a program to convert from any format to any other.
 Thu 7/10/14 8:30am
     8:30am working on learn_django-wysiwyg
 Wed 7/9/14 5:27pm
