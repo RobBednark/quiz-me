@@ -814,6 +814,9 @@ o add an inline in the admin to edit the answer for a given question
 o ability to change tags for the question shown
 o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
 o deploy to heroku
+o 7/14/14 - add a "SKIP" button to skip a question
+o 7/14/14 - capture the elapsed time that it took the user to reply
+o 7/14/14 - show all questions/answers for given tags on a single page
 o add documentation for other users to use
 o display url's as clickable url's (href's)
 o Import (import questions via csv / json / yaml / python data structure)
