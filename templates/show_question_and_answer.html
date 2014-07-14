@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% load markdown_deux_tags %}
 
 {% block content %}
 	<head>
+        {{ form.media }}
 		<title>Quiz</title>
 		<meta url-encoding="utf-8" />
 	</head>
@@ -12,20 +14,20 @@
 
             <div class="fieldWrapper">
                 Correct Answer:
-                {{ answer.answer }}
+                {{ answer.answer|markdown }}
                 <p>
             </div>
 
             <div class="fieldWrapper">
                 Your answer:
-                {{ attempt.attempt }}
+                {{ attempt.attempt|markdown }}
                 <p>
                 <p>
             </div>
 
             <div class="fieldWrapper">
                 Q: 
-                {{ question.question }}
+                {{ question.question|markdown }}
             </div>
 
             {% if form_attempt.errors %}

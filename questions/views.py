@@ -4,8 +4,6 @@ from django.db.models import Max, Min
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.views.generic.base import TemplateView
-from django.views.generic.edit import FormView
 
 from .forms import FormAttempt
 from .models import Attempt, Question, QuestionTag, Tag, User, UserTag

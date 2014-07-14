@@ -9,6 +9,96 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 7/13/14 1:45pm
+    3:41pm started vstudy page
+    3:41pm Adding Selenium questions
+    2:00pm started working on adding clicking on tag on Selenium tests; figuring out how to select the tag checkboxes with Selenium
+    1:45pm BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
+    1:45pm markdown is working for questions, answers, and attempts
+Sat 7/12/14 5:56pm
+    7:59pm Add django
+    7:54pm DONE: First of all, make the question a django-markdown field in the admin
+    7:40pm Now add django-markdown to quizme
+        DONE 1) pip install django-pagedown
+        DONE 2) add "pagedown" to INSTALLED_APPS
+        DONE 3) python manage.py collectstatic --noinput
+            (need to set STATIC_ROOT in settings.py)
+        DONE 4) in forms.py:
+                from pagedown.widgets import PagedownWidget
+                subject = forms.CharField(max_length=100, required=False, widget=PagedownWidget())
+        DONE 5) in template:
+               {{ form.media }}
+        DONE 6) in admin.py:
+            To add it to all TextField's for a given model:
+                from django.contrib import admin
+                from django.db import models
+                from pagedown.widgets import AdminPagedownWidget
+                class FooModelAdmin(models.ModelAdmin):
+                    formfield_overrides = {
+                            models.TextField: {'widget': AdminPagedownWidget },
+                        }
+                admin.site.register(FooModel, FooModelAdmin)
+    7) to display markdown as html:
+        DONE a) pip install django-markdown-deux
+        DONE b) INSTALLED_APPS: add "markdown_deux",
+        c) in the template:
+
+        {% extends 'base.html' %}
+        {% load markdown_deux_tags %}
+
+        ...
+        <p>{{ entry.body|markdown }}</p>
+        ...
+    7:06pm get django-markdown working for displaying markdown
+    6:58pm I got django-markdown working in both template and in Django Admin
+    5:57pm add editor to Django Admin
+    5:57pm look at markdown in the db or admin
+    5:56pm example markdown
+This is my subject
+**bold**
+*italics*
+[enter link description here][1]
+
+> quoted
+
+    code line 1
+    code line 2
+
+
+1. list item 1
+1. list item 2
+
+one
+two
+
+
+- bullet 1
+- bullet 2
+
+
+----------
+after hrule
+
+![picture][2]
+
+
+  [1]: http://google.com "this is a link to Google"
+  [2]: http://www.zastavki.com/pictures/1920x1200/2010/Nature_Forest_Beauty_of_the_forest_024927_.jpg
+
+Sat 7/12/14 9:12am
+    9:28am LEFT OFF: learn_django-pagedown -- now add to template
+    9:12am working on learn_django-pagedown
+    9:12am I'm choosing django-pagedown; older; popular Irish guy; doc looks slightly better; fewer participants though; can always change out later
+Fri 7/11/14 5:37pm
+    5:56pm markdown options:
+        django-pagedown v0.1.0 113 watchers; 27 forks; initial commit 4/20/12; timmyomahonny (21k on stackoverflow); 4 results on stackoverflow "django-pagedown"
+            preview box
+        django-markdown v0.6.1 97 watchers;  35 forks; more participants; initial commit 2/2/11; klen
+            preview; 1 result on stackoverflow "django-markdown"
+    5:53pm I'm just going to go with markdown
+    5:37pm Should I go with markdown or HTML?  HTML seems dangerous.
+        HTML - not safe; how about if I convert it to markdown and back again?
+        markdown - safe
 Fri 7/11/14 7:12am
     7:12am discovered that django-wysywig and django-tinymce store in html format; I'm thinking I might want markdown instead; markdown options:
         django-markdown
@@ -712,11 +802,15 @@ Tue 9/17/13
   o researching model instance versioning approaches (capturing every time an instance is modified)
 Mon 9/16/13
   o added models
+
 ================================================================================
 !TODO / Backlog
 ================================================================================
+BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
 o Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
 o postgres backups (via Makefile)
+o use a single template: combine show_question.html and show_question_and_answer.html
+o add an inline in the admin to edit the answer for a given question
 o ability to change tags for the question shown
 o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
 o deploy to heroku
@@ -781,6 +875,12 @@ o Ask a question, and then show the answer.
     4) save the user's answer, and show the correct answer, along with a Next button
     5) Next (user clicks Next to go to the next question)
     6) go to (1)
+o Example of one answer with multiple questions:
+    Q: 
+    A:
+o Example of one question with multiple answers:
+    Q: 
+    A:
 
 ================================================================================
 !Tags:

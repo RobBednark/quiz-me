@@ -1,6 +1,34 @@
-django-debug-toolbar==1.0
-Django==1.6.1
+#### from "pip freeze" 7/12/14
+Django==1.6.5
 South==0.8.4
-selenium=2.42.1
+django-debug-toolbar==1.0
+
+# email-as-username used for using email addresses as usernames
+django-email-as-username==1.6.7
+
+# markdown-deux for displaying markdown as html; import markdown_deux
+django-markdown-deux==1.0.4
+
+# django-pagedown for markdown editor; import pagedown
+django-pagedown==0.1.0
+
+# Not currently using django-versioning.  Would be used for saving versions of questions/answers.
+django-versioning==0.7.4
+
+# djangorestframework
+djangorestframework==2.3.8
+
+ipdb==0.8
+ipython==1.1.0
+psycopg2==2.5.2
+
+# selenium is used for browser testing
+selenium==2.42.1
+
 # splinter is an interface to facilitate browser testing
 splinter==0.6.0
+
+# What is sqlparse used for?
+sqlparse==0.1.10
+
+wsgiref==0.1.2

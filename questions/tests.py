@@ -128,8 +128,25 @@ class BrowserTests(LiveServerTestCase):
         self._assert_no_questions()
 
         # Now select a tag
+        import pdb; pdb.set_trace()
+        pass
 
         # Assert that a question is shown
+
+    def test_confirm_tags_can_be_selected_unselected(self):
+        ''' Assert that tags enabled/disabled during questions and answers are saved and carried over.  '''
+        tag1 = Tag(name='tag1')
+        tag2 = Tag(name='tag2')
+        tag1.save()
+        tag2.save()
+
+        question1 = Question(question="question1")
+        question2 = Question(question="question2")
+        question1.save()
+        question2.save()
+
+        self._login()
+        self._assert_no_questions()
 
 class NonBrowserTests(TestCase):
     def test_next_question(self):

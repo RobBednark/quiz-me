@@ -16,7 +16,7 @@ class CreatedBy(models.Model):
 
 class Question(CreatedBy):
     question = models.TextField()
-    answer = models.ForeignKey('Answer', null=True)
+    answer = models.ForeignKey('Answer', null=True, blank=True)
     # attempt_set
     # questiontag_set
     # tag_set
