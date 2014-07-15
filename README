@@ -809,6 +809,7 @@ Mon 9/16/13
 BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
 o Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
 o postgres backups (via Makefile)
+o 7/15/14 - add admin "list_filter" setting to be able to filter by tags on questions and answers
 o use a single template: combine show_question.html and show_question_and_answer.html
 o add an inline in the admin to edit the answer for a given question
 o ability to change tags for the question shown
