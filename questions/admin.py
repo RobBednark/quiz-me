@@ -29,6 +29,7 @@ class TagAdmin(admin.ModelAdmin):
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [TagQuestionRelationshipInline]
     list_display = ['datetime_added', 'datetime_updated', 'question', 'answer']
+    # list_filter = ['',]
     formfield_overrides = {
             models.TextField: {'widget' : AdminPagedownWidget },
     }
