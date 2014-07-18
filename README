@@ -1027,7 +1027,10 @@ vim README
 ! Names:
 ================================================================================
 AskMe
+AskMeShowMe
 FlashCards
+
+LibraryOfQuestions
 
 MemoryAid
 MemoryRefresh
@@ -1040,7 +1043,9 @@ QuizMeNow / quizmenow / quiz-me-now
 
 RefreshMyMemory
 
+SoManyQuestions
 SpacedRepetition
+
 ================================================================================
 !Examples of tables
 ================================================================================
