@@ -1024,7 +1024,7 @@ cddjango
 cd learn_django-versioning_package
 vim README
 ================================================================================
-! Names:
+! Product/App Names:
 ================================================================================
 AskMe
 AskMeShowMe
@@ -1041,6 +1041,9 @@ Quizzer
 quizzical
 QuizMeNow / quizmenow / quiz-me-now
 
+Learn-Quiz-Remember
+ReadLearnQuizRemember
+ReadQuizLearnRemember
 RefreshMyMemory
 
 SoManyQuestions
