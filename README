@@ -9,6 +9,8 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 8/17/14 9:14am
+    9:14am Note that selecting tags only works for when the question is asked, and not when the answer is shown.
 Sun 7/13/14 1:45pm
     3:41pm started vstudy page
     3:41pm Adding Selenium questions
@@ -806,6 +808,7 @@ Mon 9/16/13
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o 8/17/14 enabling tags during an answer does not enable it when the next question is shown (but it does work if enabled when asking a question)
 BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
 o Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
 o postgres backups (via Makefile)
