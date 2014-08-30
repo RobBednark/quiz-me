@@ -808,6 +808,7 @@ Mon 9/16/13
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o 8/29/14 Show the tags for the question being asked/answered.
 o 8/17/14 enabling tags during an answer does not enable it when the next question is shown (but it does work if enabled when asking a question)
 BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
 o Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
