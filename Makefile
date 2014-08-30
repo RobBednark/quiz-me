@@ -1,5 +1,7 @@
+SHELL := /bin/bash
 DB_NAME=quizme
 DB_USER=quizme
+date=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
 
 create_superuser:
 	./manage.py createsuperuser --email rbednark@gmail.com
@@ -9,6 +11,11 @@ createdb:
 
 dropdb:
 	dropdb ${DB_NAME}
+
+dumpdb: 
+	mkdir -p db_dumps
+	pg_dump ${DB_NAME} > db_dumps/dump.${DB_NAME}.$(date)
+	ls -ltr db_dumps/.
 
 migrate:
 	./manage.py migrate

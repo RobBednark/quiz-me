@@ -95,6 +95,7 @@ def _create_and_get_usertags(request):
                                                 extra=0,
                                                 fields=('enabled',))
     user = request.user
+    queryset=UserTag.objects.filter(user=user).order_by('tag__name')
     if request.method == 'GET':
         # Get the user, find all the tags, and create a form for each tag.
         #        GET:
@@ -114,13 +115,13 @@ def _create_and_get_usertags(request):
                 # There isn't a tag, so create one
                 UserTag(user=user, tag=tag, enabled=False).save()
 
-        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(user=user))
+        modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
         for form in modelformset_usertag.forms:
             form.fields['enabled'].label = form.instance.tag.name
 
         return modelformset_usertag
     elif request.method == 'POST':
-        modelformset_usertag = ModelFormset_UserTag(queryset=UserTag.objects.filter(user=user), data=request.POST)
+        modelformset_usertag = ModelFormset_UserTag(queryset=queryset, data=request.POST)
         for form in modelformset_usertag.forms:
             form.fields['enabled'].label = form.instance.tag.name
 

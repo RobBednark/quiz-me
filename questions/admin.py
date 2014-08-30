@@ -25,6 +25,7 @@ class TagAdmin(admin.ModelAdmin):
     exclude = ('questions',)
     inlines = [TagQuestionRelationshipInline]
     list_display = ['datetime_added', 'datetime_updated', 'name']
+    ordering = ('name',)
 
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [TagQuestionRelationshipInline]
