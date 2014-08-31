@@ -12,7 +12,6 @@ def next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     '''
-    TODO:
         Query for all questions that contain at least one of the UserTags
         Input:
             UserTags with enabled=True
@@ -45,49 +44,10 @@ def next_question(user):
     else:
         # Assert: there are no questions with no attempts
         # Find the oldest attempt of all the newest attempts
-        # Note that None (no attempt) for a question should count older than a question with an
-        # attempt.
-        #question_tags = question_tags.extra(select={'null_ordering': 'question_attemp'})
         # order_by defaults to ascending order (oldest to newest dates)
         question_tags = question_tags.order_by('attempt_newest')
         question = question_tags[0].question if question_tags else None
         return question
-
-
-    #questions = Question.objects.filter(id__in=[qtag.question for qtag in question_tags])
-    #questions = questions.annotate()
-    # questions = Question.objects.filter(question__in=question_tags)
-    # Select all questions with QuestionTag's that the user has enabled=True
-    # Of those questions, get the question with the oldest attempt datetime_added
-    # If a question has no attempts, consider that the oldest.
-    # Find the oldest_attempt for each question.
-    # Get the Min(oldest_attempt)
-    # Need to use aggregation and either Max() or Min() function
-
-
-    ### Previous code, which is being replaced by code above:
-    try:
-        last_attempt = Attempt.objects.filter(user=user).latest(field_name='datetime_added')
-    except ObjectDoesNotExist:
-        last_attempt = None
-
-    if last_attempt:
-        last_question = last_attempt.question
-        next_question_id = last_question.id + 1
-        try:
-            # TODO: instead of doing a get() on the id, do a query >= last_attempt.datetime_added and get the next one in the list
-            next_question = Question.objects.get(id=next_question_id)
-        except ObjectDoesNotExist:
-            next_question = Question.objects.earliest(field_name='datetime_added')
-    else:
-        # User has never answered a question
-        try:
-            next_question = Question.objects.earliest(field_name='datetime_added')
-        except ObjectDoesNotExist:
-            next_question = None
-    return next_question
-
-
 
 
 def _create_and_get_usertags(request):
