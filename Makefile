@@ -31,7 +31,7 @@ loaddb: dumpdb
 	psql --command="CREATE DATABASE ${DB_NAME_RESTORE_CUSTOM}"
 	psql --command="CREATE DATABASE ${DB_NAME_RESTORE_PLAIN}"
 	pg_restore --dbname=${DB_NAME_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
-	psql --dbname=${DB_NAME_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN}
+	psql --dbname=${DB_NAME_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN} > /tmp/psql.stdout
 
 migrate:
 	./manage.py migrate
