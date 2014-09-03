@@ -86,3 +86,19 @@ class UserTag(models.Model):
     user = models.ForeignKey(User)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
+
+#class Schedule(models.Model):
+#    CHOICES_UNITS = ("seconds",
+#                     "minutes",
+#                     "hours",
+#                     "days",
+#                     "weeks",
+#                     "months",
+#                     "years")
+#    date_added = models.DateTimeField(auto_now=True)
+#    date_show = models.DateTimeField()  # when to show the question next
+#    interval_num = models.DecimalField(max_digits=5, decimal_places=2)
+#    interval_unit = models.TextField(choices=CHOICES_UNITS)
+#    interval_secs = models.IntegerField()
+#    question = models.ForeignKey(Question)
+#    user = models.ForeignKey(User)

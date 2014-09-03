@@ -1,6 +1,11 @@
 SHELL := /bin/bash
 DB_NAME=quizme
+DB_NAME_RESTORE_CUSTOM=restore_quizme_custom
+DB_NAME_RESTORE_PLAIN=restore_quizme_plain
 DB_USER=quizme
+DIR_DUMPS=db_dumps
+FILE_DUMP_CUSTOM=${DIR_DUMPS}/dump.${DB_NAME}.$(date).custom
+FILE_DUMP_PLAIN=${DIR_DUMPS}/dump.${DB_NAME}.$(date).plain
 date=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
 
 create_superuser:
@@ -14,8 +19,19 @@ dropdb:
 
 dumpdb: 
 	mkdir -p db_dumps
-	pg_dump ${DB_NAME} > db_dumps/dump.${DB_NAME}.$(date)
+	pg_dump --format=custom ${DB_NAME} > ${FILE_DUMP_CUSTOM}
+	pg_dump --format=plain ${DB_NAME} > ${FILE_DUMP_PLAIN}
+	#pg_dump ${DB_NAME} > db_dumps/dump.${DB_NAME}.$(date).custom
 	ls -ltr db_dumps/.
+
+loaddb: dumpdb
+	# Load the dumps into new db's to test them
+	echo psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_CUSTOM}"
+	echo psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_PLAIN}"
+	echo psql --command="CREATE DATABASE ${DB_NAME_RESTORE_CUSTOM}"
+	echo psql --command="CREATE DATABASE ${DB_NAME_RESTORE_PLAIN}"
+	echo pg_restore --dbname=${DB_NAME_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
+	echo psql --dbname=${DB_NAME_RESTORE_PLAIN} ${FILE_DUMP_PLAIN}
 
 migrate:
 	./manage.py migrate
