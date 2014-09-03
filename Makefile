@@ -26,12 +26,12 @@ dumpdb:
 
 loaddb: dumpdb
 	# Load the dumps into new db's to test them
-	echo psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_CUSTOM}"
-	echo psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_PLAIN}"
-	echo psql --command="CREATE DATABASE ${DB_NAME_RESTORE_CUSTOM}"
-	echo psql --command="CREATE DATABASE ${DB_NAME_RESTORE_PLAIN}"
-	echo pg_restore --dbname=${DB_NAME_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
-	echo psql --dbname=${DB_NAME_RESTORE_PLAIN} ${FILE_DUMP_PLAIN}
+	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_CUSTOM}"
+	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_PLAIN}"
+	psql --command="CREATE DATABASE ${DB_NAME_RESTORE_CUSTOM}"
+	psql --command="CREATE DATABASE ${DB_NAME_RESTORE_PLAIN}"
+	pg_restore --dbname=${DB_NAME_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
+	psql --dbname=${DB_NAME_RESTORE_PLAIN} ${FILE_DUMP_PLAIN}
 
 migrate:
 	./manage.py migrate
