@@ -4,9 +4,9 @@ DB_NAME_RESTORE_CUSTOM=restore_quizme_custom
 DB_NAME_RESTORE_PLAIN=restore_quizme_plain
 DB_USER=quizme
 DIR_DUMPS=db_dumps
-date=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
-FILE_DUMP_CUSTOM=${DIR_DUMPS}/dump.${DB_NAME}.${date}.custom
-FILE_DUMP_PLAIN=${DIR_DUMPS}/dump.${DB_NAME}.${date}.plain
+date:=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
+FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.custom
+FILE_DUMP_PLAIN:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.plain
 
 create_superuser:
 	./manage.py createsuperuser --email rbednark@gmail.com
