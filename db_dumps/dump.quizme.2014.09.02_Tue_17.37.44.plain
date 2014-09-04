@@ -1018,6 +1018,27 @@ COPY django_admin_log (id, action_time, user_id, content_type_id, object_id, obj
 189	2014-08-29 15:01:04.252606-07	1	9	79	<Question question=[How do you tell nosetests to run all the tests that failed in the last test run?] datetime_added=[2014-08-29 22:01:04.241332+00:00]>	1	
 190	2014-08-29 17:28:27.160997-07	1	9	80	<Question question=[For the Elzar behavioral tests, where is the `self.get_api()` method defined?] datetime_added=[2014-08-30 00:28:27.138865+00:00]>	1	
 192	2014-08-29 17:33:42.275489-07	1	9	80	<Question question=[For the Elzar behavioral tests, where is the `self.get_api()` method defined?] datetime_added=[2014-08-30 00:28:27.138865+00:00]>	2	Changed answer.
+193	2014-08-29 17:47:28.053095-07	1	10	66	<Answer answer=[    elzar.client.APIClient.users()] datetime_added=[2014-08-30 00:47:28.046669+00:00]>	1	
+194	2014-08-29 17:47:31.56572-07	1	9	81	<Question question=[In the following Elzar test code, where is `api.users()` defined?\r\n\r\n    def test_walk(self):\r\n        org = self.standard_org(1)\r\n        api = self.get_api(org.testusers['admin1'	1	
+195	2014-08-29 18:11:59.640448-07	1	10	56	<Answer answer=[    CREATE TEMP TABLE tmp_rob_feeds \r\n        AS SELECT * FROM feeds WHERE feed_url ILIKE '%beautyandwell%';] datetime_added=[2014-08-19 17:42:36.661888+00:00]>	2	Changed answer.
+196	2014-08-29 18:36:58.035047-07	1	10	67	<Answer answer=[It selects all distinct names.  If there are multiple rows with a given name, only one instance of that name will be returned.] datetime_added=[2014-08-30 01:36:58.029804+00:00]>	1	
+197	2014-08-29 18:37:01.140453-07	1	9	82	<Question question=[What does the following query do:\r\n    SELECT DISTINCT name FROM my_table;] datetime_added=[2014-08-30 01:37:01.126626+00:00]>	1	
+198	2014-08-29 18:42:56.917129-07	1	10	68	<Answer answer=[    SELECT DISTINCT name, COUNT(name)\r\n        FROM my_table\r\n        GROUP BY name\r\n        ORDER BY count DESC;] datetime_added=[2014-08-30 01:42:56.910570+00:00]>	1	
+199	2014-08-29 18:42:59.615718-07	1	9	83	<Question question=[Create a query to find the number of rows for each "name".] datetime_added=[2014-08-30 01:42:59.602250+00:00]>	1	
+200	2014-08-31 19:56:22.823462-07	1	13	28	software applications	1	
+201	2014-08-31 19:57:10.3516-07	1	10	69	<Answer answer=[1. RollerCoaster Tycoon\r\n1. developed by Chris Sawyer\r\n1. released in 1999] datetime_added=[2014-09-01 02:57:10.346901+00:00]>	1	
+202	2014-08-31 19:57:15.752089-07	1	9	84	<Question question=[Which popular video game was written by a single developer in assembly?\r\n\r\n1. name of the game?\r\n1. name of the developer?\r\n1. year released?] datetime_added=[2014-09-01 02:57:15.7	1	
+203	2014-08-31 19:57:32.075259-07	1	13	28	software apps	2	Changed name.
+204	2014-09-02 10:34:39.33722-07	1	13	29	elzar	1	
+205	2014-09-02 10:35:50.653757-07	1	10	70	<Answer answer=[`selector` is the package written and open-sourced by Luke which does WSGI request delegation / routing.\r\n\r\n[https://github.com/lukearno/selector][1]\r\n\r\n\r\n  [1]: https://github.com/luk	1	
+206	2014-09-02 10:46:02.042441-07	1	9	85	<Question question=[What is `selector` in Elzar?] datetime_added=[2014-09-02 17:46:02.031045+00:00]>	1	
+207	2014-09-02 11:47:12.470363-07	1	13	30	val	1	
+208	2014-09-02 11:54:39.614905-07	1	10	71	<Answer answer=[It allows you to add 0 or more optional fields that can be anything.  This means that only the fields that you specify will be validated, and other fields will just be ignored.\r\n\r\n    	1	
+209	2014-09-02 11:54:44.093128-07	1	9	86	<Question question=[In `val`, what is the effect of adding `object : object` into a schema?  \r\ne.g.,\r\n\r\n    from val import Schema\r\n    \r\n    schema = Schema({'foo' : str, object : object})] datetime_	1	
+210	2014-09-02 17:32:58.959847-07	1	13	31	make	1	
+211	2014-09-02 17:34:45.456231-07	1	10	72	<Answer answer=[`:=` expands the variable now, and `=` just holds the syntax and expands it later.] datetime_added=[2014-09-03 00:34:45.449697+00:00]>	1	
+212	2014-09-02 17:34:49.280259-07	1	9	87	<Question question=[In a makefile, what is the difference between:  \r\n\r\n    my_variable=$(shell date)\r\n\r\nand:  \r\n\r\n    my_variable:=$(shell date)\r\n\r\n] datetime_added=[2014-09-03 00:34:49.240459+00:00]	1	
+213	2014-09-02 17:35:50.985419-07	1	10	72	<Answer answer=[`:=` expands the variable now, and `=` just holds the syntax and expands it later.\r\n\r\n[http://stackoverflow.com/questions/10024279/how-to-use-shell-commands-in-makefile][1]\r\n\r\n\r\n  [1]:	2	Changed answer.
 \.
 
 
@@ -1025,7 +1046,7 @@ COPY django_admin_log (id, action_time, user_id, content_type_id, object_id, obj
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quizme
 --
 
-SELECT pg_catalog.setval('django_admin_log_id_seq', 192, true);
+SELECT pg_catalog.setval('django_admin_log_id_seq', 213, true);
 
 
 --
@@ -1160,10 +1181,10 @@ COPY questions_answer (id, datetime_added, datetime_updated, user_id, answer) FR
 50	2014-08-12 21:13:26.331715-07	2014-08-12 21:13:26.331747-07	1	`GNU Readline Library` is used for editing.  To set to vi:\r\n\r\n    set editing-mode vi\r\n\r\n\r\nhttp://www.postgresql.org/docs/9.2/static/app-psql.html\r\nhttp://cnswww.cns.cwru.edu/php/chet/readline/readline.html
 51	2014-08-12 23:14:21.974396-07	2014-08-12 23:14:21.974432-07	1	    -- double dashes for a single line comment\r\n    \r\n    /*\r\n      for a multiline comment,\r\n      use the slash and asterisk\r\n    */
 52	2014-08-13 14:48:06.372528-07	2014-08-13 14:48:06.372568-07	1	    SELECT feed_url,count(feed_url) FROM feeds GROUP BY feed_url HAVING count(feed_url) > 1;
+71	2014-09-02 11:54:39.608317-07	2014-09-02 11:54:39.608347-07	1	It allows you to add 0 or more optional fields that can be anything.  This means that only the fields that you specify will be validated, and other fields will just be ignored.\r\n\r\n    >>> schema = Schema({object:object})\r\n    >>> schema.validate({'foo':'bar'})\r\n    {'foo': 'bar'}\r\n\r\n    >>> schema2 = Schema({'rob': str, object:object})\r\n    >>> schema2.validate({'rob' : 'bednark'})\r\n    {'rob': 'bednark'}\r\n    >>> schema2.validate({'rob' : 'bednark', 1:3})\r\n    {1: 3, 'rob': 'bednark'}\r\n    >>> schema2.validate({'rob' : 'bednark', 1:3, 2:4})\r\n    {1: 3, 'rob': 'bednark', 2: 4}\r\n    >>> schema2.validate({1:3})\r\n    Traceback...\r\n    ...\r\n    val.NotValid: missing key: 'rob'\r\n    \r\n    >>> schema3 = Schema({'rob': str})\r\n    >>> schema3.validate({'rob':'bednark'})\r\n    {'rob': 'bednark'}\r\n    >>> schema3.validate({'rob':'bednark', 1:3})\r\n    Traceback (most recent call last):\r\n    ...\r\n     val.NotValid: 1: 3 not matched
 53	2014-08-19 08:04:50.466508-07	2014-08-19 08:04:50.46655-07	1	Paraphrase:  there must only be one possible value to return for an ungrouped column (e.g., a primary key of the table containing the ungrouped column).\r\n\r\n> Aggregate functions, if any are used, are computed across all rows\r\n> making up each group, producing a separate value for each group\r\n> (whereas without GROUP BY, an aggregate produces a single value\r\n> computed across all the selected rows).\r\n> \r\n> When GROUP BY is present, it is not valid for the SELECT list\r\n> expressions to refer to ungrouped columns except within aggregate\r\n> functions or if the ungrouped column is functionally dependent on the\r\n> grouped columns, since there would otherwise be more than one possible\r\n> value to return for an ungrouped column. A functional dependency\r\n> exists if the grouped columns (or a subset thereof) are the primary\r\n> key of the table containing the ungrouped column.\r\n\r\n[http://www.postgresql.org/docs/9.1/static/sql-select.html#SQL-GROUPBY][1]\r\n[http://stackoverflow.com/questions/22788073/why-is-postgres-allowing-me-have-columns-not-in-the-group-by][2]\r\n\r\n\r\n  [1]: http://www.postgresql.org/docs/9.1/static/sql-select.html#SQL-GROUPBY\r\n  [2]: http://stackoverflow.com/questions/22788073/why-is-postgres-allowing-me-have-columns-not-in-the-group-by
 54	2014-08-19 08:09:12.34394-07	2014-08-19 08:09:12.343978-07	1	It means to group by the first column regardless of what it's called. You can do the same with ORDER BY.\r\n\r\ne.g., \r\n\r\n    SELECT id FROM orgs GROUP BY 1;\r\n\r\n[http://stackoverflow.com/questions/7392730/what-does-sql-group-by-clause-group-by-1-mean][1]\r\n\r\n\r\n  [1]: http://stackoverflow.com/questions/7392730/what-does-sql-group-by-clause-group-by-1-mean
 55	2014-08-19 08:26:43.325364-07	2014-08-19 08:26:43.325396-07	1	combine\r\n\r\nag·gre·gate  \r\nnoun  \r\nˈagrigit/  \r\n\r\n1. a whole formed by combining several (typically disparate) elements.\r\n"the council was an aggregate of three regional assemblies"\r\n2. a material or structure formed from a loosely compacted mass of fragments or particles.\r\nsynonyms:\tcollection, mass, agglomeration, conglomerate, assemblage; More\r\npieces of broken or crushed stone or gravel used to make concrete, or more generally in building and construction work.\r\n\r\nadjective\r\n\r\n1. formed or calculated by the combination of many separate units or items; total.\r\n"the aggregate amount of grants made"\r\nsynonyms:\ttotal, combined, gross, overall, composite\r\n"an aggregate score"\r\nBOTANY\r\n(of a group of species) comprising several very similar species formerly regarded as a single species.\r\nECONOMICS\r\ndenoting the total supply or demand for goods and services in an economy at a particular time.\r\n"aggregate demand"\r\n\r\nverb  \r\n3rd person present: aggregates; past tense: aggregated; past participle: aggregated; gerund or present participle: aggregating  \r\n-ˌgāt/  \r\n1. form or group into a class or cluster.\r\n"the butterflies aggregate in dense groups"
-56	2014-08-19 10:42:36.661888-07	2014-08-19 10:42:36.661921-07	1	    CREATE TEMP TABLE tmp_rob_feeds AS SELECT * FROM feeds WHERE feed_url ILIKE '%beautyandwell%';
 57	2014-08-19 10:49:04.261565-07	2014-08-19 10:49:04.261598-07	1	    ALTER TABLE my_table DROP COLUMN my_column;
 58	2014-08-19 11:34:48.937928-07	2014-08-19 11:34:48.937959-07	1	gUw\r\n\r\nFrom ":help gU":\r\n\r\n> gU{motion}        => make Nmove text uppercase
 59	2014-08-19 12:09:14.598874-07	2014-08-19 12:09:14.598907-07	1	Note that zoidberg uses `feedparser` which is a PyPI package, and `bozo` is a flag that is set on the output from feedparser.\r\n\r\n> Universal Feed Parser can parse feeds whether they are well-formed XML\r\n> or not. However, since some applications may wish to reject or warn\r\n> users about non-well-formed feeds, Universal Feed Parser sets the bozo\r\n> bit when it detects that a feed is not well-formed.\r\n\r\n[https://pythonhosted.org/feedparser/bozo.html][1]\r\n\r\n\r\n  [1]: https://pythonhosted.org/feedparser/bozo.html
@@ -1174,6 +1195,13 @@ COPY questions_answer (id, datetime_added, datetime_updated, user_id, answer) FR
 28	2014-07-22 17:25:05.858524-07	2014-08-25 15:14:01.723825-07	1	> The SQLAlchemy Expression Language presents a system of representing\r\n> relational database structures and expressions using Python\r\n> constructs. These constructs are modeled to resemble those of the\r\n> underlying database as closely as possible, while providing a modicum\r\n> of abstraction of the various implementation differences between\r\n> database backends. While the constructs attempt to represent\r\n> equivalent concepts between backends with consistent structures, they\r\n> do not conceal useful concepts that are unique to particular subsets\r\n> of backends. The Expression Language therefore presents a method of\r\n> writing backend-neutral SQL expressions, but does not attempt to\r\n> enforce that expressions are backend-neutral.\r\n> \r\n> The Expression Language is in contrast to the Object Relational\r\n> Mapper, which is a distinct API that builds on top of the Expression\r\n> Language. Whereas the ORM, introduced in Object Relational Tutorial,\r\n> presents a high level and abstracted pattern of usage, which itself is\r\n> an example of applied usage of the Expression Language, the Expression\r\n> Language presents a system of representing the primitive constructs of\r\n> the relational database directly without opinion.\r\n> \r\n> While there is overlap among the usage patterns of the ORM and the\r\n> Expression Language, the similarities are more superficial than they\r\n> may at first appear. One approaches the structure and content of data\r\n> from the perspective of a user-defined domain model which is\r\n> transparently persisted and refreshed from its underlying storage\r\n> model. The other approaches it from the perspective of literal schema\r\n> and SQL expression representations which are explicitly composed into\r\n> messages consumed individually by the database.\r\n> \r\n> A successful application may be constructed using the Object\r\n> Relational Mapper exclusively. In advanced situations, an application\r\n> constructed with the ORM may make occasional usage of the Expression\r\n> Language directly in certain areas where specific database\r\n> interactions are required.\r\n\r\n[http://docs.sqlalchemy.org/en/latest/core/tutorial.html][1]\r\n\r\n\r\n  [1]: http://docs.sqlalchemy.org/en/latest/core/tutorial.html
 64	2014-08-29 15:00:59.987822-07	2014-08-29 15:00:59.98786-07	1	    nosetests --failed
 65	2014-08-29 17:33:38.805616-07	2014-08-29 17:33:38.805654-07	1	    tests.__init__.ElzarTestCase.get_api()
+66	2014-08-29 17:47:28.046669-07	2014-08-29 17:47:28.0467-07	1	    elzar.client.APIClient.users()
+56	2014-08-19 10:42:36.661888-07	2014-08-29 18:11:59.631139-07	1	    CREATE TEMP TABLE tmp_rob_feeds \r\n        AS SELECT * FROM feeds WHERE feed_url ILIKE '%beautyandwell%';
+67	2014-08-29 18:36:58.029804-07	2014-08-29 18:36:58.029842-07	1	It selects all distinct names.  If there are multiple rows with a given name, only one instance of that name will be returned.
+68	2014-08-29 18:42:56.91057-07	2014-08-29 18:42:56.910602-07	1	    SELECT DISTINCT name, COUNT(name)\r\n        FROM my_table\r\n        GROUP BY name\r\n        ORDER BY count DESC;
+69	2014-08-31 19:57:10.346901-07	2014-08-31 19:57:10.346935-07	1	1. RollerCoaster Tycoon\r\n1. developed by Chris Sawyer\r\n1. released in 1999
+70	2014-09-02 10:35:50.648244-07	2014-09-02 10:35:50.648277-07	1	`selector` is the package written and open-sourced by Luke which does WSGI request delegation / routing.\r\n\r\n[https://github.com/lukearno/selector][1]\r\n\r\n\r\n  [1]: https://github.com/lukearno/selector
+72	2014-09-02 17:34:45.449697-07	2014-09-02 17:35:50.981652-07	1	`:=` expands the variable now, and `=` just holds the syntax and expands it later.\r\n\r\n[http://stackoverflow.com/questions/10024279/how-to-use-shell-commands-in-makefile][1]\r\n\r\n\r\n  [1]: http://stackoverflow.com/questions/10024279/how-to-use-shell-commands-in-makefile
 \.
 
 
@@ -1181,7 +1209,7 @@ COPY questions_answer (id, datetime_added, datetime_updated, user_id, answer) FR
 -- Name: questions_answer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quizme
 --
 
-SELECT pg_catalog.setval('questions_answer_id_seq', 65, true);
+SELECT pg_catalog.setval('questions_answer_id_seq', 72, true);
 
 
 --
@@ -1270,6 +1298,14 @@ COPY questions_attempt (id, datetime_added, datetime_updated, user_id, attempt, 
 79	2014-08-26 17:08:53.554393-07	2014-08-26 17:08:53.554427-07	1		58
 80	2014-08-26 17:09:18.747385-07	2014-08-26 17:09:18.747416-07	1		59
 81	2014-08-26 17:09:40.737323-07	2014-08-26 17:09:40.737382-07	1	combine	60
+82	2014-08-29 18:11:09.751644-07	2014-08-29 18:11:09.751702-07	1	    CREATE TEMP TABLE my_table AS\r\n      SELECT * FROM other_table;	61
+83	2014-08-29 18:12:25.757234-07	2014-08-29 18:12:25.757283-07	1	DROP COLUMN my_column FROM my_table;	62
+84	2014-08-29 18:13:23.069071-07	2014-08-29 18:13:23.069103-07	1	gUw	63
+85	2014-08-29 18:17:06.81379-07	2014-08-29 18:17:06.813848-07	1	It is a boolean variable returned by feedparser indicating if the feed is malformed.	64
+86	2014-08-29 18:17:49.480732-07	2014-08-29 18:17:49.480763-07	1	poll_stats indicates the last 10 polls of a feed.  For each poll it indicates the return code, the date, and ___.	65
+87	2014-08-29 18:18:07.853793-07	2014-08-29 18:18:07.853826-07	1	\\pset NULL __null__	66
+88	2014-08-29 18:18:19.57869-07	2014-08-29 18:18:19.578724-07	1		67
+89	2014-08-29 18:18:35.512316-07	2014-08-29 18:18:35.512349-07	1	!c = 3	68
 \.
 
 
@@ -1277,7 +1313,7 @@ COPY questions_attempt (id, datetime_added, datetime_updated, user_id, attempt, 
 -- Name: questions_attempt_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quizme
 --
 
-SELECT pg_catalog.setval('questions_attempt_id_seq', 81, true);
+SELECT pg_catalog.setval('questions_attempt_id_seq', 89, true);
 
 
 --
@@ -1380,6 +1416,13 @@ COPY questions_question (id, datetime_added, datetime_updated, user_id, question
 78	2014-08-26 12:49:27.443576-07	2014-08-26 12:49:27.443607-07	1	Visit: [http://www.quora.com/What-are-5-essential-skills-any-Web-Developer-should-have][1]\r\n\r\n\r\n  [1]: http://www.quora.com/What-are-5-essential-skills-any-Web-Developer-should-have	\N
 79	2014-08-29 15:01:04.241332-07	2014-08-29 15:01:04.241364-07	1	How do you tell nosetests to run all the tests that failed in the last test run?	64
 80	2014-08-29 17:28:27.138865-07	2014-08-29 17:33:42.267249-07	1	For the Elzar behavioral tests, where is the `self.get_api()` method defined?	65
+81	2014-08-29 17:47:31.530374-07	2014-08-29 17:47:31.530426-07	1	In the following Elzar test code, where is `api.users()` defined?\r\n\r\n    def test_walk(self):\r\n        org = self.standard_org(1)\r\n        api = self.get_api(org.testusers['admin1'])\r\n        resp = api.users()	66
+82	2014-08-29 18:37:01.126626-07	2014-08-29 18:37:01.126658-07	1	What does the following query do:\r\n    SELECT DISTINCT name FROM my_table;	67
+83	2014-08-29 18:42:59.60225-07	2014-08-29 18:42:59.60228-07	1	Create a query to find the number of rows for each "name".	68
+84	2014-08-31 19:57:15.738346-07	2014-08-31 19:57:15.738384-07	1	Which popular video game was written by a single developer in assembly?\r\n\r\n1. name of the game?\r\n1. name of the developer?\r\n1. year released?	69
+85	2014-09-02 10:46:02.031045-07	2014-09-02 10:46:02.031076-07	1	What is `selector` in Elzar?	70
+86	2014-09-02 11:54:44.079917-07	2014-09-02 11:54:44.079949-07	1	In `val`, what is the effect of adding `object : object` into a schema?  \r\ne.g.,\r\n\r\n    from val import Schema\r\n    \r\n    schema = Schema({'foo' : str, object : object})	71
+87	2014-09-02 17:34:49.240459-07	2014-09-02 17:34:49.240492-07	1	In a makefile, what is the difference between:  \r\n\r\n    my_variable=$(shell date)\r\n\r\nand:  \r\n\r\n    my_variable:=$(shell date)\r\n\r\n	72
 \.
 
 
@@ -1387,7 +1430,7 @@ COPY questions_question (id, datetime_added, datetime_updated, user_id, question
 -- Name: questions_question_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quizme
 --
 
-SELECT pg_catalog.setval('questions_question_id_seq', 80, true);
+SELECT pg_catalog.setval('questions_question_id_seq', 87, true);
 
 
 --
@@ -1485,6 +1528,17 @@ COPY questions_questiontag (id, datetime_added, datetime_updated, user_id, quest
 88	2014-08-26 12:49:27.453809-07	2014-08-26 12:49:27.453845-07	1	78	27	t
 89	2014-08-29 15:01:04.246304-07	2014-08-29 15:01:04.246329-07	1	79	15	t
 90	2014-08-29 17:28:27.151244-07	2014-08-29 17:28:27.151271-07	1	80	1	t
+91	2014-08-29 17:47:31.535931-07	2014-08-29 17:47:31.535963-07	1	81	1	t
+92	2014-08-29 18:37:01.133477-07	2014-08-29 18:37:01.133511-07	1	82	13	t
+93	2014-08-29 18:42:59.608031-07	2014-08-29 18:42:59.608066-07	1	83	6	t
+94	2014-08-29 18:42:59.614998-07	2014-08-29 18:42:59.615034-07	1	83	13	t
+95	2014-08-31 19:57:15.745416-07	2014-08-31 19:57:15.745452-07	1	84	28	t
+96	2014-09-02 10:46:02.035896-07	2014-09-02 10:46:02.03593-07	1	85	1	t
+97	2014-09-02 10:46:02.041887-07	2014-09-02 10:46:02.041913-07	1	85	29	t
+98	2014-09-02 11:54:44.085656-07	2014-09-02 11:54:44.085692-07	1	86	30	t
+99	2014-09-02 11:54:44.092048-07	2014-09-02 11:54:44.092073-07	1	86	29	t
+100	2014-09-02 11:54:44.092575-07	2014-09-02 11:54:44.092599-07	1	86	1	t
+101	2014-09-02 17:34:49.246944-07	2014-09-02 17:34:49.246981-07	1	87	31	t
 \.
 
 
@@ -1492,7 +1546,7 @@ COPY questions_questiontag (id, datetime_added, datetime_updated, user_id, quest
 -- Name: questions_questiontag_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quizme
 --
 
-SELECT pg_catalog.setval('questions_questiontag_id_seq', 90, true);
+SELECT pg_catalog.setval('questions_questiontag_id_seq', 101, true);
 
 
 --
@@ -1542,6 +1596,10 @@ COPY questions_tag (id, datetime_added, datetime_updated, user_id, name) FROM st
 25	2014-08-26 12:37:12.310055-07	2014-08-26 12:37:12.310091-07	1	programming
 26	2014-08-26 12:42:06.768954-07	2014-08-26 12:42:06.76899-07	1	learning
 27	2014-08-26 12:49:21.200625-07	2014-08-26 12:49:21.20066-07	1	web development
+28	2014-08-31 19:56:22.818731-07	2014-08-31 19:57:32.071497-07	1	software apps
+29	2014-09-02 10:34:39.330856-07	2014-09-02 10:34:39.33089-07	1	elzar
+30	2014-09-02 11:47:12.466062-07	2014-09-02 11:47:12.466098-07	1	val
+31	2014-09-02 17:32:58.954687-07	2014-09-02 17:32:58.954723-07	1	make
 \.
 
 
@@ -1549,7 +1607,7 @@ COPY questions_tag (id, datetime_added, datetime_updated, user_id, name) FROM st
 -- Name: questions_tag_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quizme
 --
 
-SELECT pg_catalog.setval('questions_tag_id_seq', 27, true);
+SELECT pg_catalog.setval('questions_tag_id_seq', 31, true);
 
 
 --
