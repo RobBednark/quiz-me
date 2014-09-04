@@ -7,8 +7,19 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
+!Agenda/Next:
+================================================================================
+intervals:
+    - tests
+    - view
+    - template
+    DONE - model
+    DONE - postgres backups and restores
+================================================================================
 !Log/History/Diary
 ================================================================================
+Wed 9/3/14 5:18pm
+    5:18pm decide what to do next with intervals
 Sun 8/17/14 9:14am
     9:14am Note that selecting tags only works for when the question is asked, and not when the answer is shown.
 Sun 7/13/14 1:45pm
@@ -889,13 +900,6 @@ o Example of one answer with multiple questions:
 o Example of one question with multiple answers:
     Q: 
     A:
-
-================================================================================
-!Tags:
-================================================================================
-How to design tags?
-Click on each tag to toggle enable/disable it?
-Lump tags into 2 groups: those that are enabled and those that are disabled?
 
 ================================================================================
 !django-quiz

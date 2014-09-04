@@ -128,8 +128,11 @@ class BrowserTests(LiveServerTestCase):
         self._assert_no_questions()
 
         # Now select a tag
-        import pdb; pdb.set_trace()
-        pass
+
+        # TODO/LEFTOFF/NEXT:
+        # Figure out how to select a tag.
+        #import pdb; pdb.set_trace()
+        #pass
 
         # Assert that a question is shown
 
