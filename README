@@ -7,18 +7,23 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
-!Agenda/Next:
+!Agenda/Next/ToDo:
 ================================================================================
 intervals:
-    - tests
+    - change show_question_and_answer to be a form instead of a "Next Question" link
     - view
     - template
+    - tests
     DONE - model
     DONE - postgres backups and restores
+    Notes:
+        o interval to select should be shown on the answer page
+        o interval form needs to have a number input and a unit dropdown
 ================================================================================
 !Log/History/Diary
 ================================================================================
 Wed 9/3/14 5:18pm
+    5:25pm created agenda above
     5:18pm decide what to do next with intervals
 Sun 8/17/14 9:14am
     9:14am Note that selecting tags only works for when the question is asked, and not when the answer is shown.
