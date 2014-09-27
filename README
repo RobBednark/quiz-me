@@ -7,6 +7,24 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
+!How to backup Postgres database and restore
+================================================================================
+Q: How to make a backup of the database?
+A:
+make dumpdb
+    - this creates dumps in 2 different formats (plain and custom) and puts them in the db_dumps subdir with a datestamp on them, e.g.,
+        -rw-r--r--  1 rob  staff  244938 Sep 26 17:26 dump.quizme.2014.09.26_Fri_17.26.21.plain
+        -rw-r--r--  1 rob  staff  125248 Sep 26 17:26 dump.quizme.2014.09.26_Fri_17.26.21.custom
+
+Q: How to restore from a backup?
+A: 
+make loaddb
+    - this will create two databases named "restore_quizme_custom" and "restore_quizme_plain"
+      and load the dumps 
+
+Q: How to test a database loaded from a backup?
+A: 
+================================================================================
 !Agenda/Next/ToDo:
 ================================================================================
 intervals:
@@ -22,6 +40,9 @@ intervals:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 9/26/14 5:09pm
+    5:11pm NEXT: postgres backup
+    5:09pm Last time I got Postgres backups working; also created the Schedule model that is commented out
 Wed 9/3/14 5:18pm
     5:25pm created agenda above
     5:18pm decide what to do next with intervals
@@ -828,7 +849,7 @@ o 8/29/14 Show the tags for the question being asked/answered.
 o 8/17/14 enabling tags during an answer does not enable it when the next question is shown (but it does work if enabled when asking a question)
 BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
 o Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
-o postgres backups (via Makefile)
+DONE o postgres backups (via Makefile)
 o 7/15/14 - add admin "list_filter" setting to be able to filter by tags on questions and answers
 o use a single template: combine show_question.html and show_question_and_answer.html
 o add an inline in the admin to edit the answer for a given question
