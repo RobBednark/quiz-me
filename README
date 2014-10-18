@@ -851,6 +851,8 @@ o Steven Jonas
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o 10/18/14 per Steven Jonas, have a way to find other questions (or bookmarked webpages) with similar content to help form associations and new insights
+o 10/18/14 have questions that are a single webpagge to review (a url), and show the content of the webpage instead of just a link
 o 8/29/14 Show the tags for the question being asked/answered.
 o 8/17/14 enabling tags during an answer does not enable it when the next question is shown (but it does work if enabled when asking a question)
 BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
@@ -1066,7 +1068,7 @@ vim README
 ================================================================================
 ! Other similar apps
 ================================================================================
-Anki
+Anki - open source; written in Python; https://github.com/dae/anki
 Brainscape (iOS)
 Eidetic (iOS)
 Flashcards (iOS)
@@ -1079,11 +1081,13 @@ SuperMemo
 ================================================================================
 AskMe
 AskMeShowMe
+
 FlashCards
 
 LibraryOfQuestions
 
 MemoryAid
+MemoryGym
 MemoryRefresh
 MemoryRefresher
 
@@ -1100,6 +1104,16 @@ RefreshMyMemory
 SoManyQuestions
 SpacedRepetition
 
+Keywords:
+    ask
+    brain
+    flashcard
+    gym
+    memory
+    question
+    quiz
+    remember
+    spaced repetition
 ================================================================================
 !Examples of tables
 ================================================================================
