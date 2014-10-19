@@ -20,7 +20,7 @@ djangorestframework==2.3.8
 
 ipdb==0.8
 ipython==1.1.0
-psycopg2==2.5.2
+psycopg2==2.5.2  # Python interface to Postgresql
 
 # selenium is used for browser testing
 selenium==2.42.1

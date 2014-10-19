@@ -7,6 +7,12 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
+!Before putting on github
+================================================================================
+o review all files
+o decide on name
+
+================================================================================
 !How to backup Postgres database and restore
 ================================================================================
 Q: How to make a backup of the database?
