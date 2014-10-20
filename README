@@ -871,7 +871,9 @@ o SuperMemo
 ================================================================================
 !TODO / Backlog
 ================================================================================
-
+o 10/20/14 add search ability, to search questions/answers for specified keywords
+o 10/20/14 in the admin, when viewing a question, show the answer as an inline
+o 10/20/14 in the admin, when viewing a question, add a link to jump to the answer to view/edit it
 o 10/19/14 upgrade Django to latest (currently using 1.6.7; latest is 1.7)
 o 10/18/14 per Steven Jonas, have a way to find other questions (or bookmarked webpages) with similar content to help form associations and new insights
 o 10/18/14 have questions that are a single webpagge to review (a url), and show the content of the webpage instead of just a link
