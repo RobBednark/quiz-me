@@ -1110,10 +1110,13 @@ FreshMemory (a Windows/Mac app with this name already exists)
 
 LibraryOfQuestions
 
-MemoryAid
-MemoryGym
-MemoryRefresh
-MemoryRefresher
+Memorizer
+
+Memory Aid
+Memory Bunny
+Memory Gym
+Memory Refresh
+Memory Refresher
 
 QuizMe - already an iOS and Android app with this name
 Quizzer
@@ -1136,6 +1139,7 @@ Keywords:
     brain
     flashcard
     gym
+    memorize
     memory
     query
     question
@@ -1167,6 +1171,7 @@ Naming ideas / considerations:
     - use real words with a twist (Ford Mustang)
     - create a compound word
     - make up a word
+    - add on a prefix (e.g., Coursera)
     
 ================================================================================
 !Examples of tables
