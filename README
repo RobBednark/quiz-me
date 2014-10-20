@@ -1,16 +1,26 @@
+This file is in plain text (convert to markdown at some point).  
+Lines beginning with '!' are section headings.
+
+================================================================================
+!Notes
+================================================================================
 QuizMe notes can be found in these places:
     o here (git repo /README)
     o notebooks
     o Portland Python quiz program (~/bin/learn/quiz.python/quiz.py)
 
 [The rest of this file was moved from bin/learn/quiz.python/db/db_app_designs 9/16/13]
+
 Code: Dropbox/git/quizme_site
 
 ================================================================================
-!Before putting on github
+!Putting on github
 ================================================================================
-o review all files
+DONE o review all files
 o decide on name
+    Sara, Steven, Matthew
+o push to github
+o review this file
 
 ================================================================================
 !How to backup Postgres database and restore
@@ -30,6 +40,7 @@ make loaddb
 
 Q: How to test a database loaded from a backup?
 A: 
+
 ================================================================================
 !Agenda/Next/ToDo:
 ================================================================================
@@ -854,9 +865,14 @@ Mon 9/16/13
 o Aaron Sykes
 o Josh McQuiston
 o Steven Jonas
+o Mykhaylo Kopytonenko (mishakop at gmail com)  (Fresh Memory author)
+o Anki contributors
+o SuperMemo 
 ================================================================================
 !TODO / Backlog
 ================================================================================
+
+o 10/19/14 upgrade Django to latest (currently using 1.6.7; latest is 1.7)
 o 10/18/14 per Steven Jonas, have a way to find other questions (or bookmarked webpages) with similar content to help form associations and new insights
 o 10/18/14 have questions that are a single webpagge to review (a url), and show the content of the webpage instead of just a link
 o 8/29/14 Show the tags for the question being asked/answered.
@@ -1079,16 +1095,18 @@ Brainscape (iOS)
 Eidetic (iOS)
 Flashcards (iOS)
 Flashcardlet (iOS)
+Fresh Memory - open source; Windows and Linux; last updated ; http://fresh-memory.com/ ; http://sourceforge.net/projects/freshmemory/; documentation last updated 10/6/14; app last updated 10/20/12; Mykhaylo Kopytonenko (mishakop at gmail com); c++
 Mnemosyne
 SuperMemo
 
 ================================================================================
-! Product/App Names:
+! Product/App Names / Naming:
 ================================================================================
 AskMe
 AskMeShowMe
 
 FlashCards
+FreshMemory (a Windows/Mac app with this name already exists)
 
 LibraryOfQuestions
 
@@ -1105,10 +1123,13 @@ QuizMeNow / quizmenow / quiz-me-now
 Learn-Quiz-Remember
 ReadLearnQuizRemember
 ReadQuizLearnRemember
-RefreshMyMemory
+RefreshMyMemory (an Android app for remembering where you put things already exists)
+Remember It
 
 SoManyQuestions
 SpacedRepetition
+
+Tip of my Tongue (iOS word-searching app with this name already exists)
 
 Keywords:
     ask
@@ -1116,10 +1137,37 @@ Keywords:
     flashcard
     gym
     memory
+    query
     question
     quiz
     remember
     spaced repetition
+    study
+    tool
+
+Similar apps:
+    Anki - open source; written in Python; https://github.com/dae/anki
+    Brainscape (iOS)
+    Eidetic (iOS)
+    Flashcards (iOS)
+    Flashcardlet (iOS)
+    Fresh Memory
+    Mnemosyne
+    SuperMemo
+
+Naming ideas / considerations:
+    - use a two-part name (e.g., Evernote, Wunderlist, Tweetbot)
+    - use a strange name (e.g., Google, Yahoo)
+    - pronounceability
+    - 11 chars or less
+    - use a prefix or suffix (e.g., app, go, get) (e.g., outsideapp.com)
+    - check domain names
+    - account name availability on Facebook and Twitter
+    - easy to remember
+    - use real words with a twist (Ford Mustang)
+    - create a compound word
+    - make up a word
+    
 ================================================================================
 !Examples of tables
 ================================================================================
@@ -1156,4 +1204,3 @@ For questions,
 ================================================================================
 ! The End.
 ================================================================================
-
