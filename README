@@ -14,6 +14,15 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
+!Documentation
+================================================================================
+
+Currently there is one view (questions.views) with separate templates for GET (display the question: show_question.html) and POST (post the answer: show_question_and_answer.html).
+
+3 different pages:
+    GET (the result of seeing a previous answer, or of just entering the quiz); show question; this needs to be changed to the result of a POST from the previous answer, or a different page is needed if there was an error)
+    POST (the result of answering a question; show the question and answer)
+================================================================================
 !Putting on github
 ================================================================================
 DONE o review all files
@@ -45,6 +54,8 @@ A:
 ================================================================================
 intervals:
     - change show_question_and_answer to be a form instead of a "Next Question" link
+        - form will include an interval number and unit
+        - consider 
     - view
     - template
     - tests
@@ -870,6 +881,7 @@ o SuperMemo
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o 11/17/14 add ability to select all or none for tags
 o 10/20/14 add search ability, to search questions/answers for specified keywords
 o 10/20/14 in the admin, when viewing a question, show the answer as an inline
 o 10/20/14 in the admin, when viewing a question, add a link to jump to the answer to view/edit it
