@@ -55,7 +55,8 @@ A:
 intervals:
     - change show_question_and_answer to be a form instead of a "Next Question" link
         - form will include an interval number and unit
-        - consider 
+        - need a POST view for the question, and another POST view for the answer;
+          currently have a POST view for the question; 
     - view
     - template
     - tests
