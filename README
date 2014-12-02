@@ -68,6 +68,9 @@ intervals:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 11/22/14 10:58pm
+    11:01pm previously: created documentation section above
+    10:58pm NEXT: determine view for POST'ing answer acceptance (see Agenda)
 Fri 9/26/14 5:09pm
     5:11pm NEXT: postgres backup
     5:09pm Last time I got Postgres backups working; also created the Schedule model that is commented out
@@ -990,7 +993,7 @@ o models:
     
 
 ================================================================================
-User Stories / Features
+!User Stories / Features
 ================================================================================
 o users can create accounts for themselves
 o add questions via admin
@@ -1019,7 +1022,7 @@ o study mode: show questions and answers together
 o movie clips / YouTube videos
 
 ================================================================================
-Django Apps
+!Django Apps
 ================================================================================
 Word meaning "piece of information":
 chunk / game / info / piece of info / library / article / meme / agents / chapter / quiz / 
@@ -1044,7 +1047,7 @@ constituent
 
 entities
 ================================================================================
-MVP:
+!MVP:
 ================================================================================
     Questions:
         - text
@@ -1057,7 +1060,7 @@ MVP:
         - 
 
 ================================================================================
-Entities
+!Entities
 ================================================================================
 answers
 hints
@@ -1066,7 +1069,7 @@ quizzes (collection of questions)
 tags
 users
 ================================================================================
-Screens:
+!Screens:
 ================================================================================
   New user (use the admin initially)
   Add a question/answer (use the admin initially)
@@ -1074,7 +1077,7 @@ Screens:
   Quiz - ask questions, record answers
 
 ================================================================================
-Ultimate:
+!Ultimate:
 ================================================================================
 
 Question Types:
@@ -1091,7 +1094,7 @@ Hints:
 Modes:
 
 ================================================================================
-Use Cases:
+!Use Cases:
 ================================================================================
 o want to quiz myself for a specify tag
 
