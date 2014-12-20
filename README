@@ -73,6 +73,7 @@ intervals:
         - form will include an interval number and unit
         - need a POST view for the question, and another POST view for the answer;
           currently have a POST view for the question; 
+        - in the POST, redirect the user to GET /question/
     - view
     - template
     - tests
@@ -81,6 +82,7 @@ intervals:
     Notes:
         o interval to select should be shown on the answer page
         o interval form needs to have a number input and a unit dropdown
+
 ================================================================================
 !Log/History/Diary
 ================================================================================
