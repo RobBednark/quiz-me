@@ -8,7 +8,7 @@ from django.shortcuts import render
 from .forms import FormAttempt
 from .models import Attempt, Question, QuestionTag, Tag, User, UserTag
 
-def next_question(user):
+def _next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     '''
@@ -96,16 +96,13 @@ def _create_and_get_usertags(request):
             pass
         return modelformset_usertag
 
-
-
-
 @login_required(login_url='/login')
 def view_quiz(request):
     modelformset_usertag = _create_and_get_usertags(request=request)
 
     if request.method == 'GET':
         # For a GET, show the next question
-        question = next_question(user=request.user)
+        question = _next_question(user=request.user)
         form_attempt = FormAttempt()
         if question:
             form_attempt.fields['hidden_question_id'].initial = question.id

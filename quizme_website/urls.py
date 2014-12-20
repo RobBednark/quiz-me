@@ -10,6 +10,8 @@ urlpatterns = patterns('',
     # url(r'^quizme_website/', include('quizme_website.foo.urls')),
 
     url(r'^$', 'questions.views.view_quiz', name='quiz'),
+    url(r'^question$', 'questions.views.view_quiz', name='question'),
+    url(r'^answer$', 'questions.views.view_quiz', name='question'),
     url(r'^login$', 'emailusername.views.login', name='login'),
     url(r'^logout$', 'emailusername.views.logout', name='logout'),
 

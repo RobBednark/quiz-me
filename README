@@ -20,8 +20,24 @@ Code: Dropbox/git/quizme_site
 Currently there is one view (questions.views) with separate templates for GET (display the question: show_question.html) and POST (post the answer: show_question_and_answer.html).
 
 3 different pages:
-    GET (the result of seeing a previous answer, or of just entering the quiz); show question; this needs to be changed to the result of a POST from the previous answer, or a different page is needed if there was an error)
+    show_question GET (the result of seeing a previous answer, or of just entering the quiz); show question; 
+         this needs to be changed to the result of a POST from the previous answer, or a different page is needed if there was an error)
     POST (the result of answering a question; show the question and answer)
+    POST (the result of giving feedback after seeing the answer; redirect to GET
+
+Start request        Start template                 User Action             End Request           End template
+-------------------- --------------                 -----------             -------------------   --------
+(none)               (none)                         user goes into quiz     GET  /show_question/  show_question.html
+                                                    for the first time  
+GET /show_question/  show_question.html             user answers a question POST /show_question/  show_question_and_answer.html
+POST /show_question/ show_question_and_answer.html  user clicks             GET /show_question/   show_question.html
+                                                    "next question"
+
+Requests, methods, and tempates:
+METHOD  REQUEST          TEMPLATE REQUEST IS FROM  REQUEST VIA
+------  ---------------  ------------------------  -----------
+GET     /show_question/  show_question.html
+POST    /show_question/  
 ================================================================================
 !Putting on github
 ================================================================================
@@ -68,6 +84,8 @@ intervals:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 12/13/14 3:19pm
+    3:19pm NEXT: determine view for POST'ing answer acceptance (see Agenda)
 Sat 11/22/14 10:58pm
     11:01pm previously: created documentation section above
     10:58pm NEXT: determine view for POST'ing answer acceptance (see Agenda)
