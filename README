@@ -2,6 +2,45 @@ This file is in plain text (convert to markdown at some point).
 Lines beginning with '!' are section headings.
 
 ================================================================================
+!Glossary / Terms / Nomenclature
+================================================================================
+answer - the "correct" answer associated with a question; a question can have 0 or 1 answers
+attempt - a user's single attempt to answer a question; it is the user's guess as to the answer
+hint - a hint for a question and answer (not yet implemented)
+schedule - when the user wants to see a question again
+question - a question
+quiz - a set of associated questions (not yet implemented)
+tag - a tag associated with a question; a question can have 0 to many tags
+user tag - the tags that a user has selected indicating which questions they want to see
+
+================================================================================
+!Agenda/Next/ToDo:
+================================================================================
+NEXT:
+    10:15am continue working on views.question() POST
+
+intervals:
+    - change template show_question_and_answer.html to be a POST form
+        (model after show_question.html)
+    - create a new view for submitting an answer
+        - /answer/submit_feedback/ -- POST_answer_feedback
+    - change show_question_and_answer to be a form instead of a "Next Question" link
+        - form will include an interval number and unit
+        - need a POST view for the answer;
+        - in the POST, redirect the user to GET /question/
+    - tests
+    DONE - add a redirect to question()
+    DONE - change template "show_question_and_answer.html" to "answer_feedback_form.html"
+    DONE - modify urls.py
+    DONE - add admin page for schedules
+    DONE - add new models
+    DONE - add south migration
+    DONE - model
+    DONE - postgres backups and restores
+    Notes:
+        DONE o interval form needs to have a number input and a unit dropdown
+
+================================================================================
 !Notes
 ================================================================================
 QuizMe notes can be found in these places:
@@ -38,6 +77,18 @@ METHOD  REQUEST          TEMPLATE REQUEST IS FROM  REQUEST VIA
 ------  ---------------  ------------------------  -----------
 GET     /show_question/  show_question.html
 POST    /show_question/  
+
+Symbolic actions:
+    - ask/show question
+    - submit answer
+    - schedule question for next time; submit answer feedback
+================================================================================
+!HOW TO add a South migration
+================================================================================
+a) create the migration
+    ./manage.py schemamigration myapp --auto
+b) run the migration:
+    ./manage.py migrate myapp
 ================================================================================
 !Putting on github
 ================================================================================
@@ -66,26 +117,40 @@ Q: How to test a database loaded from a backup?
 A: 
 
 ================================================================================
-!Agenda/Next/ToDo:
-================================================================================
-intervals:
-    - change show_question_and_answer to be a form instead of a "Next Question" link
-        - form will include an interval number and unit
-        - need a POST view for the question, and another POST view for the answer;
-          currently have a POST view for the question; 
-        - in the POST, redirect the user to GET /question/
-    - view
-    - template
-    - tests
-    DONE - model
-    DONE - postgres backups and restores
-    Notes:
-        o interval to select should be shown on the answer page
-        o interval form needs to have a number input and a unit dropdown
-
-================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 12/21/14 8:45am
+    8:45am upgraded Django from 1.6.5 to 1.7.1, but got the following error when running tests:
+        ROB_SELENIUM_BROWSER=firefox   ./manage.py test
+        /Users/rbednark/Dropbox/git/quizme_website/emailusername/admin.py:36: RemovedInDjango18Warning: Creating a ModelForm without either the 'fields' attribute or the 'exclude' attribute is deprecated - form UserChangeForm needs updating
+          class UserChangeForm(forms.ModelForm):
+
+        Traceback (most recent call last):
+          File "./manage.py", line 10, in <module>
+            execute_from_command_line(sys.argv)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/__init__.py", line 385, in execute_from_command_line
+            utility.execute()
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/__init__.py", line 377, in execute
+            self.fetch_command(subcommand).run_from_argv(self.argv)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/commands/test.py", line 50, in run_from_argv
+            super(Command, self).run_from_argv(argv)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/base.py", line 288, in run_from_argv
+            self.execute(*args, **options.__dict__)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/commands/test.py", line 71, in execute
+            super(Command, self).execute(*args, **options)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/base.py", line 338, in execute
+            output = self.handle(*args, **options)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/south/management/commands/test.py", line 7, in handle
+            patch_for_test_db_setup()
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/south/management/commands/__init__.py", line 34, in patch_for_test_db_setup
+            management._commands['syncdb'] = MigrateAndSyncCommand()
+        AttributeError: 'module' object has no attribute '_commands'
+        make: *** [test_firefox] Error 1
+    8:00am determined that "wsgiref" package is mistakenly shown by "pip freeze"
+    7:45am added schedules to the admin
+    7:45am created migration for schedules
+    7:30am resolved firefox test error (upgraded from selenium 2.42.1 to 2.44.0)
+
 Sat 12/13/14 3:19pm
     3:19pm NEXT: determine view for POST'ing answer acceptance (see Agenda)
 Sat 11/22/14 10:58pm
@@ -905,6 +970,10 @@ o SuperMemo
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o 12/21/14 Modify to pass question number in endpoint instead of as hidden field
+o 12/21/14 Add contributors.md
+o 12/21/14 Add to readthedocs
+o 12/21/14 Add tasks to either github issues or to Trello
 o 11/17/14 add ability to select all or none for tags
 o 10/20/14 add search ability, to search questions/answers for specified keywords
 o 10/20/14 in the admin, when viewing a question, show the answer as an inline
@@ -929,7 +998,7 @@ o 7/14/14 - show all questions/answers for given tags on a single page
 o add documentation for other users to use
 o display url's as clickable url's (href's)
 o Import (import questions via csv / json / yaml / python data structure)
-o Export (export questions via csv / json / yaml / python data structure / plain text)
+o Export (export questions via csv / json / yaml / xml / python data structure / plain text)
 o Questions (add questions from the web page instead of the admin)
 o Tags (be able to tag questions, and then select tags from which to select questions)
     DONE - select a single tag to use for a quiz

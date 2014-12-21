@@ -1,7 +1,7 @@
 #### from "pip freeze" 7/12/14
 Django==1.6.5
-South==0.8.4
-django-debug-toolbar==1.0
+South==0.8.4  # database migrations
+django-debug-toolbar==1.0  # handy Django info in browser useful for debugging
 
 # email-as-username used for using email addresses as usernames
 django-email-as-username==1.6.7
@@ -18,17 +18,15 @@ django-versioning==0.7.4
 # djangorestframework
 djangorestframework==2.3.8
 
-ipdb==0.8
+ipdb==0.8  # iPython debugger
 ipython==1.1.0
 psycopg2==2.5.2  # Python interface to Postgresql
 
-# selenium is used for browser testing
-selenium==2.42.1
+# selenium is used for browser testing (firefox, phantomjs, ...)
+selenium==2.44.0
 
 # splinter is an interface to facilitate browser testing
 splinter==0.6.0
 
 # What is sqlparse used for?
 sqlparse==0.1.10
-
-wsgiref==0.1.2

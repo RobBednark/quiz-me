@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<head>
+        {{ modelform_schedule.media }}
+		<title>Answer</title>
+		<meta url-encoding="utf-8" />
+	</head>
+	<body>
+		<form action="" method="post"> {% csrf_token %}
+            {{ modelform_schedule.as_p }}
+
+            {% if modelform_schedule.errors %}
+            <p> Errors:
+                <div class="fieldWrapper">
+                    {{ modelform_schedule.errors }}
+                </div>
+            {% endif %}
+            </p>
+
+            <p>
+            Ask questions with these tags:<br>
+            {{ modelformset_usertag.management_form }}
+            {% if modelformset_usertag.non_form_errors %}
+                {{ modelformset_usertag.non_form_errors }}
+            {% endif %}
+            {% if modelformset_usertag.errors %}
+                {{ modelformset_usertag.errors }}
+            {% endif %}
+            {% for form_usertag in modelformset_usertag.forms %}
+                {{ form_usertag }} </br>
+            {% endfor %}
+
+            <p>
+            <a href="/"> Next Question </a>
+		</form>
+	</body>
+{% endblock %}

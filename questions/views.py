@@ -5,7 +5,7 @@ from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from .forms import FormAttempt
+from .forms import FormAttempt, ModelFormSchedule
 from .models import Attempt, Question, QuestionTag, Tag, User, UserTag
 
 def _next_question(user):
@@ -143,6 +143,93 @@ def view_quiz(request):
             return render(request=request, 
                           template_name='show_question.html', 
                           dictionary=dict(form_attempt=form_attempt, 
+                                         ))
+    else:
+        raise Exception("Unknown request.method=[%s]" % request.method)
+
+@login_required(login_url='/login')
+def question_next(request):
+    # get the next question and redirect to it
+    question = _next_question(user=request.user)
+    return HttpResponseRedirect(reverse('question_new', args=(question.id,)))
+
+@login_required(login_url='/login')
+def question(request, id_question):
+    modelformset_usertag = _create_and_get_usertags(request=request)
+
+    if request.method == 'GET':
+        # For a GET, show the next question
+        question = _next_question(user=request.user)
+        form_attempt = FormAttempt()
+        if question:
+            form_attempt.fields['hidden_question_id'].initial = question.id
+        else:
+            form_attempt.fields['hidden_question_id'].initial = None
+        return render(request=request, 
+                      template_name='show_question.html', 
+                      dictionary=dict(form_attempt=form_attempt, 
+                                      modelformset_usertag=modelformset_usertag,
+                                      question=question))
+    elif request.method == 'POST':
+        # ASSERT: this is a POST, so the user answered a question
+        # Show the correct answer, the user's attempt, and the question
+        # Show a NEXT button to do a GET and get the next question
+        form_attempt = FormAttempt(request.POST)
+        if form_attempt.is_valid():
+            question_id = form_attempt.cleaned_data['hidden_question_id']
+            question = Question.objects.get(id=question_id)
+            attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
+                              question=question,
+                              user=request.user)
+            try:
+                attempt.save()
+            except Exception as exception:
+                # TODO: do something else here, e.g., log it, show it to the user  -Rob Bednark 12/21/14
+                pass
+            # Redirect to the answer page
+            return HttpResponseRedirect(reverse('answer', args=(attempt.id,)))
+        else:
+            # Assert: form is NOT valid
+            # Need to return the errors to the template, and have the template show the errors.
+            return render(request=request, 
+                          template_name='show_question.html', 
+                          dictionary=dict(form_attempt=form_attempt, 
+                                         ))
+    else:
+        raise Exception("Unknown request.method=[%s]" % request.method)
+
+def answer(request, id_attempt):
+    modelformset_usertag = _create_and_get_usertags(request=request)
+    modelform_schedule = ModelFormSchedule(request.POST)
+    if request.method == 'GET':
+        return render(request=request, 
+                      template_name='answer.html', 
+                      dictionary=dict(modelform_schedule=modelform_schedule,
+                                      modelformset_usertag=modelformset_usertag))
+    elif request.method == 'POST':
+        # ASSERT: this is a POST, so the user answered a question
+        # Show the correct answer, the user's attempt, and the question
+        # Show a NEXT button to do a GET and get the next question
+        if modelform_schedule.is_valid():
+            question_id = form_answer.cleaned_data['hidden_question_id']
+            question = Question.objects.get(id=question_id)
+            schedule = Schedule(attempt=form_answer.cleaned_data['attempt'],
+                              question=question,
+                              user=request.user)
+            modelform_schedule.save()
+            try:
+                schedule.save()
+            except Exception as exception:
+                pass
+            # Redirect to the next question
+            # TODO
+            pass
+        else:
+            # Assert: form is NOT valid
+            # Need to return the errors to the template, and have the template show the errors.
+            return render(request=request, 
+                          template_name='answer.html', 
+                          dictionary=dict(form_answer=form_answer, 
                                          ))
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)

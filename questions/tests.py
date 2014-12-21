@@ -10,7 +10,7 @@ from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
 from .models import Attempt, Question, QuestionTag, Tag, UserTag
-from .views import next_question
+from .views import _next_question
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
@@ -178,7 +178,7 @@ class NonBrowserTests(TestCase):
         #   b) no questions with any tags
         # does not get a question
         with self.assertNumQueries(2):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertIsNone(question)
 
         # Assert that:
@@ -189,7 +189,7 @@ class NonBrowserTests(TestCase):
         user1_tag1.save()
 
         with self.assertNumQueries(2):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertIsNone(question)
 
         # Assert that:
@@ -197,7 +197,7 @@ class NonBrowserTests(TestCase):
         #    b) question with that UserTag 
         # gets that question
         with self.assertNumQueries(2):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertIsNone(question)
 
         # Assert that 
@@ -207,7 +207,7 @@ class NonBrowserTests(TestCase):
         question1_tag1 = QuestionTag(question=question1, tag=tag1, enabled=True)
         question1_tag1.save()
         with self.assertNumQueries(1):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertEquals(question, question1)
 
         # Given:
@@ -216,7 +216,7 @@ class NonBrowserTests(TestCase):
         question1_tag1.enabled = False
         question1_tag1.save()
         with self.assertNumQueries(2):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertIsNone(question)
 
         # Given:
@@ -233,7 +233,7 @@ class NonBrowserTests(TestCase):
         attempt1_question2.save()
         self.assertTrue(attempt1_question2.datetime_added > attempt1_question1.datetime_added)
         with self.assertNumQueries(2):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertEquals(question, question1)
 
         # Now add a 2nd attempt to question1, and assert that question2 is returned
@@ -245,7 +245,7 @@ class NonBrowserTests(TestCase):
         attempt2_question1.save()
 
         with self.assertNumQueries(2):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertEquals(question, question2)
 
         # Not add a 3rd attempt to question1, and assert that question2 is still returned
@@ -257,7 +257,7 @@ class NonBrowserTests(TestCase):
         attempt3_question1.save()
 
         with self.assertNumQueries(2):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertEquals(question, question2)
 
         # Now add question3, and assert that question3 is returned, because it doesn't have any attempts yet
@@ -270,5 +270,5 @@ class NonBrowserTests(TestCase):
         question3_tag1 = QuestionTag(question=question3, tag=tag1, enabled=True)
         question3_tag1.save()
         with self.assertNumQueries(1):
-            question = next_question(user=user1)
+            question = _next_question(user=user1)
             self.assertEquals(question, question3)
