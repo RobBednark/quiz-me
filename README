@@ -17,7 +17,34 @@ user tag - the tags that a user has selected indicating which questions they wan
 !Agenda/Next/ToDo:
 ================================================================================
 NEXT:
-    10:15am continue working on views.question() POST
+    Fri 12/26
+
+Old urls:
+    - ^$
+    - ^question$ - (same as ^$)
+New urls:
+    - ^question_next/
+    - ^question_new/(?P<id_question>[0-9]*)/$
+    - ^answer/(?P<id_attempt>[0-9]*)/$
+
+
+Old views:
+    view_quiz
+New views:
+    question_next - ready (just a redirect to question)
+    question - shows a question with a form to input an attempt; almost identical to view_quiz
+        GET - show the question and an empty for for an attempt
+        POST - post a new attempt
+    answer - shows the question, attempt, and answer, and a form to input a schedule
+        GET - show the question, attempt, and answer
+        POST - create a new schedule; redirect to question_next
+
+Old templates:
+    show_question.html
+    show_question_and_answer.html
+New templates:
+    question.html (very similar to show_question.html, but without hidden_question_id
+    answer.html (for views.answer() )
 
 intervals:
     - change template show_question_and_answer.html to be a POST form
@@ -79,9 +106,10 @@ GET     /show_question/  show_question.html
 POST    /show_question/  
 
 Symbolic actions:
-    - ask/show question
-    - submit answer
-    - schedule question for next time; submit answer feedback
+    - ask/show question (GET question)
+    - submit answer (POST question)
+    - schedule question for next time (GET answer)
+    - submit answer feedback (POST answer)
 ================================================================================
 !HOW TO add a South migration
 ================================================================================
@@ -119,6 +147,28 @@ A:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sat 12/27/14 1:55pm
+    3:38pm added a migration; Schedule can now have null values for each field
+    1:55pm NEXT: modify answer.html to include stuff from show_question_and_answer.html
+Sat 12/27/14 9:36am
+    9:37am NEXT: run tests; add tests
+    9:36am fixed so that empty form doesn't have errors
+Fri 12/26/14 7:33pm
+    Fri 12/26 11:23pm NEXT: fix "This field is required" errors for answer() GET view
+    Fri 12/26 11:21pm answer() GET view is working, except that errors "This field is required" are being shown
+    Fri 12/26 11:14pm in answer() view, request.user is a SimpleLazyObject, but needs to be an int for the UserTag.objects.filter(user=user) query
+    Fri 12/26 11:07pm created learn_form_select; somewhat working, except that it isn't showing the value for it
+    Fri 12/26 10:45pm consider forgetting the ModelFormSchedule, and just use FormSchedule, because we only need interval_num and interval_unit
+    Fri 12/26 10:41pm created a migration for Schedule and applied it; did a "make dumpdb"
+    Fri 12/26 10:34pm NEXT: I modified models.Schedule to be subclassed from CreatedBy; now the schema is not correct because "schema.date_added" is now "schema.datetime_added"; need a South migration to fix it
+    Fri 12/26 12:26pm NEXT: getting errors in ModelFormSchedule because it's a ModelForm; either set and hide some fields
+    Fri 12/26 10:21pm NEXT: why is answer.html showing required fields and errors on the GET?
+    Fri 12/26 10:19pm NEXT: get answer.html coded as intended (show question, attempt, answer)
+    Fri 12/26 10:17pm NEXT: get answer() view working
+    Fri 12/26 10:16pm I got the question() view and POST working.
+    Fri 12/26 9:30pm need a different form without the hidden_question_id
+    Fri 12/26 8:27pm working on question.html
+    Fri 12/26 7:43pm remove hidden_question_id and replace with id_question
 Sun 12/21/14 8:45am
     8:45am upgraded Django from 1.6.5 to 1.7.1, but got the following error when running tests:
         ROB_SELENIUM_BROWSER=firefox   ./manage.py test

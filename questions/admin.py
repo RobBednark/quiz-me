@@ -36,7 +36,7 @@ class QuestionAdmin(admin.ModelAdmin):
     }
 
 class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ['date_added', 'date_show_next', 'interval_num', 'interval_unit', 'interval_secs', 'question', 'user']
+    list_display = ['datetime_added', 'date_show_next', 'interval_num', 'interval_unit', 'interval_secs', 'question', 'user']
 
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Attempt, AttemptAdmin)

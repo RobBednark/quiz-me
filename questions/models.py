@@ -6,6 +6,17 @@ from django.db import models
 
 from emailusername.models import User
 
+CHOICES_UNITS = (
+    #  db value   human-readable
+    #  --------   --------------
+      ("seconds", "seconds"),
+      ("minutes", "minutes"),
+      ("hours",   "hours"),
+      ("days",    "days"),
+      ("weeks",   "weeks"),
+      ("months",  "months"),
+      ("years",   "years"),
+)
 
 class CreatedBy(models.Model):
     datetime_added = models.DateTimeField(auto_now_add=True)
@@ -87,25 +98,12 @@ class QuestionTag(CreatedBy):
     # user_set
 
 
-class Schedule(models.Model):
-    CHOICES_UNITS = (
-        # db value   human-readable
-        # --------   --------------
-          ("seconds", "seconds"),
-          ("minutes", "minutes"),
-          ("hours",   "hours"),
-          ("days",    "days"),
-          ("weeks",   "weeks"),
-          ("months",  "months"),
-          ("years",   "years"),
-    )
-    date_added = models.DateTimeField(auto_now=True)
-    date_show_next = models.DateTimeField()  # when to show the question next
-    interval_num = models.DecimalField(max_digits=5, decimal_places=2)
-    interval_unit = models.TextField(choices=CHOICES_UNITS)
-    interval_secs = models.IntegerField()  # Number of seconds from when record was added until it should be shown again.  When is this useful?  Not sure.  Maybe to aid in showing history of intervals.
+class Schedule(CreatedBy):
+    date_show_next = models.DateTimeField(null=True, default=None)  # when to show the question next
+    interval_num = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=None)
+    interval_secs = models.IntegerField(null=True, default=None)  # Number of seconds from when record was added until it should be shown again.  When is this useful?  Not sure.  Maybe to aid in showing history of intervals.
+    interval_unit = models.TextField(choices=CHOICES_UNITS, null=True, default=None)
     question = models.ForeignKey(Question)
-    user = models.ForeignKey(User)
 
 
 class UserTag(models.Model):

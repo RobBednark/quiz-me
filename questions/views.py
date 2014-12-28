@@ -1,12 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
 from django.db.models import Max, Min
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from .forms import FormAttempt, ModelFormSchedule
-from .models import Attempt, Question, QuestionTag, Tag, User, UserTag
+from .forms import FormAttempt, FormAttemptNew, FormSchedule
+from .models import Attempt, Question, QuestionTag, Schedule, Tag, User, UserTag
 
 def _next_question(user):
     ''' Find and return the next question for the currently logged-in user.
@@ -160,24 +161,19 @@ def question(request, id_question):
     if request.method == 'GET':
         # For a GET, show the next question
         question = _next_question(user=request.user)
-        form_attempt = FormAttempt()
-        if question:
-            form_attempt.fields['hidden_question_id'].initial = question.id
-        else:
-            form_attempt.fields['hidden_question_id'].initial = None
+        form_attempt = FormAttemptNew()
         return render(request=request, 
-                      template_name='show_question.html', 
+                      template_name='question.html', 
                       dictionary=dict(form_attempt=form_attempt, 
                                       modelformset_usertag=modelformset_usertag,
                                       question=question))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
-        # Show the correct answer, the user's attempt, and the question
+        # Show the question, the attempt, and the correct answer.
         # Show a NEXT button to do a GET and get the next question
-        form_attempt = FormAttempt(request.POST)
+        form_attempt = FormAttemptNew(request.POST)
         if form_attempt.is_valid():
-            question_id = form_attempt.cleaned_data['hidden_question_id']
-            question = Question.objects.get(id=question_id)
+            question = Question.objects.get(id=id_question)
             attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
                               question=question,
                               user=request.user)
@@ -192,7 +188,7 @@ def question(request, id_question):
             # Assert: form is NOT valid
             # Need to return the errors to the template, and have the template show the errors.
             return render(request=request, 
-                          template_name='show_question.html', 
+                          template_name='question.html', 
                           dictionary=dict(form_attempt=form_attempt, 
                                          ))
     else:
@@ -200,36 +196,40 @@ def question(request, id_question):
 
 def answer(request, id_attempt):
     modelformset_usertag = _create_and_get_usertags(request=request)
-    modelform_schedule = ModelFormSchedule(request.POST)
+    attempt = Attempt.objects.get(id=id_attempt)
     if request.method == 'GET':
+        form_schedule = FormSchedule()
         return render(request=request, 
                       template_name='answer.html', 
-                      dictionary=dict(modelform_schedule=modelform_schedule,
-                                      modelformset_usertag=modelformset_usertag))
+                      dictionary=dict(form_schedule=form_schedule, 
+                                      modelformset_usertag=modelformset_usertag,
+                                      question=attempt.question,
+                                      answer=attempt.question.answer,
+                                      attempt=attempt),
+        )
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
         # Show the correct answer, the user's attempt, and the question
         # Show a NEXT button to do a GET and get the next question
-        if modelform_schedule.is_valid():
-            question_id = form_answer.cleaned_data['hidden_question_id']
-            question = Question.objects.get(id=question_id)
-            schedule = Schedule(attempt=form_answer.cleaned_data['attempt'],
-                              question=question,
-                              user=request.user)
-            modelform_schedule.save()
-            try:
-                schedule.save()
-            except Exception as exception:
-                pass
-            # Redirect to the next question
-            # TODO
-            pass
+        form_schedule = FormSchedule(request.POST)
+        if form_schedule.is_valid():
+            schedule = Schedule(
+                                interval_num=form_schedule.cleaned_data['interval_num'],
+                                interval_unit=form_schedule.cleaned_data['interval_unit'],
+                                question=attempt.question,
+                                user=request.user)
+            schedule.save()
+            return HttpResponseRedirect(reverse('question_next'))
         else:
             # Assert: form is NOT valid
             # Need to return the errors to the template, and have the template show the errors.
             return render(request=request, 
                           template_name='answer.html', 
-                          dictionary=dict(form_answer=form_answer, 
-                                         ))
+                          dictionary=dict(form_schedule=form_schedule, 
+                                          modelformset_usertag=modelformset_usertag,
+                                          question=attempt.question,
+                                          answer=attempt.question.answer,
+                                          attempt=attempt),
+        )
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)

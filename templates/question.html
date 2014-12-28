@@ -3,39 +3,30 @@
 
 {% block content %}
 	<head>
-        {{ form_schedule.media }}
-		<title>Answer</title>
+        {{ form_attempt.media }}
+		<title>Quiz</title>
 		<meta url-encoding="utf-8" />
 	</head>
 	<body>
 		<form action="" method="post"> {% csrf_token %}
-            <div class="fieldWrapper">
-                Correct Answer:
-                {{ answer.answer|markdown }}
-                <p>
-            </div>
-
-            <div class="fieldWrapper">
-                Your answer:
-                {{ attempt.attempt|markdown }}
-                <p>
-                <p>
-            </div>
-
-            <div class="fieldWrapper">
-                Q: 
-                {{ question.question|markdown }}
-            </div>
-
-            {{ form_schedule.as_p }}
-
-            {% if form_schedule.errors %}
-            <p> Errors:
-                <div class="fieldWrapper">
-                    {{ form_schedule.errors }}
-                </div>
+            {% if question %}
+                Q: {{ question.question|markdown }}
+            {% else %}
+                (NOTE: there are no questions)
             {% endif %}
-            </p>
+
+            <div class="fieldWrapper">
+                {{ form_attempt.attempt.label_tag }}
+                {{ form_attempt.attempt }}
+                {{ form_attempt.attempt.errors }}
+            </div>
+
+            {% if form_attempt.errors %}
+                <p> Errors:
+                    <div class="fieldWrapper">
+                        {{ form_attempt.errors }}
+                    </div>
+            {% endif %}
 
             <p>
             Ask questions with these tags:<br>
@@ -50,8 +41,10 @@
                 {{ form_usertag }} </br>
             {% endfor %}
 
-            <p>
+            </p>
             <input type="submit" value="Submit" />
+            <p>
 		</form>
 	</body>
+</html>
 {% endblock %}
