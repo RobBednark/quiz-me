@@ -98,61 +98,11 @@ def _create_and_get_usertags(request):
         return modelformset_usertag
 
 @login_required(login_url='/login')
-def view_quiz(request):
-    modelformset_usertag = _create_and_get_usertags(request=request)
-
-    if request.method == 'GET':
-        # For a GET, show the next question
-        question = _next_question(user=request.user)
-        form_attempt = FormAttempt()
-        if question:
-            form_attempt.fields['hidden_question_id'].initial = question.id
-        else:
-            form_attempt.fields['hidden_question_id'].initial = None
-        return render(request=request, 
-                      template_name='show_question.html', 
-                      dictionary=dict(form_attempt=form_attempt, 
-                                      modelformset_usertag=modelformset_usertag,
-                                      question=question))
-    elif request.method == 'POST':
-        # ASSERT: this is a POST, so the user answered a question
-        # Show the correct answer, the user's attempt, and the question
-        # Show a NEXT button to do a GET and get the next question
-        form_attempt = FormAttempt(request.POST)
-        if form_attempt.is_valid():
-            question_id = form_attempt.cleaned_data['hidden_question_id']
-            question = Question.objects.get(id=question_id)
-            attempt = Attempt(attempt=form_attempt.cleaned_data['attempt'],
-                              question=question,
-                              user=request.user)
-            try:
-                attempt.save()
-            except Exception as exception:
-                pass
-            # Show a page that shows their attempt, the correct answer, the question, and a NEXT button
-            return render(request=request, 
-                          template_name='show_question_and_answer.html', 
-                          dictionary=dict(form_attempt=form_attempt, 
-                                          modelformset_usertag=modelformset_usertag,
-                                          question=question,
-                                          answer=question.answer,
-                                          attempt=attempt,
-                                         ))
-        else:
-            # Assert: form is NOT valid
-            # Need to return the errors to the template, and have the template show the errors.
-            return render(request=request, 
-                          template_name='show_question.html', 
-                          dictionary=dict(form_attempt=form_attempt, 
-                                         ))
-    else:
-        raise Exception("Unknown request.method=[%s]" % request.method)
-
-@login_required(login_url='/login')
 def question_next(request):
     # get the next question and redirect to it
     question = _next_question(user=request.user)
-    return HttpResponseRedirect(reverse('question_new', args=(question.id,)))
+    id_question = question.id if question else 0
+    return HttpResponseRedirect(reverse('question_new', args=(id_question,)))
 
 @login_required(login_url='/login')
 def question(request, id_question):
@@ -194,6 +144,7 @@ def question(request, id_question):
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 
+@login_required(login_url='/login')
 def answer(request, id_attempt):
     modelformset_usertag = _create_and_get_usertags(request=request)
     attempt = Attempt.objects.get(id=id_attempt)

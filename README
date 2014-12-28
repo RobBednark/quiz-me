@@ -148,6 +148,8 @@ A:
 !Log/History/Diary
 ================================================================================
 Sat 12/27/14 1:55pm
+    4:47pm NEXT: 4 tests are failing; need a separate page to indicate there are no questions; how was this working before?  Want to have the tags so that user can choose different tags.
+    4:10pm NEXT: replace existing pages with new pages
     3:38pm added a migration; Schedule can now have null values for each field
     1:55pm NEXT: modify answer.html to include stuff from show_question_and_answer.html
 Sat 12/27/14 9:36am
