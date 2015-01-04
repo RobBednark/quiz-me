@@ -17,7 +17,6 @@ user tag - the tags that a user has selected indicating which questions they wan
 !Agenda/Next/ToDo:
 ================================================================================
 NEXT:
-    Fri 12/26
 
 Old urls:
     - ^$
@@ -68,6 +67,11 @@ intervals:
         DONE o interval form needs to have a number input and a unit dropdown
 
 ================================================================================
+!Tests
+================================================================================
+Tests to add:
+    12/27/14 add a test where there are no questions for whatever tags are selected, but selecting a different tag causes a question to be shown
+================================================================================
 !Notes
 ================================================================================
 QuizMe notes can be found in these places:
@@ -107,9 +111,30 @@ POST    /show_question/
 
 Symbolic actions:
     - ask/show question (GET question)
-    - submit answer (POST question)
-    - schedule question for next time (GET answer)
-    - submit answer feedback (POST answer)
+    - submit answer (POST question) (really POSTing an attempt)
+    - schedule question for next time (GET answer) (really GETting a specific attempt along with answer)
+    - submit answer feedback (POST answer) (really POSTing a schedule)
+
+
+----------------------------------------
+Algorithm for deciding which question to show next:
+
+question has no schedule
+question has schedule with no interval
+
+----------------------------------------
+Time zones
+
+USE_TZ = True in the settings.py file, so time zone support is enabled.  Times are stored as UTC.
+To get the current time in UTC, use:
+    from django.utils import timezone
+    now = timezone.now()
+Note that:
+    >>> naive = datetime.datetime.utcnow()
+    >>> aware = timezone.now()
+utcnow() is naive.
+
+See https://docs.djangoproject.com/en/1.7/topics/i18n/timezones/
 ================================================================================
 !HOW TO add a South migration
 ================================================================================
@@ -147,7 +172,31 @@ A:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Thu 1/1/15 9:44am
+    6:06pm Getting this exception when submitting the interval:
+        unsupported type for timedelta seconds component: Decimal
+        self.date_show_next = time_now + interval 
+        Reason: need to convert decimal to float()
+    6:03pm Fixed next_question_new by adding an additional query.  All tests are now passing.
+    10:13am QuestionTag.filter(tag__in=user_tags) is not correct.  Question.tag is a fk to Tag, not UserTag.  I need to get the tags that user_tags is pointing to.
+    9:49am question_tags_no_schedule should have something, but it is None
+    9:44am Got test_next_question_new passing with phantomjs, but it is failing with Firefox.
+Wed 12/31/14 9:05am
+    11:07pm figuring out how to select max() schedule for a given question (instead of max() schedule.datetime_added)
+    9:10am continue on with test
+    9:07am Changed utcnow() to timezone.now
+    9:05am Read about timezones.  Ensured settings.py USE_TZ=True.  Added pytz to requirements.txt
+Mon 12/29/14 9:04pm
+    10:12pm finished Schedule.save().  now work on test
+    10:08pm now save(commit) parm; just going to create a new datetime rather than saving twice to the db;
+    9:58pm determined that the date's are now set until after the super() save() is called; now looking to see how to avoid the db call on the save()
+    9:42pm added Schedule.save() method for setting self.interval_secs and self.date_show_next.  Now test to see if date_show_next is correct.
+    9:04pm working on next_question_new(); now work on save() for Schedule() to calculate date_show_next and interval_secs
 Sat 12/27/14 1:55pm
+    10:47pm started _next_question_new() and _test_next_question_new; need to modify the queries; need to modify the test
+    10:31pm NEXT: implement new _next_question() that utilizes Schedule
+    5:21pm NEXT: add a test where there are no questions for whatever tags are selected, but selecting a different tag causes a question to be shown
+    5:18pm Tests passing.  Changed the urls and views to the new ones and deleted the old one.  Fixed the issue with tests failing by 
     4:47pm NEXT: 4 tests are failing; need a separate page to indicate there are no questions; how was this working before?  Want to have the tags so that user can choose different tags.
     4:10pm NEXT: replace existing pages with new pages
     3:38pm added a migration; Schedule can now have null values for each field
@@ -1022,6 +1071,15 @@ o SuperMemo
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o 12/31/14 Added schedule intervals for "immediate" and "never"
+o 12/31/14 Allow a quiz mode that consists of a set of questions, and the user can go back and change their answers as much as they want (e.g., as part of an interview)
+o 12/31/14 Make it possible to view questions that don't have any tags
+o 12/31/14 Have a "review all" mode that goes through all questions for the selected tags, showing you number seen and number remaining.
+o 12/31/14 REFACTOR: change all datetime_* variables to either date_* or time_*
+o 12/31/14 Change all timezones to UTC
+o 12/30/14 Implement variations (a question can have variations -- other questions that are similar but modified in a different way; e.g., 2+3=? could be a variation of 2+2=?); this is helpful so that you don't get in the habit of seeing the question and remembering the answer without understanding it
+o 12/27/14 ask how well the question was answered (maybe percentage; excellent / good / bad)
+o 12/27/14 Show the number of questions for each tag (total number of questions, and number of questions past deadline)
 o 12/21/14 Modify to pass question number in endpoint instead of as hidden field
 o 12/21/14 Add contributors.md
 o 12/21/14 Add to readthedocs

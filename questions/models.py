@@ -1,8 +1,10 @@
-from datetime import datetime
+#from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.utils import timezone
 
 from emailusername.models import User
 
@@ -32,7 +34,9 @@ class Question(CreatedBy):
     answer = models.ForeignKey('Answer', null=True, blank=True)
     # attempt_set
     # questiontag_set
+    # schedule_set
     # tag_set
+    # user
     # user_set
 
     def __unicode__(self):
@@ -43,6 +47,7 @@ class Answer(CreatedBy):
     answer = models.TextField()
     # hint_set
     # question_set
+    # user
     # user_set
 
     def __unicode__(self):
@@ -52,12 +57,14 @@ class Answer(CreatedBy):
 class Attempt(CreatedBy):
     attempt = models.TextField()
     question = models.ForeignKey('Question', null=False)
+    # user
     # user_set
 
 
 class Hint(CreatedBy):
     answer = models.ForeignKey('Answer', null=True)
     hint = models.TextField()
+    # user
     # user_set
 
 
@@ -74,6 +81,7 @@ class Tag(CreatedBy):
     questions = models.ManyToManyField('Question', blank=True, through='QuestionTag', null=True)
     users = models.ManyToManyField(User, blank=True, through='UserTag', related_name='users', null=True)
     # questiontag_set
+    # user
     # user_set
 
     def __unicode__(self):
@@ -83,6 +91,7 @@ class Tag(CreatedBy):
 class Quiz(CreatedBy):
     # Just a placeholder for now.
     name = models.CharField(max_length=1000)
+    # user
     # user_set
 
 
@@ -95,6 +104,7 @@ class QuestionTag(CreatedBy):
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
     # questions_set
+    # user
     # user_set
 
 
@@ -104,6 +114,25 @@ class Schedule(CreatedBy):
     interval_secs = models.IntegerField(null=True, default=None)  # Number of seconds from when record was added until it should be shown again.  When is this useful?  Not sure.  Maybe to aid in showing history of intervals.
     interval_unit = models.TextField(choices=CHOICES_UNITS, null=True, default=None)
     question = models.ForeignKey(Question)
+    # user
+
+    def save(self, *args, **kwargs):
+        # Note that datetime_added and datetime_updated are not set until super() is called.
+        # Rather than doing 2 db calls, get a new timezone.now instead, which will be slightly off
+        # (maybe a fraction of a second) from datetime_added and datetime_updated.
+        time_now = timezone.now()
+        if self.interval_unit in ('months', 'years'):
+            interval_num = int(self.interval_num)
+        else:
+            interval_num = float(self.interval_num)
+        interval = relativedelta(**({self.interval_unit: interval_num}))
+        # TODO: set interval_secs
+        try:
+            self.date_show_next = time_now + interval
+        except TypeError as exception:
+            print "Exception: interval_unit=[%s] interval_num=[%s] type(interval_num)=[%s]" % (self.interval_unit, interval_num, type(interval_num))
+            raise
+        return super(Schedule, self).save(*args, **kwargs)
 
 
 class UserTag(models.Model):

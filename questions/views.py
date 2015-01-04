@@ -50,6 +50,51 @@ def _next_question(user):
         question = question_tags[0].question if question_tags else None
         return question
 
+def _next_question_new(user):
+    ''' Find and return the next question for the currently logged-in user.
+    '''
+    '''
+        Query for all questions that contain at least one of the UserTags
+        Input:
+            UserTags with enabled=True
+        Output:
+            questions that have one or more QuestionTag's 
+            WHERE 
+                QuestionTag.enabled=True
+            AND
+                QuestionTag.
+
+    '''
+
+    # Find all the tags that the user has selected
+    user_tags = UserTag.objects.select_related('tag').filter(user=user, enabled=True)
+    tag_ids = [ user_tag.tag.id for user_tag in user_tags ]
+
+    # Find all the QuestionTag's associated with the UserTag's
+    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=tag_ids)
+
+    # Also get the questions so that we don't need to do additional queries
+    question_tags = question_tags.select_related('question')
+
+    # Find the earliest/oldest date_show_next schedule for each question.
+    question_tags = question_tags.annotate(schedule_oldest=Min('question__schedule__date_show_next'))
+
+    # First look for questions without any schedules, ordered oldest added first
+    question_tags_no_schedule = question_tags.filter(schedule_oldest=None).order_by('question__datetime_added')
+    # If there is a question with no schedules, then use that one.
+    if question_tags_no_schedule:
+        # [0] will be the question with the oldest datetime_added
+        question = question_tags_no_schedule[0].question
+        return question
+    else:
+        # Assert: there are no questions with no schedules; all questions have at least one schedule
+        # Find the newest schedule 
+        # order_by defaults to ascending order (oldest to newest dates)
+        # Note that this is an additional/second query (the first one is the question_tags_no_schedule)
+        question_tags = question_tags.order_by('schedule_oldest')
+        question = question_tags[0].question if question_tags else None
+        return question
+
 
 def _create_and_get_usertags(request):
     ModelFormset_UserTag = modelformset_factory(model=UserTag,
@@ -100,7 +145,7 @@ def _create_and_get_usertags(request):
 @login_required(login_url='/login')
 def question_next(request):
     # get the next question and redirect to it
-    question = _next_question(user=request.user)
+    question = _next_question_new(user=request.user)
     id_question = question.id if question else 0
     return HttpResponseRedirect(reverse('question_new', args=(id_question,)))
 
@@ -110,7 +155,7 @@ def question(request, id_question):
 
     if request.method == 'GET':
         # For a GET, show the next question
-        question = _next_question(user=request.user)
+        question = _next_question_new(user=request.user)
         form_attempt = FormAttemptNew()
         return render(request=request, 
                       template_name='question.html', 

@@ -30,3 +30,9 @@ splinter==0.6.0
 
 # What is sqlparse used for?
 sqlparse==0.1.10
+
+# pytz is for timezones
+pytz
+
+# python-dateutil is used for timedelta's "months" and "years"
+python-dateutil

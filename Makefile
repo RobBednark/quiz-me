@@ -50,7 +50,7 @@ syncdb:
 test: test_phantomjs test_firefox
 
 test_firefox:
-	ROB_SELENIUM_BROWSER=firefox   ./manage.py test
+	ROB_SELENIUM_BROWSER=firefox   ./manage.py test --failfast
 
 test_phantomjs:
-	ROB_SELENIUM_BROWSER=phantomjs ./manage.py test
+	ROB_SELENIUM_BROWSER=phantomjs ./manage.py test --failfast

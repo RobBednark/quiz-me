@@ -9,8 +9,8 @@ import os
 from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
-from .models import Attempt, Question, QuestionTag, Tag, UserTag
-from .views import _next_question
+from .models import Attempt, Question, QuestionTag, Schedule, Tag, UserTag
+from .views import _next_question, _next_question_new
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
@@ -153,7 +153,7 @@ class BrowserTests(LiveServerTestCase):
 
 class NonBrowserTests(TestCase):
     def test_next_question(self):
-        ''' Assert that only views.next_question() works correctly. '''
+        ''' Assert that views.next_question() works correctly. '''
         user1 = User(email="user1@bednark.com")
         user2 = User(email="user2@bednark.com")
         user1.save()
@@ -188,17 +188,10 @@ class NonBrowserTests(TestCase):
         user1_tag1 = UserTag(user=user1, tag=tag1, enabled=True)
         user1_tag1.save()
 
-        with self.assertNumQueries(2):
-            question = _next_question(user=user1)
-            self.assertIsNone(question)
-
-        # Assert that:
-        #    a) user with a UserTag 
-        #    b) question with that UserTag 
-        # gets that question
-        with self.assertNumQueries(2):
-            question = _next_question(user=user1)
-            self.assertIsNone(question)
+        for _ in range(3):
+            with self.assertNumQueries(2):
+                question = _next_question(user=user1)
+                self.assertIsNone(question)
 
         # Assert that 
         #    a) user with a tag 
@@ -272,3 +265,127 @@ class NonBrowserTests(TestCase):
         with self.assertNumQueries(1):
             question = _next_question(user=user1)
             self.assertEquals(question, question3)
+
+    def test_next_question_new(self):
+        ''' Assert that views.next_question_new() works correctly. '''
+        user1 = User(email="user1@bednark.com")
+        user2 = User(email="user2@bednark.com")
+        user1.save()
+        user2.save()
+
+        tag1 = Tag(name='tag1')
+        tag2 = Tag(name='tag2')
+        tag1.save()
+        tag2.save()
+
+        question1 = Question(question="question1")
+        question2 = Question(question="question2")
+        question1.save()
+        question2.save()
+
+        # Asserts: 2 questions
+        #          0 QuestionTag's
+        #          0 UserTag's
+        self.assertEquals(Question.objects.all().count(), 2)
+        self.assertEquals(QuestionTag.objects.all().count(), 0)
+        self.assertEquals(UserTag.objects.all().count(), 0)
+
+        # Assert that:
+        #   a) a user with no tags 
+        #   b) no questions with any tags
+        # does not get a question
+        with self.assertNumQueries(1):
+            question = _next_question_new(user=user1)
+            self.assertIsNone(question)
+
+        # Assert that:
+        #   a) user with a UserTag 
+        #   b) no questions with that UserTag 
+        # does not get a question
+        user1_tag1 = UserTag(user=user1, tag=tag1, enabled=True)
+        user1_tag1.save()
+        self.assertEquals(UserTag.objects.filter(user=user1).count(), 1)
+        self.assertEquals(QuestionTag.objects.filter(tag=tag1).count(), 0)
+
+        for _ in range(3):
+            with self.assertNumQueries(3):
+                question = _next_question_new(user=user1)
+                self.assertIsNone(question)
+
+
+        # Assert that 
+        #    a) user with a tag 
+        #    b) question with that tag
+        #    c) user has no schedules
+        # gets question1 because it was added before question2
+        question1_tag1 = QuestionTag(question=question1, tag=tag1, enabled=True)
+        question1_tag1.save()
+        self.assertEquals(question1.datetime_added < question2.datetime_added, True)
+        self.assertEquals(Question.objects.all().count(), 2)
+        self.assertEquals(UserTag.objects.filter(user=user1).count(), 1)
+        self.assertEquals(QuestionTag.objects.all().count(), 1)
+        self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 1)
+        self.assertEquals(Schedule.objects.filter(user=user1).count(), 0)
+
+        for n in range(4):
+            with self.assertNumQueries(2):
+                question = _next_question_new(user=user1)
+                self.assertEquals(question, question1, msg="iteration=[%s]" % n)
+
+        # Given:
+        #       a) QuestionTag.enabled=False 
+        # Assert: no question is returned
+        question1_tag1.enabled = False
+        question1_tag1.save()
+        self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 0)
+        self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 1)
+        for _ in range(4):
+            with self.assertNumQueries(3):
+                question = _next_question_new(user=user1)
+                self.assertIsNone(question)
+
+        # Given:
+        #       a) question1 and question2 exist for a given tag
+        #       b) question1 has a schedule and question2 does not
+        # Assert that question2 is returned because it has no schedule
+        question1_tag1.enabled = True
+        question1_tag1.save()
+        question2_tag1 = QuestionTag(question=question2, tag=tag1, enabled=True)
+        question2_tag1.save()
+        q1_sched1 = Schedule(user=user1, question=question1, interval_num=1, interval_unit='weeks')
+        q1_sched1.save()
+        self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 2)
+        self.assertEquals(Schedule.objects.all().count(), 1)
+        self.assertEquals(Question.objects.get(id=question1.id).schedule_set.count(), 1)
+        for _ in range(5):
+            with self.assertNumQueries(2):
+                question = _next_question_new(user=user1)
+                self.assertEquals(question, question2)
+
+        # Now add a schedule to question2 with an older scheduled date, and assert that question1 is returned
+        # Given:
+        #       a) two questions exist for a given tag
+        #       b) question1 has two schedules, with question1's newest schedule earlier than question2's schedule
+        q2_sched1 = Schedule(user=user1, question=question2, interval_num=1, interval_unit='months')
+        q1_sched2 = Schedule(user=user1, question=question1, interval_num=1, interval_unit='days')
+        q1_sched2.save()
+        q2_sched1.save()
+        self.assertEquals(q2_sched1.date_show_next > q1_sched2.date_show_next, True)
+        for _ in range(5):
+            with self.assertNumQueries(3):
+                question = _next_question_new(user=user1)
+                self.assertEquals(question, question1)
+
+        # Now add a 2nd earlier schedule to question2, and assert that question2 is now returned
+        # Given:
+        #       a) two questions exist for a given tag
+        #       b) question1 and question2 each have 2 schedules
+        #       c) question2's newest schedule is earlier than question1's newest schedule
+        # Assert that question2 is returned because it's schedule is older
+        q2_sched2 = Schedule(user=user1, question=question2, interval_num=5, interval_unit='minutes')
+        q2_sched2.save()
+        self.assertEquals(q2_sched2.date_show_next < q1_sched1.date_show_next, True)
+        for _ in range(5):
+            with self.assertNumQueries(3):
+                question = _next_question_new(user=user1)
+                self.assertEquals(question, question2)
