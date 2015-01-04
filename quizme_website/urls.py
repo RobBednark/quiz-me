@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     url(r'^$', 'questions.views.question_next'),
     url(r'^/$', 'questions.views.question_next'),
     url(r'^question/$', 'questions.views.question_next', name='question_next'),
-    url(r'^question/(?P<id_question>[0-9]*)/$', 'questions.views.question', name='question_new'),
+    url(r'^question/(?P<id_question>[0-9]*)/$', 'questions.views.question', name='question'),
     url(r'^answer/(?P<id_attempt>[0-9]*)/$', 'questions.views.answer', name='answer'),
 
     # Uncomment the admin/doc line below to enable admin documentation:

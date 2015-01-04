@@ -10,7 +10,7 @@ from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
 from .models import Attempt, Question, QuestionTag, Schedule, Tag, UserTag
-from .views import _next_question_new
+from .views import _next_question
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
@@ -152,8 +152,8 @@ class BrowserTests(LiveServerTestCase):
         self._assert_no_questions()
 
 class NonBrowserTests(TestCase):
-    def test_next_question_new(self):
-        ''' Assert that views.next_question_new() works correctly. '''
+    def test_next_question(self):
+        ''' Assert that views.next_question() works correctly. '''
         user1 = User(email="user1@bednark.com")
         user2 = User(email="user2@bednark.com")
         user1.save()
@@ -181,7 +181,7 @@ class NonBrowserTests(TestCase):
         #   b) no questions with any tags
         # does not get a question
         with self.assertNumQueries(1):
-            question = _next_question_new(user=user1)
+            question = _next_question(user=user1)
             self.assertIsNone(question)
 
         # Assert that:
@@ -195,7 +195,7 @@ class NonBrowserTests(TestCase):
 
         for _ in range(3):
             with self.assertNumQueries(3):
-                question = _next_question_new(user=user1)
+                question = _next_question(user=user1)
                 self.assertIsNone(question)
 
 
@@ -215,7 +215,7 @@ class NonBrowserTests(TestCase):
 
         for n in range(4):
             with self.assertNumQueries(2):
-                question = _next_question_new(user=user1)
+                question = _next_question(user=user1)
                 self.assertEquals(question, question1, msg="iteration=[%s]" % n)
 
         # Given:
@@ -227,7 +227,7 @@ class NonBrowserTests(TestCase):
         self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 1)
         for _ in range(4):
             with self.assertNumQueries(3):
-                question = _next_question_new(user=user1)
+                question = _next_question(user=user1)
                 self.assertIsNone(question)
 
         # Given:
@@ -245,7 +245,7 @@ class NonBrowserTests(TestCase):
         self.assertEquals(Question.objects.get(id=question1.id).schedule_set.count(), 1)
         for _ in range(5):
             with self.assertNumQueries(2):
-                question = _next_question_new(user=user1)
+                question = _next_question(user=user1)
                 self.assertEquals(question, question2)
 
         # Now add a schedule to question2 with an older scheduled date, and assert that question1 is returned
@@ -259,7 +259,7 @@ class NonBrowserTests(TestCase):
         self.assertEquals(q2_sched1.date_show_next > q1_sched2.date_show_next, True)
         for _ in range(5):
             with self.assertNumQueries(3):
-                question = _next_question_new(user=user1)
+                question = _next_question(user=user1)
                 self.assertEquals(question, question1)
 
         # Now add a 2nd earlier schedule to question2, and assert that question2 is now returned
@@ -273,5 +273,5 @@ class NonBrowserTests(TestCase):
         self.assertEquals(q2_sched2.date_show_next < q1_sched1.date_show_next, True)
         for _ in range(5):
             with self.assertNumQueries(3):
-                question = _next_question_new(user=user1)
+                question = _next_question(user=user1)
                 self.assertEquals(question, question2)

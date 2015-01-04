@@ -10,7 +10,7 @@ from .forms import FormAttempt, FormAttemptNew, FormSchedule
 from .models import Attempt, Question, QuestionTag, Schedule, Tag, User, UserTag
 
 
-def _next_question_new(user):
+def _next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     '''
@@ -105,9 +105,9 @@ def _create_and_get_usertags(request):
 @login_required(login_url='/login')
 def question_next(request):
     # get the next question and redirect to it
-    question = _next_question_new(user=request.user)
+    question = _next_question(user=request.user)
     id_question = question.id if question else 0
-    return HttpResponseRedirect(reverse('question_new', args=(id_question,)))
+    return HttpResponseRedirect(reverse('question', args=(id_question,)))
 
 @login_required(login_url='/login')
 def question(request, id_question):
@@ -115,7 +115,7 @@ def question(request, id_question):
 
     if request.method == 'GET':
         # For a GET, show the next question
-        question = _next_question_new(user=request.user)
+        question = _next_question(user=request.user)
         form_attempt = FormAttemptNew()
         return render(request=request, 
                       template_name='question.html', 
