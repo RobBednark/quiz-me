@@ -153,6 +153,10 @@ class BrowserTests(LiveServerTestCase):
 
 class NonBrowserTests(TestCase):
     def test_next_question(self):
+        QUERIES_EXPECTED_NO_QUESTIONS = 1
+        QUERIES_EXPECTED_NO_SCHEDULES = 2
+        QUERIES_EXPECTED_WITH_SCHEDULES = 3
+
         ''' Assert that views.next_question() works correctly. '''
         user1 = User(email="user1@bednark.com")
         user2 = User(email="user2@bednark.com")
@@ -180,9 +184,9 @@ class NonBrowserTests(TestCase):
         #   a) a user with no tags 
         #   b) no questions with any tags
         # does not get a question
-        with self.assertNumQueries(1):
-            question = _next_question(user=user1)
-            self.assertIsNone(question)
+        with self.assertNumQueries(QUERIES_EXPECTED_NO_QUESTIONS):
+            next_question = _next_question(user=user1)
+            self.assertIsNone(next_question.question)
 
         # Assert that:
         #   a) user with a UserTag 
@@ -193,10 +197,10 @@ class NonBrowserTests(TestCase):
         self.assertEquals(UserTag.objects.filter(user=user1).count(), 1)
         self.assertEquals(QuestionTag.objects.filter(tag=tag1).count(), 0)
 
-        for _ in range(3):
-            with self.assertNumQueries(3):
-                question = _next_question(user=user1)
-                self.assertIsNone(question)
+        for _ in range(5):
+            with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
+                next_question = _next_question(user=user1)
+                self.assertIsNone(next_question.question)
 
 
         # Assert that 
@@ -214,9 +218,9 @@ class NonBrowserTests(TestCase):
         self.assertEquals(Schedule.objects.filter(user=user1).count(), 0)
 
         for n in range(4):
-            with self.assertNumQueries(2):
-                question = _next_question(user=user1)
-                self.assertEquals(question, question1, msg="iteration=[%s]" % n)
+            with self.assertNumQueries(QUERIES_EXPECTED_NO_SCHEDULES):
+                next_question = _next_question(user=user1)
+                self.assertEquals(next_question.question, question1, msg="iteration=[%s]" % n)
 
         # Given:
         #       a) QuestionTag.enabled=False 
@@ -226,9 +230,9 @@ class NonBrowserTests(TestCase):
         self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 0)
         self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 1)
         for _ in range(4):
-            with self.assertNumQueries(3):
-                question = _next_question(user=user1)
-                self.assertIsNone(question)
+            with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
+                next_question = _next_question(user=user1)
+                self.assertIsNone(next_question.question)
 
         # Given:
         #       a) question1 and question2 exist for a given tag
@@ -244,9 +248,9 @@ class NonBrowserTests(TestCase):
         self.assertEquals(Schedule.objects.all().count(), 1)
         self.assertEquals(Question.objects.get(id=question1.id).schedule_set.count(), 1)
         for _ in range(5):
-            with self.assertNumQueries(2):
-                question = _next_question(user=user1)
-                self.assertEquals(question, question2)
+            with self.assertNumQueries(QUERIES_EXPECTED_NO_SCHEDULES):
+                next_question = _next_question(user=user1)
+                self.assertEquals(next_question.question, question2)
 
         # Now add a schedule to question2 with an older scheduled date, and assert that question1 is returned
         # Given:
@@ -258,9 +262,9 @@ class NonBrowserTests(TestCase):
         q2_sched1.save()
         self.assertEquals(q2_sched1.date_show_next > q1_sched2.date_show_next, True)
         for _ in range(5):
-            with self.assertNumQueries(3):
-                question = _next_question(user=user1)
-                self.assertEquals(question, question1)
+            with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
+                next_question = _next_question(user=user1)
+                self.assertEquals(next_question.question, question1)
 
         # Now add a 2nd earlier schedule to question2, and assert that question2 is now returned
         # Given:
@@ -272,6 +276,6 @@ class NonBrowserTests(TestCase):
         q2_sched2.save()
         self.assertEquals(q2_sched2.date_show_next < q1_sched1.date_show_next, True)
         for _ in range(5):
-            with self.assertNumQueries(3):
-                question = _next_question(user=user1)
-                self.assertEquals(question, question2)
+            with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
+                next_question = _next_question(user=user1)
+                self.assertEquals(next_question.question, question2)

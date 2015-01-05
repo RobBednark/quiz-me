@@ -38,7 +38,7 @@
                 {{ modelformset_usertag.errors }}
             {% endif %}
             {% for form_usertag in modelformset_usertag.forms %}
-                {{ form_usertag }} </br>
+            {{ form_usertag }} (num_questions=[{{ form_usertag.instance.num_questions }}]) </br>
             {% endfor %}
 
             </p>

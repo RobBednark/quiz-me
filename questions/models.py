@@ -11,6 +11,7 @@ from emailusername.models import User
 CHOICES_UNITS = (
     #  db value   human-readable
     #  --------   --------------
+      ("immediately", "immediately"),
       ("seconds", "seconds"),
       ("minutes", "minutes"),
       ("hours",   "hours"),
@@ -18,6 +19,7 @@ CHOICES_UNITS = (
       ("weeks",   "weeks"),
       ("months",  "months"),
       ("years",   "years"),
+      ("never",   "never"),
 )
 
 class CreatedBy(models.Model):
@@ -121,10 +123,13 @@ class Schedule(CreatedBy):
         # Rather than doing 2 db calls, get a new timezone.now instead, which will be slightly off
         # (maybe a fraction of a second) from datetime_added and datetime_updated.
         time_now = timezone.now()
-        if self.interval_unit in ('months', 'years'):
-            interval_num = int(self.interval_num)
+        if self.interval_num != None:
+            if self.interval_unit in ('months', 'years'):
+                interval_num = int(self.interval_num)
+            else:
+                interval_num = float(self.interval_num)
         else:
-            interval_num = float(self.interval_num)
+            interval_num = 0
         interval = relativedelta(**({self.interval_unit: interval_num}))
         # TODO: set interval_secs
         try:

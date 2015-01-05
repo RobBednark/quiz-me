@@ -20,5 +20,5 @@ class ModelFormSchedule(ModelForm):
         fields = ('date_show_next', 'interval_num', 'interval_unit')
 
 class FormSchedule(forms.Form):
-    interval_num = forms.DecimalField(max_digits=5, decimal_places=2)
+    interval_num = forms.DecimalField(max_digits=5, decimal_places=2, required=False)
     interval_unit = forms.ChoiceField(choices=CHOICES_UNITS)

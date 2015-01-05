@@ -1,7 +1,9 @@
+from collections import namedtuple
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db.models import Max, Min
+from django.db.models import Count, Max, Min
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -9,6 +11,12 @@ from django.shortcuts import render
 from .forms import FormAttempt, FormAttemptNew, FormSchedule
 from .models import Attempt, Question, QuestionTag, Schedule, Tag, User, UserTag
 
+NextQuestion = namedtuple(typename='NextQuestion',
+                          field_names = [
+                            'question',
+                            'user_tags',
+                          ]
+)
 
 def _next_question(user):
     ''' Find and return the next question for the currently logged-in user.
@@ -28,7 +36,13 @@ def _next_question(user):
 
     # Find all the tags that the user has selected
     user_tags = UserTag.objects.select_related('tag').filter(user=user, enabled=True)
+
+    # Find the number of questions for each tag (only used to display the number to the user)
+    user_tags = user_tags.annotate(num_questions=Count('tag__questions'))
     tag_ids = [ user_tag.tag.id for user_tag in user_tags ]
+    for user_tag in user_tags:
+        print "DEBUG: tag=[%s] num_questions=[%s]" % (user_tag.tag.name, user_tag.num_questions)
+    # Find 
 
     # Find all the QuestionTag's associated with the UserTag's
     question_tags = QuestionTag.objects.filter(enabled=True, tag__in=tag_ids)
@@ -45,7 +59,6 @@ def _next_question(user):
     if question_tags_no_schedule:
         # [0] will be the question with the oldest datetime_added
         question = question_tags_no_schedule[0].question
-        return question
     else:
         # Assert: there are no questions with no schedules; all questions have at least one schedule
         # Find the newest schedule 
@@ -53,15 +66,22 @@ def _next_question(user):
         # Note that this is an additional/second query (the first one is the question_tags_no_schedule)
         question_tags = question_tags.order_by('schedule_oldest')
         question = question_tags[0].question if question_tags else None
-        return question
+    return NextQuestion(
+            question=question,
+            user_tags=user_tags,
+    )
 
 
-def _create_and_get_usertags(request):
+def _create_and_get_usertags(request, next_question=None):
     ModelFormset_UserTag = modelformset_factory(model=UserTag,
                                                 extra=0,
                                                 fields=('enabled',))
     user = request.user
-    queryset=UserTag.objects.filter(user=user).order_by('tag__name')
+    queryset = (UserTag.objects
+                       .filter(user=user)
+                       # annotate the number of questions so it can be displayed to the user
+                       .annotate(num_questions=Count('tag__questions'))
+                       .order_by('tag__name'))
     if request.method == 'GET':
         # Get the user, find all the tags, and create a form for each tag.
         #        GET:
@@ -105,23 +125,26 @@ def _create_and_get_usertags(request):
 @login_required(login_url='/login')
 def question_next(request):
     # get the next question and redirect to it
-    question = _next_question(user=request.user)
-    id_question = question.id if question else 0
+    next_question = _next_question(user=request.user)
+    id_question = next_question.question.id if next_question.question else 0
     return HttpResponseRedirect(reverse('question', args=(id_question,)))
 
 @login_required(login_url='/login')
 def question(request, id_question):
-    modelformset_usertag = _create_and_get_usertags(request=request)
 
     if request.method == 'GET':
         # For a GET, show the next question
-        question = _next_question(user=request.user)
+        next_question = _next_question(user=request.user)
+        modelformset_usertag = _create_and_get_usertags(request=request, next_question=next_question)
         form_attempt = FormAttemptNew()
+        # TODO: get total number of questions for the selected tags
+        #   form.quiz_num_questions = Question.objects.filter().count()
+        # TODO: get total number of questions for all tags
         return render(request=request, 
                       template_name='question.html', 
                       dictionary=dict(form_attempt=form_attempt, 
                                       modelformset_usertag=modelformset_usertag,
-                                      question=question))
+                                      question=next_question.question))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
         # Show the question, the attempt, and the correct answer.
@@ -151,9 +174,9 @@ def question(request, id_question):
 
 @login_required(login_url='/login')
 def answer(request, id_attempt):
-    modelformset_usertag = _create_and_get_usertags(request=request)
     attempt = Attempt.objects.get(id=id_attempt)
     if request.method == 'GET':
+        modelformset_usertag = _create_and_get_usertags(request=request)
         form_schedule = FormSchedule()
         return render(request=request, 
                       template_name='answer.html', 
@@ -179,6 +202,7 @@ def answer(request, id_attempt):
         else:
             # Assert: form is NOT valid
             # Need to return the errors to the template, and have the template show the errors.
+            modelformset_usertag = _create_and_get_usertags(request=request)
             return render(request=request, 
                           template_name='answer.html', 
                           dictionary=dict(form_schedule=form_schedule, 

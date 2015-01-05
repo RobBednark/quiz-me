@@ -172,6 +172,13 @@ A:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Sun 1/4/15 1:52pm
+    1:52pm NEXT: add number of questions per tag to the form
+Sat 1/3/15 11:05pm
+    11:06pm NEXT: implement number of questions due now, next 5 mins, next day, week, month, year
+    11:05pm implemented annotation of number of questions for each tag
+    11:05pm got rid of old unused code
+    11:05pm committed changes
 Thu 1/1/15 9:44am
     6:06pm Getting this exception when submitting the interval:
         unsupported type for timedelta seconds component: Decimal
