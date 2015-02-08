@@ -152,7 +152,7 @@ class BrowserTests(LiveServerTestCase):
         self._assert_no_questions()
 
 class NonBrowserTests(TestCase):
-    def test_next_question(self):
+    def test_get_next_question(self):
         QUERIES_EXPECTED_NO_QUESTIONS = 1
         QUERIES_EXPECTED_NO_SCHEDULES = 2
         QUERIES_EXPECTED_WITH_SCHEDULES = 3
@@ -185,7 +185,7 @@ class NonBrowserTests(TestCase):
         #   b) no questions with any tags
         # does not get a question
         with self.assertNumQueries(QUERIES_EXPECTED_NO_QUESTIONS):
-            next_question = _next_question(user=user1)
+            next_question = _get_next_question(user=user1)
             self.assertIsNone(next_question.question)
 
         # Assert that:
@@ -199,7 +199,7 @@ class NonBrowserTests(TestCase):
 
         for _ in range(5):
             with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
-                next_question = _next_question(user=user1)
+                next_question = _get_next_question(user=user1)
                 self.assertIsNone(next_question.question)
 
 
@@ -219,7 +219,7 @@ class NonBrowserTests(TestCase):
 
         for n in range(4):
             with self.assertNumQueries(QUERIES_EXPECTED_NO_SCHEDULES):
-                next_question = _next_question(user=user1)
+                next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question1, msg="iteration=[%s]" % n)
 
         # Given:
@@ -231,7 +231,7 @@ class NonBrowserTests(TestCase):
         self.assertEquals(QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 1)
         for _ in range(4):
             with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
-                next_question = _next_question(user=user1)
+                next_question = _get_next_question(user=user1)
                 self.assertIsNone(next_question.question)
 
         # Given:
@@ -249,7 +249,7 @@ class NonBrowserTests(TestCase):
         self.assertEquals(Question.objects.get(id=question1.id).schedule_set.count(), 1)
         for _ in range(5):
             with self.assertNumQueries(QUERIES_EXPECTED_NO_SCHEDULES):
-                next_question = _next_question(user=user1)
+                next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question2)
 
         # Now add a schedule to question2 with an older scheduled date, and assert that question1 is returned
@@ -263,7 +263,7 @@ class NonBrowserTests(TestCase):
         self.assertEquals(q2_sched1.date_show_next > q1_sched2.date_show_next, True)
         for _ in range(5):
             with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
-                next_question = _next_question(user=user1)
+                next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question1)
 
         # Now add a 2nd earlier schedule to question2, and assert that question2 is now returned
@@ -277,5 +277,5 @@ class NonBrowserTests(TestCase):
         self.assertEquals(q2_sched2.date_show_next < q1_sched1.date_show_next, True)
         for _ in range(5):
             with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
-                next_question = _next_question(user=user1)
+                next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question2)

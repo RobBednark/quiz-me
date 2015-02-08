@@ -28,6 +28,8 @@
                     </div>
             {% endif %}
 
+            <input type="submit" value="Submit" /> 
+
             <p>
             Ask questions with these tags:<br>
             {{ modelformset_usertag.management_form }}
@@ -37,8 +39,13 @@
             {% if modelformset_usertag.errors %}
                 {{ modelformset_usertag.errors }}
             {% endif %}
+
+
             {% for form_usertag in modelformset_usertag.forms %}
-            {{ form_usertag }} (num_questions=[{{ form_usertag.instance.num_questions }}]) </br>
+                {{ form_usertag }} 
+                (num_questions=[{{ form_usertag.instance.num_questions }}]) 
+                {{ form_usertag.interval_counts }}
+                </br>
             {% endfor %}
 
             </p>

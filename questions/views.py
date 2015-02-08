@@ -1,4 +1,6 @@
-from collections import namedtuple
+from collections import defaultdict, namedtuple, OrderedDict
+
+from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -7,6 +9,7 @@ from django.db.models import Count, Max, Min
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils import timezone
 
 from .forms import FormAttempt, FormAttemptNew, FormSchedule
 from .models import Attempt, Question, QuestionTag, Schedule, Tag, User, UserTag
@@ -18,7 +21,7 @@ NextQuestion = namedtuple(typename='NextQuestion',
                           ]
 )
 
-def _next_question(user):
+def _get_next_question_previous_working(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     '''
@@ -42,7 +45,6 @@ def _next_question(user):
     tag_ids = [ user_tag.tag.id for user_tag in user_tags ]
     for user_tag in user_tags:
         print "DEBUG: tag=[%s] num_questions=[%s]" % (user_tag.tag.name, user_tag.num_questions)
-    # Find 
 
     # Find all the QuestionTag's associated with the UserTag's
     question_tags = QuestionTag.objects.filter(enabled=True, tag__in=tag_ids)
@@ -51,6 +53,7 @@ def _next_question(user):
     question_tags = question_tags.select_related('question')
 
     # Find the earliest/oldest date_show_next schedule for each question.
+    # TODO: this doesn't look correct; what is "question__schedule"?  A question can have multiple schedules associated with it.  We need to find the latest schedule for the user for that question.
     question_tags = question_tags.annotate(schedule_oldest=Min('question__schedule__date_show_next'))
 
     # First look for questions without any schedules, ordered oldest added first
@@ -71,8 +74,125 @@ def _next_question(user):
             user_tags=user_tags,
     )
 
+def _get_next_question(user):
+    ''' Find and return the next question for the currently logged-in user.
+    '''
+    # Find all the tags that the user has selected (UserTag's)
+    user_tags = UserTag.objects.select_related('tag').filter(user=user, enabled=True)
 
-def _create_and_get_usertags(request, next_question=None):
+    # Find the number of questions for each tag (only used to display the number to the user)
+    user_tags = user_tags.annotate(num_questions=Count('tag__questions'))
+
+    # Find all the QuestionTag's associated with the UserTag's
+    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags)
+
+    # Find all the questions associated with the QuestionTag's
+    questions = Question.objects.filter(questiontag__in=question_tags).all()
+
+    # Can't do an annotate on questions for a schedule, because it returns a value, not the schedule
+
+    # Find the most-recently-added schedule of each question (datetime_added),
+    # and among all those schedules, find the oldest schedule that is due (date_show_next).
+    oldest_schedule = None
+    oldest_question = None
+
+    # first see if there are questions without any schedules.  If there are, then return the one with the oldest datetime_added
+
+    for question in questions:
+        # Get the most recently-added schedule for this question
+        try:
+            schedule = (Schedule.objects
+                                .filter(user=user, question=question)
+                                .latest(field_name='datetime_added'))
+        except ObjectDoesNotExist:
+            schedule = None
+        if schedule:
+            if oldest_question:
+                pass
+            else:
+                if oldest_schedule:
+                    if schedule.date_show_next < oldest_schedule.date_show_next:
+                        oldest_schedule = schedule
+                else:
+                    oldest_schedule = schedule
+        else:
+            if oldest_question:
+                if question.datetime_added < oldest_question.datetime_added:
+                    oldest_question = question
+            else:
+                oldest_question = question
+    if oldest_question:
+        question = oldest_question
+    elif oldest_schedule:
+        question = oldest_schedule.question
+    else:
+        question = None
+
+    return NextQuestion(
+            question=question,
+            user_tags=user_tags,
+    )
+
+def _get_tag2periods(user, modelformset_usertag=None):
+    # IN-PROCESS / TODO:
+    INTERVALS = (
+            (None, None, "unseen"),
+            (0, "minutes", "now"),
+            (10, "minutes", "10m"),
+            (1, "hour", "1h"),
+            (1, "day", "1d"),
+            (1, "weeks", "1w"),
+            (1, "months", "1mo"),
+            (1, "year", "1y"),
+    )
+    tag2interval2cnt = defaultdict(lambda: defaultdict(int))
+    tag2interval_order = defaultdict(list)
+    tags = Tag.objects.all()
+    for tag in tags:
+        # Get all QuestionTag's for this tag
+        question_tags = QuestionTag.objects.filter(enabled=True, tag=tag)
+
+        # Also get the questions for each QuestionTag so that we don't need to do additional queries
+        question_tags = question_tags.select_related('question')
+
+        for question_tag in question_tags:
+            question = question_tag.question
+            # for each question, get the most recently-added schedule for that user
+            try:
+                latest = Schedule.objects.filter(user=user, question=question).latest(field_name='datetime_added')
+            except ObjectDoesNotExist:
+                latest = None
+            if latest == None:
+                tag2interval2cnt[tag.name]['unseen'] += 1
+                if not 'unseen' in tag2interval_order[tag.name]:
+                    tag2interval_order[tag.name].append('unseen')
+            else:
+                interval_previous = (None, None, '')
+                # Find which interval this schedule is in
+                for interval in INTERVALS:
+                    if interval[0] == None:
+                        continue
+                    delta = relativedelta(**({interval[1]: interval[0]}))
+                    now = timezone.now()
+                    if latest.date_show_next <= now + delta:
+                        interval_name = '%s-%s' % (interval_previous[2], interval[2])
+                        tag2interval2cnt[tag.name][interval_name] += 1
+                        if not interval_name in tag2interval_order[tag.name]:
+                            tag2interval_order[tag.name].append(interval_name)
+                        break
+                    interval_previous = interval
+
+    for form in modelformset_usertag:
+        # update the corresponding tag in modelformset
+        tag_name = form.instance.tag.name
+        interval_str = ''
+        for interval in tag2interval_order[tag_name]:
+            interval_str += '{interval}={count}  '.format(interval=interval, count=tag2interval2cnt[tag_name][interval])
+        form.interval_counts = interval_str
+    return tag2interval2cnt
+
+
+def _create_and_get_usertags(request):
     ModelFormset_UserTag = modelformset_factory(model=UserTag,
                                                 extra=0,
                                                 fields=('enabled',))
@@ -82,6 +202,7 @@ def _create_and_get_usertags(request, next_question=None):
                        # annotate the number of questions so it can be displayed to the user
                        .annotate(num_questions=Count('tag__questions'))
                        .order_by('tag__name'))
+
     if request.method == 'GET':
         # Get the user, find all the tags, and create a form for each tag.
         #        GET:
@@ -91,7 +212,7 @@ def _create_and_get_usertags(request, next_question=None):
         # Get all the Tag's
         tags = Tag.objects.all()
 
-        # Get all the UserTag's associated with this user
+        # Get all the UserTag's for this user
         qs_user_tags = UserTag.objects.filter(user=user)
         user_tags_by_tagname = { user_tag.tag.name : user_tag for user_tag in qs_user_tags }
 
@@ -103,10 +224,12 @@ def _create_and_get_usertags(request, next_question=None):
 
         modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
         for form in modelformset_usertag.forms:
+            # For each checkbox, display to the user the tag name
             form.fields['enabled'].label = form.instance.tag.name
 
         return modelformset_usertag
     elif request.method == 'POST':
+        # Save the changes made by the user (selecting/unselecting tags)
         modelformset_usertag = ModelFormset_UserTag(queryset=queryset, data=request.POST)
         for form in modelformset_usertag.forms:
             form.fields['enabled'].label = form.instance.tag.name
@@ -125,26 +248,26 @@ def _create_and_get_usertags(request, next_question=None):
 @login_required(login_url='/login')
 def question_next(request):
     # get the next question and redirect to it
-    next_question = _next_question(user=request.user)
+    next_question = _get_next_question(user=request.user)
     id_question = next_question.question.id if next_question.question else 0
     return HttpResponseRedirect(reverse('question', args=(id_question,)))
 
 @login_required(login_url='/login')
 def question(request, id_question):
 
+    modelformset_usertag = _create_and_get_usertags(request=request)
     if request.method == 'GET':
         # For a GET, show the next question
-        next_question = _next_question(user=request.user)
-        modelformset_usertag = _create_and_get_usertags(request=request, next_question=next_question)
+        next_question = _get_next_question(user=request.user)
+        _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
         form_attempt = FormAttemptNew()
-        # TODO: get total number of questions for the selected tags
-        #   form.quiz_num_questions = Question.objects.filter().count()
         # TODO: get total number of questions for all tags
         return render(request=request, 
                       template_name='question.html', 
                       dictionary=dict(form_attempt=form_attempt, 
                                       modelformset_usertag=modelformset_usertag,
-                                      question=next_question.question))
+                                      question=next_question.question
+                                      ))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
         # Show the question, the attempt, and the correct answer.
@@ -175,8 +298,9 @@ def question(request, id_question):
 @login_required(login_url='/login')
 def answer(request, id_attempt):
     attempt = Attempt.objects.get(id=id_attempt)
+    modelformset_usertag = _create_and_get_usertags(request=request)
     if request.method == 'GET':
-        modelformset_usertag = _create_and_get_usertags(request=request)
+        _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
         form_schedule = FormSchedule()
         return render(request=request, 
                       template_name='answer.html', 
@@ -202,7 +326,7 @@ def answer(request, id_attempt):
         else:
             # Assert: form is NOT valid
             # Need to return the errors to the template, and have the template show the errors.
-            modelformset_usertag = _create_and_get_usertags(request=request)
+            _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
             return render(request=request, 
                           template_name='answer.html', 
                           dictionary=dict(form_schedule=form_schedule, 

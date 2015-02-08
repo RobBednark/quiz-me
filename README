@@ -2,6 +2,47 @@ This file is in plain text (convert to markdown at some point).
 Lines beginning with '!' are section headings.
 
 ================================================================================
+!Show schedules for each tag
+================================================================================
+
+User > UserTag's > QuestionTag's > Question's > Schedule's > Schedule.date_added
+
+Want: most recently-added Schedule for each Question for the specified User
+To get latest Schedule's, need Question's and User
+To get Question's, need QuestionTag's
+To get QuestionTag's, need UserTag's (specifically, need the tag's from UserTag's to get the QuestionTag's)
+To get UserTag's, need User
+
+Reference: http://stackoverflow.com/questions/27544223/django-query-filter-many-to-many-to-many-etc
+Reference: http://stackoverflow.com/questions/3630619/django-queryset-for-many-to-many-field
+
+Could just add this code to _get_tag2periods, just need to add UserTag's.
+Keep track of most-recently schedule question by seeing if that question has a UserTag (need an extra query for each question though)
+
+Data structure to process schedules:
+  questions2schedules[question_id] == latest_schedule
+
+Iterate through questions for each tag:
+    for tag in tags:
+        questions = ...
+        questions.annotate(newest_date_added)
+        for question in questions:
+            tag2periods...
+
+Resulting data structure:
+  tag2periods['python']['now-10m'] = 4
+              ^^^^^^^^  ^^^^^^^^^    ^
+              tag       period       num_questions
+
+Consider using the Max(pk) to get the latest-added schedule.
+
+Note that a question with multiple tags will still only have one schedule, because the schedule is per user per question.
+
+Q: How do I find the most-recently-added schedule of each question (datetime_added)?
+A:
+I have the queryset of questions.
+*** Get the code working first, then worry about performance.  Easier to just ask on stackoverflow with existing code.
+================================================================================
 !Glossary / Terms / Nomenclature
 ================================================================================
 answer - the "correct" answer associated with a question; a question can have 0 or 1 answers
@@ -12,59 +53,6 @@ question - a question
 quiz - a set of associated questions (not yet implemented)
 tag - a tag associated with a question; a question can have 0 to many tags
 user tag - the tags that a user has selected indicating which questions they want to see
-
-================================================================================
-!Agenda/Next/ToDo:
-================================================================================
-NEXT:
-
-Old urls:
-    - ^$
-    - ^question$ - (same as ^$)
-New urls:
-    - ^question_next/
-    - ^question_new/(?P<id_question>[0-9]*)/$
-    - ^answer/(?P<id_attempt>[0-9]*)/$
-
-
-Old views:
-    view_quiz
-New views:
-    question_next - ready (just a redirect to question)
-    question - shows a question with a form to input an attempt; almost identical to view_quiz
-        GET - show the question and an empty for for an attempt
-        POST - post a new attempt
-    answer - shows the question, attempt, and answer, and a form to input a schedule
-        GET - show the question, attempt, and answer
-        POST - create a new schedule; redirect to question_next
-
-Old templates:
-    show_question.html
-    show_question_and_answer.html
-New templates:
-    question.html (very similar to show_question.html, but without hidden_question_id
-    answer.html (for views.answer() )
-
-intervals:
-    - change template show_question_and_answer.html to be a POST form
-        (model after show_question.html)
-    - create a new view for submitting an answer
-        - /answer/submit_feedback/ -- POST_answer_feedback
-    - change show_question_and_answer to be a form instead of a "Next Question" link
-        - form will include an interval number and unit
-        - need a POST view for the answer;
-        - in the POST, redirect the user to GET /question/
-    - tests
-    DONE - add a redirect to question()
-    DONE - change template "show_question_and_answer.html" to "answer_feedback_form.html"
-    DONE - modify urls.py
-    DONE - add admin page for schedules
-    DONE - add new models
-    DONE - add south migration
-    DONE - model
-    DONE - postgres backups and restores
-    Notes:
-        DONE o interval form needs to have a number input and a unit dropdown
 
 ================================================================================
 !Tests
@@ -86,14 +74,13 @@ Code: Dropbox/git/quizme_site
 ================================================================================
 !Documentation
 ================================================================================
-
-Currently there is one view (questions.views) with separate templates for GET (display the question: show_question.html) and POST (post the answer: show_question_and_answer.html).
-
-3 different pages:
-    show_question GET (the result of seeing a previous answer, or of just entering the quiz); show question; 
-         this needs to be changed to the result of a POST from the previous answer, or a different page is needed if there was an error)
-    POST (the result of answering a question; show the question and answer)
-    POST (the result of giving feedback after seeing the answer; redirect to GET
+question_next - ready (just a redirect to question)
+question - shows a question with a form to input an attempt
+    GET - show the question and an empty for for an attempt
+    POST - post a new attempt
+answer - shows the question, attempt, and answer, and a form to input a schedule
+    GET - show the question, attempt, and answer
+    POST - create a new schedule; redirect to question_next
 
 Start request        Start template                 User Action             End Request           End template
 -------------------- --------------                 -----------             -------------------   --------
@@ -106,8 +93,8 @@ POST /show_question/ show_question_and_answer.html  user clicks             GET 
 Requests, methods, and tempates:
 METHOD  REQUEST          TEMPLATE REQUEST IS FROM  REQUEST VIA
 ------  ---------------  ------------------------  -----------
-GET     /show_question/  show_question.html
-POST    /show_question/  
+GET     /question/       question.html
+POST    /question/  
 
 Symbolic actions:
     - ask/show question (GET question)
@@ -135,6 +122,7 @@ Note that:
 utcnow() is naive.
 
 See https://docs.djangoproject.com/en/1.7/topics/i18n/timezones/
+
 ================================================================================
 !HOW TO add a South migration
 ================================================================================
@@ -142,6 +130,7 @@ a) create the migration
     ./manage.py schemamigration myapp --auto
 b) run the migration:
     ./manage.py migrate myapp
+
 ================================================================================
 !Putting on github
 ================================================================================
@@ -172,6 +161,22 @@ A:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 1/23/15 7:05am
+    7:05am Working!  The usertag's are now working as well.
+Mon 1/19/15 1:41pm
+    1:41pm Fix so that modelformset_usertag is fixed on each POST so that it is saved.
+    1:41pm It looks like I got _get_next_question() working correctly.  Hooray!
+Thu 1/15/15 7:26am
+    7:26am NEXT: review all of the view and model code to see if I can spot the bug(s)
+Wed 1/14/15 9:42pm
+    10:07pm NEXT: add some tests; schedules aren't working for CSS tag - it always shows the same question
+    10:07pm Got interval counts working!
+    9:42pm NEXT: _get_tag2periods -- still figuring out how to get into a data structure to easily add them to each tag in an ordered fashion
+Thu 1/8/15 4:42pm
+    4:43pm NEXT: implement number of questions due now, next 5 mins, next day, week, month, year
+        get all questions for each tag; iterate through them and put them in time categories (annotate the latest schedule for each question)
+        select_related all questions for each tag; annotate every question with latest schedule
+    4:42pm Number of questions per tag has been added.
 Sun 1/4/15 1:52pm
     1:52pm NEXT: add number of questions per tag to the form
 Sat 1/3/15 11:05pm
@@ -1078,6 +1083,9 @@ o SuperMemo
 ================================================================================
 !TODO / Backlog
 ================================================================================
+o 01/23/15 Django Admin: be able to click on the answer from the list of questions page.
+o 01/23/15 Django Admin: add ability to edit answer in same page as editing question.
+o 01/23/15 Add search to Django admin to search in questions and answers.
 o 12/31/14 Added schedule intervals for "immediate" and "never"
 o 12/31/14 Allow a quiz mode that consists of a set of questions, and the user can go back and change their answers as much as they want (e.g., as part of an interview)
 o 12/31/14 Make it possible to view questions that don't have any tags
