@@ -2,6 +2,8 @@
 Django==1.6.5
 South==0.8.4  # database migrations
 django-debug-toolbar==1.0  # handy Django info in browser useful for debugging
+                           # Note that 1.2.2 is newer, but it requires a newer
+                           # 1.7 version of Django
 
 # email-as-username used for using email addresses as usernames
 django-email-as-username==1.6.7

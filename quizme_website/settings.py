@@ -6,6 +6,7 @@ AUTH_USER_MODEL = 'emailusername.User'
 BASEDIR=os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+ENABLE_DJANGO_DEBUG_TOOLBAR = False
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -109,6 +110,9 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+if ENABLE_DJANGO_DEBUG_TOOLBAR:
+    # Django Debug Toolbar (make sure to put it first!)
+    MIDDLEWARE_CLASSES = ( 'debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
 
 ROOT_URLCONF = 'quizme_website.urls'
 
@@ -141,6 +145,9 @@ INSTALLED_APPS = (
     'questions',
     'emailusername',  # used for User; so email addresses can be used as username
 )
+if ENABLE_DJANGO_DEBUG_TOOLBAR:
+    # Django Debug Toolbar
+    INSTALLED_APPS += ('debug_toolbar',)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -170,3 +177,25 @@ LOGGING = {
         },
     }
 }
+if ENABLE_DJANGO_DEBUG_TOOLBAR:
+    if False:
+    # Django Debug Toolbar:
+        DEBUG_TOOLBAR_PANELS = (
+                'debug_toolbar.panels.version.VersionDebugPanel',
+                'debug_toolbar.panels.timer.TimerDebugPanel',
+                'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+                'debug_toolbar.panels.headers.HeaderDebugPanel',
+                'debug_toolbar.panels.profiling.ProfilingDebugPanel',
+                'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+                'debug_toolbar.panels.sql.SQLDebugPanel',
+                'debug_toolbar.panels.template.TemplateDebugPanel',
+                'debug_toolbar.panels.cache.CacheDebugPanel',
+                'debug_toolbar.panels.signals.SignalDebugPanel',
+                'debug_toolbar.panels.logger.LoggingPanel',
+        )
+
+    DEBUG_TOOLBAR_CONFIG = {
+                    'INTERCEPT_REDIRECTS': False, # set this to True if you want to intercept redirects
+                    'SHOW_TEMPLATE_CONTEXT' : True,  # This shows all the context variables available when rendering the template
+                    # 'SHOW_TOOLBAR_CALLBACK' : lambda request: True,
+    }
