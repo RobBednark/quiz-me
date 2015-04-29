@@ -10,7 +10,7 @@ from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
 from .models import Attempt, Question, QuestionTag, Schedule, Tag, UserTag
-from .views import _next_question
+from .views import _get_next_question
 
 # By default, LiveServerTestCase uses port 8081.
 # If you need a different port, then set this.
@@ -154,8 +154,9 @@ class BrowserTests(LiveServerTestCase):
 class NonBrowserTests(TestCase):
     def test_get_next_question(self):
         QUERIES_EXPECTED_NO_QUESTIONS = 1
-        QUERIES_EXPECTED_NO_SCHEDULES = 2
-        QUERIES_EXPECTED_WITH_SCHEDULES = 3
+        QUERIES_EXPECTED_NO_SCHEDULES_MIN = 2
+        QUERIES_EXPECTED_NO_SCHEDULES_MAX = 3
+        QUERIES_EXPECTED_WITH_SCHEDULES = 1
 
         ''' Assert that views.next_question() works correctly. '''
         user1 = User(email="user1@bednark.com")

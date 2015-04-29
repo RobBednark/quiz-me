@@ -134,8 +134,8 @@ def _get_next_question(user):
     )
 
 def _get_tag2periods(user, modelformset_usertag=None):
-    # IN-PROCESS / TODO:
     INTERVALS = (
+            # integer, unit, display-name
             (None, None, "unseen"),
             (0, "minutes", "now"),
             (10, "minutes", "10m"),
@@ -157,11 +157,13 @@ def _get_tag2periods(user, modelformset_usertag=None):
 
         for question_tag in question_tags:
             question = question_tag.question
+
             # for each question, get the most recently-added schedule for that user
             try:
                 latest = Schedule.objects.filter(user=user, question=question).latest(field_name='datetime_added')
             except ObjectDoesNotExist:
                 latest = None
+
             if latest == None:
                 tag2interval2cnt[tag.name]['unseen'] += 1
                 if not 'unseen' in tag2interval_order[tag.name]:
@@ -254,6 +256,7 @@ def question_next(request):
 
 @login_required(login_url='/login')
 def question(request, id_question):
+    # Display the question, with a form to put in the attempted answer
 
     modelformset_usertag = _create_and_get_usertags(request=request)
     if request.method == 'GET':
@@ -261,12 +264,27 @@ def question(request, id_question):
         next_question = _get_next_question(user=request.user)
         _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
         form_attempt = FormAttemptNew()
+        question_tag_names = ", ".join([str(qtag.tag.name) for qtag in next_question.question.questiontag_set.all()])
+
+        # TODO: get the number of questions answered (scheduled) in the last hour
+
+        # TODO: get the number of questions answered (scheduled) since midnight
+
+        try:
+            last_schedule_added = (Schedule.objects
+                                   .filter(user=request.user, question=next_question.question)
+                                   .latest(field_name='datetime_added'))
+        except ObjectDoesNotExist:
+            last_schedule_added = None
+
         # TODO: get total number of questions for all tags
+
         return render(request=request, 
                       template_name='question.html', 
                       dictionary=dict(form_attempt=form_attempt, 
                                       modelformset_usertag=modelformset_usertag,
-                                      question=next_question.question
+                                      question=next_question.question,
+                                      question_tag_names = question_tag_names,
                                       ))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
@@ -297,6 +315,7 @@ def question(request, id_question):
 
 @login_required(login_url='/login')
 def answer(request, id_attempt):
+    # Display the question, the attempt, and the answer
     attempt = Attempt.objects.get(id=id_attempt)
     modelformset_usertag = _create_and_get_usertags(request=request)
     if request.method == 'GET':
@@ -311,9 +330,9 @@ def answer(request, id_attempt):
                                       attempt=attempt),
         )
     elif request.method == 'POST':
-        # ASSERT: this is a POST, so the user answered a question
-        # Show the correct answer, the user's attempt, and the question
-        # Show a NEXT button to do a GET and get the next question
+        # ASSERT: this is a POST, so the user answered a question, and inputted
+        # when they want to see the question again.
+        # Redirect the user to the next question.
         form_schedule = FormSchedule(request.POST)
         if form_schedule.is_valid():
             schedule = Schedule(

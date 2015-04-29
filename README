@@ -161,6 +161,8 @@ A:
 ================================================================================
 !Log/History/Diary
 ================================================================================
+Fri 3/6/15 4:17pm
+    4:17pm adding a management command to export questions and answers in plain text
 Fri 1/23/15 7:05am
     7:05am Working!  The usertag's are now working as well.
 Mon 1/19/15 1:41pm
@@ -1081,8 +1083,12 @@ o Mykhaylo Kopytonenko (mishakop at gmail com)  (Fresh Memory author)
 o Anki contributors
 o SuperMemo 
 ================================================================================
-!TODO / Backlog
+!TODO / Backlog / Features / Stories
 ================================================================================
+o 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time
+o 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev]
+o 3/10/15 don't allow duplicate tags to be created
+o 3/10/15 show the question number on the answer page, so that it can be visually seen to manually edit the question in the admin
 o Export (export questions via csv / json / yaml / xml / python data structure / plain text)
 o 02/11/15 On the answer page, add an input box where the user can type to practice the answer.  Maybe or maybe not save it (only value in saving it would be to see the effort that was made).
 o 01/23/15 Django Admin: be able to click on the answer from the list of questions page.
@@ -1166,6 +1172,7 @@ o ability to modify questions/answers on-the-fly
 
 o versions of questions/answers
 
+DONE o 3/10/15 show the answer id in answer.__unicode__ in the admin [DONE 3/10/15]
 DONE o 12/27/14 Show the number of questions for each tag (total number of questions, and number of questions past deadline)
 DONE o postgres backups (via Makefile)
 DONE o User login
@@ -1368,8 +1375,12 @@ MeMemorize
 Memorizer
 
 Memory Aid
+Memory Assistant
 Memory Butler
 Memory Chest
+Memory Concierge
+Memory Coach
+Memory Curator
 Memory Bunny
 Memory Fountain
 Memory-Go-Round
@@ -1378,7 +1389,9 @@ Memory Lift
 Memory Push-ups
 Memory Refresh
 Memory Refresher
+Memory Secretary
 Memory Toolchest
+Memory Toy
 
 Neuron Expander
 
@@ -1417,6 +1430,7 @@ What Was That?
 My Favorites:
 ----------------------------------------
 Memory Butler
+Memory Curator
 
 ----------------------------------------
 Keywords:

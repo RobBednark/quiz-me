@@ -9,12 +9,15 @@
 	</head>
 	<body>
 		<form action="" method="post"> {% csrf_token %}
+            <!-- Show the question -->
             {% if question %}
                 Q: {{ question.question|markdown }}
             {% else %}
                 (NOTE: there are no questions)
             {% endif %}
 
+
+            <!-- Show the form fields for the attempt -->
             <div class="fieldWrapper">
                 {{ form_attempt.attempt.label_tag }}
                 {{ form_attempt.attempt }}
@@ -30,6 +33,18 @@
 
             <input type="submit" value="Submit" /> 
 
+            <!-- Show the tags for this question -->
+            <br>Tags for this question: [{{ question_tag_names }}]
+            <br>Question added  date  : [{{ question.datetime_added }}]
+            <br>Question updated date : [{{ question.datetime_updated }}]
+
+            <!-- Last attempt for this question -->
+            <br/>Last time this question was scheduled (answered): [{{ last_schedule_added }}]
+
+            <!-- Show the number of schedules added in the last 30m, 1h, 4h, 1d -->
+            <br/>Schedules recently added (questions answered): 
+
+            <!-- Show all the tags -->
             <p>
             Ask questions with these tags:<br>
             {{ modelformset_usertag.management_form }}

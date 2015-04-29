@@ -7,6 +7,8 @@ DIR_DUMPS=db_dumps
 date:=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
 FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.custom
 FILE_DUMP_PLAIN:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.plain
+FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.txt
+SYMLINK_LATEST_TEXT:=${DIR_DUMPS}/latest.dump.txt
 
 create_superuser:
 	./manage.py createsuperuser --email rbednark@gmail.com
@@ -21,8 +23,10 @@ dumpdb:
 	mkdir -p db_dumps
 	pg_dump --format=custom ${DB_NAME} > ${FILE_DUMP_CUSTOM}
 	pg_dump --format=plain ${DB_NAME} > ${FILE_DUMP_PLAIN}
-	#pg_dump ${DB_NAME} > db_dumps/dump.${DB_NAME}.$(date).custom
-	ls -ltr db_dumps/.
+	./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
+	rm -f ${SYMLINK_LATEST_TEXT}
+	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
+	ls -ltr db_dumps/. |tail -5
 
 loaddb: dumpdb
 	# Load the dumps into new db's to test them

@@ -42,7 +42,7 @@ class Question(CreatedBy):
     # user_set
 
     def __unicode__(self):
-        return '<Question question=[%s] datetime_added=[%s]>' % (self.question, self.datetime_added)
+        return '<Question id=[%s] question=[%s] datetime_added=[%s]>' % (self.id, self.question, self.datetime_added)
 
 
 class Answer(CreatedBy):
@@ -53,7 +53,7 @@ class Answer(CreatedBy):
     # user_set
 
     def __unicode__(self):
-        return '<Answer answer=[%s] datetime_added=[%s]>' % (self.answer, self.datetime_added)
+        return '<Answer id=[%s] answer=[%s] datetime_added=[%s]>' % (self.id, self.answer, self.datetime_added)
 
 
 class Attempt(CreatedBy):
@@ -108,6 +108,9 @@ class QuestionTag(CreatedBy):
     # questions_set
     # user
     # user_set
+
+    def __unicode__(self):
+        return 'QuestionTag: tag.name=[%s] question.id=[%s]' % (self.tag.name, self.question.id)
 
 
 class Schedule(CreatedBy):
