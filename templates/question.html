@@ -39,10 +39,11 @@
             <br>Question updated date : [{{ question.datetime_updated }}]
 
             <!-- Last attempt for this question -->
-            <br/>Last time this question was scheduled (answered): [{{ last_schedule_added }}]
+            <br/>Last time this question was scheduled (answered): [{{ last_schedule_added.datetime_added }}]
+            <br/>Next scheduled time for this question: [{{ last_schedule_added.date_show_next }}]
 
             <!-- Show the number of schedules added in the last 30m, 1h, 4h, 1d -->
-            <br/>Schedules recently added (questions answered): 
+            <br/>Schedules recently added (# questions answered in last 30m, ...): 
 
             <!-- Show all the tags -->
             <p>

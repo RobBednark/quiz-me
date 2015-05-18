@@ -21,7 +21,7 @@ NextQuestion = namedtuple(typename='NextQuestion',
                           ]
 )
 
-def _get_next_question_previous_working(user):
+def _DEPRECATED_get_next_question_previous_working_DEPRECATED(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     '''
@@ -93,10 +93,10 @@ def _get_next_question(user):
 
     # Find the most-recently-added schedule of each question (datetime_added),
     # and among all those schedules, find the oldest schedule that is due (date_show_next).
+    # The most-recently-added schedule is the only one that matters.
+    # For questions that don't have a schedule, find the oldest question based on when it was added.
     oldest_schedule = None
     oldest_question = None
-
-    # first see if there are questions without any schedules.  If there are, then return the one with the oldest datetime_added
 
     for question in questions:
         # Get the most recently-added schedule for this question
@@ -108,6 +108,8 @@ def _get_next_question(user):
             schedule = None
         if schedule:
             if oldest_question:
+                # There's already a question without a schedule, so we don't
+                # care about questions with a schedule.
                 pass
             else:
                 if oldest_schedule:
@@ -122,14 +124,14 @@ def _get_next_question(user):
             else:
                 oldest_question = question
     if oldest_question:
-        question = oldest_question
+        question_to_show = oldest_question
     elif oldest_schedule:
-        question = oldest_schedule.question
+        question_to_show = oldest_schedule.question
     else:
-        question = None
+        question_to_show = None
 
     return NextQuestion(
-            question=question,
+            question=question_to_show,
             user_tags=user_tags,
     )
 
@@ -282,6 +284,7 @@ def question(request, id_question):
         return render(request=request, 
                       template_name='question.html', 
                       dictionary=dict(form_attempt=form_attempt, 
+                                      last_schedule_added=last_schedule_added,
                                       modelformset_usertag=modelformset_usertag,
                                       question=next_question.question,
                                       question_tag_names = question_tag_names,

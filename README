@@ -1085,17 +1085,17 @@ o SuperMemo
 ================================================================================
 !TODO / Backlog / Features / Stories
 ================================================================================
-o 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time
+o 05/17/15 show the number of questions recently answered/scheduled (e.g., 0-10mins=[5]  10-30mins=[12] 30m-2h=[4]  0-2h=[21])  #high
+o 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time  #high
 o 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev]
 o 3/10/15 don't allow duplicate tags to be created
 o 3/10/15 show the question number on the answer page, so that it can be visually seen to manually edit the question in the admin
-o Export (export questions via csv / json / yaml / xml / python data structure / plain text)
-o 02/11/15 On the answer page, add an input box where the user can type to practice the answer.  Maybe or maybe not save it (only value in saving it would be to see the effort that was made).
+o Export (export questions via csv / json / yaml / xml / python data structure / plain text).  Find a way to maintain referential integrity.
+o 02/11/15 On the answer page, add an input box where the user can type to practice the answer.  Maybe or maybe not save it (only value in saving it would be to see the effort that was made).  #high
 o 01/23/15 Django Admin: be able to click on the answer from the list of questions page.
 o 02/15/15 Django Admin: show the associated question(s) for each answer, and be able to click on the question 
 o 01/23/15 Django Admin: add ability to edit answer in same page as editing question.
-o 2/11/15  Show the schedule numbers for the total of selected tags (just like is done for each individual tag)
-o 8/29/14 Show the tags for the question being asked/answered.
+o 2/11/15  Show the schedule numbers for the total of selected tags (just like is done for each individual tag)  #high
 o 01/23/15 Add search to Django admin to search in questions and answers.
 o 12/31/14 Added schedule intervals for "immediate" and "never"
 o 12/31/14 Allow a quiz mode that consists of a set of questions, and the user can go back and change their answers as much as they want (e.g., as part of an interview)
@@ -1172,6 +1172,7 @@ o ability to modify questions/answers on-the-fly
 
 o versions of questions/answers
 
+DONE o 8/29/14 Show the tags for the question being asked/answered.
 DONE o 3/10/15 show the answer id in answer.__unicode__ in the admin [DONE 3/10/15]
 DONE o 12/27/14 Show the number of questions for each tag (total number of questions, and number of questions past deadline)
 DONE o postgres backups (via Makefile)

@@ -9,23 +9,24 @@
 	</head>
 	<body>
 		<form action="" method="post"> {% csrf_token %}
-            <div class="fieldWrapper">
-                Correct Answer:
-                {{ answer.answer|markdown }}
-                <p>
+            <div class="fieldWrapper" style="background-color:#00FFCC">
+                Q: 
+                {{ question.question|markdown }}
             </div>
 
-            <div class="fieldWrapper">
+            <div class="fieldWrapper" style="background-color:#FFFF85">
                 Your answer:
                 {{ attempt.attempt|markdown }}
                 <p>
                 <p>
             </div>
 
-            <div class="fieldWrapper">
-                Q: 
-                {{ question.question|markdown }}
+            <div class="fieldWrapper" style="background-color:#66FF33">
+                Correct Answer:
+                {{ answer.answer|markdown }}
+                <p>
             </div>
+
 
             {{ form_schedule.as_p }}
 
