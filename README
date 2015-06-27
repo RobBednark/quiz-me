@@ -1082,9 +1082,16 @@ o Steven Jonas
 o Mykhaylo Kopytonenko (mishakop at gmail com)  (Fresh Memory author)
 o Anki contributors
 o SuperMemo 
+o Nev Okyay
 ================================================================================
 !TODO / Backlog / Features / Stories
 ================================================================================
+o 6/2/15 BUG: I added a new question with tags=[file_systems, unix]; when I went to quiz myself with a bunch of tags selected, but neither [file_systems, unix], I still got that question; after I answered that question, I then got another question with those same tags
+  - it might be because the schedules query 
+  - questions being shown that should not be:
+        http://localhost:8000/question/1052/  
+        http://localhost:8000/question/1053/
+o 5/29/15 show list of selected tags on one line (instead of having to look through list of all tags) #high
 o 05/17/15 show the number of questions recently answered/scheduled (e.g., 0-10mins=[5]  10-30mins=[12] 30m-2h=[4]  0-2h=[21])  #high
 o 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time  #high
 o 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev]
@@ -1123,7 +1130,7 @@ o Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or
 o 7/15/14 - add admin "list_filter" setting to be able to filter by tags on questions and answers
 o use a single template: combine show_question.html and show_question_and_answer.html
 o add an inline in the admin to edit the answer for a given question
-o ability to change tags for the question shown
+o ability to change tags for the question shown #high
 o Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
 o deploy to heroku
 o 7/14/14 - add a "SKIP" button to skip a question

@@ -136,6 +136,7 @@ def _get_next_question(user):
     )
 
 def _get_tag2periods(user, modelformset_usertag=None):
+    # TODO: also pass in the selected tags and count the questions for those tags
     INTERVALS = (
             # integer, unit, display-name
             (None, None, "unseen"),
