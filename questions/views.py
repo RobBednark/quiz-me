@@ -21,59 +21,6 @@ NextQuestion = namedtuple(typename='NextQuestion',
                           ]
 )
 
-def _DEPRECATED_get_next_question_previous_working_DEPRECATED(user):
-    ''' Find and return the next question for the currently logged-in user.
-    '''
-    '''
-        Query for all questions that contain at least one of the UserTags
-        Input:
-            UserTags with enabled=True
-        Output:
-            questions that have one or more QuestionTag's 
-            WHERE 
-                QuestionTag.enabled=True
-            AND
-                QuestionTag.
-
-    '''
-
-    # Find all the tags that the user has selected
-    user_tags = UserTag.objects.select_related('tag').filter(user=user, enabled=True)
-
-    # Find the number of questions for each tag (only used to display the number to the user)
-    user_tags = user_tags.annotate(num_questions=Count('tag__questions'))
-    tag_ids = [ user_tag.tag.id for user_tag in user_tags ]
-    for user_tag in user_tags:
-        print "DEBUG: tag=[%s] num_questions=[%s]" % (user_tag.tag.name, user_tag.num_questions)
-
-    # Find all the QuestionTag's associated with the UserTag's
-    question_tags = QuestionTag.objects.filter(enabled=True, tag__in=tag_ids)
-
-    # Also get the questions so that we don't need to do additional queries
-    question_tags = question_tags.select_related('question')
-
-    # Find the earliest/oldest date_show_next schedule for each question.
-    # TODO: this doesn't look correct; what is "question__schedule"?  A question can have multiple schedules associated with it.  We need to find the latest schedule for the user for that question.
-    question_tags = question_tags.annotate(schedule_oldest=Min('question__schedule__date_show_next'))
-
-    # First look for questions without any schedules, ordered oldest added first
-    question_tags_no_schedule = question_tags.filter(schedule_oldest=None).order_by('question__datetime_added')
-    # If there is a question with no schedules, then use that one.
-    if question_tags_no_schedule:
-        # [0] will be the question with the oldest datetime_added
-        question = question_tags_no_schedule[0].question
-    else:
-        # Assert: there are no questions with no schedules; all questions have at least one schedule
-        # Find the newest schedule 
-        # order_by defaults to ascending order (oldest to newest dates)
-        # Note that this is an additional/second query (the first one is the question_tags_no_schedule)
-        question_tags = question_tags.order_by('schedule_oldest')
-        question = question_tags[0].question if question_tags else None
-    return NextQuestion(
-            question=question,
-            user_tags=user_tags,
-    )
-
 def _get_next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
