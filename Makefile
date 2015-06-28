@@ -62,7 +62,7 @@ test_firefox:
 	ROB_SELENIUM_BROWSER=firefox   ./manage.py test --failfast
 
 test_nonbrowser:
-	./manage.py test questions/tests.py:NonBrowserTests
+	./manage.py test questions.tests.NonBrowserTests
 
 test_phantomjs:
 	ROB_SELENIUM_BROWSER=phantomjs ./manage.py test --failfast

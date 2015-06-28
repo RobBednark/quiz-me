@@ -184,18 +184,20 @@ class NonBrowserTests(TestCase):
         self.assertEquals(QuestionTag.objects.all().count(), 0)
         self.assertEquals(UserTag.objects.all().count(), 0)
 
-        # Assert that:
-        #   a) a user with no tags
-        #   b) no questions with any tags
-        # does not get a question
+        # Given:
+        #   a) user1 with 0 tags
+        #   b) 0 questions with any tags
+        #   c) 2 questions with 0 tags
+        #   d) tag1 and tag2 each have 0 questions
+        # Assert: user does not get a question
         with self.assertNumQueries(QUERIES_EXPECTED_NO_QUESTIONS):
             next_question = _get_next_question(user=user1)
             self.assertIsNone(next_question.question)
 
-        # Assert that:
-        #   a) user with a UserTag
-        #   b) no questions with that UserTag
-        # does not get a question
+        # Given:
+        #   a) user1 with 1 UserTag
+        #   b) 0 questions with that UserTag
+        # Assert: iuser1 does not get a question
         user1_tag1 = UserTag(user=user1, tag=tag1, enabled=True)
         user1_tag1.save()
         self.assertEquals(UserTag.objects.filter(user=user1).count(), 1)
@@ -206,11 +208,11 @@ class NonBrowserTests(TestCase):
                 next_question = _get_next_question(user=user1)
                 self.assertIsNone(next_question.question)
 
-        # Assert that
-        #    a) user with a tag
-        #    b) question with that tag
-        #    c) user has no schedules
-        # gets question1 because it was added before question2
+        # Given:
+        #    a) user1 with tag user1_tag1
+        #    b) question1 with tag1
+        #    c) user has 0 schedules
+        # Assert: user1 gets question1 because it was added before question2
         question1_tag1 = QuestionTag(question=question1, tag=tag1, enabled=True)
         question1_tag1.save()
         self.assertEquals(question1.datetime_added < question2.datetime_added, True)
@@ -226,7 +228,10 @@ class NonBrowserTests(TestCase):
                 self.assertEquals(next_question.question, question1, msg="iteration=[%s]" % n)
 
         # Given:
-        #       a) QuestionTag.enabled=False
+        #    a) user1 with tag user1_tag1
+        #    b) question1 with tag1
+        #    c) tag1.enabled == False
+        #    d) user has 0 schedules
         # Assert: no question is returned
         question1_tag1.enabled = False
         question1_tag1.save()
@@ -238,9 +243,9 @@ class NonBrowserTests(TestCase):
                 self.assertIsNone(next_question.question)
 
         # Given:
-        #       a) question1 and question2 exist for a given tag
-        #       b) question1 has a schedule and question2 does not
-        # Assert that question2 is returned because it has no schedule
+        #       a) question1 and question2 both have tag1
+        #       b) question1 has 1 schedule and question2 has 0 schedules
+        # Assert: question2 is returned because it has no schedule
         question1_tag1.enabled = True
         question1_tag1.save()
         question2_tag1 = QuestionTag(question=question2, tag=tag1, enabled=True)
@@ -255,29 +260,40 @@ class NonBrowserTests(TestCase):
                 next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question2)
 
-        # Now add a schedule to question2 with an older scheduled date, and assert that question1 is returned
+        # Add a schedule to question2 with a later scheduled date, and assert that question1 is returned
         # Given:
-        #       a) two questions exist for a given tag
-        #       b) question1 has two schedules, with question1's newest schedule earlier than question2's schedule
+        #       a) question1 and question2 both have tag1
+        #       b) question1 has 2 schedules, question2 has 1 schedule
+        #       b) question1's newest schedule is earlier than question2's schedule
+        # Assert: question1 is returned because it has an earlier schedule
         q2_sched1 = Schedule(user=user1, question=question2, interval_num=1, interval_unit='months')
         q1_sched2 = Schedule(user=user1, question=question1, interval_num=1, interval_unit='days')
         q1_sched2.save()
         q2_sched1.save()
         self.assertEquals(q2_sched1.date_show_next > q1_sched2.date_show_next, True)
+        self.assertEquals(Schedule.objects.all().count(), 3)
         for _ in range(5):
             with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
                 next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question1)
 
-        # Now add a 2nd earlier schedule to question2, and assert that question2 is now returned
+        # Add a 2nd schedule to question2 earlier than question1's schedule, and assert that question2 is now returned
         # Given:
-        #       a) two questions exist for a given tag
+        #       a) question1 and question2 both have tag1
         #       b) question1 and question2 each have 2 schedules
         #       c) question2's newest schedule is earlier than question1's newest schedule
-        # Assert that question2 is returned because it's schedule is older
+        # Assert that question2 is returned because it's schedule is earlier
         q2_sched2 = Schedule(user=user1, question=question2, interval_num=5, interval_unit='minutes')
         q2_sched2.save()
         self.assertEquals(q2_sched2.date_show_next < q1_sched1.date_show_next, True)
+        for _ in range(5):
+            with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
+                next_question = _get_next_question(user=user1)
+                self.assertEquals(next_question.question, question2)
+
+        # Add a new question with a different tag, and assert that it doesn't affect the question returned
+        question3 = Question(question="question3")
+        question3.save()
         for _ in range(5):
             with self.assertNumQueries(QUERIES_EXPECTED_WITH_SCHEDULES):
                 next_question = _get_next_question(user=user1)
