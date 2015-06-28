@@ -6,7 +6,7 @@ AUTH_USER_MODEL = 'emailusername.User'
 BASEDIR=os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-ENABLE_DJANGO_DEBUG_TOOLBAR = True
+ENABLE_DJANGO_DEBUG_TOOLBAR = False
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),

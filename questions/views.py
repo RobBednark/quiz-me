@@ -16,7 +16,7 @@ from .models import Attempt, Question, QuestionTag, Schedule, Tag, UserTag
 
 
 NextQuestion = namedtuple(typename='NextQuestion',
-                          field_names=['question', 'user_tags'])
+                          field_names=['question', 'user_tag_names'])
 
 
 def _get_next_question(user):
@@ -27,6 +27,7 @@ def _get_next_question(user):
 
     # Find the number of questions for each tag (only used to display the number to the user)
     user_tags = user_tags.annotate(num_questions=Count('tag__questions'))
+    user_tag_names = sorted([str(utag.tag.name) for utag in user_tags])
 
     # Find all the QuestionTag's associated with the UserTag's
     question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags)
@@ -76,7 +77,7 @@ def _get_next_question(user):
         question_to_show = None
 
     return NextQuestion(question=question_to_show,
-                        user_tags=user_tags)
+                        user_tag_names=user_tag_names)
 
 
 def _get_tag2periods(user, modelformset_usertag=None):
@@ -213,7 +214,10 @@ def question(request, id_question):
         next_question = _get_next_question(user=request.user)
         _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
         form_attempt = FormAttemptNew()
-        question_tag_names = ", ".join([str(qtag.tag.name) for qtag in next_question.question.questiontag_set.all()])
+        if next_question.question:
+            question_tag_names = ", ".join([str(qtag.tag.name) for qtag in next_question.question.questiontag_set.all()])
+        else:
+            question_tag_names = []
 
         # TODO: get the number of questions answered (scheduled) in the last hour
 
@@ -235,7 +239,7 @@ def question(request, id_question):
                                       modelformset_usertag=modelformset_usertag,
                                       question=next_question.question,
                                       question_tag_names=question_tag_names,
-                                      ))
+                                      user_tag_names=next_question.user_tag_names))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
         # Show the question, the attempt, and the correct answer.

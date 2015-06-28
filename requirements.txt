@@ -1,6 +1,8 @@
 #### from "pip freeze" 7/12/14
 Django==1.6.5
+
 South==0.8.4  # database migrations
+
 django-debug-toolbar==1.0  # handy Django info in browser useful for debugging
                            # Note that 1.2.2 is newer, but it requires a newer
                            # 1.7 version of Django
@@ -15,7 +17,7 @@ django-markdown-deux==1.0.4
 django-pagedown==0.1.0
 
 # Not currently using django-versioning.  Would be used for saving versions of questions/answers.
-django-versioning==0.7.4
+# django-versioning==0.7.4
 
 # djangorestframework
 djangorestframework==2.3.8
@@ -25,10 +27,13 @@ flake8
 
 ipdb==0.8  # iPython debugger
 ipython==1.1.0
+
 psycopg2==2.5.2  # Python interface to Postgresql
 
+pudb==2015.3  # python gui debugger
+
 # selenium is used for browser testing (firefox, phantomjs, ...)
-selenium==2.44.0
+selenium==2.46.0
 
 # splinter is an interface to facilitate browser testing
 splinter==0.6.0
