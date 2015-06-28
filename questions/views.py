@@ -1,25 +1,23 @@
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, namedtuple
 
 from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Max, Min
+from django.db.models import Count
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
 
-from .forms import FormAttempt, FormAttemptNew, FormSchedule
-from .models import Attempt, Question, QuestionTag, Schedule, Tag, User, UserTag
+from .forms import FormAttemptNew, FormSchedule
+from .models import Attempt, Question, QuestionTag, Schedule, Tag, UserTag
+
 
 NextQuestion = namedtuple(typename='NextQuestion',
-                          field_names = [
-                            'question',
-                            'user_tags',
-                          ]
-)
+                          field_names=['question', 'user_tags'])
+
 
 def _get_next_question(user):
     ''' Find and return the next question for the currently logged-in user.
@@ -77,24 +75,22 @@ def _get_next_question(user):
     else:
         question_to_show = None
 
-    return NextQuestion(
-            question=question_to_show,
-            user_tags=user_tags,
-    )
+    return NextQuestion(question=question_to_show,
+                        user_tags=user_tags)
+
 
 def _get_tag2periods(user, modelformset_usertag=None):
     # TODO: also pass in the selected tags and count the questions for those tags
     INTERVALS = (
-            # integer, unit, display-name
-            (None, None, "unseen"),
-            (0, "minutes", "now"),
-            (10, "minutes", "10m"),
-            (1, "hour", "1h"),
-            (1, "day", "1d"),
-            (1, "weeks", "1w"),
-            (1, "months", "1mo"),
-            (1, "year", "1y"),
-    )
+        # integer, unit, display-name
+        (None, None, "unseen"),
+        (0, "minutes", "now"),
+        (10, "minutes", "10m"),
+        (1, "hour", "1h"),
+        (1, "day", "1d"),
+        (1, "weeks", "1w"),
+        (1, "months", "1mo"),
+        (1, "year", "1y"))
     tag2interval2cnt = defaultdict(lambda: defaultdict(int))
     tag2interval_order = defaultdict(list)
     tags = Tag.objects.all()
@@ -114,22 +110,22 @@ def _get_tag2periods(user, modelformset_usertag=None):
             except ObjectDoesNotExist:
                 latest = None
 
-            if latest == None:
+            if latest is None:
                 tag2interval2cnt[tag.name]['unseen'] += 1
-                if not 'unseen' in tag2interval_order[tag.name]:
+                if 'unseen' not in tag2interval_order[tag.name]:
                     tag2interval_order[tag.name].append('unseen')
             else:
                 interval_previous = (None, None, '')
                 # Find which interval this schedule is in
                 for interval in INTERVALS:
-                    if interval[0] == None:
+                    if interval[0] is None:
                         continue
                     delta = relativedelta(**({interval[1]: interval[0]}))
                     now = timezone.now()
                     if latest.date_show_next <= now + delta:
                         interval_name = '%s-%s' % (interval_previous[2], interval[2])
                         tag2interval2cnt[tag.name][interval_name] += 1
-                        if not interval_name in tag2interval_order[tag.name]:
+                        if interval_name not in tag2interval_order[tag.name]:
                             tag2interval_order[tag.name].append(interval_name)
                         break
                     interval_previous = interval
@@ -149,11 +145,12 @@ def _create_and_get_usertags(request):
                                                 extra=0,
                                                 fields=('enabled',))
     user = request.user
-    queryset = (UserTag.objects
-                       .filter(user=user)
-                       # annotate the number of questions so it can be displayed to the user
-                       .annotate(num_questions=Count('tag__questions'))
-                       .order_by('tag__name'))
+    queryset = (UserTag
+                .objects
+                .filter(user=user)
+                # annotate the number of questions so it can be displayed to the user
+                .annotate(num_questions=Count('tag__questions'))
+                .order_by('tag__name'))
 
     if request.method == 'GET':
         # Get the user, find all the tags, and create a form for each tag.
@@ -166,11 +163,11 @@ def _create_and_get_usertags(request):
 
         # Get all the UserTag's for this user
         qs_user_tags = UserTag.objects.filter(user=user)
-        user_tags_by_tagname = { user_tag.tag.name : user_tag for user_tag in qs_user_tags }
+        user_tags_by_tagname = {user_tag.tag.name: user_tag for user_tag in qs_user_tags}
 
         # Create UserTag's for any new tags
         for tag in tags:
-            if not tag.name in user_tags_by_tagname:
+            if tag.name not in user_tags_by_tagname:
                 # There isn't a tag, so create one
                 UserTag(user=user, tag=tag, enabled=False).save()
 
@@ -186,16 +183,17 @@ def _create_and_get_usertags(request):
         for form in modelformset_usertag.forms:
             form.fields['enabled'].label = form.instance.tag.name
 
-        if modelformset_usertag.is_valid(): # All validation rules pass
+        if modelformset_usertag.is_valid():  # All validation rules pass
             modelformset_usertag.save()
         else:
             # ASSERT: modelformset_usertag.is_valid() was called, so modelformset_usertag modified itself to contain
             # any errors, and these errors will be displayed in the form using the form.as_p
             # attribute.
-            #  It puts the errors in form._errors and form.errors, 
+            #  It puts the errors in form._errors and form.errors,
             #   e.g., form.errors['sender'] == 'Enter a valid email address.'
             pass
         return modelformset_usertag
+
 
 @login_required(login_url='/login')
 def question_next(request):
@@ -203,6 +201,7 @@ def question_next(request):
     next_question = _get_next_question(user=request.user)
     id_question = next_question.question.id if next_question.question else 0
     return HttpResponseRedirect(reverse('question', args=(id_question,)))
+
 
 @login_required(login_url='/login')
 def question(request, id_question):
@@ -229,13 +228,13 @@ def question(request, id_question):
 
         # TODO: get total number of questions for all tags
 
-        return render(request=request, 
-                      template_name='question.html', 
-                      dictionary=dict(form_attempt=form_attempt, 
+        return render(request=request,
+                      template_name='question.html',
+                      dictionary=dict(form_attempt=form_attempt,
                                       last_schedule_added=last_schedule_added,
                                       modelformset_usertag=modelformset_usertag,
                                       question=next_question.question,
-                                      question_tag_names = question_tag_names,
+                                      question_tag_names=question_tag_names,
                                       ))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
@@ -249,7 +248,7 @@ def question(request, id_question):
                               user=request.user)
             try:
                 attempt.save()
-            except Exception as exception:
+            except Exception:
                 # TODO: do something else here, e.g., log it, show it to the user  -Rob Bednark 12/21/14
                 pass
             # Redirect to the answer page
@@ -257,12 +256,12 @@ def question(request, id_question):
         else:
             # Assert: form is NOT valid
             # Need to return the errors to the template, and have the template show the errors.
-            return render(request=request, 
-                          template_name='question.html', 
-                          dictionary=dict(form_attempt=form_attempt, 
-                                         ))
+            return render(request=request,
+                          template_name='question.html',
+                          dictionary=dict(form_attempt=form_attempt))
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
+
 
 @login_required(login_url='/login')
 def answer(request, id_attempt):
@@ -272,22 +271,20 @@ def answer(request, id_attempt):
     if request.method == 'GET':
         _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
         form_schedule = FormSchedule()
-        return render(request=request, 
-                      template_name='answer.html', 
-                      dictionary=dict(form_schedule=form_schedule, 
+        return render(request=request,
+                      template_name='answer.html',
+                      dictionary=dict(form_schedule=form_schedule,
                                       modelformset_usertag=modelformset_usertag,
                                       question=attempt.question,
                                       answer=attempt.question.answer,
-                                      attempt=attempt),
-        )
+                                      attempt=attempt))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question, and inputted
         # when they want to see the question again.
         # Redirect the user to the next question.
         form_schedule = FormSchedule(request.POST)
         if form_schedule.is_valid():
-            schedule = Schedule(
-                                interval_num=form_schedule.cleaned_data['interval_num'],
+            schedule = Schedule(interval_num=form_schedule.cleaned_data['interval_num'],
                                 interval_unit=form_schedule.cleaned_data['interval_unit'],
                                 question=attempt.question,
                                 user=request.user)
@@ -297,13 +294,12 @@ def answer(request, id_attempt):
             # Assert: form is NOT valid
             # Need to return the errors to the template, and have the template show the errors.
             _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
-            return render(request=request, 
-                          template_name='answer.html', 
-                          dictionary=dict(form_schedule=form_schedule, 
+            return render(request=request,
+                          template_name='answer.html',
+                          dictionary=dict(form_schedule=form_schedule,
                                           modelformset_usertag=modelformset_usertag,
                                           question=attempt.question,
                                           answer=attempt.question.answer,
-                                          attempt=attempt),
-        )
+                                          attempt=attempt))
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)

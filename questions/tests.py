@@ -9,7 +9,7 @@ import os
 from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
-from .models import Attempt, Question, QuestionTag, Schedule, Tag, UserTag
+from .models import Question, QuestionTag, Schedule, Tag, UserTag
 from .test_helpers import FuzzyInt
 from .views import _get_next_question
 
@@ -30,7 +30,7 @@ class BrowserTests(LiveServerTestCase):
         #   open /Applications/Firefox.app
         #   THE_END
         #   $ chmod a+x /usr/local/bin/firefox
-        #cls.browser = Browser('firefox')
+        # cls.browser = Browser('firefox')
 
         # Note that in order to use phantomjs, need to "brew install phantomjs"
         browser = os.environ.get('ROB_SELENIUM_BROWSER', 'phantomjs')
@@ -61,9 +61,9 @@ class BrowserTests(LiveServerTestCase):
         self.assertTrue(self.browser.is_text_present('(NOTE: there are no questions)'))
 
     def _login(self, user=None, password=None):
-        if user == None:
+        if user is None:
             user = self.EMAIL_USER1
-        if password == None:
+        if password is None:
             password = self.PASSWORD
         self.browser.visit(self.live_server_url)
         self.assertEquals(self.browser.title, 'Quiz Me!')
@@ -101,9 +101,9 @@ class BrowserTests(LiveServerTestCase):
         # Assert that QuestionTags were created for this user
         user_tags = UserTag.objects.all()
         self.assertEquals(len(user_tags), 2)
-        tag_ids = { user_tag.tag.id for user_tag in user_tags }
-        user_ids = { user_tag.user.id for user_tag in user_tags }
-        enabled_set = { user_tag.enabled for user_tag in user_tags }
+        tag_ids = {user_tag.tag.id for user_tag in user_tags}
+        user_ids = {user_tag.user.id for user_tag in user_tags}
+        enabled_set = {user_tag.enabled for user_tag in user_tags}
         self.assertEquals(tag_ids, {tag1.id, tag2.id})
         self.assertEquals(user_ids, {self.user1.id})
         self.assertEquals(enabled_set, {False})
@@ -132,8 +132,8 @@ class BrowserTests(LiveServerTestCase):
 
         # TODO/LEFTOFF/NEXT:
         # Figure out how to select a tag.
-        #import pdb; pdb.set_trace()
-        #pass
+        # import pdb; pdb.set_trace()
+        # pass
 
         # Assert that a question is shown
 
@@ -185,7 +185,7 @@ class NonBrowserTests(TestCase):
         self.assertEquals(UserTag.objects.all().count(), 0)
 
         # Assert that:
-        #   a) a user with no tags 
+        #   a) a user with no tags
         #   b) no questions with any tags
         # does not get a question
         with self.assertNumQueries(QUERIES_EXPECTED_NO_QUESTIONS):
@@ -193,8 +193,8 @@ class NonBrowserTests(TestCase):
             self.assertIsNone(next_question.question)
 
         # Assert that:
-        #   a) user with a UserTag 
-        #   b) no questions with that UserTag 
+        #   a) user with a UserTag
+        #   b) no questions with that UserTag
         # does not get a question
         user1_tag1 = UserTag(user=user1, tag=tag1, enabled=True)
         user1_tag1.save()
@@ -206,9 +206,8 @@ class NonBrowserTests(TestCase):
                 next_question = _get_next_question(user=user1)
                 self.assertIsNone(next_question.question)
 
-
-        # Assert that 
-        #    a) user with a tag 
+        # Assert that
+        #    a) user with a tag
         #    b) question with that tag
         #    c) user has no schedules
         # gets question1 because it was added before question2
@@ -227,7 +226,7 @@ class NonBrowserTests(TestCase):
                 self.assertEquals(next_question.question, question1, msg="iteration=[%s]" % n)
 
         # Given:
-        #       a) QuestionTag.enabled=False 
+        #       a) QuestionTag.enabled=False
         # Assert: no question is returned
         question1_tag1.enabled = False
         question1_tag1.save()
