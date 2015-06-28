@@ -28,6 +28,9 @@ dumpdb:
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
 	ls -ltr db_dumps/. |tail -5
 
+flake8:
+	flake8 --max-line-length=128 questions
+
 loaddb: dumpdb
 	# Load the dumps into new db's to test them
 	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_CUSTOM}"
@@ -48,6 +51,8 @@ recreate_migrations:
 	# Add a dependency to the emailusername migration
 	perl -pi -e 's/(class Migration\(SchemaMigration\):)/$$1\n    depends_on = \(\("emailusername", "0001_initial"\),\)/' questions/migrations/0001_initial.py
 
+style-check: flake8
+	
 syncdb:
 	./manage.py syncdb --noinput
 
@@ -55,6 +60,9 @@ test: test_phantomjs test_firefox
 
 test_firefox:
 	ROB_SELENIUM_BROWSER=firefox   ./manage.py test --failfast
+
+test_nonbrowser:
+	./manage.py test questions/tests.py:NonBrowserTests
 
 test_phantomjs:
 	ROB_SELENIUM_BROWSER=phantomjs ./manage.py test --failfast

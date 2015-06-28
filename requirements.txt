@@ -20,6 +20,9 @@ django-versioning==0.7.4
 # djangorestframework
 djangorestframework==2.3.8
 
+# flake8 for pep8 style-checking
+flake8
+
 ipdb==0.8  # iPython debugger
 ipython==1.1.0
 psycopg2==2.5.2  # Python interface to Postgresql
