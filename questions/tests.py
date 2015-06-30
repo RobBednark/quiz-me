@@ -157,9 +157,9 @@ class BrowserTests(LiveServerTestCase):
 class NonBrowserTests(TestCase):
 
     def test_get_next_question(self):
-        QUERIES_EXPECTED_NO_QUESTIONS = 2
-        QUERIES_EXPECTED_NO_SCHEDULES = FuzzyInt(3, 4)
-        QUERIES_EXPECTED_WITH_SCHEDULES = FuzzyInt(2, 5)
+        QUERIES_EXPECTED_NO_QUESTIONS = 3
+        QUERIES_EXPECTED_NO_SCHEDULES = FuzzyInt(4, 5)
+        QUERIES_EXPECTED_WITH_SCHEDULES = FuzzyInt(3, 6)
 
         ''' Assert that views.next_question() works correctly. '''
         user1 = User(email="user1@bednark.com")

@@ -16,7 +16,7 @@ from .models import Attempt, Question, QuestionTag, Schedule, Tag, UserTag
 
 
 NextQuestion = namedtuple(typename='NextQuestion',
-                          field_names=['question', 'user_tag_names'])
+                          field_names=['num_schedules', 'question', 'user_tag_names'])
 
 
 def _get_next_question(user):
@@ -53,6 +53,7 @@ def _get_next_question(user):
         except ObjectDoesNotExist:
             schedule = None
         if schedule:
+            # TODO: count the schedules for each date range here
             if oldest_question:
                 # There's already a question without a schedule, so we don't
                 # care about questions with a schedule.
@@ -76,8 +77,10 @@ def _get_next_question(user):
     else:
         question_to_show = None
 
+    num_schedules = Schedule.objects.filter(user=user, question=question_to_show).count()
     return NextQuestion(question=question_to_show,
-                        user_tag_names=user_tag_names)
+                        user_tag_names=user_tag_names,
+                        num_schedules=num_schedules)
 
 
 def _get_tag2periods(user, modelformset_usertag=None):
@@ -239,7 +242,8 @@ def question(request, id_question):
                                       modelformset_usertag=modelformset_usertag,
                                       question=next_question.question,
                                       question_tag_names=question_tag_names,
-                                      user_tag_names=next_question.user_tag_names))
+                                      user_tag_names=next_question.user_tag_names,
+                                      num_schedules=next_question.num_schedules))
     elif request.method == 'POST':
         # ASSERT: this is a POST, so the user answered a question
         # Show the question, the attempt, and the correct answer.

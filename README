@@ -1086,6 +1086,7 @@ o Nev Okyay
 ================================================================================
 !TODO / Backlog / Features / Stories
 ================================================================================
+o 6/28/15 FEATURE: show how long it has been between when we last answered the question and now; this will me when I answer determine how long I want to set the next interval
 o 6/2/15 BUG: I added a new question with tags=[file_systems, unix]; when I went to quiz myself with a bunch of tags selected, but neither [file_systems, unix], I still got that question; after I answered that question, I then got another question with those same tags
   - it might be because the schedules query 
   - questions being shown that should not be:
