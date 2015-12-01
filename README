@@ -2,14 +2,28 @@ This file is in plain text (convert to markdown at some point).
 Lines beginning with '!' are section headings.
 
 ================================================================================
-!Thoughts about scheduling
+#How to install and run
+================================================================================
+1. clone the repo
+2. create a virtualenv, e.g.,
+    mkvirtualenv quizme
+3. activate the virtualenv, e.g.,
+    workon quizme
+4. install the required packages in the virtualenv, e.g.,
+    pip install --requirement requirements.txt
+5. install postgresql (if using postgresql); e.g., on OSX,
+    brew install postgresql
+6. configure postgresql
+7. copy database
+================================================================================
+#Thoughts about scheduling
 ================================================================================
 - maybe capture percentage of correctness and time since last seen
 - I ask myself: when do I want to see this again?
 - I ask myself: how long before I think I will forget this?
 - consider assigning an importance to each question; distinguish between how important it is to me, and when I think I will forget it; don't mix the two together
 ================================================================================
-!Show schedules for each tag
+#Show schedules for each tag
 ================================================================================
 
 User > UserTag's > QuestionTag's > Question's > Schedule's > Schedule.date_added
@@ -50,7 +64,7 @@ A:
 I have the queryset of questions.
 *** Get the code working first, then worry about performance.  Easier to just ask on stackoverflow with existing code.
 ================================================================================
-!Glossary / Terms / Nomenclature
+#Glossary / Terms / Nomenclature
 ================================================================================
 answer - the "correct" answer associated with a question; a question can have 0 or 1 answers
 attempt - a user's single attempt to answer a question; it is the user's guess as to the answer
@@ -62,12 +76,12 @@ tag - a tag associated with a question; a question can have 0 to many tags
 user tag - the tags that a user has selected indicating which questions they want to see
 
 ================================================================================
-!Tests
+#Tests
 ================================================================================
 Tests to add:
     12/27/14 add a test where there are no questions for whatever tags are selected, but selecting a different tag causes a question to be shown
 ================================================================================
-!Notes
+#Notes
 ================================================================================
 QuizMe notes can be found in these places:
     o here (git repo /README)
@@ -79,7 +93,7 @@ QuizMe notes can be found in these places:
 Code: Dropbox/git/quizme_site
 
 ================================================================================
-!Documentation
+#Documentation
 ================================================================================
 question_next - ready (just a redirect to question)
 question - shows a question with a form to input an attempt
@@ -131,7 +145,7 @@ utcnow() is naive.
 See https://docs.djangoproject.com/en/1.7/topics/i18n/timezones/
 
 ================================================================================
-!HOW TO add a South migration
+#HOW TO add a South migration
 ================================================================================
 a) create the migration
     ./manage.py schemamigration myapp --auto
@@ -139,7 +153,7 @@ b) run the migration:
     ./manage.py migrate myapp
 
 ================================================================================
-!Putting on github
+#Putting on github
 ================================================================================
 DONE o review all files
 DONE o decide on name: memory-butler
@@ -147,7 +161,7 @@ o review this file
 o push to github
 
 ================================================================================
-!How to backup Postgres database and restore
+#How to backup Postgres database and restore
 ================================================================================
 Q: How to make a backup of the database?
 A:
@@ -166,7 +180,7 @@ Q: How to test a database loaded from a backup?
 A: 
 
 ================================================================================
-!Log/History/Diary
+#Log/History/Diary
 ================================================================================
 Fri 3/6/15 4:17pm
     4:17pm adding a management command to export questions and answers in plain text
@@ -1081,7 +1095,7 @@ Mon 9/16/13
   o added models
 
 ================================================================================
-!Share with:
+#Share with:
 ================================================================================
 o Aaron Sykes
 o Josh McQuiston
@@ -1217,7 +1231,7 @@ o Example of one question with multiple answers:
     A:
 
 ================================================================================
-!django-quiz
+#django-quiz
 ================================================================================
 o Name of quiz is passed in the url
 o views:
@@ -1235,7 +1249,7 @@ o models:
     
 
 ================================================================================
-!User Stories / Features
+#User Stories / Features
 ================================================================================
 o users can create accounts for themselves
 o add questions via admin
@@ -1264,7 +1278,7 @@ o study mode: show questions and answers together
 o movie clips / YouTube videos
 
 ================================================================================
-!Django Apps
+#Django Apps
 ================================================================================
 Word meaning "piece of information":
 chunk / game / info / piece of info / library / article / meme / agents / chapter / quiz / 
@@ -1289,7 +1303,7 @@ constituent
 
 entities
 ================================================================================
-!MVP:
+#MVP:
 ================================================================================
     Questions:
         - text
@@ -1302,7 +1316,7 @@ entities
         - 
 
 ================================================================================
-!Entities
+#Entities
 ================================================================================
 answers
 hints
@@ -1311,7 +1325,7 @@ quizzes (collection of questions)
 tags
 users
 ================================================================================
-!Screens:
+#Screens:
 ================================================================================
   New user (use the admin initially)
   Add a question/answer (use the admin initially)
@@ -1319,7 +1333,7 @@ users
   Quiz - ask questions, record answers
 
 ================================================================================
-!Ultimate:
+#Ultimate:
 ================================================================================
 
 Question Types:
@@ -1336,18 +1350,18 @@ Hints:
 Modes:
 
 ================================================================================
-!Use Cases:
+#Use Cases:
 ================================================================================
 o want to quiz myself for a specify tag
 
 ================================================================================
-!HOW TO use django-versioning
+#HOW TO use django-versioning
 ================================================================================
 cddjango
 cd learn_django-versioning_package
 vim README
 ================================================================================
-! Other similar apps
+# Other similar apps
 ================================================================================
 Anki - open source; written in Python; https://github.com/dae/anki
 Brainscape (iOS)
@@ -1359,7 +1373,7 @@ Mnemosyne
 SuperMemo
 
 ================================================================================
-! Product/App Names / Naming:
+# Product/App Names / Naming:
 ================================================================================
 
 ----------------------------------------
@@ -1554,7 +1568,7 @@ Taglines:
 ----------------------------------------
     - Quizzes / Flashcards / Spaced Repetition
 ================================================================================
-!Examples of tables
+#Examples of tables
 ================================================================================
 Attempt:
     attempt     correct     question_id  datetime_added  datetime_updated  user_id
@@ -1587,5 +1601,5 @@ For questions,
     questions = Question.objects.filter(question__in=question_tags)
 
 ================================================================================
-! The End.
+# The End.
 ================================================================================
