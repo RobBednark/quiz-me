@@ -13,7 +13,18 @@ Lines beginning with '!' are section headings.
     pip install --requirement requirements.txt
 5. install postgresql (if using postgresql); e.g., on OSX,
     brew install postgresql
-6. configure postgresql
+6. create a postgres database
+    createdb quizme
+    (note that the database name "quizme" is a setting in settings.py for
+     DATABASES['default']['NAME']
+    )
+7. create a postgres user:
+    createuser quizme
+    --or--
+        psql --command="CREATE USER quizme"
+
+    Test it:
+        psql --user=quizme quizme
 7. copy database
 ================================================================================
 #Thoughts about scheduling
