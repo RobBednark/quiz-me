@@ -1,5 +1,7 @@
 *.pyc
 *.log
+# .swp -- vim temp swap files
 *.swp
+# db_dumps -- directory for putting database dumps via Makefile commands
 db_dumps
 tmp/
