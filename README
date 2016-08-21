@@ -1,5 +1,4 @@
 This file is in plain text (convert to markdown at some point).  
-Lines beginning with '!' are section headings.
 
 ================================================================================
 #How to install and run
@@ -1106,17 +1105,7 @@ Mon 9/16/13
   o added models
 
 ================================================================================
-#Share with:
-================================================================================
-o Aaron Sykes
-o Josh McQuiston
-o Steven Jonas
-o Mykhaylo Kopytonenko (mishakop at gmail com)  (Fresh Memory author)
-o Anki contributors
-o SuperMemo 
-o Nev Okyay
-================================================================================
-!#TODO / Backlog / Features / Stories
+#TODO / Backlog / Features / Stories
 ================================================================================
 o 7/1/15 FEATURE: in addition to tags, consider keywords
 o 6/28/15 FEATURE: show how long (duration/interval) it has been between when we last answered the question and now; this will me when I answer determine how long I want to set the next interval (both question and answer pages)
