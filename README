@@ -163,14 +163,6 @@ b) run the migration:
     ./manage.py migrate myapp
 
 ================================================================================
-#Putting on github
-================================================================================
-DONE o review all files
-DONE o decide on name: memory-butler
-o review this file
-o push to github
-
-================================================================================
 #How to backup Postgres database and restore
 ================================================================================
 Q: How to make a backup of the database?
