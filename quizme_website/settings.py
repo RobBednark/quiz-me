@@ -199,3 +199,8 @@ if ENABLE_DJANGO_DEBUG_TOOLBAR:
                     'SHOW_TEMPLATE_CONTEXT' : True,  # This shows all the context variables available when rendering the template
                     # 'SHOW_TOOLBAR_CALLBACK' : lambda request: True,
     }
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
