@@ -72,14 +72,14 @@ A: I have the queryset of questions.
 *Get the code working first, then worry about performance.  Easier to just ask on stackoverflow with existing code.*
 
 ## Glossary / Terms / Nomenclature
-answer - the "correct" answer associated with a question; a question can have 0 or 1 answers
-attempt - a user's single attempt to answer a question; it is the user's guess as to the answer
-hint - a hint for a question and answer (not yet implemented)
-schedule - when the user wants to see a question again
-question - a question
-quiz - a set of associated questions (not yet implemented)
-tag - a tag associated with a question; a question can have 0 to many tags
-user tag - the tags that a user has selected indicating which questions they want to see
+* answer - the "correct" answer associated with a question; a question can have 0 or 1 answers
+* attempt - a user's single attempt to answer a question; it is the user's guess as to the answer
+* hint - a hint for a question and answer (not yet implemented)
+* schedule - when the user wants to see a question again
+* question - a question
+* quiz - a set of associated questions (not yet implemented)
+* tag - a tag associated with a question; a question can have 0 to many tags
+* user tag - the tags that a user has selected indicating which questions they want to see
 
 ## Tests
 Tests to add:
@@ -585,26 +585,31 @@ smart
 
 ## Examples of tables
 Attempt:
+
 attempt |correct|question_id|datetime_added|datetime_updated|user_id
 --------|-------|-----------|--------------|----------------|-------
 "foobar"|True   |3          |7/1/14 8:35am |7/1/14 8:35am   |5
 
 Question:
+
 question|answer_id
 --------|---------
 1+1     |1
 
 QuestionTag:
+
 question_id|tag_id|enabled
 -----------|------|-------
 1          |1     |True
 
 Tag:
+
 name  |
 ------|
 my_tag|
 
-UserTag
+UserTag:
+
 user_id|tag_id|enabled
 -------|------|-------
 1      |1     |True
