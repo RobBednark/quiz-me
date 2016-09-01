@@ -24,6 +24,48 @@
         psql --user=quizme quizme
 1. copy database
 
+### Docker Test Environment
+I got some docker containers setup for with the intent of making local testing easier. In order to use it you need to install docker and docker-compose, which is a util for managing sets of docker containers.
+
+There are two config files involved with the docker testing containers:
+
+```
+Dockerfile
+docker-compose.yml
+```
+
+The Django database settings also need to be modified. The best way to do that is by adding a `local_settings.py` file to the project's root directory with the following content:
+```
+DATABASES = {
+'default': {
+    'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    'NAME': 'postgres',
+    'USER': 'postgres',
+    'HOST': 'db',
+    'PORT': 5432,
+    }
+}
+```
+
+In order to get the testing containers working, docker and docker-compose need to be installed on the host system.
+
+In order to get docker running the following commands need to be run from this project's root directory:
+
+$ docker-compose up
+$ docker-compose run web python manage.py syncdb
+$ docker-compose run web python manage.py migrate
+
+Django, Docker, and Pdb don't play well together. In order to set a stack trace inside some app code run docker-compose like so:
+
+```
+$ docker-compose run --service-ports web
+```
+
+I'm far from an expert on Docker in particular or containers in general. If something happens with a container and I don't know how to fix it I go nuclear, and then recreate everything. This command will stop and remove all containers.
+```
+docker rm $(docker ps -a -q)
+```
+
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
 * I ask myself: when do I want to see this again?
