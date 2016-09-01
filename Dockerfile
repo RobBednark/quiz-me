@@ -9,6 +9,3 @@ ADD requirements.txt /opt/website
 # Install application dependencies
 WORKDIR /opt/website
 RUN virtualenv . && pip install -r requirements.txt
-
-# Add all app code to /opt/website directory
-ADD . /opt/website
