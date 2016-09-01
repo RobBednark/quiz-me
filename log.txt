@@ -1,0 +1,917 @@
+This file is in plain text (convert to markdown at some point).  
+
+================================================================================
+#Log/History/Diary
+================================================================================
+Fri 3/6/15 4:17pm
+    4:17pm adding a management command to export questions and answers in plain text
+Fri 1/23/15 7:05am
+    7:05am Working!  The usertag's are now working as well.
+Mon 1/19/15 1:41pm
+    1:41pm Fix so that modelformset_usertag is fixed on each POST so that it is saved.
+    1:41pm It looks like I got _get_next_question() working correctly.  Hooray!
+Thu 1/15/15 7:26am
+    7:26am NEXT: review all of the view and model code to see if I can spot the bug(s)
+Wed 1/14/15 9:42pm
+    10:07pm NEXT: add some tests; schedules aren't working for CSS tag - it always shows the same question
+    10:07pm Got interval counts working!
+    9:42pm NEXT: _get_tag2periods -- still figuring out how to get into a data structure to easily add them to each tag in an ordered fashion
+Thu 1/8/15 4:42pm
+    4:43pm NEXT: implement number of questions due now, next 5 mins, next day, week, month, year
+        get all questions for each tag; iterate through them and put them in time categories (annotate the latest schedule for each question)
+        select_related all questions for each tag; annotate every question with latest schedule
+    4:42pm Number of questions per tag has been added.
+Sun 1/4/15 1:52pm
+    1:52pm NEXT: add number of questions per tag to the form
+Sat 1/3/15 11:05pm
+    11:06pm NEXT: implement number of questions due now, next 5 mins, next day, week, month, year
+    11:05pm implemented annotation of number of questions for each tag
+    11:05pm got rid of old unused code
+    11:05pm committed changes
+Thu 1/1/15 9:44am
+    6:06pm Getting this exception when submitting the interval:
+        unsupported type for timedelta seconds component: Decimal
+        self.date_show_next = time_now + interval 
+        Reason: need to convert decimal to float()
+    6:03pm Fixed next_question_new by adding an additional query.  All tests are now passing.
+    10:13am QuestionTag.filter(tag__in=user_tags) is not correct.  Question.tag is a fk to Tag, not UserTag.  I need to get the tags that user_tags is pointing to.
+    9:49am question_tags_no_schedule should have something, but it is None
+    9:44am Got test_next_question_new passing with phantomjs, but it is failing with Firefox.
+Wed 12/31/14 9:05am
+    11:07pm figuring out how to select max() schedule for a given question (instead of max() schedule.datetime_added)
+    9:10am continue on with test
+    9:07am Changed utcnow() to timezone.now
+    9:05am Read about timezones.  Ensured settings.py USE_TZ=True.  Added pytz to requirements.txt
+Mon 12/29/14 9:04pm
+    10:12pm finished Schedule.save().  now work on test
+    10:08pm now save(commit) parm; just going to create a new datetime rather than saving twice to the db;
+    9:58pm determined that the date's are now set until after the super() save() is called; now looking to see how to avoid the db call on the save()
+    9:42pm added Schedule.save() method for setting self.interval_secs and self.date_show_next.  Now test to see if date_show_next is correct.
+    9:04pm working on next_question_new(); now work on save() for Schedule() to calculate date_show_next and interval_secs
+Sat 12/27/14 1:55pm
+    10:47pm started _next_question_new() and _test_next_question_new; need to modify the queries; need to modify the test
+    10:31pm NEXT: implement new _next_question() that utilizes Schedule
+    5:21pm NEXT: add a test where there are no questions for whatever tags are selected, but selecting a different tag causes a question to be shown
+    5:18pm Tests passing.  Changed the urls and views to the new ones and deleted the old one.  Fixed the issue with tests failing by 
+    4:47pm NEXT: 4 tests are failing; need a separate page to indicate there are no questions; how was this working before?  Want to have the tags so that user can choose different tags.
+    4:10pm NEXT: replace existing pages with new pages
+    3:38pm added a migration; Schedule can now have null values for each field
+    1:55pm NEXT: modify answer.html to include stuff from show_question_and_answer.html
+Sat 12/27/14 9:36am
+    9:37am NEXT: run tests; add tests
+    9:36am fixed so that empty form doesn't have errors
+Fri 12/26/14 7:33pm
+    Fri 12/26 11:23pm NEXT: fix "This field is required" errors for answer() GET view
+    Fri 12/26 11:21pm answer() GET view is working, except that errors "This field is required" are being shown
+    Fri 12/26 11:14pm in answer() view, request.user is a SimpleLazyObject, but needs to be an int for the UserTag.objects.filter(user=user) query
+    Fri 12/26 11:07pm created learn_form_select; somewhat working, except that it isn't showing the value for it
+    Fri 12/26 10:45pm consider forgetting the ModelFormSchedule, and just use FormSchedule, because we only need interval_num and interval_unit
+    Fri 12/26 10:41pm created a migration for Schedule and applied it; did a "make dumpdb"
+    Fri 12/26 10:34pm NEXT: I modified models.Schedule to be subclassed from CreatedBy; now the schema is not correct because "schema.date_added" is now "schema.datetime_added"; need a South migration to fix it
+    Fri 12/26 12:26pm NEXT: getting errors in ModelFormSchedule because it's a ModelForm; either set and hide some fields
+    Fri 12/26 10:21pm NEXT: why is answer.html showing required fields and errors on the GET?
+    Fri 12/26 10:19pm NEXT: get answer.html coded as intended (show question, attempt, answer)
+    Fri 12/26 10:17pm NEXT: get answer() view working
+    Fri 12/26 10:16pm I got the question() view and POST working.
+    Fri 12/26 9:30pm need a different form without the hidden_question_id
+    Fri 12/26 8:27pm working on question.html
+    Fri 12/26 7:43pm remove hidden_question_id and replace with id_question
+Sun 12/21/14 8:45am
+    8:45am upgraded Django from 1.6.5 to 1.7.1, but got the following error when running tests:
+        ROB_SELENIUM_BROWSER=firefox   ./manage.py test
+        /Users/rbednark/Dropbox/git/quizme_website/emailusername/admin.py:36: RemovedInDjango18Warning: Creating a ModelForm without either the 'fields' attribute or the 'exclude' attribute is deprecated - form UserChangeForm needs updating
+          class UserChangeForm(forms.ModelForm):
+
+        Traceback (most recent call last):
+          File "./manage.py", line 10, in <module>
+            execute_from_command_line(sys.argv)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/__init__.py", line 385, in execute_from_command_line
+            utility.execute()
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/__init__.py", line 377, in execute
+            self.fetch_command(subcommand).run_from_argv(self.argv)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/commands/test.py", line 50, in run_from_argv
+            super(Command, self).run_from_argv(argv)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/base.py", line 288, in run_from_argv
+            self.execute(*args, **options.__dict__)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/commands/test.py", line 71, in execute
+            super(Command, self).execute(*args, **options)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/core/management/base.py", line 338, in execute
+            output = self.handle(*args, **options)
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/south/management/commands/test.py", line 7, in handle
+            patch_for_test_db_setup()
+          File "/Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/south/management/commands/__init__.py", line 34, in patch_for_test_db_setup
+            management._commands['syncdb'] = MigrateAndSyncCommand()
+        AttributeError: 'module' object has no attribute '_commands'
+        make: *** [test_firefox] Error 1
+    8:00am determined that "wsgiref" package is mistakenly shown by "pip freeze"
+    7:45am added schedules to the admin
+    7:45am created migration for schedules
+    7:30am resolved firefox test error (upgraded from selenium 2.42.1 to 2.44.0)
+
+Sat 12/13/14 3:19pm
+    3:19pm NEXT: determine view for POST'ing answer acceptance (see Agenda)
+Sat 11/22/14 10:58pm
+    11:01pm previously: created documentation section above
+    10:58pm NEXT: determine view for POST'ing answer acceptance (see Agenda)
+Fri 9/26/14 5:09pm
+    5:11pm NEXT: postgres backup
+    5:09pm Last time I got Postgres backups working; also created the Schedule model that is commented out
+Wed 9/3/14 5:18pm
+    5:25pm created agenda above
+    5:18pm decide what to do next with intervals
+Sun 8/17/14 9:14am
+    9:14am Note that selecting tags only works for when the question is asked, and not when the answer is shown.
+Sun 7/13/14 1:45pm
+    3:41pm started vstudy page
+    3:41pm Adding Selenium questions
+    2:00pm started working on adding clicking on tag on Selenium tests; figuring out how to select the tag checkboxes with Selenium
+    1:45pm BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
+    1:45pm markdown is working for questions, answers, and attempts
+Sat 7/12/14 5:56pm
+    7:59pm Add django
+    7:54pm DONE: First of all, make the question a django-markdown field in the admin
+    7:40pm Now add django-markdown to quizme
+        DONE 1) pip install django-pagedown
+        DONE 2) add "pagedown" to INSTALLED_APPS
+        DONE 3) python manage.py collectstatic --noinput
+            (need to set STATIC_ROOT in settings.py)
+        DONE 4) in forms.py:
+                from pagedown.widgets import PagedownWidget
+                subject = forms.CharField(max_length=100, required=False, widget=PagedownWidget())
+        DONE 5) in template:
+               {{ form.media }}
+        DONE 6) in admin.py:
+            To add it to all TextField's for a given model:
+                from django.contrib import admin
+                from django.db import models
+                from pagedown.widgets import AdminPagedownWidget
+                class FooModelAdmin(models.ModelAdmin):
+                    formfield_overrides = {
+                            models.TextField: {'widget': AdminPagedownWidget },
+                        }
+                admin.site.register(FooModel, FooModelAdmin)
+    7) to display markdown as html:
+        DONE a) pip install django-markdown-deux
+        DONE b) INSTALLED_APPS: add "markdown_deux",
+        c) in the template:
+
+        {% extends 'base.html' %}
+        {% load markdown_deux_tags %}
+
+        ...
+        <p>{{ entry.body|markdown }}</p>
+        ...
+    7:06pm get django-markdown working for displaying markdown
+    6:58pm I got django-markdown working in both template and in Django Admin
+    5:57pm add editor to Django Admin
+    5:57pm look at markdown in the db or admin
+    5:56pm example markdown
+This is my subject
+**bold**
+*italics*
+[enter link description here][1]
+
+> quoted
+
+    code line 1
+    code line 2
+
+
+1. list item 1
+1. list item 2
+
+one
+two
+
+
+- bullet 1
+- bullet 2
+
+
+----------
+after hrule
+
+![picture][2]
+
+
+  [1]: http://google.com "this is a link to Google"
+  [2]: http://www.zastavki.com/pictures/1920x1200/2010/Nature_Forest_Beauty_of_the_forest_024927_.jpg
+
+Sat 7/12/14 9:12am
+    9:28am LEFT OFF: learn_django-pagedown -- now add to template
+    9:12am working on learn_django-pagedown
+    9:12am I'm choosing django-pagedown; older; popular Irish guy; doc looks slightly better; fewer participants though; can always change out later
+Fri 7/11/14 5:37pm
+    5:56pm markdown options:
+        django-pagedown v0.1.0 113 watchers; 27 forks; initial commit 4/20/12; timmyomahonny (21k on stackoverflow); 4 results on stackoverflow "django-pagedown"
+            preview box
+        django-markdown v0.6.1 97 watchers;  35 forks; more participants; initial commit 2/2/11; klen
+            preview; 1 result on stackoverflow "django-markdown"
+    5:53pm I'm just going to go with markdown
+    5:37pm Should I go with markdown or HTML?  HTML seems dangerous.
+        HTML - not safe; how about if I convert it to markdown and back again?
+        markdown - safe
+Fri 7/11/14 7:12am
+    7:12am discovered that django-wysywig and django-tinymce store in html format; I'm thinking I might want markdown instead; markdown options:
+        django-markdown
+        Howard mentioned there there is a program to convert from any format to any other.
+Thu 7/10/14 8:30am
+    8:30am working on learn_django-wysiwyg
+Wed 7/9/14 5:27pm
+    5:27pm aborted learn_django-wysiwyg-redactor project; started learn_django-wysiwyg   
+Wed 7/9/14 8:46am
+    8:46am looking at WYSIWYG editors; started a learn project for learn_django-wysiwyg-redactor 
+Tue 7/8/14 8:30am
+    8:30am Added questions yesterday.  Tried running it now, and got this error:
+        Errors:
+        hidden_question_id
+        This field is required.
+        (note that no tags were selected)
+      and then on the next page this error:
+        Exception Type: ValidationError
+        Exception Value:    
+        [u'ManagementForm data is missing or has been tampered with']
+        Exception Location: /Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/forms/formsets.py in management_form, line 89
+
+    I then went back to the home page and now it is working.  There might be an issue with having no tags selected to selecting some tags.
+
+Sun 7/6/14 1:33pm
+    1:52pm WORKING!  Got it working:
+        - can select tags for which questions to ask
+        - questions are ordered by:
+            - no attempts get asked first
+            - older attempts get asked before newer attempts
+    1:33pm modified code to do two queries, one for no attempts, and for newest attempt
+Sun 7/6/14 8:08am
+    8:10am Modify the learn_* app to run in Postgres instead of sqlite
+    8:08am I confirmed that the quizme tests are being run in Postgres
+Sat 7/5/14 8:09am
+    11:31am Work on django learn program to figure out why null's aren't the oldest in my queryset
+    8:09am figured out how null is used with annotate and ordering
+Sat 7/5/14 12:14am
+    12:14am NEXT: get the latest test working to return a question with no attempts
+    12:14am Got the tests working.
+Fri 7/4/14 4:19pm
+    4:19pm NEXT: figure out how to annote the newest attempt for a given Question
+    4:19pm added learn projects to learn how to use backwards lowercase model name for the reverse relationship.
+Thu 7/3/14 1:00pm
+    1:00pm NEXT: figure out how to get all Attempt's for a given Question
+Wed 7/2/14 8:33am
+    8:34am NEXT: figure out how to annotate most recent attempt and order by that
+    8:33am created learn_aggregate_annotate project
+Tue 7/1/14 8:02am
+    8:39am NEXT: learn how to use aggregation to select Max()/Min() for the attempt date_created for a question;  see https://docs.djangoproject.com/en/dev/topics/db/aggregation/
+    8:38am DONE: got initial code in place for views.next_question()
+    8:02am NEXT: add code to select question based on tags
+Mon 6/30/14 8:41pm
+    8:41pm added test to assert that no questions appear when no tags are selected
+Mon 6/30/14 5:41pm
+    5:58pm STATUS: line 111 is failing for some reason; see what it looks like in the browser
+    5:57pm DONE: put _login() in separate function
+    5:42pm NEXT: create a test to confirm that view only gets questions with tag selected
+    5:41pm DONE: finished test_tags_created_automatically_for_user
+Mon 6/30/14 8:26am
+    9:09am LEFT OFF: working on test to assert that tags get created
+    8:33am Add tests:
+        - verify that tags get created
+    8:26am DONE: Add makefile for running tests with both browsers.
+Sun 6/29/14 8:11am
+    8:21am Ran with both firefox and phantomjs.  All tests pass.
+    8:21am Added tests for bad password, username.  They pass.
+    8:11am Add these tests:
+        DONE - wrong password for login
+        DONE - run tests with both firefox and phantomjs
+Sat 6/28/14 10:31pm
+    11:59pm Next: add more tests.
+    11:59pm Got test_1 working!  Hooray!  
+    11:21pm Now got Makefile targets and commands working for recreating the db.
+    11:20pm Now got dependency on emailusername for questions
+    11:20pm Figured out how to do South dependencies.
+    11:04pm Removed migrations.  Created new initial migrations.
+    10:43pm Remove the existing migrations and db and create new ones.
+    10:42pm When running tests, get this error:
+        Creating test database for alias 'default'...
+        FATAL ERROR - The following SQL query failed: ALTER TABLE "questions_question" ADD CONSTRAINT "user_id_refs_id_e3223746" FOREIGN KEY ("user_id") REFERENCES "emailusername_user" ("id") DEFERRABLE INITIALLY DEFERRED;
+        The error was: relation "emailusername_user" does not exist
+
+        Error in migration: questions:0001_initial
+    10:42pm Created tests.
+    10:31pm Look at Atlatl and copy how to do tests.
+    10:31pm With the learn command I think I understand how to use the queries.  But first I want to get tests in place so I can test things.
+Sat 6/28/14 2:49pm
+    4:43pm Got learn management command working.
+           SOLUTION: needed __init__.py in /management/ directory
+    4:39pm Also tried adding management command to emailusername, but still no luck.  Aargh!
+    4:32pm I added the management command, but it isn't being seen, I don't know why.
+    4:32pm Next: add a management command to see what the data is and play around with queries
+    3:19pm Now add code to just query for questions with those tags enabled.
+    3:19pm It seems to be working!  
+    3:16pm Add modelformset to render() args
+    3:16pm Added template code to show_question_and_answer.html; confirmed that it was already added to show_questions.html
+    2:49pm Now add code to get the tags and only query for questions with those tags, and add template code
+    2:49pm Added the call to _create_and_get_usertags()
+Sat 6/28/14 11:21am
+    11:24am Figure out where to call _create_and_get_tags() from in the view.
+    11:21am I think the function is ready.
+Fri 6/27/14 7:58am
+    8:13am 
+    7:58am commented different models
+Thu 6/26/14 5:41pm
+    5:41pm What is difference/relationship between Tag, QuestionTag, and UserTag
+    5:41pm worked on _create_and_get_usertags()
+Thu 6/26/14 7:48am
+    7:55am decide what to do if form is invalid; handle it here or in the main view?
+    7:54am need to complete create_and_get_persontags(); 
+    7:54am copied-and-pasted the learn project code to a new create_and_get_persontags() function.
+    7:49am needed:
+        view:
+            create modelformset_persontag
+        template:
+            add modelformset_persontag just like in learn project
+    7:48am learn_form_checkbox_for_manytomany_field - looking at to figure out how to transfer knowledge to quizme
+Wed 6/25/14 4:33pm
+    4:47pm ran the app; went into the admin; added some tags, another question and answer; things seem to be working
+    4:45pm looked at the existing cddjango projects; looks like these two are almost identical:
+        learn_many_to_many_with_needed_related_names_to_avoid_conflict
+        learn_multiple_many_to_many_in_one_model_with_needed_related_names_to_avoid_conflict
+Wed 6/25/14 8:00am
+    8:01am next: add the checkboxes to quizme (the models and migrations are now in place)
+    8:00am resuming work on this
+Sun 6/8/14 10:01pm
+    10:26pm next: add the checkboxes to quizme (the models and migrations are now in place)
+    10:02pm next: add comments for quizme model reverse accessors
+    10:01pm done: learn_many_to_many_with_needed_related_names_to_avoid_conflict now works
+Sun 6/8/14 1:40pm
+    1:40pm IN-PROGRESS: learn_many_to_many_with_needed_related_names_to_avoid_conflict -- still getting errors during syncdb
+    1:40pm learn_many_to_many_multiple_in_one_model -- finished and got working
+Sat 6/7/14 9:00pm
+    9:00pm next: clean up other models; add comments for related fields
+    9:00pm added QuestionTag model
+Sat 6/7/14 9:02am
+    6:21pm the issue is that
+        class Tag
+            questions = models.ManyToManyField(Question, through=UserTag)
+        so a Tag as many questions, and a question can have many tags.  But the through model doesn't have a question foreign key.
+        I think it should be a different "through" model.  Maybe a "through" model of QuestionTagM2M
+    6:18pm added related_name args; now down to this one error:
+        questions.tag: 'questions' is a manually-defined m2m relation through model UserTag, which does not have foreign keys to Question and Tag
+    6:18pm created django learn project: learn_many_to_many_with_needed_related_names_to_avoid_conflict
+    5:58pm this helps me understand it: http://stackoverflow.com/questions/9630922/multiple-m2m-in-django
+    5:47pm walk through the specific errors
+    5:39pm added some related_name's, still getting the same errors
+    10:15am when running quizme, I'm getting:
+        django.core.management.base.CommandError: One or more models did not validate:
+        questions.tag: Accessor for field 'user' clashes with related m2m field 'User.tag_set'. Add a related_name argument to the definition for 'user'.
+        questions.tag: 'questions' is a manually-defined m2m relation through model UserTag, which does not have foreign keys to Question and Tag
+        questions.tag: Accessor for m2m field 'users' clashes with related field 'User.tag_set'. Add a related_name argument to the definition for 'users'.
+    10:13am next: got back to quizme and see what error is
+    10:12am I got the related_name example working
+    9:22am now I'm getting:
+         IntegrityError('myapp_book.author_id may not be NULL',))
+    9:22am SOLVED; REASON: my db is db.sqlite3 instead of my.db, so I needed to modify "mycmd"
+    9:19am commented-out the delete() lines, now I'm getting:
+         OperationalError('table myapp_book has no column named book_title',))
+    9:18am I'm getting this error:
+         OperationalError('no such column: myapp_book.author_id',))
+    9:02am next: work on related_name
+Sat 5/31/14 8:33am
+    8:33am left off last night trying to get a new learn script with related_name to work
+Fri 5/30/14 5:52pm
+    5:53pm created new db, but syncdb still gives:
+        CommandError: One or more models did not validate:
+        questions.tag: 'tags' is a manually-defined m2m relation through model UserTag, which does not have foreign keys to Tag and Tag
+    5:52pm decided to create a new db called "quizme" owned by quizme
+Thu 5/29/14 5:28pm
+    5:28pm next: complete the views.get_tags() function
+Thu 5/29/14 7:35am
+    7:57am complete the views.get_tags() function
+    7:57am added the template; added get_tags() function
+    7:37am there are two templates: 
+            GET: show_question.html (this is where to add them)
+            POST: show_question_and_answer.html
+    7:35am add the tag checkboxes
+Wed 5/28/14 9:02pm
+    9:12pm next: add the tag checkboxes
+    9:12pm yes, tags are now working
+    9:10pm see if migration worked and I can now look at tags
+    9:10pm created and applied South migration for questions:
+        ./manage.py schemamigration questions --auto
+        ./manage.py migrate questions
+    9:07pm How to create a new South migration?
+    9:06pm Yes, I have South migrations
+    9:06pm see if I have South installed
+    9:02pm the app is working; but the admin gives the error;
+           I got the error in the admin when clicking on a tag to see details for the tag:
+            ProgrammingError at /admin/questions/tag/2/
+            relation "questions_tag_users" does not exist
+            LINE 1: ...e_user"."id" FROM "emailusername_user" INNER JOIN "questions...
+        I think I need to do a syncdb or migrate.
+Tue 5/27/14 5:34pm
+    6:05pm got this error when trying to create a tag in the admin:
+        ProgrammingError at /admin/questions/tag/add/
+        relation "questions_tag_users" does not exist
+        LINE 1: DELETE FROM "questions_tag_users" WHERE "questions_tag_users...
+    6:03pm creating a new tag in the admin: Users field is required; how to make it not required?  blank=True?
+    6:02pm able to login as superuser@bednark.com / p (admin account)
+    6:00pm see if I have South setup
+    6:00pm create an admin account to login to the admin
+    5:52pm "manage.py runserver" giving error:
+        django.core.management.base.CommandError: One or more models did not validate:
+        questions.tag: 'users' has an m2m relation with model User, which has either not been installed or is abstract.
+        SOLUTION: make a many2many field with User instead of 'User'
+    5:51pm models are correct; see if I can add tags for a question in the admin
+    5:45pm see if models are correct
+    5:45pm get tags working on quizme program
+    5:44pm next: continue on quizme program
+    5:44pm learn_form_checkbox_for_manytomany_field working!
+    5:34pm Next: update learn_form_checkbox_for_manytomany_field 
+Tue 5/27/14 8:10am
+    8:10am Got it working!  Now update learn_form_checkbox_for_manytomany_field with it.
+Sun 5/25/14 8:10pm
+    10:42pm I finished posting the question to stackoverflow.
+    10:12pm post to stackoverflow!
+    9:30pm try: >>> f.fields['name'].label = "Username"
+    9:09pm Post to stackoverflow:
+    Tags: django-forms django-modelformsets django-modelform django
+    Title: How to set formset form widget.label with value of other model field
+    Body:
+        I have a modelformset for a `PersonTag` model with 3 fields, and I want to display a checkbox widget for the `PersonTag.enabled` field, and no widget for the other two fields.  For each checkbox, I want the label to be set to the `PersonTag.tag` value for that model instance.  How might I accomplish this?
+
+    8:10pm see if I can use a HiddenInput
+Fri 5/23/14 4:16pm
+    4:16pm preparing to post to stackoverflow
+Fri 5/23/14 7:07am
+    7:51am tried the "for field in form", but it's now showing the widgets (post to stackoverflow for this)
+    7:07am to add the tag name, consider:
+        1) subclassing BaseFormSet.add_fields() to add an additional field
+            https://docs.djangoproject.com/en/dev/topics/forms/formsets/
+        -or-
+        2) using HiddenInputs and using the value of those in the template to specify the name
+        -or-
+        3) just adding an additional key to the formset dict in the view, and using that in the template
+        -or-
+        4)  
+            {% for field in form %}
+                <th>{{ field.label }}</th>
+                <td>{{ field.widget }}</td>
+            {% endfor %}
+        -or-
+        5) Give a label to the tag field.  Maybe Django will show the label but not the HiddenInput widget
+        -or-
+        6) look at the Django source code for a widget
+
+        http://stackoverflow.com/questions/18591609/disable-display-of-field-names-in-django-forms
+    
+Thu 5/22/14 6:00pm
+    6:00pm to add the tag name, consider:
+        1) subclassing BaseFormSet.add_fields() to add an additional field
+            https://docs.djangoproject.com/en/dev/topics/forms/formsets/
+        -or-
+        2) using HiddenInputs and using the value of those in the template to specify the name
+        -or-
+        3) just adding an additional key to the formset dict in the view, and using that in the template
+Thu 5/22/14 6:55am
+    7:21am now figure out how to add the tag name
+    7:21am fixed the three projects that are using it
+    7:21am it works!  
+    6:56am test out my modelformset_factory(widgets=...) fix
+Wed 5/21/14 7:19am
+    5:45pm I discovered my problem!  I'm specifying the HiddenInput widgets in the forms.PersonTagForm, but that form is not being used by the factory.  I need to pass the widgets arg to the factory.
+    7:55am I queried stackoverflow for "django modelformset_factory hiddeninput" and found some posts, one that mentions different behavior with the "extra" field; try extra=0 and extra=1
+    7:19am post question to stackoverflow
+    Tags: Django django-modelformsets django-modelform factory widget
+    Title: Why doesn't Django modelformset_factory formset recognize HiddenInput widgets?
+        For my ModelForm, I'm specifying two fields as HiddenInput fields.  This works as desired if I use a ModelForm instance in my view and template.  But when I use modelformset_factory, the fields are no longer hidden.  Why not?
+
+Tue 5/20/14 7:45am
+    7:47am learn_modelform_hidden_field -- HiddenInput widgets are working; it is correctly only showing the checkbox for the GET, and the dropdowns are hidden fields
+Mon 5/19/14 5:30pm
+    5:41pm learn_modelform_hidden_field: LEFT OFF modifying it to use a ModelForm instead of a ModelFormset
+    5:30pm try using just a ModelForm without a formset
+Mon 5/19/14 6:58am
+    2:42pm create stackoverflow question
+    7:23am fix "model = Tag" for TagForm in the other projects
+    7:22am I discovered that I had set "model = Person" for the TagForm; not sure what that was doing
+    6:58am try:
+        o look at Django code
+        o try hidden widgets
+        o try removing fields
+Sat 5/17/14 8:22pm
+    8:59pm consider asking Aaron, Kyle, or Nick (put it in a git repo)
+    8:59pm consider asking StackOverflow
+    8:59pm I created learn_modelformset_make_field_hidden_or_remove_it and set widgets in the Meta for the form, but it didn't seem to do anything.
+    8:22pm this shows two options:
+            1) make field a HiddenInput field
+            -or-
+            2) delete it from fields
+Sat 5/17/14 4:42pm
+    5:00pm run with debugger and inspect the widgets
+    4:46pm I want to change so that only the checkbox is shown
+        consider: http://stackoverflow.com/questions/11736322/django-how-to-override-fields-of-a-modelform-in-a-modelformset
+    4:42pm learn_form_checkbox_for_manytomany_field - seems to be working; now figure out how to only show checkbox
+Thu 5/15/14 7:43am
+    7:44am how is it that tags for both users are showing up?
+        A: It's because I'm using 
+            queryset=PersonTag.objects.all())
+        I have now fixed it by using filter(person=person)
+    7:43am figure out how to only show checkbox and not the other two fields of the PersonTag ManyToMany field
+Wed 5/14/14 5:03pm
+    5:06pm get the POST working:
+    5:05pm getting this error when submitting:
+        NameError: global name 'ContactForm' is not defined
+    5:04pm Now what?
+Wed 5/7/14 9:18pm
+    9:18pm Got page displaying!  Was using wrong filename for the template.
+Wed 5/7/14 5:45pm
+    5:45pm try printing out as_p() stuff; look up as_p() in other projects
+    5:45pm learn_form_checkbox_for_manytomany_field - the page is now displaying, but there is no content; why not?
+Tue 5/6/14 5:59pm
+    6:16pm learn_form_checkbox_for_manytomany_field - the page is now displaying, but there is no content; why not?
+    5:59pm learn_form_checkbox_for_manytomany_field - set_trace() to see why it's failing
+Tue 5/6/14 7:43am
+    8:30am got web page running; when I added a tag, and now I'm getting an exception:
+        too many values to unpack
+         person_tag = qs_person_tags.get(tag.tag_name) 
+    7:43am learn_form_checkbox_for_manytomany_field - 
+Mon 5/5/14 7:39am
+    8:03am learn_form_checkbox_for_manytomany_field - copied code to contact2(); now modify it to add new tags that don't exist
+    7:39am learn_form_checkbox_for_manytomany_field - get it working like learn_ModelFormset_modify_existing_instances_web_page
+Sun 5/4/14 8:35pm
+    9:00pm learn_ModelFormset_modify_existing_instances_web_page -- it's working!!!
+    8:55pm don't see any errors, so step through the code
+    8:40pm got one form displaying, but it's not valid, and is not showing any errors
+    8:35pm learn_forms_inline_formsets - see what is available for form options (form.as_p, ...); and see what the HTML source looks like
+Sat 5/3/14 9:23pm
+    9:54pm learn_forms_inline_formsets - got web page at least displaying; but it not displaying the data
+    9:30pm how do I put a formset into a template?
+    9:24pm learn_forms_inline_formsets - this has formset code, but I never got it working
+    9:23pm learn_ModelFormset_modify_existing_instances_web_page - work on template for GET
+Sat 5/3/14 11:47am
+    12:13pm see if I have another django learn example using a formset in a template
+    12:12pm I think I got view in place for GET, now fill in the template
+    12:03pm find another project to copy view pattern for GET and POST
+    12:00pm learn_ModelFormset_modify_existing_instances_web_page - complete this so that I know how to do it with a web page
+    11:47am consider just adding any tags that don't already exist
+Tue 4/29/14 7:56am
+    7:57am next: 
+Mon 4/28/14 5:50pm
+    5:50pm can I start with a queryset, and add data onto it?
+Sun 4/27/14 4:50pm
+    4:52pm learn_ModelFormset_modify_existing_instances -- see if I can get by without add data;
+    4:50pm continue working on learn_form_checkbox_for_manytomany_field: views.py - adding data to modelformset
+Thu 4/24/14 6:00pm
+    6:08pm continue working on learn_form_checkbox_for_manytomany_field: views.py - adding data to modelformset
+    6:00pm see if it matters whether data is in a different order than the queryset
+           FOUND: order of existing instances doesn't matter with the queryset 
+Mon 4/21/14 8:01am
+    8:01am  work on finishing learn_form_checkbox_for_manytomany_field
+Thu 4/17/14 8:05am
+    8:05am  figure out why I can't both modify an existing instance and add a new instance for learn_ModelFormset_modify_existing_instances
+Wed 4/16/14 7:32am
+    7:32am  next: work on the html template of the learn_form_checkbox_for_manytomany_field
+Tue 4/15/14 7:39pm
+    7:39pm  next: finish learn_form_checkbox_for_manytomany_field
+Tue 4/15/14 7:38am
+    7:47am  got learn_ModelFormset_modify_existing_instances working!!!
+    7:38am  next: get learn_ModelFormset working with modifying existing instances
+            learn_ModelFormset_modify_existing_instances
+Sun 4/13/14 10:20pm
+    10:24pm next: get learn_ModelFormset working with modifying existing instances
+    10:23pm Got learn_ModelFormset working!
+    10:21pm now working on getting learn_ModelFormset working
+    10:20pm got learn_formset_stackoverflow_ask working (plain old formsets)
+Sun 4/13/14 12:20pm
+    12:20pm looking at learn_ModelForm
+                - it's working
+                - it creates a new instance, and modifies an existing instance
+Fri 4/11/14 7:35am
+    8:58am vdjango -- started summarizing forms and formsets; 
+           explore further the relationship between ModelForm and not having an instance;
+           nail down how a ModelForm works before using a ModelFormset;
+           explore formsets and ModelFormsets separately
+    7:35am consider posting a stackoverflow question; start with new learn project
+Thu 4/10/14 5:45pm
+    5:45pm Cannot figure out why formset has no save() method.  Consider looping through the formset and saving each instance:
+        http://stackoverflow.com/questions/18700690/why-isnt-my-modelformset-saving
+Wed 4/9/14 5:30pm
+    6:00pm Note that, per Django docs, for initial values:
+            These values are only displayed for unbound forms, and they’re not used as fallback values if a particular value isn’t provided.
+    5:50pm formset.is_valid() is False because it is an unbound 
+    5:30pm starting to work on cleaned_data AttributeError
+Wed 4/9/14 8:45am
+    8:45am figured out how to use inspect module to check for classes and methods
+Tue 4/8/14 5:29pm
+    5:36pm learn_formset: got most of attributes printing; cleaned_data is still raising an AttributeError
+    5:29pm left off in learn_formset, printing out attr's of a form/formset.
+           For some reason, dir(form) shows cleaned_data as an attribute, but it only
+           gets shown if is_valid() is run.
+Fri 4/4/14 8:35am
+    8:39am consider stepping into the Django code and seeing what the error is
+    8:35am learn_formset line 30: My formset is not valid, and there are no formset.errors or form.errors.  Why not?
+    8:34am figuring out where I left off
+Mon 3/31/14
+    9:08am modelformset's are tied to a queryset; does a ModelForm object have to be tied to a model instance?
+    8:20am learn_formset: started
+    8:10am learn_forms_inline_formsets: not working; start a new easier one instead
+Fri 3/28/14 
+    5:30pm need to figure out how to process multiple forms from a template; use formsets; start with a project for learning how to use them
+Thu 3/27/14
+    8:24am learn_form_checkbox_for_manytomany_field: added instance; now need to add to template
+Wed 3/26/14 5pm
+    5:20pm next: finish learn_form_checkbox_for_manytomany_field and learn_checkboxes_for_every_boolean_record
+    5:19pm learn_form_1: modified mycmd to specify all the fields
+    5:02pm working on getting learn_form_1 mycmd working
+    5:00pm Forget about figuring out how to use existing field value if not specified.
+Wed 3/26/14 8am
+    9:03am NEXT: figure out how to use existing field value if not specified (just like for Atlatl)
+    9:00am got learn_ModelForm working with not requiring all fields.  However, updating an existing instance does not use the existing field value if not specified.
+    8:58am got ModelForm working when creating a new instance in learn_ModelForm.  However, when updating an existing instance, the fields are still required.  Make them not required.
+    8:44am figuring how how a ModelForm takes fields
+    8:35am beginning learn_form_1 mycmd
+Tue 3/25/14 4pm
+    5:10pm LEFT OFF: get learn_form_1 mycmd working
+    5:09pm modified learn_form_1 mycmd to understand how to use a ModelForm;
+    5:00pm creating a project to learn how to map an instance
+    4:53pm Now need to figure out how to map an instance to the form:
+        MyForm(instance=my_instance)
+    4:52pm Figured out how to instantiate a form.
+    4:51pm Working on learn_form_1 to figure out how to instantiate a form();
+    4:50pm Working on learn_form_checkbox_for_manytomany_field
+Mon 3/17/14 8am
+    understanding how a single checkbox should work in the follow scenarios:
+        - ManyToMany field with two specified values
+        - a new instance
+        - an existing instance
+    working on learn_form_checkbox_for_manytomany_field
+Fri 3/14/14 10am
+    detailing how the functionality should work
+Wed 3/12/14 5pm
+    left off: exploring different tagging methods after googling; explore django-taggit by Alex Gaynor some more, and also some blog posts
+    Next: get checkboxes for the boolean values
+    + Got working with showing the page.  
+    resuming work on learn_checkboxes_for_every_boolean_record
+    + modified code for view, forms, and html template
+Tue 3/11/14 9am
+    Working on the view for learn_checkboxes_for_every_boolean_record
+Mon 3/10/14 5pm
+    Decided I'm done with learn_aaron_inline_formsets.
+    Resuming learn_checkboxes_for_every_boolean_record
+    Created the models, now figuring out what to create for the view.
+Fri 3/7/14 5pm
+    Reading through Django documentation on formsets.
+Thu 3/6/14 6pm
+    Copied Aaron Sykes' inlineformset_factory project into learn.  
+    Read about sqlite3 in wikipedia.
+    LEFT OFF: documenting how Aaron's inlineformset_factory works.
+Thu 3/6/14 8am
+    Added a boolean field to learn_ModelForm and proved that it uses a checkbox.
+    Went through learn_form_1 and determined what it was doing.
+    Went through learn_form_1a_customize_form_html and determined it was using html instead of {{ form.as_p }}
+    Next: keep going through other learn*form* projects to get a thorough understanding of forms.
+Wed 3/5/14 5pm
+    LEFT OFF: discovered stackoverflow post of using formsets for each one
+    Looked at Postgresql bit strings.  Don't see it supported in Django.
+    Continuing to work on checkboxes project.
+
+Thu 2/13/14 7am
+    Working on Django learn project for checkboxes for all the tags.
+Tue 2/11/14 7am
+    Next: implement tags via checkboxes or radio buttons.  First create a Django learn project.
+    Consider:
+        
+        event.members = form.cleaned_data['members']
+    Add saving of tags for a user:
+        default to all tags
+
+Mon 2/10/14 9am
+    Next:
+    It now works!!!!
+    SOLUTION: added admin.py code 
+    I looked at learn_django_doc_example_custom_user_mycmd_create_users and found that I forgot
+    all the admin.py code.  I have now added it.
+Sun 2/9/14 3pm
+    Next: try the learn project to see how it's storing passwords
+    Reason: it looks like creating a user through the admin is not encrypting the password.
+    Why can I login as a superuser, but not as a non-superuser?
+    deleted rbednark@gmail.com and then re-created:
+        FAIL: rbednark@gmail.com / p
+    manage.py createsuperuser
+        SUCCESS: superuser@bednark.com / p
+    attempts:
+        FAIL: rob / rob 
+        FAIL: rbednark@gmail.com / p
+    I have now set AUTH_USER_MODEL in settings.py
+
+    What is being authenticated?  auth_user or emailusername_user?
+    Currently logged-in as: [rob]
+    auth_user:
+        rob
+        rbednark
+    emailusername_user:
+        rbednark@gmail.com
+    I think it's because I forgot settings AUTH_USER_MODEL in settings.py
+
+Thu 2/6/14 9am
+    I set a trace to see what the error is.  It is here:
+        /Users/rob/.virtualenvs/quizme/lib/python2.7/site-packages/django/contrib/auth/backends.py(16)authenticate()
+    Added a logout link via a base.html page.
+    login as rbednark@gmail.com / p: 
+        Your username and password didn't match. Please try again.
+        (I confirmed that rbednark@gmail.com / p in the admin are correct, and is_active=True)
+    login as rob / rob:
+        
+Wed 2/5/14 7am
+    Problem: getting this error:
+        Cannot assign "<SimpleLazyObject: <User: rob>>": "Attempt.user" must be a "User" instance.
+    Theory: I think it's because I'm logged-in as an auth_user instead of an emailusername_user
+    Next: add a logout link
+    Status: added a base.html page.  Including it in the other 2 pages.
+Tue 2/4/14 6pm
+    Next: resolve the csrf error
+    Got the login screen working.  Now there is a csrf error:
+        CSRF token missing or incorrect.
+    Got the django learn project working to use the login screen.
+Tue 2/4/14 8am
+    Next: implement custom login page
+    Got learn_custom_user_login_page_form_view working.
+Mon 2/3/14 5pm
+    Working on learn_custom_user_login_page_form_view
+    Added a custom form.  Now add a custom view, subclassed from login() view
+
+    https://docs.djangoproject.com/en/dev/topics/auth/default/
+
+    Start implementing the login form.  We'll need it anyway.
+
+    If I did implement saving an anonymous user as a user, it would have to be done
+    when they first go into a quiz.  That could potentially mean a lot of anonymous users.
+    Could choose to purge them after every n days.
+    Furthermore, might need a way to convert an anonymous user to an existing user.
+    Maybe that would be easy -- just fill in their fields (email addr, first name, last name)
+Mon 2/3/14 8am
+    Anonymous users do not have a User instance.  Figuring out how to save them as an actual user.  Created a django learn project.
+    Implementing...
+    Maybe it's not worth it.
+Sun 2/2/14 8pm
+    Fixed error.
+    Now getting another error:
+        Cannot assign "1": "Attempt.user" must be a "User" instance.
+Sun 2/2/14 11am
+    Changed from sqlite3 to postgres.  Create initial migrations again.  Now get an error:
+        column questions_attempt.datetime_updated does not exist
+        LINE 1: ...empt"."id", "questions_attempt"."datetime_added", "questions...
+    Next: need to allow superuser to add tags/questions in Django Admin.
+    Added Tag ManyToMany with Question.
+    Added ManyToMany both ways in Django Admin.
+Sat 2/01/14 10am
+    Next: add tags
+    Users now work.
+    Added foreign keys to User.
+    Added a user_ app to quizme.
+    Now add user to my model.
+    Satisfied that subclassing AbstractBaseUser also has all the authentication/permission functionality.
+    On plan from Charleston.
+    learn_django_doc_example_custom_user -- this is done and just creates a custom user by subclassing AbstractBaseUser.
+    I figured out that create_user() is a method of the manager, not of the user.
+
+Sun 1/26/14 2pm
+    On plane to Charleston.  Working on creating users and logging-in.
+Fri 1/24/14 6pm
+    Did some googling.  It doesn't look like it's easy to modify the Django authentication to use email addresses instead of usernames.
+    Decided to use Tom Christie's django-email-as-username library.
+    Working on learn_django_email_as_username
+Thu 1/23/14 5pm
+    Finished new template_django_1_6_1
+    Now working on learn_django_user_authentication
+    Left off: reading about Django user authentication
+        https://docs.djangoproject.com/en/1.6/topics/auth/
+        https://docs.djangoproject.com/en/1.6/topics/auth/customizing/
+Thu 1/23/14 9am
+    Working on creating and authenticating users.  Creating a learn project for it.  Right now, I'm creating a new template_django_1_6_1 based off of Django 1.6.1
+    Left to do: 
+        settings.py
+Wed 1/22/14 9pm
+    Got it working.  Works with 3 questions.  Cycles through.
+    Next step?  Maybe tests.
+Wed 1/22/14 5pm
+    I think I got it working.  Add another question to see if it really works.
+Wed 1/22/14 8am
+    I added a "question" field to the form, but this doesn't make any sense.  Question is not an input.  I think I just added it to make it easy to display the question.  Take it out and pass it explicitly.
+
+    Do I really want a different template for showing the first question vs showing an answer
+    and the next question?  For now it's fine.  Keep moving on.
+Tue 1/21/14 8am
+    Left off changing field names in forms and views.
+    States:
+        - initial GET:
+            - show the question
+        - POST
+            - new template:
+                - show the answer, the user's attempt, the question
+                - have a NEXT button be a GET for the next question
+Mon 1/20/14 6pm
+    I got the hidden input to work.  Now need to figure out what to do next.
+Mon 1/20/14 8am
+    Trying different things to get the HiddenInput to work.  I think it is due to these lines in the view:
+            form_attempt.fields['question_id'] = question.id
+            form_attempt.fields['question_id'] = None
+    I think it should be something like ['initial'], otherwise I think it's overriding the widget.
+Fri 1/17/14 6pm
+    Tried putting explicit <input> in the form, and then it put the <input> widget in the "value".
+    Baffling.
+Fri 1/17/14 8am
+    Googled.  Tried .as_hidden and using ()'s when setting the widget.  Still not working.  Might not to explicitly put it in the form.
+    Look at the Django code to see what the HiddenInput widget does.
+Thu 1/16/14 8am
+    Added errors to form so can see what the error is.
+    It is saying that question_id is not present in the form.
+    I set a breakpoint and confirmed that question_id is not in request.POST.
+    Now check to see if question_id is getting in the form.  I see it as one of the fields, but because I'm not using form.as_p(), it's not getting put into the form.
+Wed 1/15/14 8am
+    Figured out that my for is not valid.  Now trying to figure out how to show Django form errors manually, and then eventually using Django generic class-based views.
+Tue 1/14/14 5pm
+    Got view to show question working, and next_question() code working.
+    Now getting an exception after clicking "submit".
+Tue 1/14/14 9am
+    Added code for next_question().  
+    Added code to pass question_id as hidden field.  Now test it.
+Mon 1/13/14 8am
+    Looking at django-quiz to see how he did it.
+    Still have to decide how to pass fields.  I want to go with hidden fields.
+    Got django-quiz up and running.  Needed to do a "django-admin.py startproject", and add the apps.  I didn't actually get the templates working.
+    Options:
+        pass hidden fields
+        pass query parameters (http://quizme.com?parm=value
+Fri 1/9/14 8pm
+    Got the hidden field working!  Now add it to quizme.
+    Want to redirect to the next question by passing the hidden value of the current question.
+    Could also pass it in the URL as the ID of the question.
+Fri 1/9/14 8am
+    working on getting hidden field working; found form.fields['myfield']['initial'] but it is not right
+Thu 1/9/14 6pm
+    Working on learn_form_hidden_field.  Got the hidden field, now need to see if it's passing a value.
+    It's passing the initial value and saving that.  Now I have to see if I can set it to something else.
+    How do I set the value for a field?
+    Set a trace and see what the values are.
+Thu 1/9/14 9am
+    o Learned how to use a hidden field.  Now need to figure out how to set the value for the hidden field in the view instead of just using the initial value.
+      Created learn_form_hidden_field.
+Wed 1/8/14 6pm
+    o Got admin working.
+    o Next: redirect to the next question; started working on; need hidden field
+Wed 1/8/14 10am
+    o Got it saving an attempt.  Now need to work on a redirect to the next question.  Also need to add Attempt to the admin.  Left off making changes to the admin.
+Tue 1/7/14 6pm
+    o Got the form displaying correctly for the GET.
+      ERROR when submitting: 'FormAttempt' object has no attribute 'cleaned_data'
+
+Tue 1/7/14 9am
+    o Working on the view and template.  Decided to use form for the answer, and just put the question in directly.  Still modifying the view code and the template.
+Mon 1/6/14 6pm:
+  o I'm trying to figure out how to do a read-only field; what I want:
+        o display the question
+        o have a box for the answer:
+        o when submitting, only allow the answer
+    Maybe what I should do is create a form just for the answer, and in the template put the questionas well.
+  
+Mon 1/6/14 8am:
+  o work on implementing the view; was going to use a form, not sure if I use Django Forms (because I have readonly field of question) or not.
+
+Fri 1/3/14:
+  
+  o got it working; added a question and answer via the admin
+  o added 'questions' to INSTALLED_APPS
+  o enabled the admin
+  o added requirements.txt file
+  o installed South
+  o got Django 1.6.1 installed
+Mon 10/14/13:
+  o LEFT OFF: working on learn_GenericForeignKey.polymorphic.contentType; can't figure out how to chain querysets together
+  o worked on the models; now figuring out how to use GenericForeignKey for the tag
+  o played with django_versioning again to see how it works; decided to continue working on the models
+Thu 10/3/13
+  o NEXT STEP: create a basic question and answer models, and add the Django REST Framework API
+  o completed the Django REST Framework Quickstart, and skimmed the tutorial
+  o working on learn_django_rest_framework project
+Tue 10/1/13
+  o create learn_django_rest_framework project
+Mon 9/30/13
+  o If I use a REST API and AJAX, what should my first feature be?
+    Being able to add questions.  Tag questions.  Modify questions.
+  o installed django REST Framework: pip install djangorestframework
+  o What should I do next?  I would like to create a REST API and use a JavaScript front-end.  Maybe I will use django-rest-framework.
+
+Thu 9/19/13
+  o got it running; can see revisions in Django Admin; 
+  o need to run syncdb before versioning_setup
+  o installed django-debug-toolbar
+Wed 9/18/13
+  o ran "manage.py version_setup..." command and got:
+    ImportError: No module named debug_toolbar
+  o finished modifying code
+Tue 9/17/13
+  o started playing with django-versioning in learn_django-versioning_package
+        LEFT OFF: adding code to models.py
+  o researching model instance versioning approaches (capturing every time an instance is modified)
+Mon 9/16/13
+  o added models
+================================================================================
