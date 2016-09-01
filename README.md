@@ -25,7 +25,7 @@
 1. copy database
 
 ### Docker Test Environment
-I got some docker containers setup for with the intent of making local testing easier. In order to use it you need to install docker and docker-compose, which is a util for managing sets of docker containers.
+I got some docker containers setup for with the intent of making local testing easier. In order to use it, you need to install docker and docker-compose, which is a util for managing sets of docker containers.
 
 There are two config files involved with the docker testing containers:
 
@@ -47,13 +47,13 @@ DATABASES = {
 }
 ```
 
-In order to get the testing containers working, docker and docker-compose need to be installed on the host system.
-
 In order to get docker running the following commands need to be run from this project's root directory:
 
+```
 $ docker-compose up
 $ docker-compose run web python manage.py syncdb
 $ docker-compose run web python manage.py migrate
+```
 
 Django, Docker, and Pdb don't play well together. In order to set a stack trace inside some app code run docker-compose like so:
 
