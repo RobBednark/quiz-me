@@ -208,6 +208,20 @@ Q: How to test a database loaded from a backup?
 A: 
 
 ## TODO / Backlog / Features / Stories
+* 9/11/16 FEATURE: For the selected tags, show them one per line right under "Tags selected:", along with num_questions and time periods, as is shown in the next section with all the tags.  As a user, I want to see these tags at the top and not have to hunt for them.
+* 9/7/16 MODIFY: in the admin, modify it so that the width of the question/answer text isn't a single line and extremely wide
+* 9/5/16 FEATURE: save the duration/interval to attempt table in the database; then show this duration for the answer, so the user can determine how well they did for the actual interval compared to the desired interval; also, consider adding query criteria for a quiz to say "show me all questions with an interval of less than 2 days"
+* 9/5/16 FEATURE: for a quiz, make it possible to exclude questions with specified tags (e.g., quiz with all 'python' tags, except for questions that also contain the page 'web pages to review')
+* 9/5/16 TEST: add tests for:
+    - num_questions (for each tag)
+    - each interval:
+        - -now
+        - 10m-1h
+        - 1h-1d
+        - 1d-1w
+        - 1w-1mo
+        - 1mo-1y
+        - unseen
 * 7/1/15 FEATURE: in addition to tags, consider keywords
 * 6/28/15 FEATURE: show how long (duration/interval) it has been between when we last answered the question and now; this will me when I answer determine how long I want to set the next interval (both question and answer pages)
 * 6/2/15 BUG: I added a new question with tags=[file_systems, unix]; when I went to quiz myself with a bunch of tags selected, but neither [file_systems, unix], I still got that question; after I answered that question, I then got another question with those same tags
@@ -243,7 +257,7 @@ A:
 * 12/21/14 Add tasks to either github issues or to Trello
 * 11/17/14 add ability to select all or none for tags
 * 10/20/14 add search ability, to search questions/answers for specified keywords
-* 10/20/14 in the admin, when viewing a question, show the answer as an inline
+* 10/20/14 in the admin, when viewing a question, show the answer as an inline that can also be edited; likewise, when viewing an answer, show the question inline  #high
 * 10/20/14 in the admin, when viewing a question, add a link to jump to the answer to view/edit it
 * 10/19/14 upgrade Django to latest (currently using 1.6.7; latest is 1.7)
 * 10/18/14 per Steven Jonas, have a way to find other questions (or bookmarked webpages) with similar content to help form associations and new insights

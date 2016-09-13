@@ -17,6 +17,9 @@
             {% endif %}
 
 
+            {% if not question.answer %}
+                (NOTE: there is no answer for this question)
+            {% endif %}
             <!-- Show the form fields for the attempt -->
             <div class="fieldWrapper">
                 {{ form_attempt.attempt.label_tag }}
