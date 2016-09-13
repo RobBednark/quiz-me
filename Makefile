@@ -39,6 +39,7 @@ loaddb: dumpdb
 	psql --command="CREATE DATABASE ${DB_NAME_RESTORE_PLAIN}"
 	pg_restore --dbname=${DB_NAME_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
 	psql --dbname=${DB_NAME_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN} > /tmp/psql.stdout
+	echo "NOTE: If restore fails due to a missing role, then create that role manually (e.g., psql --command="CREATE USER my_user)."
 
 migrate:
 	./manage.py migrate
