@@ -116,6 +116,8 @@ class Schedule(CreatedBy):
     interval_num = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=None)
     interval_secs = models.IntegerField(null=True, default=None)  # Number of seconds from when record was added until it should be shown again.  When is this useful?  Not sure.  Maybe to aid in showing history of intervals.
     interval_unit = models.TextField(choices=CHOICES_UNITS, null=True, default=None)
+    percent_correct = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=None)
+    percent_importance = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=None)
     question = models.ForeignKey(Question)
     # user
 

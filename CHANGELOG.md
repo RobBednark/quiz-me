@@ -1,7 +1,10 @@
 # Quiz-me Changelog
 
 ## 2016-09-23
-- REMOVE "immediately" and "never" from "Interval unit" dropdown and answer page, because they aren't implemented
+- ADD "percent_correct" and "percent_importance" fields to Schedule model, and add accompanying migration
+
+## 2016-09-23
+- REMOVE "immediately" and "never" from "Interval unit" dropdown on answer page, because they aren't implemented
 
 ## 2016-09-23
 - ADDED links to modify question and answer from both question and answer pages
