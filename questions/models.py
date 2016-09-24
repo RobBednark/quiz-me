@@ -11,7 +11,6 @@ from emailusername.models import User
 CHOICES_UNITS = (
     #  db value   human-readable
     #  --------   --------------
-      ("immediately", "immediately"),
       ("seconds", "seconds"),
       ("minutes", "minutes"),
       ("hours",   "hours"),
@@ -19,7 +18,6 @@ CHOICES_UNITS = (
       ("weeks",   "weeks"),
       ("months",  "months"),
       ("years",   "years"),
-      ("never",   "never"),
 )
 
 class CreatedBy(models.Model):
