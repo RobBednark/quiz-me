@@ -36,6 +36,14 @@
 
             <input type="submit" value="Submit" /> 
 
+            <!-- Add urls to edit the question and answer in the Django admin -->
+            {% if question %}
+                <br> <a href="{% url 'admin:questions_question_change' question.id %}">Edit question</a>
+                {% if question.answer %}
+                    <br> <a href="{% url 'admin:questions_answer_change' question.answer.id %}"> | Edit answer </a>
+                {% endif %}
+            {% endif %}
+
             <!-- Show the tags for this question -->
             <br>Tags for this question: [{{ question_tag_names }}]
             <br>Question added  date  : [{{ question.datetime_added }}]

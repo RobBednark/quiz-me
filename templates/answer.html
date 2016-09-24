@@ -39,8 +39,14 @@
             </p>
 
             <input type="submit" value="Submit" /> 
-            <br/>Question.id=[{{ question.id }}]
-            <br/>Answer.id=[{{ answer.id }}]
+
+            <!-- Add urls to edit the question and answer in the Django admin -->
+            {% if question %}
+                <br> <a href="{% url 'admin:questions_question_change' question.id %}">Edit question</a>
+                {% if answer %}
+                    <br> <a href="{% url 'admin:questions_answer_change' answer.id %}"> | Edit answer </a>
+                {% endif %}
+            {% endif %}
 
             <p>
             Ask questions with these tags:<br>
