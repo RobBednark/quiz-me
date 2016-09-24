@@ -23,6 +23,11 @@
     Test it:
         psql --user=quizme quizme
 1. copy database
+   --or--
+   ./manage.py syncdb
+   ./manage.py migrate
+1. create a superuser
+	./manage.py createsuperuser --email my_user@my_domain.com
 
 ### Docker Test Environment
 I got some docker containers setup for with the intent of making local testing easier. In order to use it, you need to install docker and docker-compose, which is a util for managing sets of docker containers.
@@ -208,6 +213,11 @@ Q: How to test a database loaded from a backup?
 A: 
 
 ## TODO / Backlog / Features / Stories
+* 9/23/16 FEATURE: in the admin, modify tags so that when editing a tag, it only shows the first n matching questions; otherwise, it gets slow listing many matching questions
+* 9/22/16 BUG: when running for the very first time, there are no tags selected, so no questions are selected, and you need to select some tags and will get an error after clicking "submit"
+* 9/20/16 FEATURE: consider capturing percentage of usefulness/importance (e.g., "This question is 80% important to me")
+* 9/20/16 FEATURE: consider capturing percentage of correctness (e.g., "I got this answer 90% correct")
+* 9/14/16 STYLE: in list of tags, change the color of the tag if the tag is selected, to make it clear which are selected
 * 9/11/16 FEATURE: For the selected tags, show them one per line right under "Tags selected:", along with num_questions and time periods, as is shown in the next section with all the tags.  As a user, I want to see these tags at the top and not have to hunt for them.
 * 9/7/16 MODIFY: in the admin, modify it so that the width of the question/answer text isn't a single line and extremely wide
 * 9/5/16 FEATURE: save the duration/interval to attempt table in the database; then show this duration for the answer, so the user can determine how well they did for the actual interval compared to the desired interval; also, consider adding query criteria for a quiz to say "show me all questions with an interval of less than 2 days"
@@ -244,7 +254,7 @@ A:
 * 01/23/15 Add search to Django admin to search in questions and answers.
 * 12/31/14 Added schedule intervals for "immediate" and "never"
 * 12/31/14 Allow a quiz mode that consists of a set of questions, and the user can go back and change their answers as much as they want (e.g., as part of an interview)
-* 12/31/14 Make it possible to view questions that don't have any tags ("untagged")
+* 12/31/14 Make it possible to view questions that don't have any tags ("untagged")  #high
 * 12/31/14 Have a "review all" mode that goes through all questions for the selected tags, showing you number seen and number remaining.
 * 12/31/14 REFACTOR: change all datetime_* variables to either date_* or time_*
 * 12/31/14 Change all timezones to UTC
@@ -255,10 +265,10 @@ A:
 * 12/21/14 Add to readthedocs
 * 02/15/15 Consider adding a priority field (interval is ideally when you want to see it again, but priority is how important it is to you; so 2 different questions could have the same interval, but the one with the higher priority gets shown first; however, what to do if question1 has interval 1 month and priority "high", and question2 has interval 1 minute and priority "low" -- which gets shown first?)
 * 12/21/14 Add tasks to either github issues or to Trello
-* 11/17/14 add ability to select all or none for tags
+* 11/17/14 add ability to select all or deselect all for tags  #high
 * 10/20/14 add search ability, to search questions/answers for specified keywords
 * 10/20/14 in the admin, when viewing a question, show the answer as an inline that can also be edited; likewise, when viewing an answer, show the question inline  #high
-* 10/20/14 in the admin, when viewing a question, add a link to jump to the answer to view/edit it
+* 10/20/14 in the admin, when viewing a question, add a link/url to jump to the answer to view/edit it  #high
 * 10/19/14 upgrade Django to latest (currently using 1.6.7; latest is 1.7)
 * 10/18/14 per Steven Jonas, have a way to find other questions (or bookmarked webpages) with similar content to help form associations and new insights
 * 10/18/14 have questions that are a single webpagge to review (a url), and show the content of the webpage instead of just a link
