@@ -1,6 +1,9 @@
 # Quiz-me Changelog
 
 ## 2016-09-23
+- ADD "percent_correct" and "percent_importance" fields to answer page
+
+## 2016-09-23
 - ADD "percent_correct" and "percent_importance" fields to Schedule model, and add accompanying migration
 
 ## 2016-09-23

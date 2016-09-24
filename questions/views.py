@@ -292,7 +292,9 @@ def answer(request, id_attempt):
         # Redirect the user to the next question.
         form_schedule = FormSchedule(request.POST)
         if form_schedule.is_valid():
-            schedule = Schedule(interval_num=form_schedule.cleaned_data['interval_num'],
+            schedule = Schedule(percent_correct=form_schedule.cleaned_data['percent_correct'],
+                                percent_importance=form_schedule.cleaned_data['percent_importance'],
+                                interval_num=form_schedule.cleaned_data['interval_num'],
                                 interval_unit=form_schedule.cleaned_data['interval_unit'],
                                 question=attempt.question,
                                 user=request.user)

@@ -12,9 +12,11 @@ class FormAttemptNew(forms.Form):
 class ModelFormSchedule(ModelForm):
     class Meta:
         model = Schedule
-        fields = ('date_show_next', 'interval_num', 'interval_unit')
+        fields = ('percent_correct', 'percent_importance', 'date_show_next', 'interval_num', 'interval_unit')
 
 
 class FormSchedule(forms.Form):
+    percent_correct = forms.DecimalField(max_digits=5, decimal_places=2, required=False)
+    percent_importance = forms.DecimalField(max_digits=5, decimal_places=2, required=False)
     interval_num = forms.DecimalField(max_digits=5, decimal_places=2, required=False)
     interval_unit = forms.ChoiceField(choices=CHOICES_UNITS)
