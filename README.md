@@ -197,20 +197,42 @@ utcnow() is naive.
 ```
 
 ### How to backup Postgres database and restore
-Q: How to make a backup of the database?
-A: make dumpdb
-* this creates dumps in 2 different formats (plain and custom) and puts them in the db_dumps subdir with a datestamp on them, e.g.,
+Q: How to make a backup of the database?  
+A:   
+`make dumpdb`  
+This creates dumps in 2 different formats (plain and custom) and puts them in the db_dumps subdir with a datestamp on them, e.g.,
+
 ```
 -rw-r--r--  1 rob  staff  244938 Sep 26 17:26 dump.quizme.2014.09.26_Fri_17.26.21.plain
 -rw-r--r--  1 rob  staff  125248 Sep 26 17:26 dump.quizme.2014.09.26_Fri_17.26.21.custom
 ```
 
-Q: How to restore from a backup?
-A: make loaddb
-* this will create two databases named "restore_quizme_custom" and "restore_quizme_plain" and load the dumps 
-
-Q: How to test a database loaded from a backup?
+Q: How to restore from a backup?  
 A: 
+`make loaddb`
+
+This will create two databases named "restore_quizme_custom" and "restore_quizme_plain" and load the dumps.  They should each be identical, as the plain and custom dumps should each have the same data.
+
+Q: How to restore a database manually?  
+A:
+
+```
+DB_NAME_RESTORE_CUSTOM=restore_quizme_custom
+FILE_DUMP_CUSTOM=~/Dropbox/git/quizme_website/db_dumps/dump.quizme.2016.09.04_Sun_10.01.32.custom
+psql --dbname=postgres --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_CUSTOM}"
+psql --dbname=postgres --command="CREATE DATABASE ${DB_NAME_RESTORE_CUSTOM}"
+# Create role (what does it need to be?)
+psql --dbname=postgres --command="CREATE USER rob"
+pg_restore --verbose --dbname=${DB_NAME_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM} >& /tmp/pg_restore.out
+psql --dbname=postgres --command="ALTER DATABASE ${DB_NAME_RESTORE_CUSTOM} RENAME TO quizme_master"
+```
+To get webapp to connect to that db:
+
+```
+    quizme_website/settings.py
+        DATABASES
+            'NAME': 'restore_quizme_custom'
+```
 
 ## TODO / Backlog / Features / Stories
 * 9/23/16 FEATURE: in the admin, modify tags so that when editing a tag, it only shows the first n matching questions; otherwise, it gets slow listing many matching questions
