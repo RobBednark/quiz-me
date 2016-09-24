@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-DB_NAME=quizme
+DB_NAME=quizme_master
 DB_NAME_RESTORE_CUSTOM=restore_quizme_custom
 DB_NAME_RESTORE_PLAIN=restore_quizme_plain
 DB_USER=quizme
