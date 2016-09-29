@@ -33,7 +33,7 @@ class BrowserTests(LiveServerTestCase):
         # cls.browser = Browser('firefox')
 
         # Note that in order to use phantomjs, need to "brew install phantomjs"
-        browser = os.environ.get('ROB_SELENIUM_BROWSER', 'phantomjs')
+        browser = os.environ.get('SELENIUM_BROWSER', 'phantomjs')
         cls.browser = Browser(browser)
 
         super(BrowserTests, cls).setUpClass()

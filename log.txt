@@ -78,7 +78,7 @@ Fri 12/26/14 7:33pm
     Fri 12/26 7:43pm remove hidden_question_id and replace with id_question
 Sun 12/21/14 8:45am
     8:45am upgraded Django from 1.6.5 to 1.7.1, but got the following error when running tests:
-        ROB_SELENIUM_BROWSER=firefox   ./manage.py test
+        SELENIUM_BROWSER=firefox   ./manage.py test
         /Users/rbednark/Dropbox/git/quizme_website/emailusername/admin.py:36: RemovedInDjango18Warning: Creating a ModelForm without either the 'fields' attribute or the 'exclude' attribute is deprecated - form UserChangeForm needs updating
           class UserChangeForm(forms.ModelForm):
 
