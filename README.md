@@ -307,7 +307,7 @@ To get webapp to connect to that db:
 * 7/14/14 - capture the elapsed time that it took the user to reply
 * 7/14/14 - show all questions/answers for given tags on a single page
 * add documentation for other users to use
-* display url's as clickable url's (href's)
+* FEATURE: display url's as clickable url's (href's) if they aren't already in markdown url format #high
 * Import (import questions via csv / json / yaml / python data structure)
 * Questions (add questions from the web page instead of the admin)
 * Tags (be able to tag questions, and then select tags from which to select questions)
