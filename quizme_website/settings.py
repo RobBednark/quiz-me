@@ -3,7 +3,7 @@ import os
 
 AUTH_USER_MODEL = 'emailusername.User'
 
-BASEDIR=os.path.abspath(os.path.dirname(__file__))
+BASEDIR = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 ENABLE_DJANGO_DEBUG_TOOLBAR = False
@@ -16,15 +16,15 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        #'NAME': 'mydb.db',                      # Or path to database file if using sqlite3.
+        # 'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        # 'NAME': 'mydb.db',                      # Or path to database file if using sqlite3.
         'NAME': 'quizme_master',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'quizme',
         'PASSWORD': '',
-        'HOST': 'localhost',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'HOST': 'localhost',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',           # Set to empty string for default.
     }
 }
 
@@ -88,7 +88,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -98,7 +98,7 @@ SECRET_KEY = ')ltnqpp5h)&r217dm)@4ia9bq)idd5+@jr19qz62!gh0sm@7-p'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -112,7 +112,7 @@ MIDDLEWARE_CLASSES = (
 )
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
     # Django Debug Toolbar (make sure to put it first!)
-    MIDDLEWARE_CLASSES = ( 'debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
+    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
 
 ROOT_URLCONF = 'quizme_website.urls'
 
@@ -137,8 +137,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
-    'pagedown', # used for markdown editor
-    'markdown_deux', # for displaying markdown as html in a template
+    'pagedown',  # used for markdown editor
+    'markdown_deux',  # for displaying markdown as html in a template
 
     'south',  # used for database migrations
 
@@ -179,25 +179,25 @@ LOGGING = {
 }
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
     if False:
-    # Django Debug Toolbar:
+        # Django Debug Toolbar:
         DEBUG_TOOLBAR_PANELS = (
-                'debug_toolbar.panels.version.VersionDebugPanel',
-                'debug_toolbar.panels.timer.TimerDebugPanel',
-                'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
-                'debug_toolbar.panels.headers.HeaderDebugPanel',
-                'debug_toolbar.panels.profiling.ProfilingDebugPanel',
-                'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
-                'debug_toolbar.panels.sql.SQLDebugPanel',
-                'debug_toolbar.panels.template.TemplateDebugPanel',
-                'debug_toolbar.panels.cache.CacheDebugPanel',
-                'debug_toolbar.panels.signals.SignalDebugPanel',
-                'debug_toolbar.panels.logger.LoggingPanel',
+            'debug_toolbar.panels.version.VersionDebugPanel',
+            'debug_toolbar.panels.timer.TimerDebugPanel',
+            'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+            'debug_toolbar.panels.headers.HeaderDebugPanel',
+            'debug_toolbar.panels.profiling.ProfilingDebugPanel',
+            'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+            'debug_toolbar.panels.sql.SQLDebugPanel',
+            'debug_toolbar.panels.template.TemplateDebugPanel',
+            'debug_toolbar.panels.cache.CacheDebugPanel',
+            'debug_toolbar.panels.signals.SignalDebugPanel',
+            'debug_toolbar.panels.logger.LoggingPanel',
         )
 
     DEBUG_TOOLBAR_CONFIG = {
-                    'INTERCEPT_REDIRECTS': False, # set this to True if you want to intercept redirects
-                    'SHOW_TEMPLATE_CONTEXT' : True,  # This shows all the context variables available when rendering the template
-                    # 'SHOW_TOOLBAR_CALLBACK' : lambda request: True,
+        'INTERCEPT_REDIRECTS': False,   # set this to True if you want to intercept redirects
+        'SHOW_TEMPLATE_CONTEXT': True,  # This shows all the context variables available when rendering the template
+        # 'SHOW_TOOLBAR_CALLBACK' : lambda request: True,
     }
 
 try:
