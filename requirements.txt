@@ -1,11 +1,8 @@
-#### from "pip freeze" 7/12/14
+# requirements.txt -- python packages needed to run the quizme app
+
 Django==1.6.5
 
 South==0.8.4  # database migrations
-
-django-debug-toolbar==1.0  # handy Django info in browser useful for debugging
-                           # Note that 1.2.2 is newer, but it requires a newer
-                           # 1.7 version of Django
 
 # email-as-username used for using email addresses as usernames
 django-email-as-username==1.6.7
@@ -16,33 +13,16 @@ django-markdown-deux==1.0.4
 # django-pagedown for markdown editor; import pagedown
 django-pagedown==0.1.0
 
-# Not currently using django-versioning.  Would be used for saving versions of questions/answers.
-# django-versioning==0.7.4
-
-# djangorestframework
+# djangorestframework -- is the app using this?
 djangorestframework==2.3.8
-
-# flake8 for pep8 style-checking
-flake8
-
-ipdb==0.8  # iPython debugger
-ipython==1.1.0
 
 psycopg2==2.5.2  # Python interface to Postgresql
 
-pudb==2015.3  # python gui debugger
-
-# selenium is used for browser testing (firefox, phantomjs, ...)
-selenium==2.46.0
-
-# splinter is an interface to facilitate browser testing
-splinter==0.6.0
-
-# What is sqlparse used for?
-sqlparse==0.1.10
-
-# pytz is for timezones
+# pytz is for timezones; is the app currently using it?
 pytz
 
 # python-dateutil is used for timedelta's "months" and "years"
+# Is the app using this?
 python-dateutil
+# six is required by python-dateutil
+six==1.10.0
