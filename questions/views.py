@@ -279,11 +279,16 @@ def answer(request, id_attempt):
     if request.method == 'GET':
         _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
         form_schedule = FormSchedule()
+        if attempt.question:
+            question_tag_names = ", ".join([str(qtag.tag.name) for qtag in attempt.question.questiontag_set.all()])
+        else:
+            question_tag_names = []
         return render(request=request,
                       template_name='answer.html',
                       dictionary=dict(form_schedule=form_schedule,
                                       modelformset_usertag=modelformset_usertag,
                                       question=attempt.question,
+                                      question_tag_names=question_tag_names,
                                       answer=attempt.question.answer,
                                       attempt=attempt))
     elif request.method == 'POST':
