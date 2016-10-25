@@ -1,12 +1,12 @@
 from django import forms
 from django.forms import ModelForm
-from .models import CHOICES_UNITS, Attempt, Schedule
+from .models import CHOICES_UNITS, Schedule
 
 from pagedown.widgets import PagedownWidget
 
 
 class FormAttemptNew(forms.Form):
-    attempt  = forms.CharField(label="A", required=False, widget=PagedownWidget())
+    attempt = forms.CharField(label="A", required=False, widget=PagedownWidget())
 
 
 class ModelFormSchedule(ModelForm):
