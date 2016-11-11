@@ -235,10 +235,8 @@ To get webapp to connect to that db:
 ```
 
 ## TODO / Backlog / Features / Stories
-* 9/23/16 FEATURE: in the admin, modify tags so that when editing a tag, it only shows the first n matching questions; otherwise, it gets slow listing many matching questions
-* 9/22/16 BUG: when running for the very first time, there are no tags selected, so no questions are selected, and you need to select some tags and will get an error after clicking "submit"
-* 9/20/16 FEATURE: consider capturing percentage of usefulness/importance (e.g., "This question is 80% important to me")
-* 9/20/16 FEATURE: consider capturing percentage of correctness (e.g., "I got this answer 90% correct")
+NOTE: all new backlog items should be added to https://trello.com/b/5WCzHwdo/quizme
+
 * 9/14/16 STYLE: in list of tags, change the color of the tag if the tag is selected, to make it clear which are selected
 * 9/11/16 FEATURE: For the selected tags, show them one per line right under "Tags selected:", along with num_questions and time periods, as is shown in the next section with all the tags.  As a user, I want to see these tags at the top and not have to hunt for them.
 * 9/7/16 MODIFY: in the admin, modify it so that the width of the question/answer text isn't a single line and extremely wide

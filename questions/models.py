@@ -1,24 +1,22 @@
-#from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
 
 from emailusername.models import User
 
 CHOICES_UNITS = (
-    #  db value   human-readable
-    #  --------   --------------
-      ("seconds", "seconds"),
-      ("minutes", "minutes"),
-      ("hours",   "hours"),
-      ("days",    "days"),
-      ("weeks",   "weeks"),
-      ("months",  "months"),
-      ("years",   "years"),
+    # db value   human-readable
+    # --------   --------------
+    ("seconds", "seconds"),
+    ("minutes", "minutes"),
+    ("hours",   "hours"),
+    ("days",    "days"),
+    ("weeks",   "weeks"),
+    ("months",  "months"),
+    ("years",   "years"),
 )
+
 
 class CreatedBy(models.Model):
     datetime_added = models.DateTimeField(auto_now_add=True)
@@ -96,7 +94,7 @@ class Quiz(CreatedBy):
 
 
 class QuestionTag(CreatedBy):
-    # This is a tag applied to a question.  
+    # This is a tag applied to a question.
     # e.g., question = Question(text="1 + 1 = ??")
     #       tag_math = Tag(name="math")
     #       QuestionTag(question=question, tag=tag_math, enabled=True)
@@ -115,7 +113,8 @@ class Schedule(CreatedBy):
     # A record indicating the next time that a question should be shown.
     date_show_next = models.DateTimeField(null=True, default=None)  # when to show the question next
     interval_num = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=None)
-    interval_secs = models.IntegerField(null=True, default=None)  # Number of seconds from when record was added until it should be shown again.  When is this useful?  Not sure.  Maybe to aid in showing history of intervals.
+    # interval_secs - number of seconds from when record was added until it should be shown again.
+    interval_secs = models.IntegerField(null=True, default=None)
     interval_unit = models.TextField(choices=CHOICES_UNITS, null=True, default=None)
     percent_correct = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=None)
     percent_importance = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=None)
@@ -127,7 +126,7 @@ class Schedule(CreatedBy):
         # Rather than doing 2 db calls, get a new timezone.now instead, which will be slightly off
         # (maybe a fraction of a second) from datetime_added and datetime_updated.
         time_now = timezone.now()
-        if self.interval_num != None:
+        if self.interval_num is not None:
             if self.interval_unit in ('months', 'years'):
                 interval_num = int(self.interval_num)
             else:
@@ -139,7 +138,9 @@ class Schedule(CreatedBy):
         try:
             self.date_show_next = time_now + interval
         except TypeError as exception:
-            print "Exception: interval_unit=[%s] interval_num=[%s] type(interval_num)=[%s]" % (self.interval_unit, interval_num, type(interval_num))
+            print("Exception: interval_unit=[%s] interval_num=[%s] type(interval_num)=[%s] "
+                  "exception=[%s]" % (
+                      self.interval_unit, interval_num, type(interval_num), exception))
             raise
         return super(Schedule, self).save(*args, **kwargs)
 

@@ -29,7 +29,7 @@ dumpdb:
 	ls -ltr db_dumps/. |tail -5
 
 flake8:
-	flake8 --max-line-length=128 questions
+	flake8 --max-line-length=999
 
 loaddb: dumpdb
 	# Load the dumps into new db's to test them

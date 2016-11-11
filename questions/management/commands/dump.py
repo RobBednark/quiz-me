@@ -4,6 +4,7 @@ import questions.models as models
 
 CR = chr(13)
 
+
 class Command(NoArgsCommand):
     help = "run this script"
 

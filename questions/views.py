@@ -84,6 +84,12 @@ def _get_next_question(user):
 
 
 def _get_tag2periods(user, modelformset_usertag=None):
+    """For the given :user:, find the number of questions scheduled to be answered in each time
+       period (unseen, -now, now-10m, ...).  Assign this as a string to
+       the .interval_counts attribute of the corresponding form in :modelformset_usertag:
+       e.g.,
+        modelformset_usertag[0].interval_counts == '-now=3 1d-1w=8 unseen=22'
+    """
     # TODO: also pass in the selected tags and count the questions for those tags
     INTERVALS = (
         # integer, unit, display-name
@@ -145,6 +151,13 @@ def _get_tag2periods(user, modelformset_usertag=None):
 
 
 def _create_and_get_usertags(request):
+    """For the given :request:, return a modelformset_usertag that is an
+    iterable which a form for each usertag.
+    request.user will be used to get the corresponding usertags for that user.
+    if request.method == 'GET', then find all the tags and create a form for each tag.
+    if request.method == 'POST', then save any changes made by the user to any of the forms.
+    Returns modelformset_usertag (an iterable of one form for each usertag).
+    """
     ModelFormset_UserTag = modelformset_factory(model=UserTag,
                                                 extra=0,
                                                 fields=('enabled',))
@@ -279,11 +292,16 @@ def answer(request, id_attempt):
     if request.method == 'GET':
         _get_tag2periods(user=request.user, modelformset_usertag=modelformset_usertag)
         form_schedule = FormSchedule()
+        if attempt.question:
+            question_tag_names = ", ".join([str(qtag.tag.name) for qtag in attempt.question.questiontag_set.all()])
+        else:
+            question_tag_names = []
         return render(request=request,
                       template_name='answer.html',
                       dictionary=dict(form_schedule=form_schedule,
                                       modelformset_usertag=modelformset_usertag,
                                       question=attempt.question,
+                                      question_tag_names=question_tag_names,
                                       answer=attempt.question.answer,
                                       attempt=attempt))
     elif request.method == 'POST':
