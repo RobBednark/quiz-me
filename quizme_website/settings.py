@@ -208,7 +208,6 @@ if ENABLE_DJANGO_DEBUG_TOOLBAR:
     }
 
 try:
-    # Needed when using docker?
-    from local_settings import *
+    from local_settings import *  # noqa
 except ImportError:
     pass
