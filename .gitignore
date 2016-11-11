@@ -17,3 +17,5 @@ local_settings.py
 # not sure what's in these dirs :/
 selenium
 share
+# ignore collected static files (dir that results from `python manage.py collectstatic`
+/static
