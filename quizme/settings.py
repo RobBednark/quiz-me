@@ -1,5 +1,5 @@
 import os
-# Django settings for quizme_website project.
+# Django settings for quizme project.
 
 AUTH_USER_MODEL = 'emailusername.User'
 
@@ -121,10 +121,10 @@ if ENABLE_DJANGO_DEBUG_TOOLBAR:
     # Django Debug Toolbar (make sure to put it first!)
     MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
 
-ROOT_URLCONF = 'quizme_website.urls'
+ROOT_URLCONF = 'quizme.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'quizme_website.wsgi.application'
+WSGI_APPLICATION = 'quizme.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -208,6 +208,7 @@ if ENABLE_DJANGO_DEBUG_TOOLBAR:
     }
 
 try:
+    # Simple way of allowing for custom local dev/testing settings
     from local_settings import *  # noqa
 except ImportError:
     pass
