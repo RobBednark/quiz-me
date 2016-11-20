@@ -145,6 +145,12 @@ class Schedule(CreatedBy):
         return super(Schedule, self).save(*args, **kwargs)
 
 
+class UserTagManager(models.Manager):
+
+    def tags_available_for_user(self, user):
+        return self.filter(user=user).exists()
+
+
 class UserTag(models.Model):
     # This allows the user to dynamically tell the app which questions they want to see.
     # Maybe it would be better to be called QuizTag.
@@ -153,3 +159,5 @@ class UserTag(models.Model):
     user = models.ForeignKey(User)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
+
+    objects = UserTagManager()
