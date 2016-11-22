@@ -452,6 +452,9 @@ class ViewAnswerTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_viewanswer_post(self):
+        # Create a tag and link the tag to self.user via UserTag
+        tag = models.Tag.objects.create(name='faketag')
+        models.UserTag.objects.create(user=self.user, tag=tag)
         # Log in
         logged_in = self.client.login(
             username=self.user.get_username(),
@@ -471,6 +474,12 @@ class ViewAnswerTests(TestCase):
                 'percent_importance': 23.45,
                 'interval_num': 33.45,
                 'interval_unit': 'hours',
+                'form-TOTAL_FORMS': 1,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-TOTAL_FORMS': 1,
+                'form-0-enabled': 'on',
+                'form-0-id': 1,
+                'form-INITIAL_FORMS': 1,
             }
 
         )

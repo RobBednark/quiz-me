@@ -201,7 +201,6 @@ def _create_and_get_usertags(request):
             queryset=queryset,
             data=request.POST
         )
-        import pdb; pdb.set_trace()
         for form in modelformset_usertag.forms:
             form.fields['enabled'].label = form.instance.tag.name
 
@@ -269,22 +268,28 @@ def question(request, id_question):
         form_attempt = FormAttemptNew(request.POST)
         if form_attempt.is_valid():
             question = models.Question.objects.get(id=id_question)
-            attempt = models.Attempt(attempt=form_attempt.cleaned_data['attempt'],
-                              question=question,
-                              user=request.user)
+            attempt = models.Attempt(
+                attempt=form_attempt.cleaned_data['attempt'],
+                question=question,
+                user=request.user
+            )
             try:
                 attempt.save()
             except Exception:
-                # TODO: do something else here, e.g., log it, show it to the user  -Rob Bednark 12/21/14
+                # TODO: do something else here,
+                # e.g., log it, show it to the user  -Rob Bednark 12/21/14
                 pass
             # Redirect to the answer page
             return HttpResponseRedirect(reverse('answer', args=(attempt.id,)))
         else:
             # Assert: form is NOT valid
-            # Need to return the errors to the template, and have the template show the errors.
-            return render(request=request,
-                          template_name='question.html',
-                          dictionary=dict(form_attempt=form_attempt))
+            # Need to return the errors to the template,
+            # and have the template show the errors.
+            return render(
+                request=request,
+                template_name='question.html',
+                dictionary=dict(form_attempt=form_attempt)
+            )
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 
@@ -293,15 +298,7 @@ def question(request, id_question):
 def answer(request, id_attempt):
     # Display the question, the attempt, and the answer
     attempt = models.Attempt.objects.get(id=id_attempt)
-
-    if models.UserTag.objects.tags_available_for_user(
-        user=request.user.id
-    ):
-        modelformset_usertag = _create_and_get_usertags(
-            request=request
-        )
-    else:
-        modelformset_usertag = None
+    modelformset_usertag = _create_and_get_usertags(request=request)
 
     if request.method == 'GET':
         _get_tag2periods(

@@ -152,10 +152,13 @@ class UserTagManager(models.Manager):
 
 
 class UserTag(models.Model):
-    # This allows the user to dynamically tell the app which questions they want to see.
+    # This allows the user to dynamically tell the app which questions
+    # they want to see.
     # Maybe it would be better to be called QuizTag.
-    # For each user, they will have a UserTag for each tag, with an enable=True/False
-    # Eventually, will have different quizzes where each quiz has its own set of UserTag's.
+    # For each user, they will have a UserTag for each tag,
+    # with an enable=True/False
+    # Eventually, will have different quizzes where each quiz has its
+    # own set of UserTag's.
     user = models.ForeignKey(User)
     tag = models.ForeignKey(Tag)
     enabled = models.BooleanField(default=False)
