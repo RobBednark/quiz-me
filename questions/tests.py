@@ -419,6 +419,15 @@ class FormScheduleTests(TestCase):
 
 class ViewAnswerTests(TestCase):
 
+    modelformset_usertag_dict = {
+        'form-TOTAL_FORMS': 1,
+        'form-MAX_NUM_FORMS': 1000,
+        'form-TOTAL_FORMS': 1,
+        'form-0-enabled': 'on',
+        'form-0-id': 1,
+        'form-INITIAL_FORMS': 1,
+    }
+
     def setUp(self):
         # Create a user
         self.PASSWORD = 'p'
@@ -467,21 +476,16 @@ class ViewAnswerTests(TestCase):
         )
 
         # POST to the answer page
-        response = self.client.post(
-            '/answer/{}/'.format(self.attempt.pk),
-            {
-                'percent_correct': 13.45,
-                'percent_importance': 23.45,
-                'interval_num': 33.45,
-                'interval_unit': 'hours',
-                'form-TOTAL_FORMS': 1,
-                'form-MAX_NUM_FORMS': 1000,
-                'form-TOTAL_FORMS': 1,
-                'form-0-enabled': 'on',
-                'form-0-id': 1,
-                'form-INITIAL_FORMS': 1,
-            }
+        data = {
+            'percent_correct': 13.45,
+            'percent_importance': 23.45,
+            'interval_num': 33.45,
+            'interval_unit': 'hours',
+        }
+        data.update(self.modelformset_usertag_dict)  # Formset fields
 
+        response = self.client.post(
+            '/answer/{}/'.format(self.attempt.pk), data
         )
 
         # Verify that we're logged-in, and that we GET 302'ed
