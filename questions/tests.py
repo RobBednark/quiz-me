@@ -9,8 +9,7 @@ import os
 from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
-from questions import forms
-from questions import models
+from questions import forms, models
 from questions.test_helpers import FuzzyInt
 from questions.views import _get_next_question
 
