@@ -157,7 +157,7 @@ class BrowserTests(LiveServerTestCase):
 class NonBrowserTests(TestCase):
 
     def test_get_next_question(self):
-        QUERIES_EXPECTED_NO_QUESTIONS = 3
+        QUERIES_EXPECTED_NO_QUESTIONS = 2
         QUERIES_EXPECTED_NO_SCHEDULES = FuzzyInt(4, 5)
         QUERIES_EXPECTED_WITH_SCHEDULES = FuzzyInt(3, 6)
 
