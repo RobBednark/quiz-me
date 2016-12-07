@@ -40,9 +40,9 @@ def _get_next_question(user):
     user_tag_names = sorted([str(utag.tag.name) for utag in user_tags])
 
     # Find all the QuestionTag's associated with the UserTag's
+    tag_ids = [t.tag_id for t in user_tags]
     question_tags = models.QuestionTag.objects.filter(
-        enabled=True, tag__in=user_tags
-    )
+        enabled=True, tag__in=tag_ids)
 
     # Find all the questions associated with the QuestionTag's
     questions = models.Question.objects.filter(
