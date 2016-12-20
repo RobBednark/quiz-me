@@ -10,7 +10,7 @@ from django.test import LiveServerTestCase, TestCase
 
 from emailusername.models import User
 from questions import forms, models
-from questions.test_helpers import FuzzyInt
+from questions.tests.test_helpers import FuzzyInt
 from questions.views import _get_next_question
 
 # By default, LiveServerTestCase uses port 8081.
