@@ -54,6 +54,10 @@ class TestGetNextQuestion(TestCase):
         self.assertIsNotNone(next_question.question)
         self.assertEqual(len(connection.queries), 8)
 
+        questions = models.Question.objects.get_user_questions(self.user)
+
+        self.assertEqual(questions.count(), 1)
+
     @override_settings(DEBUG=True)
     def test_user_with_ten_questions(self):
         for i in range(10):
@@ -67,4 +71,7 @@ class TestGetNextQuestion(TestCase):
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)
         self.assertEqual(len(connection.queries), 53)
-        import pdb; pdb.set_trace()
+
+        questions = models.Question.objects.get_user_questions(self.user)
+
+        self.assertEqual(questions.count(), 10)

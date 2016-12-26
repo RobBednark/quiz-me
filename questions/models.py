@@ -27,6 +27,18 @@ class CreatedBy(models.Model):
         abstract = True
 
 
+class QuestionManager(models.Manager):
+
+    def get_user_questions(self, user):
+
+        questions = self.filter(
+            tag__usertag__user=user,
+            tag__usertag__enabled=True
+        )
+
+        return questions
+
+
 class Question(CreatedBy):
     question = models.TextField()
     answer = models.ForeignKey('Answer', null=True, blank=True)
@@ -36,6 +48,7 @@ class Question(CreatedBy):
     # tag_set
     # user
     # user_set
+    objects = QuestionManager()
 
     def __unicode__(self):
         return '<Question id=[%s] question=[%s] datetime_added=[%s]>' % (self.id, self.question, self.datetime_added)
