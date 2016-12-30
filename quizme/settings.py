@@ -144,11 +144,12 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+
+    # imported apps:
     'pagedown',  # used for markdown editor
     'markdown_deux',  # for displaying markdown as html in a template
 
-    'south',  # used for database migrations
-
+    # local apps:
     'questions',
     'emailusername',  # used for User; so email addresses can be used as username
 )

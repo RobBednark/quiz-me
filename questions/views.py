@@ -235,7 +235,11 @@ def _create_and_get_usertags(request):
             data=request.POST
         )
         for form in modelformset_usertag.forms:
-            form.fields['enabled'].label = form.instance.tag.name
+            try:
+                form.fields['enabled'].label = form.instance.tag.name
+            except Exception as exception:
+                import pdb; pdb.set_trace()
+                pass
 
         if modelformset_usertag.is_valid():  # All validation rules pass
             modelformset_usertag.save()
