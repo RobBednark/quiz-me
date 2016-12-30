@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
 import sys
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
+
+DELIMITER_TAG = ','
+DELIMITER_QUESTION = '^Q:'
+DELIMITER_ANSWER = '^A:'
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     help = "run this script"
     stdin = sys.stdin
 
     def add_arguments(self, parser):
-        # Named (optional) arguments
         parser.add_argument(
             '--commit',
             action='store_true',
-            dest='commit',
+            dest='--commit',
             default=False,
             help='Commit the data instead of just doing a dry-run.',
+            # type=bool,
         )
 
-    def handle_noargs(self, **options):
+    def handle(self, *args, **options):
         # read the entire file
 
         # split by "^\S*Q:\*S$" (case-insensitive)
@@ -31,11 +35,10 @@ class Command(NoArgsCommand):
         # split the question and answer on '^\S*A:\S*'
 
         stdin = options.get('stdin', sys.stdin)
-        stdin.read()
-
+        # stdin.read()
 
         # if --commit, then commit the data, else just show what would be done (a dry-run)
-        if options['commit']:
+        if options['--commit']:
             pass
         else:
             self.stdout.write("NOTE: --commit not present, so data is not being committed to the database.")
