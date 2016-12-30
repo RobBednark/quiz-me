@@ -144,11 +144,12 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+
+    # imported apps:
     'pagedown',  # used for markdown editor
     'markdown_deux',  # for displaying markdown as html in a template
 
-    'south',  # used for database migrations
-
+    # local apps:
     'questions',
     'emailusername',  # used for User; so email addresses can be used as username
 )
@@ -184,6 +185,7 @@ LOGGING = {
         },
     }
 }
+
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
     if False:
         # Django Debug Toolbar:
@@ -206,6 +208,11 @@ if ENABLE_DJANGO_DEBUG_TOOLBAR:
         'SHOW_TEMPLATE_CONTEXT': True,  # This shows all the context variables available when rendering the template
         # 'SHOW_TOOLBAR_CALLBACK' : lambda request: True,
     }
+
+# This is the default test runner.  Added here to suppress warnings after upgrade to Django 1.7
+# Can probably be removed after upgrading to 1.10, as I read something that indicated Django
+# was removing the warning.
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 try:
     # Simple way of allowing for custom local dev/testing settings
