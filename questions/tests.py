@@ -423,7 +423,6 @@ class ViewAnswerTests(TestCase):
         'form-MAX_NUM_FORMS': 1000,
         'form-TOTAL_FORMS': 1,
         'form-0-enabled': 'on',
-        'form-0-id': 1,
         'form-INITIAL_FORMS': 1,
     }
 
@@ -462,7 +461,8 @@ class ViewAnswerTests(TestCase):
     def test_viewanswer_post(self):
         # Create a tag and link the tag to self.user via UserTag
         tag = models.Tag.objects.create(name='faketag')
-        models.UserTag.objects.create(user=self.user, tag=tag)
+        user_tag = models.UserTag.objects.create(user=self.user, tag=tag)
+        self.modelformset_usertag_dict['form-0-id'] = user_tag.id
         # Log in
         logged_in = self.client.login(
             username=self.user.get_username(),
