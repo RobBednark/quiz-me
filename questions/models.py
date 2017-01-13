@@ -146,6 +146,7 @@ class Schedule(CreatedBy):
                 interval_num = float(self.interval_num)
         else:
             interval_num = 0
+            self.interval_unit = 'seconds'
         interval = relativedelta(**({self.interval_unit: interval_num}))
         # TODO: set interval_secs
         try:

@@ -1,7 +1,6 @@
 from django.test import TestCase
 
 from django.db import connection
-from django.test.utils import override_settings
 from emailusername.models import User
 
 from questions import models
@@ -35,43 +34,68 @@ class TestGetNextQuestion(TestCase):
 
         return tag
 
+    def _schedule_question_for_user(self, user, question):
+        schedule = models.Schedule.objects.create(
+            user=user,
+            question=question,
+        )
+
+        return schedule
+
     def test_user_with_no_questions(self):
+        connection.queries = []
         next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
 
-    @override_settings(DEBUG=True)
+    def test_user_with_one_unassociated_question(self):
+        connection.queries = []
+
+        models.Question.objects.create(
+            question='fakebar',
+        )
+
+        with self.assertNumQueries(2):
+            next_question = _get_next_question(self.user)
+
+        self.assertIsInstance(next_question, NextQuestion)
+        self.assertIsNone(next_question.question)
+
+        questions = models.Question.objects.get_user_questions(self.user)
+        self.assertEqual(questions.count(), 0)
+
     def test_user_with_one_question(self):
         question = models.Question.objects.create(
             question='fakebar',
         )
         self._assign_question_to_user(self.user, question)
+        self._schedule_question_for_user(self.user, question)
 
-        next_question = _get_next_question(self.user)
+        with self.assertNumQueries(3):
+            next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)
-        self.assertEqual(len(connection.queries), 8)
 
         questions = models.Question.objects.get_user_questions(self.user)
-
         self.assertEqual(questions.count(), 1)
 
-    @override_settings(DEBUG=True)
     def test_user_with_ten_questions(self):
         for i in range(10):
             question = models.Question.objects.create(
                 question='fakebar',
             )
             self._assign_question_to_user(self.user, question)
+            self._schedule_question_for_user(self.user, question)
 
-        next_question = _get_next_question(self.user)
+        connection.queries = []
+
+        with self.assertNumQueries(3):
+            next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)
-        self.assertEqual(len(connection.queries), 53)
 
         questions = models.Question.objects.get_user_questions(self.user)
-
         self.assertEqual(questions.count(), 10)
