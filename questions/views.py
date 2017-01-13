@@ -56,7 +56,7 @@ def _get_next_question(user):
 
     return NextQuestion(
         question=question_to_show,
-        user_tag_names=[],
+        user_tag_names=user_tag_names,
         num_schedules=num_schedules,
     )
 
