@@ -13,13 +13,7 @@ django-markdown-deux==1.0.4
 # django-pagedown for markdown editor; import pagedown
 django-pagedown==0.1.0
 
-# djangorestframework -- is the app using this?
-djangorestframework==2.3.8
-
 psycopg2==2.5.2  # Python interface to Postgresql
-
-# pytz is for timezones; is the app currently using it?
-pytz
 
 # python-dateutil is used for timedelta's "months" and "years"
 # Is the app using this?
