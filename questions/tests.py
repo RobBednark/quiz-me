@@ -87,9 +87,9 @@ class BrowserTests(LiveServerTestCase):
         self._login(password='')
 
         self.assertTrue(
-                self.browser.is_text_present(
-                    "Your username and password didn't match. "
-                    "Please try again."
+            self.browser.is_text_present(
+                "Your username and password didn't match. "
+                "Please try again."
             )
         )
 
