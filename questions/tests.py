@@ -7,6 +7,7 @@ Replace this with more appropriate tests for your application.
 import os
 
 from django.test import LiveServerTestCase, TestCase
+from selenium.common.exceptions import StaleElementReferenceException
 
 from emailusername.models import User
 from questions import forms, models
@@ -17,6 +18,7 @@ from questions.views import _get_next_question
 # If you need a different port, then set this.
 # os.environ['DJANGO_LIVE_TEST_SERVER_ADDRESS'] = 'localhost:8000'
 
+WAIT_TIME = 5
 
 # phantomjs archives for Windows, OSX, and Linux can be found at: http://phantomjs.org/download.html
 class BrowserTests(LiveServerTestCase):
@@ -58,10 +60,20 @@ class BrowserTests(LiveServerTestCase):
         self.user1 = user1
         self.user2 = user2
 
+    def _loop_is_text_present(self, text, max_attempts=3):
+        attempt = 1
+        while attempt < max_attempts:
+            try:
+                ret = self.browser.is_text_present(text, wait_time=WAIT_TIME)
+                return ret
+            except StaleElementReferenceException:
+                attempt += 1
+                if attempt == max_attempts:
+                    raise
+
     def _assert_no_questions(self):
-        self.assertTrue(
-            self.browser.is_text_present('(NOTE: there are no questions)')
-        )
+        self.assertTrue(self._loop_is_text_present(
+            text='(NOTE: there are no questions)'))
 
     def _login(self, user=None, password=None):
         if user is None:
@@ -98,9 +110,8 @@ class BrowserTests(LiveServerTestCase):
         self._login(user="bad username")
 
         self.assertTrue(
-            self.browser.is_text_present(
-                "Your username and password didn't match. Please try again."
-            )
+            self._loop_is_text_present(
+                "Your username and password didn't match. Please try again.")
         )
 
     def test_tags_created_automatically_for_user(self):
