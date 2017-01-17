@@ -99,7 +99,7 @@ class BrowserTests(LiveServerTestCase):
         self._login(password='')
 
         self.assertTrue(
-            self.browser.is_text_present(
+            self._loop_is_text_present(
                 "Your username and password didn't match. "
                 "Please try again."
             )
@@ -159,8 +159,6 @@ class BrowserTests(LiveServerTestCase):
 
         # TODO/LEFTOFF/NEXT:
         # Figure out how to select a tag.
-        # import pdb; pdb.set_trace()
-        # pass
 
         # Assert that a question is shown
 
