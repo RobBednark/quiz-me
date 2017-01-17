@@ -76,8 +76,8 @@ class Tag(CreatedBy):
                 tag2: question1, question3
     '''
     name = models.CharField(max_length=1000)
-    questions = models.ManyToManyField('Question', blank=True, through='QuestionTag', null=True)
-    users = models.ManyToManyField(User, blank=True, through='UserTag', related_name='users', null=True)
+    questions = models.ManyToManyField('Question', blank=True, through='QuestionTag')
+    users = models.ManyToManyField(User, blank=True, through='UserTag', related_name='users')
     # questiontag_set
     # user
     # user_set
