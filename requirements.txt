@@ -2,7 +2,7 @@
 # (note that this does not include packages needed for running tests
 # or debugging; see also: requirements-test.txt, requirements-debug.txt)
 
-Django==1.9
+Django==1.9.12
 
 # email-as-username used for using email addresses as usernames
 django-email-as-username==1.6.7
