@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 import questions.models as models
 
 CR = chr(13)
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     help = "run this script"
 
-    def handle_noargs(self, **options):
+    def handle(self, *args, **options):
         questions = models.Question.objects.all()
         # tags = models.Tag.objects.all()
         # question_tags = models.QuestionTag.objects.all()
