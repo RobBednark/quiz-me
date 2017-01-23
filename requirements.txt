@@ -1,6 +1,8 @@
 # requirements.txt -- python packages needed to run the quizme app
+# (note that this does not include packages needed for running tests
+# or debugging; see also: requirements-test.txt, requirements-debug.txt)
 
-Django==1.8.17
+Django==1.10.5
 
 # email-as-username used for using email addresses as usernames
 django-email-as-username==1.6.7

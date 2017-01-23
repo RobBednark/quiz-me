@@ -257,7 +257,7 @@ def question(request, id_question):
         return render(
             request=request,
             template_name='question.html',
-            dictionary=dict(
+            context=dict(
                 form_attempt=form_attempt,
                 last_schedule_added=last_schedule_added,
                 modelformset_usertag=modelformset_usertag,
@@ -294,7 +294,7 @@ def question(request, id_question):
             return render(
                 request=request,
                 template_name='question.html',
-                dictionary=dict(form_attempt=form_attempt)
+                context=dict(form_attempt=form_attempt)
             )
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
@@ -336,7 +336,7 @@ def answer(request, id_attempt):
         return render(
             request=request,
             template_name='answer.html',
-            dictionary=context_dict,
+            context=context_dict,
         )
 
     elif request.method == 'POST':
@@ -377,7 +377,7 @@ def answer(request, id_attempt):
             return render(
                 request=request,
                 template_name='answer.html',
-                dictionary=context_dict,
+                context=context_dict,
             )
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
