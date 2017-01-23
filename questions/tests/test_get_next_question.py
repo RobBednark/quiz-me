@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.db import connection
 from emailusername.models import User
 
-from questions import models
+from questions import models, util
 from questions.views import _get_next_question
 from questions.views import NextQuestion
 
@@ -17,30 +17,6 @@ class TestGetNextQuestion(TestCase):
         self.user = User(email=self.USERNAME)
         self.user.set_password(self.PASSWORD)
         self.user.save()
-
-    def _assign_question_to_user(self, user, question):
-        tag = models.Tag.objects.create(name='faketag')
-
-        models.UserTag.objects.create(
-            tag=tag,
-            user=user,
-            enabled=True
-        )
-        models.QuestionTag.objects.create(
-            tag=tag,
-            question=question,
-            enabled=True
-        )
-
-        return tag
-
-    def _schedule_question_for_user(self, user, question):
-        schedule = models.Schedule.objects.create(
-            user=user,
-            question=question,
-        )
-
-        return schedule
 
     def test_user_with_no_questions(self):
         connection.queries = []
@@ -69,8 +45,8 @@ class TestGetNextQuestion(TestCase):
         question = models.Question.objects.create(
             question='fakebar',
         )
-        self._assign_question_to_user(self.user, question)
-        self._schedule_question_for_user(self.user, question)
+        util.assign_question_to_user(self.user, question, 'fake_tag')
+        util.schedule_question_for_user(self.user, question)
 
         with self.assertNumQueries(3):
             next_question = _get_next_question(self.user)
@@ -86,8 +62,8 @@ class TestGetNextQuestion(TestCase):
             question = models.Question.objects.create(
                 question='fakebar',
             )
-            self._assign_question_to_user(self.user, question)
-            self._schedule_question_for_user(self.user, question)
+            util.assign_question_to_user(self.user, question, 'fake_tag')
+            util.schedule_question_for_user(self.user, question)
 
         connection.queries = []
 
