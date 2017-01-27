@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-from django.db import connection
 from emailusername.models import User
 
 from questions import models, util
@@ -19,14 +18,12 @@ class TestGetNextQuestion(TestCase):
         self.user.save()
 
     def test_user_with_no_questions(self):
-        connection.queries = []
         next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
 
     def test_user_with_one_unassociated_question(self):
-        connection.queries = []
 
         models.Question.objects.create(
             question='fakebar',
@@ -64,8 +61,6 @@ class TestGetNextQuestion(TestCase):
             )
             util.assign_question_to_user(self.user, question, 'fake_tag')
             util.schedule_question_for_user(self.user, question)
-
-        connection.queries = []
 
         with self.assertNumQueries(3):
             next_question = _get_next_question(self.user)

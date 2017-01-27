@@ -5,11 +5,12 @@ ENV PYTHONUNBUFFERED 1
 # Add requirements.txt file to /opt/website directory
 RUN mkdir /opt/website
 ADD requirements.txt /opt/website
-ADD requirements-dev.txt /opt/website
+ADD requirements-debug.txt /opt/website
+ADD requirements-test.txt /opt/website
 
 # Install application dependencies
 WORKDIR /opt/website
-RUN virtualenv . && pip install -r requirements.txt -r requirements-dev.txt
+RUN virtualenv . && pip install -r requirements.txt -r requirements-debug.txt -r requirements-test.txt
 
 # Install phantomjs for selenium browser testing
 RUN apt-get update; \
