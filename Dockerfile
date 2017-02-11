@@ -10,7 +10,9 @@ ADD requirements-test.txt /opt/website
 
 # Install application dependencies
 WORKDIR /opt/website
-RUN virtualenv . && pip install -r requirements.txt -r requirements-debug.txt -r requirements-test.txt
+RUN virtualenv . && pip install -r requirements.txt \
+    -r requirements-debug.txt\
+    -r requirements-test.txt
 
 # Install phantomjs for selenium browser testing
 RUN apt-get update; \

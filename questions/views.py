@@ -29,6 +29,7 @@ def _get_next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     # Find the oldest schedule, and get the question for that schedule
+    # ERATTA - find the oldest schedule for the selected tag
     try:
         oldest_schedule = models.Schedule.objects.filter(user=user).latest('date_show_next')
     except models.Schedule.DoesNotExist:
