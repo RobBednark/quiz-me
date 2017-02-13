@@ -28,27 +28,26 @@ NextQuestion = namedtuple(
 def _get_next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
+    # Find all the tags that the user has selected (UserTag's)
+    # Find the number of questions for each tag (only used to display the number to the user)
+    tags = models.Tag.objects.filter(users=user, usertag__enabled=True)
+    
+    tag_names = tags.values_list(
+        'name', flat=True
+    )
+
     # Find the oldest schedule, and get the question for that schedule
     # ERATTA - find the oldest schedule for the selected tag
     try:
-        oldest_schedule = models.Schedule.objects.filter(user=user).latest('date_show_next')
+        schedule = models.Schedule.objects.filter(
+            user=user,
+            question__tag__in=tags,
+        ).latest('date_show_next')
     except models.Schedule.DoesNotExist:
         # Add log statement here
         question_to_show = None
     else:
-        question_to_show = oldest_schedule.question
-
-    # Find all the tags that the user has selected (UserTag's)
-    # Find the number of questions for each tag (only used to display the number to the user)
-    user_tag_names = models.UserTag.objects.select_related('tag').filter(
-        user=user,
-        enabled=True,
-    ).annotate(
-        num_questions=Count('tag__questions')
-    ).values_list(
-        'tag__name',
-        flat=True
-    )
+        question_to_show = schedule.question
 
     num_schedules = models.Schedule.objects.filter(
         user=user,
@@ -57,7 +56,7 @@ def _get_next_question(user):
 
     return NextQuestion(
         question=question_to_show,
-        user_tag_names=user_tag_names,
+        user_tag_names=tag_names,
         num_schedules=num_schedules,
     )
 
