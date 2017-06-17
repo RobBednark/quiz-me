@@ -2,20 +2,21 @@
 # (note that this does not include packages needed for running tests
 # or debugging; see also: requirements-test.txt, requirements-debug.txt)
 
-Django==1.10.5
+Django==1.11.2
 
 # email-as-username used for using email addresses as usernames
 django-email-as-username==1.6.7
 
 # markdown-deux for displaying markdown as html; import markdown_deux
-django-markdown-deux==1.0.4
+django-markdown-deux==1.0.5
 
 # django-pagedown for markdown editor; import pagedown
-django-pagedown==0.1.0
+django-pagedown==0.1.3
 
-psycopg2==2.5.2  # Python interface to Postgresql
+psycopg2==2.7.1  # Python interface to Postgresql
 
 # six is required by python-dateutil
 six==1.10.0
+
 # python-dateutil is used for relativedelta/timedelta "months" and "years" (import dateutil)
-python-dateutil==2.4.2
+python-dateutil==2.6.0
