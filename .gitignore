@@ -6,7 +6,6 @@
 db_dumps
 tmp/
 #virtualenv dirs
-font-size: 1em;
 bin
 include
 lib
