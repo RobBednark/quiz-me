@@ -29,6 +29,12 @@
 1. create a superuser
 	./manage.py createsuperuser --email my_user@my_domain.com
 
+## How to run tests
+
+1. Install phantomjs: `brew install phantomjs`
+2. Install geckodriver: `brew install geckodriver`
+3. Install Firefox
+
 ### Docker Test Environment
 I got some docker containers setup for with the intent of making local testing easier. In order to use it, you need to install docker and docker-compose, which is a util for managing sets of docker containers.
 
