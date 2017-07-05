@@ -1,15 +1,17 @@
 from collections import defaultdict, namedtuple
+from datetime import datetime
+from pprint import pprint
 
 from dateutil.relativedelta import relativedelta
-
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db.models import Count
+from django.db.models import Count, OuterRef, Subquery
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
+import pytz
 
 from .forms import FormAttemptNew, FormSchedule
 from questions import models
@@ -24,36 +26,39 @@ NextQuestion = namedtuple(
     ]
 )
 
+MIN_DATETIME = datetime(1970, 1, 1, tzinfo=pytz.timezone('UTC'))
+
 
 def _get_next_question(user):
-    ''' Find and return the next question for the currently logged-in user.
-    '''
-    # Find all the tags that the user has selected (UserTag's)
-    # Find the number of questions for each tag (only used to display the number to the user)
-    tags = models.Tag.objects.filter(users=user, usertag__enabled=True)
-    
-    tag_names = tags.values_list(
-        'name', flat=True
-    )
-
-    # Find the oldest schedule, and get the question for that schedule
-    # ERATTA - find the oldest schedule for the selected tag
-    try:
-        schedule = models.Schedule.objects.filter(
-            user=user,
-            question__tag__in=tags,
-        ).latest('date_show_next')
-    except models.Schedule.DoesNotExist:
-        # Add log statement here
-        question_to_show = None
+    datetime_now = datetime.now(pytz.timezone('UTC'))
+    user_tags = models.UserTag.objects.select_related('tag').filter(user=user, enabled=True)
+    tags = models.Tag.objects.filter(id__in=user_tags)
+    tag_names = tags.values_list('name', flat=True)
+    question_tags = models.QuestionTag.objects.filter(enabled=True, tag__in=tags)
+    questions = models.Question.objects.filter(questiontag__in=question_tags)
+    schedules = (models.Schedule.objects
+                 .filter(user=user, question=OuterRef('pk'))
+                 .order_by('datetime_added'))
+    questions = questions.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
+    questions = questions.filter(date_show_next__lte=datetime_now)
+    questions = questions.order_by('-date_show_next')
+    questions = questions.order_by('datetime_added')
+    # If multiple questions have no date_show_next, then use the date the question was added.
+    # Sort first by date_show_next, then by date_added.
+    if True:
+        for num, q in enumerate(questions):
+            # import pdb; pdb.set_trace()
+            print('%s:' % num)
+            pprint(q.__dict__)
+    if questions:
+        question_to_show = questions[0]
     else:
-        question_to_show = schedule.question
-
+        question_to_show = None
+    # question_to_show = max(questions, key=lambda q: q.date_show_next if q.date_show_next else MIN_DATETIME) if questions else None
     num_schedules = models.Schedule.objects.filter(
         user=user,
         question=question_to_show
     ).count()
-
     return NextQuestion(
         question=question_to_show,
         user_tag_names=tag_names,

@@ -45,7 +45,7 @@ class TestGetNextQuestion(TestCase):
         util.assign_question_to_user(self.user, question, 'fake_tag')
         util.schedule_question_for_user(self.user, question)
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(2):
             next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)
@@ -62,7 +62,7 @@ class TestGetNextQuestion(TestCase):
             util.assign_question_to_user(self.user, question, 'fake_tag')
             util.schedule_question_for_user(self.user, question)
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(2):
             next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)

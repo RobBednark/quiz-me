@@ -184,21 +184,15 @@ class BrowserTests(LiveServerTestCase):
 class NonBrowserTests(TestCase):
 
     def test_get_next_question(self):
-        ''' Assert that views.next_question() works correctly. '''
-        user1 = User(email="user1@bednark.com")
-        user2 = User(email="user2@bednark.com")
-        user1.save()
-        user2.save()
+        # test _get_next_question()
+        user1 = User.objects.create(email="user1@bednark.com")
+        user2 = User.objects.create(email="user2@bednark.com")
 
-        tag1 = models.Tag(name='tag1')
-        tag2 = models.Tag(name='tag2')
-        tag1.save()
-        tag2.save()
+        tag1 = models.Tag.objects.create(name='tag1')
+        tag2 = models.Tag.objects.create(name='tag2')
 
-        question1 = models.Question(question="question1")
-        question2 = models.Question(question="question2")
-        question1.save()
-        question2.save()
+        question1 = models.Question.objects.create(question="question1")
+        question2 = models.Question.objects.create(question="question2")
 
         # Asserts: 2 questions
         #          0 QuestionTag's
@@ -206,9 +200,10 @@ class NonBrowserTests(TestCase):
         self.assertEquals(models.Question.objects.all().count(), 2)
         self.assertEquals(models.QuestionTag.objects.all().count(), 0)
         self.assertEquals(models.UserTag.objects.all().count(), 0)
+        self.assertEquals(models.Tag.objects.all().count(), 2)
 
         # Given:
-        #   a) user1 with 0 tags
+        #   a) user1 with 0 UserTags
         #   b) 0 questions with any tags
         #   c) 2 questions with 0 tags
         #   d) tag1 and tag2 each have 0 questions
@@ -221,8 +216,7 @@ class NonBrowserTests(TestCase):
         #   a) user1 with 1 UserTag
         #   b) 0 questions with that UserTag
         # Assert: iuser1 does not get a question
-        user1_tag1 = models.UserTag(user=user1, tag=tag1, enabled=True)
-        user1_tag1.save()
+        user1_tag1 = models.UserTag.objects.create(user=user1, tag=tag1, enabled=True)
         self.assertEquals(
             models.UserTag.objects.filter(user=user1).count(), 1
         )
@@ -237,11 +231,10 @@ class NonBrowserTests(TestCase):
         #    a) user1 with tag user1_tag1
         #    b) question1 with tag1
         #    c) user has 0 schedules
-        # Assert: user1 gets no question because it was not added before question2
-        question1_tag1 = models.QuestionTag(
+        # Assert: user1 gets question1 because it was added before question2
+        question1_tag1 = models.QuestionTag.objects.create(
             question=question1, tag=tag1, enabled=True
         )
-        question1_tag1.save()
         self.assertEquals(
             question1.datetime_added < question2.datetime_added, True
         )
@@ -256,7 +249,7 @@ class NonBrowserTests(TestCase):
         for n in range(4):
             with self.assertNumQueries(2):
                 next_question = _get_next_question(user=user1)
-                self.assertIsNone(next_question.question)
+                self.assertTrue(next_question.question == question1)
 
 
         # Given:
@@ -281,21 +274,20 @@ class NonBrowserTests(TestCase):
 
         # Given:
         #       a) question1 and question2 both have tag1
-        #       b) question1 has 1 schedule and question2 has 0 schedules
-        # Assert: question1 is returned because it has a schedule
+        #       b) question1 has 1 schedule with date_show_now > now
+        #       c) question2 has 0 schedules
+        # Assert: question2 is returned because question1 is not ready to be shown yet
         question1_tag1.enabled = True
         question1_tag1.save()
-        question2_tag1 = models.QuestionTag(
+        question2_tag1 = models.QuestionTag.objects.create(
             question=question2, tag=tag1, enabled=True
         )
-        question2_tag1.save()
-        q1_sched1 = models.Schedule(
+        q1_sched1 = models.Schedule.objects.create(
             user=user1,
             question=question1,
             interval_num=1,
             interval_unit='weeks'
         )
-        q1_sched1.save()
         self.assertEquals(
             models.QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 2
         )
@@ -305,9 +297,11 @@ class NonBrowserTests(TestCase):
         )
         for _ in range(5):
             with self.assertNumQueries(3):
+                import pdb; pdb.set_trace()
                 next_question = _get_next_question(user=user1)
-
-                self.assertEquals(next_question.question, question1)
+                import pdb; pdb.set_trace()
+                self.assertTrue(next_question.question == question2)
+        ####### Test is correct to here.  ############################################################
 
         # Add a schedule to question2 with a later scheduled date, and assert that question1 is returned
         # Given:
