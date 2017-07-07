@@ -184,6 +184,10 @@ class BrowserTests(LiveServerTestCase):
 class NonBrowserTests(TestCase):
 
     def test_get_next_question(self):
+        NUM_QUERIES_NO_QUESTIONS = 4  # number of queries expected when no questions are found
+        NUM_QUERIES_UNSCHEDULED_QUESTION = 4  # number of queries expected when there are no scheduled questions,
+                                              # and an uncheduled question is returned
+
         # test _get_next_question()
         user1 = User.objects.create(email="user1@bednark.com")
         user2 = User.objects.create(email="user2@bednark.com")
@@ -197,10 +201,6 @@ class NonBrowserTests(TestCase):
         # Asserts: 2 questions
         #          0 QuestionTag's
         #          0 UserTag's
-        self.assertEquals(models.Question.objects.all().count(), 2)
-        self.assertEquals(models.QuestionTag.objects.all().count(), 0)
-        self.assertEquals(models.UserTag.objects.all().count(), 0)
-        self.assertEquals(models.Tag.objects.all().count(), 2)
 
         # Given:
         #   a) user1 with 0 UserTags
@@ -208,80 +208,87 @@ class NonBrowserTests(TestCase):
         #   c) 2 questions with 0 tags
         #   d) tag1 and tag2 each have 0 questions
         # Assert: user does not get a question
-        with self.assertNumQueries(2):
+        self.assertTrue(models.UserTag.objects.filter(user=user1).count() == 0)
+        self.assertTrue(models.Question.objects.all().count() == 2)
+        self.assertTrue(models.QuestionTag.objects.all().count() == 0)
+        self.assertTrue(models.Schedule.objects.all().count() == 0)
+        self.assertTrue(models.Tag.objects.all().count() == 2)
+        self.assertTrue(models.UserTag.objects.all().count() == 0)
+        with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
             next_question = _get_next_question(user=user1)
-            self.assertIsNone(next_question.question)
+            self.assertTrue(next_question.question is None)
 
         # Given:
         #   a) user1 with 1 UserTag
         #   b) 0 questions with that UserTag
-        # Assert: iuser1 does not get a question
+        # Assert: user1 does not get a question
         user1_tag1 = models.UserTag.objects.create(user=user1, tag=tag1, enabled=True)
-        self.assertEquals(
-            models.UserTag.objects.filter(user=user1).count(), 1
-        )
-        self.assertEquals(models.QuestionTag.objects.filter(tag=tag1).count(), 0)
+        self.assertTrue(user1_tag1.tag.questions.count() == 0)
+        self.assertTrue(
+            models.UserTag.objects.filter(user=user1).count() == 1)
+        self.assertTrue(models.QuestionTag.objects.filter(tag=tag1).count() == 0)
 
         for _ in range(5):
-            with self.assertNumQueries(2):
+            with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
                 next_question = _get_next_question(user=user1)
-                self.assertIsNone(next_question.question)
+                self.assertTrue(next_question.question is None)
 
         # Given:
         #    a) user1 with tag user1_tag1
-        #    b) question1 with tag1
+        #    b) question1 and question2 have tag1
         #    c) user has 0 schedules
         # Assert: user1 gets question1 because it was added before question2
         question1_tag1 = models.QuestionTag.objects.create(
             question=question1, tag=tag1, enabled=True
         )
-        self.assertEquals(
-            question1.datetime_added < question2.datetime_added, True
+        question2_tag1 = models.QuestionTag.objects.create(
+            question=question2, tag=tag1, enabled=True
         )
-        self.assertEquals(models.Question.objects.all().count(), 2)
-        self.assertEquals(models.UserTag.objects.filter(user=user1).count(), 1)
-        self.assertEquals(models.QuestionTag.objects.all().count(), 1)
-        self.assertEquals(
-            models.QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 1
+        self.assertTrue(question1.datetime_added < question2.datetime_added)
+        self.assertTrue(models.Question.objects.all().count() == 2)
+        self.assertTrue(models.UserTag.objects.filter(user=user1).count() == 1)
+        self.assertTrue(models.QuestionTag.objects.all().count() == 2)
+        self.assertTrue(
+            models.QuestionTag.objects.filter(tag=tag1, enabled=True).count() == 2
         )
-        self.assertEquals(models.Schedule.objects.filter(user=user1).count(), 0)
+        self.assertTrue(models.Schedule.objects.filter(user=user1).count() == 0)
 
         for n in range(4):
-            with self.assertNumQueries(2):
+            with self.assertNumQueries(NUM_QUERIES_UNSCHEDULED_QUESTION):
                 next_question = _get_next_question(user=user1)
                 self.assertTrue(next_question.question == question1)
 
-
         # Given:
         #    a) user1 with tag user1_tag1
-        #    b) question1 with tag1
+        #    b) question1 and question2 with tag1
         #    c) tag1.enabled == False
         #    d) user has 0 schedules
-        # Assert: no question is returned
+        # Assert: no question is returned because tag1.enabled == False
         question1_tag1.enabled = False
+        question2_tag1.enabled = False
         question1_tag1.save()
+        question2_tag1.save()
         self.assertEquals(
             models.QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 0
         )
         self.assertEquals(
-            models.QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 1
+            models.QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 2
         )
         for _ in range(4):
-            with self.assertNumQueries(2):
+            with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
                 next_question = _get_next_question(user=user1)
-
-                self.assertIsNone(next_question.question)
+                self.assertTrue(next_question.question is None)
 
         # Given:
         #       a) question1 and question2 both have tag1
         #       b) question1 has 1 schedule with date_show_now > now
         #       c) question2 has 0 schedules
-        # Assert: question2 is returned because question1 is not ready to be shown yet
+        # Assert: question2 is returned because question1 is not ready to be shown yet,
+        #         and question2 has no schedules
         question1_tag1.enabled = True
         question1_tag1.save()
-        question2_tag1 = models.QuestionTag.objects.create(
-            question=question2, tag=tag1, enabled=True
-        )
+        question2_tag1.enabled = True
+        question2_tag1.save()
         q1_sched1 = models.Schedule.objects.create(
             user=user1,
             question=question1,
@@ -296,12 +303,10 @@ class NonBrowserTests(TestCase):
             models.Question.objects.get(id=question1.id).schedule_set.count(), 1
         )
         for _ in range(5):
-            with self.assertNumQueries(3):
-                import pdb; pdb.set_trace()
-                next_question = _get_next_question(user=user1)
-                import pdb; pdb.set_trace()
-                self.assertTrue(next_question.question == question2)
+            with self.assertNumQueries(NUM_QUERIES_UNSCHEDULED_QUESTION):
         ####### Test is correct to here.  ############################################################
+                next_question = _get_next_question(user=user1)
+                self.assertTrue(next_question.question == question2)
 
         # Add a schedule to question2 with a later scheduled date, and assert that question1 is returned
         # Given:
