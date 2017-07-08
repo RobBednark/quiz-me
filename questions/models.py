@@ -149,13 +149,14 @@ class Schedule(CreatedBy):
             self.interval_unit = 'seconds'
         interval = relativedelta(**({self.interval_unit: interval_num}))
         # TODO: set interval_secs
-        try:
-            self.date_show_next = time_now + interval
-        except TypeError as exception:
-            print("Exception: interval_unit=[%s] interval_num=[%s] type(interval_num)=[%s] "
-                  "exception=[%s]" % (
-                      self.interval_unit, interval_num, type(interval_num), exception))
-            raise
+        if not self.date_show_next:
+            try:
+                self.date_show_next = time_now + interval
+            except TypeError as exception:
+                print("Exception: interval_unit=[%s] interval_num=[%s] type(interval_num)=[%s] "
+                      "exception=[%s]" % (
+                          self.interval_unit, interval_num, type(interval_num), exception))
+                raise
         return super(Schedule, self).save(*args, **kwargs)
 
 

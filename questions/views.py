@@ -30,53 +30,72 @@ MIN_DATETIME = datetime(1970, 1, 1, tzinfo=pytz.timezone('UTC'))
 
 
 def _get_next_question(user):
-    datetime_now = datetime.now(pytz.timezone('UTC'))
+    # First look for questions with schedule.date_show_next <= now,
+    # and return the question with the newest schedule.datetime_added.
+
+    # If there are none of those, then look for questions with no schedules,
+    # and return the question with the oldest question.datetime_added.
+
+    # If there are none of those, then return the question with the oldest
+    # schedule.date_show_next
+
+    if True:
+        import pytz
+        if getattr(pytz, 'show', False):
+            # import pudb; pudb.set_trace()
+            pass
+    datetime_now = datetime.now(tz=pytz.utc)
     user_tags = models.UserTag.objects.select_related('tag').filter(user=user, enabled=True)
     tags = models.Tag.objects.filter(id__in=user_tags)
     tag_names = tags.values_list('name', flat=True)
     question_tags = models.QuestionTag.objects.filter(enabled=True, tag__in=tags)
     questions_tagged = models.Question.objects.filter(questiontag__in=question_tags)
 
-    # First look for questions with schedule.date_show_next <= now,
-    # ordered by schedule.datetime_added. 
-    # Then order by question.datetime_added, so if there are no questions
-    # with schedule.date_show_next <= now, then look for questions with no
-    # schedules, and show the oldest question.datetime_added.
     schedules = (models.Schedule.objects
                  .filter(user=user, question=OuterRef('pk'))
                  .order_by('datetime_added'))
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
     questions = questions_annotated.filter(date_show_next__lte=datetime_now)  # will this get questions with no schedules?
+    # questions = questions.order_by('date_show_next')
     questions = questions.order_by('-schedule.datetime_added')
     questions = questions.order_by('datetime_added')
 
     def show_questions(questions):
+        return
         if not questions:
             print('questions is None')
         for num, q in enumerate(questions):
             print('%s:' % num)
             pprint(q.__dict__)
     show_questions(questions)
+
+    # query #1
     if questions:
         question_to_show = questions[0]
     else:
         # assert: no question with schedule.date_show_next <= now
-        # Look for questions with no schedules, ordered by datetime_added
+        # Look for questions with no schedules, and show the one with the
+        # oldest question.datetime_added
         questions = questions_tagged
         questions = questions.filter(schedule=None)
         questions = questions.order_by('datetime_added')
+
         show_questions(questions_annotated)
+
+        # query #2
         if questions:
             question_to_show = questions[0]
         else:
             # assert: no question without a schedule
-            # Look for questions with a schedule, and order by date_show_next
-            # (show oldest date_show_next first)
-            if questions_annotated:
-                question_to_show = questions_annotated[0]
+            # Return the question with the oldest schedule.date_show_next
+            # query #3
+            questions = questions_tagged
+            if questions:
+                question_to_show = questions[0]
             else:
                 question_to_show = None
 
+    # query #4
     num_schedules = models.Schedule.objects.filter(
         user=user,
         question=question_to_show
