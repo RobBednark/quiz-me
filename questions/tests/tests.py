@@ -200,6 +200,7 @@ class NonBrowserTests(TestCase):
         NUM_QUERIES_SCHEDULED_BEFORE_NOW = 2
         NUM_QUERIES_UNSCHEDULED_QUESTION = 3  # number of queries expected when there are no scheduled questions,
                                               # and an uncheduled question is returned
+        NUM_QUERIES_SCHEDULED_AFTER_NOW = 4
         NUM_QUERIES_NO_QUESTIONS = 4  # number of queries expected when no questions are found
 
         # test _get_next_question()
@@ -324,40 +325,48 @@ class NonBrowserTests(TestCase):
         #       a) question1 and question2 both have tag1
         #       b) question1 has 2 schedules, question2 has 1 schedule
         #       c) question1's newest schedule (q1_sched2) has date_show_next > question2's schedule.date_show_next
-        #       d) question1's oldest schedule (q1_sched1) has date_show_next < now
+        #       d) question1's newest schedule (q1_sched2) has date_show_next < now
+        #       e) question1's oldest schedule (q1_sched1) has date_show_next < now
         # Assert: question1 is returned because it has a later schedule.date_show_next
         q2_sched1 = Schedule.objects.create(
             user=user1,
             question=question2,
             interval_num=1,
-            interval_unit='months')
+            interval_unit='months',
+            date_show_next=datetime.now(tz=pytz.utc) - timedelta(days=2))
         q1_sched2 = Schedule.objects.create(
             user=user1,
             question=question1,
             interval_num=1,
-            interval_unit='days')
+            interval_unit='days',
+            date_show_next=datetime.now(tz=pytz.utc) - timedelta(days=1))
         q1_sched1.date_show_next = datetime.now(tz=pytz.utc) - timedelta(days=1)
-        q2_sched1.date_show_next = datetime.now(tz=pytz.utc) - timedelta(days=2)
         q1_sched1.save()
         q2_sched1.save()
         self.assertTrue(q1_sched2.datetime_added > q1_sched1.datetime_added)
         self.assertTrue(q1_sched2.date_show_next > q2_sched1.date_show_next)
         self.assertTrue(q1_sched1.date_show_next < datetime.now(tz=pytz.utc))
-        self.assertTrue(q1_sched2.date_show_next > datetime.now(tz=pytz.utc))
+        self.assertTrue(q1_sched2.date_show_next < datetime.now(tz=pytz.utc))
         self.assertTrue(Schedule.objects.all().count() == 3)
         for _ in range(5):
             with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
+                if True:
+                    # trigger the debugger
+                    pytz.show = False
                 next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question1)
 
-        # Add a 2nd schedule to question2 > question1's schedule < now
+        # Add a 2nd schedule to question2 such that:
+        #    question2's schedule.date_show_next > question1's schedule.date_show_next < now
         # and assert that question2 is now returned
         # Given:
         # a) question1 and question2 both have tag1
         # b) question1 and question2 each have 2 schedules
+        # c) q2's newest schedule (q2_sched2): q2_sched2
         # c) question2's newest schedule (q2_sched2) is earlier than question1's
         #    newest schedule (q1_sched2)
-        # Assert that question2 is returned because it's schedule is earlier
+        # d) q2_sched.datetime_added > q1_sched.datetime_added
+        # Assert that question2 is returned because it's schedule was added later.
         q2_sched2 = Schedule(
             user=user1,
             question=question2,
@@ -366,10 +375,9 @@ class NonBrowserTests(TestCase):
             date_show_next=datetime.now(tz=pytz.utc)
         )
         q2_sched2.save()
-        self.assertTrue(q2_sched2.date_show_next > q1_sched1.date_show_next < datetime.now(tz=pytz.utc))
+        self.assertTrue(q2_sched2.date_show_next < datetime.now(tz=pytz.utc))
         self.assertTrue(q2_sched2.datetime_added > q2_sched1.datetime_added)
-        if True:
-            pytz.show = True
+        self.assertTrue(q2_sched2.datetime_added > q1_sched2.datetime_added)
         for _ in range(5):
             with self.assertNumQueries(3):
                 next_question = _get_next_question(user=user1)

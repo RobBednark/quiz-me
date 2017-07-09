@@ -39,35 +39,19 @@ def _get_next_question(user):
     # If there are none of those, then return the question with the oldest
     # schedule.date_show_next
 
-    if True:
-        import pytz
-        if getattr(pytz, 'show', False):
-            # import pudb; pudb.set_trace()
-            pass
     datetime_now = datetime.now(tz=pytz.utc)
     user_tags = models.UserTag.objects.select_related('tag').filter(user=user, enabled=True)
     tags = models.Tag.objects.filter(id__in=user_tags)
     tag_names = tags.values_list('name', flat=True)
     question_tags = models.QuestionTag.objects.filter(enabled=True, tag__in=tags)
     questions_tagged = models.Question.objects.filter(questiontag__in=question_tags)
-
     schedules = (models.Schedule.objects
                  .filter(user=user, question=OuterRef('pk'))
-                 .order_by('datetime_added'))
+                 .order_by('-datetime_added'))
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
+    questions_annotated = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
     questions = questions_annotated.filter(date_show_next__lte=datetime_now)  # will this get questions with no schedules?
-    # questions = questions.order_by('date_show_next')
-    questions = questions.order_by('-schedule.datetime_added')
-    questions = questions.order_by('datetime_added')
-
-    def show_questions(questions):
-        return
-        if not questions:
-            print('questions is None')
-        for num, q in enumerate(questions):
-            print('%s:' % num)
-            pprint(q.__dict__)
-    show_questions(questions)
+    questions = questions.order_by('-schedule_datetime_added')
 
     # query #1
     if questions:
@@ -79,8 +63,6 @@ def _get_next_question(user):
         questions = questions_tagged
         questions = questions.filter(schedule=None)
         questions = questions.order_by('datetime_added')
-
-        show_questions(questions_annotated)
 
         # query #2
         if questions:
