@@ -197,11 +197,11 @@ class NonBrowserTests(TestCase):
         self.assertEquals(schedule2.date_show_next, my_datetime)
 
     def test_get_next_question(self):
-        NUM_QUERIES_SCHEDULED_BEFORE_NOW = 2
-        NUM_QUERIES_UNSCHEDULED_QUESTION = 3  # number of queries expected when there are no scheduled questions,
+        NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3
+        NUM_QUERIES_UNSCHEDULED_QUESTION = 4  # number of queries expected when there are no scheduled questions,
                                               # and an uncheduled question is returned
-        NUM_QUERIES_SCHEDULED_AFTER_NOW = 4
-        NUM_QUERIES_NO_QUESTIONS = 4  # number of queries expected when no questions are found
+        NUM_QUERIES_SCHEDULED_AFTER_NOW = 5
+        NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
 
         # test _get_next_question()
         user1 = User.objects.create(email="user1@bednark.com")

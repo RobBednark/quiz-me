@@ -89,7 +89,7 @@ def _get_next_question(user):
 
     return NextQuestion(
         question=question_to_show,
-        user_tag_names=tag_names,
+        user_tag_names=[tag for tag in tag_names],  # query #5
         num_schedules=num_schedules,
     )
 
