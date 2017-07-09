@@ -39,6 +39,9 @@ def _get_next_question(user):
     # If there are none of those, then return the question with the oldest
     # schedule.date_show_next
 
+    if getattr(pytz, 'show', False):
+        import pudb; pudb.set_trace()
+
     datetime_now = datetime.now(tz=pytz.utc)
     user_tags = models.UserTag.objects.select_related('tag').filter(user=user, enabled=True)
     tags = models.Tag.objects.filter(id__in=user_tags)
@@ -49,8 +52,8 @@ def _get_next_question(user):
                  .filter(user=user, question=OuterRef('pk'))
                  .order_by('-datetime_added'))
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
-    questions_annotated = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
-    questions = questions_annotated.filter(date_show_next__lte=datetime_now)  # will this get questions with no schedules?
+    questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
+    questions = questions.filter(date_show_next__lte=datetime_now)  # will this get questions with no schedules?
     questions = questions.order_by('-schedule_datetime_added')
 
     # query #1
@@ -71,7 +74,8 @@ def _get_next_question(user):
             # assert: no question without a schedule
             # Return the question with the oldest schedule.date_show_next
             # query #3
-            questions = questions_tagged
+            questions = questions_annotated
+            questions = questions.order_by('date_show_next')
             if questions:
                 question_to_show = questions[0]
             else:

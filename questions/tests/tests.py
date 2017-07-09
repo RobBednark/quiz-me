@@ -213,16 +213,13 @@ class NonBrowserTests(TestCase):
         question1 = Question.objects.create(question="question1")
         question2 = Question.objects.create(question="question2")
 
-        # Asserts: 2 questions
-        #          0 QuestionTag's
-        #          0 UserTag's
-
+        # Test: no question when no UserTags
         # Given:
         #   a) user1 with 0 UserTags
         #   b) 0 questions with any tags
         #   c) 2 questions with 0 tags
         #   d) tag1 and tag2 each have 0 questions
-        # Assert: user does not get a question
+        # Assert: user does not get a question, because they have no UserTags
         self.assertTrue(UserTag.objects.filter(user=user1).count() == 0)
         self.assertTrue(Question.objects.all().count() == 2)
         self.assertTrue(QuestionTag.objects.all().count() == 0)
@@ -233,10 +230,11 @@ class NonBrowserTests(TestCase):
             next_question = _get_next_question(user=user1)
             self.assertTrue(next_question.question is None)
 
+        # Test: no question when UserTag but no questions with that tag
         # Given:
         #   a) user1 with 1 UserTag
         #   b) 0 questions with that UserTag
-        # Assert: user1 does not get a question
+        # Assert: user1 does not get a question, because there are no questions with that UserTag
         user1_tag1 = UserTag.objects.create(user=user1, tag=tag1, enabled=True)
         self.assertTrue(user1_tag1.tag.questions.count() == 0)
         self.assertTrue(
@@ -248,10 +246,13 @@ class NonBrowserTests(TestCase):
                 next_question = _get_next_question(user=user1)
                 self.assertTrue(next_question.question is None)
 
+        # Bucket 2: question with no schedules
+        # Test: No questions with schedules, so returned oldest question.datetime_added
         # Given:
         #    a) user1 with tag user1_tag1
         #    b) question1 and question2 have tag1
         #    c) user has 0 schedules
+        #    d) question1.datetime_added < question2.datetime_added
         # Assert: user1 gets question1 because it was added before question2
         question1_tag1 = QuestionTag.objects.create(
             question=question1, tag=tag1, enabled=True
@@ -273,6 +274,7 @@ class NonBrowserTests(TestCase):
                 next_question = _get_next_question(user=user1)
                 self.assertTrue(next_question.question == question1)
 
+        # Test: No question returned when tag.enabled == False
         # Given:
         #    a) user1 with tag user1_tag1
         #    b) question1 and question2 with tag1
@@ -294,6 +296,8 @@ class NonBrowserTests(TestCase):
                 next_question = _get_next_question(user=user1)
                 self.assertTrue(next_question.question is None)
 
+        # Bucket 2: question with no schedules
+        # Test: question with no schedules returned (when another question with schedule.date_show_next > now)
         # Given:
         #       a) question1 and question2 both have tag1
         #       b) question1 has 1 schedule with date_show_now > now
@@ -308,8 +312,8 @@ class NonBrowserTests(TestCase):
             user=user1,
             question=question1,
             interval_num=1,
-            interval_unit='weeks'
-        )
+            interval_unit='weeks')
+        self.assertTrue(q1_sched1.date_show_next > datetime.now(tz=pytz.utc))
         self.assertTrue(QuestionTag.objects.filter(tag=tag1, enabled=True).count() == 2)
         self.assertTrue(Schedule.objects.all().count() == 1)
         self.assertTrue(Schedule.objects.filter(question=question1).count() == 1)
@@ -320,6 +324,7 @@ class NonBrowserTests(TestCase):
                 next_question = _get_next_question(user=user1)
                 self.assertTrue(next_question.question == question2)
 
+        # Bucket 1: question.schedule.date_show_next < now
         # Given 2 questions with date_show_next < now, show the question with the latest date_show_next
         # Given:
         #       a) question1 and question2 both have tag1
@@ -327,6 +332,8 @@ class NonBrowserTests(TestCase):
         #       c) question1's newest schedule (q1_sched2) has date_show_next > question2's schedule.date_show_next
         #       d) question1's newest schedule (q1_sched2) has date_show_next < now
         #       e) question1's oldest schedule (q1_sched1) has date_show_next < now
+        #       f) question2's schedule (q2_sched1) has date_show_next < now
+        #       g) question1's newest schedule (q1_sched2).date_show_next > q2_sched1.date_show_next
         # Assert: question1 is returned because it has a later schedule.date_show_next
         q2_sched1 = Schedule.objects.create(
             user=user1,
@@ -347,39 +354,46 @@ class NonBrowserTests(TestCase):
         self.assertTrue(q1_sched2.date_show_next > q2_sched1.date_show_next)
         self.assertTrue(q1_sched1.date_show_next < datetime.now(tz=pytz.utc))
         self.assertTrue(q1_sched2.date_show_next < datetime.now(tz=pytz.utc))
+        self.assertTrue(q2_sched1.date_show_next < datetime.now(tz=pytz.utc))
         self.assertTrue(Schedule.objects.all().count() == 3)
         for _ in range(5):
             with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
-                if True:
-                    # trigger the debugger
-                    pytz.show = False
                 next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question1)
 
+        # Bucket 3: question.schedule_date_show_next > now
         # Add a 2nd schedule to question2 such that:
-        #    question2's schedule.date_show_next > question1's schedule.date_show_next < now
+        #    now < question2's schedule.date_show_next < question1's schedule.date_show_next
         # and assert that question2 is now returned
         # Given:
-        # a) question1 and question2 both have tag1
-        # b) question1 and question2 each have 2 schedules
-        # c) q2's newest schedule (q2_sched2): q2_sched2
-        # c) question2's newest schedule (q2_sched2) is earlier than question1's
-        #    newest schedule (q1_sched2)
-        # d) q2_sched.datetime_added > q1_sched.datetime_added
+        #   a) question1 and question2 both have tag1
+        #   b) question1 and question2 each have 2 schedules
+        #   c) q2's newest schedule is q2_sched2, q1's newest is q1_sched2
+        #   d) q2_sched2.date_show_next > now < q1_sched2.date_show_next
         # Assert that question2 is returned because it's schedule was added later.
-        q2_sched2 = Schedule(
+        q2_sched2 = Schedule.objects.create(
             user=user1,
             question=question2,
             interval_num=5,
             interval_unit='minutes',
-            date_show_next=datetime.now(tz=pytz.utc)
+            date_show_next=datetime.now(tz=pytz.utc) + timedelta(minutes=1)
         )
-        q2_sched2.save()
-        self.assertTrue(q2_sched2.date_show_next < datetime.now(tz=pytz.utc))
+        q1_sched2.date_show_next = datetime.now(tz=pytz.utc) + timedelta(minutes=2)
+        q1_sched2.save()
+        self.assertTrue(q2_sched2.date_show_next > datetime.now(tz=pytz.utc))
+        self.assertTrue(q1_sched2.date_show_next > datetime.now(tz=pytz.utc))
+        self.assertTrue(q2_sched2.date_show_next < q1_sched2.date_show_next)
         self.assertTrue(q2_sched2.datetime_added > q2_sched1.datetime_added)
-        self.assertTrue(q2_sched2.datetime_added > q1_sched2.datetime_added)
+        self.assertTrue(q1_sched2.datetime_added > q1_sched1.datetime_added)
+        question1.refresh_from_db()
+        question2.refresh_from_db()
+        self.assertTrue(question1.schedule_set.count() == 2)
+        self.assertTrue(question1.schedule_set.count() == 2)
         for _ in range(5):
-            with self.assertNumQueries(3):
+            with self.assertNumQueries(NUM_QUERIES_SCHEDULED_AFTER_NOW):
+                if True:
+                    # trigger the debugger
+                    pytz.show = False
                 next_question = _get_next_question(user=user1)
         ####### Test is correct to here.  ############################################################
                 self.assertEquals(next_question.question, question2)
@@ -388,7 +402,7 @@ class NonBrowserTests(TestCase):
         # doesn't affect the question returned
         Question.objects.create(question="question3")
         for _ in range(5):
-            with self.assertNumQueries(3):
+            with self.assertNumQueries(NUM_QUERIES_SCHEDULED_AFTER_NOW):
                 next_question = _get_next_question(user=user1)
                 self.assertEquals(next_question.question, question2)
 
