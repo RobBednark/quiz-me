@@ -115,6 +115,9 @@ def _get_tag2periods(user, modelformset_usertag=None):
     tag2interval2cnt = defaultdict(lambda: defaultdict(int))
     tag2interval_order = defaultdict(list)
     tags = models.Tag.objects.all()
+    schedules = (models.Schedule.objects
+                 .filter(user=user, question=OuterRef('question_id'))
+                 .order_by('-datetime_added'))
     for tag in tags:
         # Get all QuestionTag's for this tag
         question_tags = models.QuestionTag.objects.filter(
@@ -123,20 +126,12 @@ def _get_tag2periods(user, modelformset_usertag=None):
 
         # Also get the questions for each QuestionTag so that we don't need to do additional queries
         question_tags = question_tags.select_related('question')
+        # for each question, get the most recently-added schedule for that user
+        question_tags = question_tags.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
 
         for question_tag in question_tags:
             question = question_tag.question
-
-            # for each question, get the most recently-added schedule for that user
-            try:
-                latest = models.Schedule.objects.filter(
-                    user=user,
-                    question=question
-                ).latest(field_name='datetime_added')
-            except ObjectDoesNotExist:
-                latest = None
-
-            if latest is None:
+            if question_tag.date_show_next is None:
                 tag2interval2cnt[tag.name]['unseen'] += 1
                 if 'unseen' not in tag2interval_order[tag.name]:
                     tag2interval_order[tag.name].append('unseen')
@@ -148,7 +143,7 @@ def _get_tag2periods(user, modelformset_usertag=None):
                         continue
                     delta = relativedelta(**({interval[1]: interval[0]}))
                     now = timezone.now()
-                    if latest.date_show_next <= now + delta:
+                    if question_tag.date_show_next <= now + delta:
                         interval_name = '%s-%s' % (
                             interval_previous[2],
                             interval[2]
