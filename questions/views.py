@@ -29,68 +29,25 @@ def _get_next_question(user):
     ''' Find and return the next question for the currently logged-in user.
     '''
     # Find all the tags that the user has selected (UserTag's)
-    user_tags = models.UserTag.objects.select_related('tag').filter(
-        user=user, enabled=True
-    )
-
     # Find the number of questions for each tag (only used to display the number to the user)
-    user_tags = user_tags.annotate(
-        num_questions=Count('tag__questions')
+    tags = models.Tag.objects.filter(users=user, usertag__enabled=True)
+    
+    tag_names = tags.values_list(
+        'name', flat=True
     )
-    user_tag_names = sorted([str(utag.tag.name) for utag in user_tags])
 
-    # Find all the QuestionTag's associated with the UserTag's
-    tag_ids = [t.tag_id for t in user_tags]
-    question_tags = models.QuestionTag.objects.filter(
-        enabled=True, tag__in=tag_ids)
-
-    # Find all the questions associated with the QuestionTag's
-    questions = models.Question.objects.filter(
-        questiontag__in=question_tags
-    ).all()
-
-    # Can't do an annotate on questions for a schedule, because it returns a value, not the schedule
-
-    # Find the most-recently-added schedule of each question (datetime_added),
-    # and among all those schedules, find the oldest schedule that is due (date_show_next).
-    # The most-recently-added schedule is the only one that matters.
-    # For questions that don't have a schedule, find the oldest question based on when it was added.
-    oldest_schedule = None
-    oldest_question = None
-
-    for question in questions:
-        # Get the most recently-added schedule for this question
-        try:
-            schedule = (
-                models.Schedule.objects.filter(
-                    user=user, question=question
-                ).latest(field_name='datetime_added'))
-        except ObjectDoesNotExist:
-            schedule = None
-        if schedule:
-            # TODO: count the schedules for each date range here
-            if oldest_question:
-                # There's already a question without a schedule, so we don't
-                # care about questions with a schedule.
-                pass
-            else:
-                if oldest_schedule:
-                    if schedule.date_show_next < oldest_schedule.date_show_next:
-                        oldest_schedule = schedule
-                else:
-                    oldest_schedule = schedule
-        else:
-            if oldest_question:
-                if question.datetime_added < oldest_question.datetime_added:
-                    oldest_question = question
-            else:
-                oldest_question = question
-    if oldest_question:
-        question_to_show = oldest_question
-    elif oldest_schedule:
-        question_to_show = oldest_schedule.question
-    else:
+    # Find the oldest schedule, and get the question for that schedule
+    # ERATTA - find the oldest schedule for the selected tag
+    try:
+        schedule = models.Schedule.objects.filter(
+            user=user,
+            question__tag__in=tags,
+        ).latest('date_show_next')
+    except models.Schedule.DoesNotExist:
+        # Add log statement here
         question_to_show = None
+    else:
+        question_to_show = schedule.question
 
     num_schedules = models.Schedule.objects.filter(
         user=user,
@@ -99,8 +56,8 @@ def _get_next_question(user):
 
     return NextQuestion(
         question=question_to_show,
-        user_tag_names=user_tag_names,
-        num_schedules=num_schedules
+        user_tag_names=tag_names,
+        num_schedules=num_schedules,
     )
 
 
