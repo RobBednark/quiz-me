@@ -6,6 +6,9 @@ from questions import models, util
 from questions.views import _get_next_question
 from questions.views import NextQuestion
 
+NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
+NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
+
 
 class TestGetNextQuestion(TestCase):
 
@@ -29,7 +32,10 @@ class TestGetNextQuestion(TestCase):
             question='fakebar',
         )
 
-        with self.assertNumQueries(2):
+        # One untagged question that doesn't get returned because it has
+        # no tags.
+
+        with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
             next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)
@@ -45,7 +51,7 @@ class TestGetNextQuestion(TestCase):
         util.assign_question_to_user(self.user, question, 'fake_tag')
         util.schedule_question_for_user(self.user, question)
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
             next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)
@@ -62,7 +68,7 @@ class TestGetNextQuestion(TestCase):
             util.assign_question_to_user(self.user, question, 'fake_tag')
             util.schedule_question_for_user(self.user, question)
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
             next_question = _get_next_question(self.user)
 
         self.assertIsInstance(next_question, NextQuestion)

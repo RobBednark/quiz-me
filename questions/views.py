@@ -1,15 +1,16 @@
 from collections import defaultdict, namedtuple
+from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
-
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db.models import Count
+from django.db.models import Count, OuterRef, Subquery
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
+import pytz
 
 from .forms import FormAttemptNew, FormSchedule
 from questions import models
@@ -26,29 +27,58 @@ NextQuestion = namedtuple(
 
 
 def _get_next_question(user):
-    ''' Find and return the next question for the currently logged-in user.
-    '''
-    # Find all the tags that the user has selected (UserTag's)
-    # Find the number of questions for each tag (only used to display the number to the user)
-    tags = models.Tag.objects.filter(users=user, usertag__enabled=True)
-    
-    tag_names = tags.values_list(
-        'name', flat=True
-    )
+    # Bucket 1: questions scheduled before now
+    # First look for questions with schedule.date_show_next <= now,
+    # and return the question with the newest schedule.datetime_added.
 
-    # Find the oldest schedule, and get the question for that schedule
-    # ERATTA - find the oldest schedule for the selected tag
-    try:
-        schedule = models.Schedule.objects.filter(
-            user=user,
-            question__tag__in=tags,
-        ).latest('date_show_next')
-    except models.Schedule.DoesNotExist:
-        # Add log statement here
-        question_to_show = None
+    # Bucket 2: unscheduled questions
+    # If there are none of those, then look for questions with no schedules,
+    # and return the question with the oldest question.datetime_added.
+
+    # Bucket 3: questions scheduled after now
+    # If there are no questions without schedules, then return the question
+    # with the oldest schedule.date_show_next
+
+    datetime_now = datetime.now(tz=pytz.utc)
+    user_tags = models.UserTag.objects.filter(user=user, enabled=True).values_list('tag', flat=True)
+    tags = models.Tag.objects.filter(id__in=user_tags)
+    tag_names = tags.values_list('name', flat=True)
+    question_tags = models.QuestionTag.objects.filter(enabled=True, tag__in=tags)
+    questions_tagged = models.Question.objects.filter(questiontag__in=question_tags)
+    schedules = (models.Schedule.objects
+                 .filter(user=user, question=OuterRef('pk'))
+                 .order_by('-datetime_added'))
+    questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
+    questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
+    questions = questions.filter(date_show_next__lte=datetime_now)  # will this get questions with no schedules?
+    questions = questions.order_by('-schedule_datetime_added')
+
+    # query #1
+    if questions:
+        question_to_show = questions[0]
     else:
-        question_to_show = schedule.question
+        # assert: no question with schedule.date_show_next <= now
+        # Look for questions with no schedules, and show the one with the
+        # oldest question.datetime_added
+        questions = questions_tagged
+        questions = questions.filter(schedule=None)
+        questions = questions.order_by('datetime_added')
 
+        # query #2
+        if questions:
+            question_to_show = questions[0]
+        else:
+            # assert: no question without a schedule
+            # Return the question with the oldest schedule.date_show_next
+            # query #3
+            questions = questions_annotated
+            questions = questions.order_by('date_show_next')
+            if questions:
+                question_to_show = questions[0]
+            else:
+                question_to_show = None
+
+    # query #4
     num_schedules = models.Schedule.objects.filter(
         user=user,
         question=question_to_show
@@ -56,7 +86,7 @@ def _get_next_question(user):
 
     return NextQuestion(
         question=question_to_show,
-        user_tag_names=tag_names,
+        user_tag_names=sorted([tag for tag in tag_names]),  # query #5
         num_schedules=num_schedules,
     )
 
@@ -82,6 +112,9 @@ def _get_tag2periods(user, modelformset_usertag=None):
     tag2interval2cnt = defaultdict(lambda: defaultdict(int))
     tag2interval_order = defaultdict(list)
     tags = models.Tag.objects.all()
+    schedules = (models.Schedule.objects
+                 .filter(user=user, question=OuterRef('question_id'))
+                 .order_by('-datetime_added'))
     for tag in tags:
         # Get all QuestionTag's for this tag
         question_tags = models.QuestionTag.objects.filter(
@@ -90,20 +123,12 @@ def _get_tag2periods(user, modelformset_usertag=None):
 
         # Also get the questions for each QuestionTag so that we don't need to do additional queries
         question_tags = question_tags.select_related('question')
+        # for each question, get the most recently-added schedule for that user
+        question_tags = question_tags.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
 
         for question_tag in question_tags:
             question = question_tag.question
-
-            # for each question, get the most recently-added schedule for that user
-            try:
-                latest = models.Schedule.objects.filter(
-                    user=user,
-                    question=question
-                ).latest(field_name='datetime_added')
-            except ObjectDoesNotExist:
-                latest = None
-
-            if latest is None:
+            if question_tag.date_show_next is None:
                 tag2interval2cnt[tag.name]['unseen'] += 1
                 if 'unseen' not in tag2interval_order[tag.name]:
                     tag2interval_order[tag.name].append('unseen')
@@ -115,7 +140,7 @@ def _get_tag2periods(user, modelformset_usertag=None):
                         continue
                     delta = relativedelta(**({interval[1]: interval[0]}))
                     now = timezone.now()
-                    if latest.date_show_next <= now + delta:
+                    if question_tag.date_show_next <= now + delta:
                         interval_name = '%s-%s' % (
                             interval_previous[2],
                             interval[2]
@@ -229,11 +254,11 @@ def question(request, id_question):
         form_attempt = FormAttemptNew()
         if next_question.question:
             question_tag_names = ", ".join(
-                [
+                sorted([
                     str(
                         qtag.tag.name
                     ) for qtag in next_question.question.questiontag_set.all()
-                ]
+                ])
             )
         else:
             question_tag_names = []
@@ -315,11 +340,11 @@ def answer(request, id_attempt):
 
         if attempt.question:
             question_tag_names = ", ".join(
-                [
+                sorted([
                     str(
                         qtag.tag.name
                     ) for qtag in attempt.question.questiontag_set.all()
-                ]
+                ])
             )
         else:
             question_tag_names = []
