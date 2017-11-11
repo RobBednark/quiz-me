@@ -187,7 +187,7 @@ class BrowserTests(LiveServerTestCase):
 class NonBrowserTests(TestCase):
 
     def test_schedule_save(self):
-        my_datetime = datetime(year=2017, month=07, day=04)
+        my_datetime = pytz.utc.localize(datetime(year=2017, month=07, day=04))
         question = Question.objects.create()
         schedule1 = Schedule.objects.create(question=question)
         schedule2 = Schedule.objects.create(date_show_next=my_datetime, question=question)
