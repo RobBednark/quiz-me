@@ -1,5 +1,8 @@
 # Quiz-me Changelog
 
+## 2017-11-10
+- CHANGE to use new algorithm for getting next question
+
 ## 2016-09-23
 - ADD "percent_correct" and "percent_importance" fields to answer page
 
