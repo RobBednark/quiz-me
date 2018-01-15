@@ -1,7 +1,7 @@
 # requirements-test.txt -- python packages needed to test the quiz-me code
 
 # selenium is used by splinter for browser testing (firefox, phantomjs, ...)
-selenium==3.4.3
+selenium==3.8.1
 
 # splinter is an interface to facilitate browser testing; it calls selenium
-splinter==0.7.5
+splinter==0.7.7
