@@ -5,7 +5,7 @@
 Django==1.11.9
 
 # email-as-username used for using email addresses as usernames
-django-email-as-username==1.6.7
+py2-py3-django-email-as-username==1.7.1
 
 # markdown-deux for displaying markdown as html; import markdown_deux
 django-markdown-deux==1.0.5
