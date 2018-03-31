@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from django.utils.encoding import python_2_unicode_compatible
+
 from dateutil.relativedelta import relativedelta
 
 from django.db import models
@@ -39,6 +42,7 @@ class QuestionManager(models.Manager):
         return questions
 
 
+@python_2_unicode_compatible
 class Question(CreatedBy):
     question = models.TextField()
     answer = models.ForeignKey('Answer', null=True, blank=True)
@@ -50,10 +54,11 @@ class Question(CreatedBy):
     # user_set
     objects = QuestionManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return '<Question id=[%s] question=[%s] datetime_added=[%s]>' % (self.id, self.question, self.datetime_added)
 
 
+@python_2_unicode_compatible
 class Answer(CreatedBy):
     answer = models.TextField()
     # hint_set
@@ -61,7 +66,7 @@ class Answer(CreatedBy):
     # user
     # user_set
 
-    def __unicode__(self):
+    def __str__(self):
         return '<Answer id=[%s] answer=[%s] datetime_added=[%s]>' % (self.id, self.answer, self.datetime_added)
 
 
@@ -79,6 +84,7 @@ class Hint(CreatedBy):
     # user_set
 
 
+@python_2_unicode_compatible
 class Tag(CreatedBy):
     '''
         Each tag can be applied to each question for a given user.
@@ -95,7 +101,7 @@ class Tag(CreatedBy):
     # user
     # user_set
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -106,6 +112,7 @@ class Quiz(CreatedBy):
     # user_set
 
 
+@python_2_unicode_compatible
 class QuestionTag(CreatedBy):
     # This is a tag applied to a question.
     # e.g., question = Question(text="1 + 1 = ??")
@@ -118,7 +125,7 @@ class QuestionTag(CreatedBy):
     # user
     # user_set
 
-    def __unicode__(self):
+    def __str__(self):
         return 'QuestionTag: tag.name=[%s] question.id=[%s]' % (self.tag.name, self.question.id)
 
 
