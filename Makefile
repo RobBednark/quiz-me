@@ -51,7 +51,7 @@ dumpdb:
 	mkdir -p db_dumps
 	pg_dump --format=custom ${DB_NAME_TO_DUMP} > ${FILE_DUMP_CUSTOM}
 	pg_dump --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN}
-	PYTHONIOENCODING=utf-8 python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
+	DB_QUIZME=${DB_NAME_TO_DUMP} PYTHONIOENCODING=utf-8 python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
 	rm -f ${SYMLINK_LATEST_TEXT}
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
 	ls -ltr db_dumps/. |tail -5
