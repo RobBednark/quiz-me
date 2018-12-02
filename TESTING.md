@@ -31,6 +31,9 @@
 - admin: Change tag name
 - admin: answers page
 
+- manage.py makemigrations
+- manage.py migrate
+
 - all automated tests pass (make test)
 
 ## Test Log Template
