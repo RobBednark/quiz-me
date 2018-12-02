@@ -95,6 +95,7 @@ docker rm $(docker ps -a -q)
 * *manual test log*  -- manual testing for each branch or commit must be logged in TESTING.md and include the python version and Pipenv.lock file used
 * *PEP8*  --code style must adhere to PEP8
 * *granular commits* -- all commits should be granular, e.g., a single fix, a single new feature, a refactor; a single commit should not contain both fixes and features
+* *view &ast;.md changes before merging* - if changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct
 
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
