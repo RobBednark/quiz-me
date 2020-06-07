@@ -7,7 +7,10 @@
 - run quiz and select a different tag to quiz on
 - click the `Edit Question` link and edit a question
 - click the `Edit Answer` link and edit a question
-- make dumpdb
+
+- make dumpdb (ensure no errors)
+- loaddb into a new db
+    - run all tests in this file against the new db
 
 - admin: questions page
 
