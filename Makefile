@@ -1,7 +1,7 @@
 # To override variables from the command-line, use the make "-e" option,
 # which causes environment variables to override assignments in the
 # Makefile. e.g., 
-#	make DB_NAME_DUMP='my-db'
+#	make DB_NAME_TO_DUMP='my-db'
 #	PGDATABASE=template1  \
 #   make \
 #      FILE_DUMP_CUSTOM=db_dumps/my-dump-custom \
@@ -19,15 +19,16 @@
 #   PGDATABASE=template1 make loaddb
 
 SHELL := /bin/bash -xv
-DB_NAME_DUMP=restore_quizme_plain  # name of the db to dump
-DB_NAME_RESTORE_CUSTOM=restore_quizme_custom
-DB_NAME_RESTORE_PLAIN=restore_quizme_plain
+# DB_NAME_TO_DUMP = name of the db to dump
+DB_NAME_TO_DUMP=restore_quizme_plain
+DB_NAME_TO_RESTORE_CUSTOM=restore_quizme_custom
+DB_NAME_TO_RESTORE_PLAIN=restore_quizme_plain
 DB_USER=quizme
 DIR_DUMPS=db_dumps
 date:=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
-FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.custom
-FILE_DUMP_PLAIN:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.plain
-FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.txt
+FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.custom
+FILE_DUMP_PLAIN:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain
+FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.txt
 SYMLINK_LATEST_TEXT:=${DIR_DUMPS}/latest.dump.txt
 
 first_target:
@@ -37,15 +38,16 @@ create_superuser:
 	./manage.py createsuperuser --email rbednark@gmail.com
 
 createdb: 
-	createdb --username=${DB_USER} ${DB_NAME_DUMP}
+	createdb --username=${DB_USER} ${DB_NAME_TO_DUMP}
 
 dropdb:
-	dropdb ${DB_NAME_DUMP}
+	dropdb ${DB_NAME_TO_DUMP}
 
 dumpdb: 
 	mkdir -p db_dumps
-	pg_dump --format=custom ${DB_NAME_DUMP} > ${FILE_DUMP_CUSTOM}
-	pg_dump --format=plain ${DB_NAME_DUMP} > ${FILE_DUMP_PLAIN}
+	echo "DEBUG: FILE_DUMP_CUSTOM=[${FILE_DUMP_CUSTOM}]"
+	pg_dump --format=custom ${DB_NAME_TO_DUMP} > ${FILE_DUMP_CUSTOM}
+	pg_dump --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN}
 	./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
 	rm -f ${SYMLINK_LATEST_TEXT}
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
@@ -56,13 +58,13 @@ flake8:
 
 loaddb:
 	# Load the dumps into new db's to test them
-	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_CUSTOM}"
-	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_RESTORE_PLAIN}"
-	psql --command="CREATE DATABASE ${DB_NAME_RESTORE_CUSTOM}"
-	psql --command="CREATE DATABASE ${DB_NAME_RESTORE_PLAIN}"
+	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_CUSTOM}"
+	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_PLAIN}"
+	psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_CUSTOM}"
+	psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_PLAIN}"
 
-	pg_restore --dbname=${DB_NAME_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
-	psql --user=${DB_USER} --dbname=${DB_NAME_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN} > /tmp/psql.stdout
+	pg_restore --dbname=${DB_NAME_TO_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
+	psql --user=${DB_USER} --dbname=${DB_NAME_TO_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN}
 
 migrate:
 	./manage.py migrate
