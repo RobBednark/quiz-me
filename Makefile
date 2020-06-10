@@ -2,7 +2,12 @@
 # which causes environment variables to override assignments in the
 # Makefile. e.g., 
 #	make DB_NAME_DUMP='my-db'
-#	make FILE_DUMP_CUSTOM=db_dumps/my-dump-custom dumpdb
+#	PGDATABASE=template1  \
+#   make \
+#      FILE_DUMP_CUSTOM=db_dumps/my-dump-custom \
+#      FILE_DUMP_PLAIN=db_dumps/my-dump-plain   \
+#      loaddb
+#	PGDATABASE=template1  make  FILE_DUMP_CUSTOM=db_dumps/my-dump-custom  FILE_DUMP_PLAIN=db_dumps/my-dump-plain  loaddb
 # 
 # If restore fails due to a missing role, then create that role manually
 # e.g., 
@@ -24,6 +29,9 @@ FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.custom
 FILE_DUMP_PLAIN:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.plain
 FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME}.${date}.txt
 SYMLINK_LATEST_TEXT:=${DIR_DUMPS}/latest.dump.txt
+
+first_target:
+	echo "This is the default target and it does nothing.  Specify a target."
 
 create_superuser:
 	./manage.py createsuperuser --email rbednark@gmail.com
