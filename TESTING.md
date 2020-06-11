@@ -11,6 +11,10 @@
 - make dumpdb (ensure no errors)
 - loaddb into a new db
     - run all tests in this file against the new db
+- python manage.py dump
+- python manage.py migrate
+
+- create a new db, run "migrate", run manual tests
 
 - admin: questions page
 
