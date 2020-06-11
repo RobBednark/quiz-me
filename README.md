@@ -8,8 +8,14 @@
     workon quizme
 1. install the required packages in the virtualenv, e.g.,
     pip install --requirement requirements.txt
-1. install postgresql (if using postgresql); e.g., on OSX,
-    brew install postgresql
+1. install and run postgresql (if using postgresql); e.g., on OSX,
+    brew install postgresql (or "brew update")
+    ("brew info postgresql" to see how to start/stop)
+    (if errors, consider "brew reinstall postgresql")
+1. start postgres; e.g., on OSX,
+    launchctl list | grep postgres  # see if launchctl knows about postgres, and if so, what the last exit status is
+    brew services list  # list all running services, and see if postgresql is there
+    brew services stop postgresql
 1. create a postgres database
     createdb quizme
     (note that the database name "quizme" is a setting in settings.py for
