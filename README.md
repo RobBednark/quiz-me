@@ -83,6 +83,12 @@ I'm far from an expert on Docker in particular or containers in general. If some
 docker rm $(docker ps -a -q)
 ```
 
+## Development Conventions
+
+* *merge commits* -- all branch merges must have a merge commit (to make it clear when the branch changed)
+* *manual test log*  -- manual testing for each branch or commit must be logged in TESTING.md and include the python version and Pipenv.lock file used
+* *PEP8*  --code style must adhere to PEP8
+
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
 * I ask myself: when do I want to see this again?
