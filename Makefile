@@ -45,7 +45,6 @@ dropdb:
 
 dumpdb: 
 	mkdir -p db_dumps
-	echo "DEBUG: FILE_DUMP_CUSTOM=[${FILE_DUMP_CUSTOM}]"
 	pg_dump --format=custom ${DB_NAME_TO_DUMP} > ${FILE_DUMP_CUSTOM}
 	pg_dump --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN}
 	PYTHONIOENCODING=utf-8 python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
@@ -58,13 +57,13 @@ flake8:
 
 loaddb:
 	# Load the dumps into new db's to test them
-	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_CUSTOM}"
-	psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_PLAIN}"
-	psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_CUSTOM}"
-	psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_PLAIN}"
+	PGDATABASE=template1 psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_CUSTOM}"
+	PGDATABASE=template1 psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_PLAIN}"
+	PGDATABASE=template1 psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_CUSTOM}"
+	PGDATABASE=template1 psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_PLAIN}"
 
 	pg_restore --dbname=${DB_NAME_TO_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
-	psql --user=${DB_USER} --dbname=${DB_NAME_TO_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN}
+	PGDATABASE=template1 psql --user=${DB_USER} --dbname=${DB_NAME_TO_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN}
 
 migrate:
 	./manage.py migrate
