@@ -20,7 +20,7 @@
 
 SHELL := /bin/bash -xv
 # DB_NAME_TO_DUMP = name of the db to dump
-DB_NAME_TO_DUMP=restore_quizme_plain
+DB_NAME_TO_DUMP=quizme_production
 DB_NAME_TO_RESTORE_CUSTOM=restore_quizme_custom
 DB_NAME_TO_RESTORE_PLAIN=restore_quizme_plain
 DB_USER=quizme
