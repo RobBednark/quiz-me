@@ -29,8 +29,10 @@
 
 Date: 
 OS:  
-Python version: 
-Postgresql version:  
+postgresql version:  
+python version: 
+geckodriver version: 
+phantomjs version: 
 Pipfile lock used for manual tests:  
 Pipfile lock used for automated tests:  
 
