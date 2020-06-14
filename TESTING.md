@@ -29,6 +29,7 @@
 
 Date: 
 OS:  
+firefox version: 
 postgresql version:  
 python version: 
 geckodriver version: 
