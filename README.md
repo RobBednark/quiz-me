@@ -37,7 +37,7 @@
 
 ## How to run tests
 
-1. Install phantomjs: `brew install phantomjs`
+1. Install phantomjs: `brew cask install phantomjs`
 2. Install geckodriver: `brew install geckodriver`
 3. Install Firefox
 
