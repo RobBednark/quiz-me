@@ -86,10 +86,11 @@ docker rm $(docker ps -a -q)
 ## Development Conventions
 
 * *merge commits* -- all branch merges must have a merge commit (to make it clear when the branch changed), as opposed to a rebase, where there's no record of the rebase in git history
+* *merge commit msg details* -- for fixes, the message must detail what the bug is that has been fixed (include error text, etc.); for new functionality, the message should describe the functionality; the following labels should be used to indicate what the commit does: (new, fix, refactor)
 * *manual testing for PR* -- each branch to be merged must have all manual tests run
 * *manual test log*  -- manual testing for each branch or commit must be logged in TESTING.md and include the python version and Pipenv.lock file used
 * *PEP8*  --code style must adhere to PEP8
-* *granular commits* -- all commits should be granular, e.g., a single fix, a single new feature, a refactor
+* *granular commits* -- all commits should be granular, e.g., a single fix, a single new feature, a refactor; a single commit should not contain both fixes and features
 
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
