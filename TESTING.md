@@ -24,3 +24,15 @@
 - admin: answers page
 
 - all automated tests pass (make test)
+
+## Test Log Template
+
+Date: 
+OS:  
+Python version: 
+Postgresql version:  
+Pipfile lock used for manual tests:  
+Pipfile lock used for automated tests:  
+
+## Test Log
+
