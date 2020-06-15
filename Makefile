@@ -2,12 +2,16 @@
 # which causes environment variables to override assignments in the
 # Makefile. e.g., 
 #	make DB_NAME_TO_DUMP='my-db'
+#
 #	PGDATABASE=template1  \
 #   make \
 #      FILE_DUMP_CUSTOM=db_dumps/my-dump-custom \
 #      FILE_DUMP_PLAIN=db_dumps/my-dump-plain   \
 #      loaddb
+#
 #	PGDATABASE=template1  make  FILE_DUMP_CUSTOM=db_dumps/my-dump-custom  FILE_DUMP_PLAIN=db_dumps/my-dump-plain  loaddb
+#
+#   PGDATABASE=template1 make DB_NAME_TO_DUMP=quizme_production dumpdb
 # 
 # If restore fails due to a missing role, then create that role manually
 # e.g., 
