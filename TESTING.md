@@ -6,6 +6,9 @@
 - add a new question/answer
 - run quiz and select a different tag to quiz on
 - click the `Edit Question` link and edit a question
+    - edit the text
+    - add a tag
+    - remove a tag
 - click the `Edit Answer` link and edit a question
 
 - make dumpdb (ensure no errors)
@@ -19,7 +22,7 @@
 - admin: questions page
 
 - admin: tags page
-- admin: Change tag
+- admin: Change tag name
 
 - admin: answers page
 
