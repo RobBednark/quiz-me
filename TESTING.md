@@ -1,5 +1,11 @@
 ## Manual tests to run:
 
+- dbs to run tests against:
+    - restored production db
+    - new db
+    - sqlite db
+    - restored production db with migrations deleted
+
 - logout
 - login
 - run quiz, answer question, submit a new schedule
@@ -39,6 +45,7 @@ geckodriver version:
 phantomjs version: 
 Pipfile lock used for manual tests:  
 Pipfile lock used for automated tests:  
+pip freeze:
 
 ## Test Log
 
