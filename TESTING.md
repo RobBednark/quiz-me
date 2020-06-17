@@ -2,9 +2,9 @@
 
 - dbs to run tests against:
     - restored production db
-    - new db
-    - sqlite db
     - restored production db with migrations deleted
+    - new postgresql db
+    - sqlite db
 
 - logout
 - login
@@ -26,10 +26,8 @@
 - create a new db, run "migrate", run manual tests
 
 - admin: questions page
-
 - admin: tags page
 - admin: Change tag name
-
 - admin: answers page
 
 - all automated tests pass (make test)
