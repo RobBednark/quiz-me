@@ -1,27 +1,10 @@
-# requirements.txt -- python packages needed to run the quizme app
-# (note that this does not include packages needed for running tests
-# or debugging; see also: requirements-test.txt, requirements-debug.txt)
-
-Django==1.11.9
-
-# email-as-username used for using email addresses as usernames
-py2-py3-django-email-as-username==1.7.1
-
-# markdown-deux for displaying markdown as html; import markdown_deux
+-i https://pypi.org/simple/
 django-markdown-deux==1.0.5
-
-# django-pagedown for markdown editor; import pagedown
 django-pagedown==1.0.4
-
-# markdown2 is required by django-markdown-deux
+django==1.11.29
 markdown2==2.3.5
-
 psycopg2==2.7.3.2
-
-pytz==2017.3
-
-# six is required by python-dateutil
-six==1.11.0
-
-# python-dateutil is used for relativedelta/timedelta "months" and "years" (import dateutil)
+py2-py3-django-email-as-username==1.7.1
 python-dateutil==2.6.1
+pytz==2017.3
+six==1.11.0
