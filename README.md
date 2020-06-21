@@ -140,12 +140,61 @@ A: I have the queryset of questions.
 *Get the code working first, then worry about performance.  Easier to just ask on stackoverflow with existing code.*
 
 ## Glossary / Terms / Nomenclature
+
+**Table names**
+
+* *answer* - answers to questions
+* *attempt* -
+    one question can have many attempts per user<br><br>
+
+    fields:
+        attempt.datetime_added - added, added_ts, when, when_added, ts_added, dt_added, *created
+
+        attempt.datetime_updated - when_updated, *updated
+        attempt.attempt
+        attempt.text - the text the user typed in;
+            body; corpus; paragraph; clob; stanza; input; representation
+
+    brainstorming alternative names:
+        trial?
+        answer?
+        given_answer?  user_answer (vs correct_answer)
+        in_answer (incoming answer)
+* *hint* - a hint for a question toward the answer
+* *ignore* - ignore a question; never show it (alternative: hide)
+* *question* - a question table
+* *questiontag* - question id, get a representation of tags; junction table;
+    one-to-many; find out what tags a given question has
+* *quiz* - a set of tags, number of questions, options, ...
+* *quiztag* - many-to-many; quiz_id, tag_id
+* *schedule* - for a question, the next time to ask that question again
+
+    Alternatives:
+        next_time_to_ask
+        future
+        when
+        ask_again_time / ts / date / datetime
+        appointment / future_appointment
+        scheduled_at
+        feedback
+        output
+        response
+        Could response and schedule go together in the same table?
+        interval_unit -- interval_value, interval
+
+* *tag* - an arbitrary symbol associated with a question
+* *usertag* - ??  tags added by users?
+
+TODO: see if tables can be renamed in Django (eliminate the "questions_" prefix)
+
+**Initial Glossary**
 * answer - the "correct" answer associated with a question; a question can have 0 or 1 answers
 * attempt - a user's single attempt to answer a question; it is the user's guess as to the answer
 * hint - a hint for a question and answer (not yet implemented)
 * schedule - when the user wants to see a question again
 * question - a question
 * quiz - a set of associated questions (not yet implemented)
+* quiz - the name of the main Django app
 * tag - a tag associated with a question; a question can have 0 to many tags
 * user tag - the tags that a user has selected indicating which questions they want to see
 
