@@ -2,12 +2,16 @@
 
 ## How to install and run
 1. clone the repo
-1. create a virtualenv, e.g.,
-    mkvirtualenv quizme
+1. create a virtual environment using pipenv, e.g.,
+        $ pipenv install
+    or create a virtualenv using mkvirtualenv, e.g.,
+        mkvirtualenv quizme
 1. activate the virtualenv, e.g.,
-    workon quizme
-1. install the required packages in the virtualenv, e.g.,
-    pip install --requirement requirements.txt
+        $ pipenv shell
+    or using virtualenv:
+        $ workon quizme
+1. If using virtualenv instead of pipenv, install the required packages in the virtualenv, e.g.,
+        pip install --requirement requirements.txt
 1. install and run postgresql (if using postgresql); e.g., on OSX,
     brew install postgresql (or "brew update")
     ("brew info postgresql" to see how to start/stop)
