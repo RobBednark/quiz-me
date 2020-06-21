@@ -18,7 +18,7 @@ DATABASES = {
         # 'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         # 'NAME': 'mydb.db',                      # Or path to database file if using sqlite3.
-        'NAME': 'quizme_master',                      # Or path to database file if using sqlite3.
+        'NAME': os.environ.get('DB_QUIZME', 'quizme_default_db'),
         # The following settings are not used with sqlite3:
         'USER': 'quizme',
         'PASSWORD': '',

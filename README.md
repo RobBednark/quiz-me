@@ -30,10 +30,10 @@
         psql --user=quizme quizme
 1. copy database
    --or--
-   ./manage.py syncdb
-   ./manage.py migrate
+   DB_QUIZME=my_db_name ./manage.py syncdb
+   DB_QUIZME=my_db_name ./manage.py migrate
 1. create a superuser
-	./manage.py createsuperuser --email my_user@my_domain.com
+DB_QUIZME=my_db_name ./manage.py createsuperuser --email my_user@my_domain.com
 
 ## How to run tests
 
@@ -68,8 +68,8 @@ In order to get docker running the following commands need to be run from this p
 
 ```
 $ docker-compose up
-$ docker-compose run web python manage.py syncdb
-$ docker-compose run web python manage.py migrate
+$ docker-compose run web DB_QUIZME=my_db_name python manage.py syncdb
+$ docker-compose run web DB_QUIZME=my_db_name python manage.py migrate
 ```
 
 Django, Docker, and Pdb don't play well together. In order to set a stack trace inside some app code run docker-compose like so:
@@ -263,7 +263,7 @@ utcnow() is naive.
 ```
 1. run the migration:
 ```
-./manage.py migrate myapp
+DB_QUIZME=my_db_name ./manage.py migrate myapp
 ```
 
 ### How to backup Postgres database and restore
