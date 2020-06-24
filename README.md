@@ -311,6 +311,7 @@ To get webapp to connect to that db:
 ## TODO / Backlog / Features / Stories
 NOTE: all new backlog items should be added to https://trello.com/b/5WCzHwdo/quizme
 
+* 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 6/24/20 FEATURE: add *time_since_last_seen* field to schedule, e.g., the amount of time (secs, and maybe human-readable, and maybe previous date seen) between this response and the last response
 * 6/24/20 FEATURE: add option to sort questions by number of times answered
 * 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
