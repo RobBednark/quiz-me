@@ -311,6 +311,11 @@ To get webapp to connect to that db:
 ## TODO / Backlog / Features / Stories
 NOTE: all new backlog items should be added to https://trello.com/b/5WCzHwdo/quizme
 
+* 6/24/20 FEATURE: add option to sort questions by number of times answered
+* 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
+* 6/24/20 FEATURE: show questions ordered by importance
+* 6/24/20 FEATURE: add option to show unanswered questions first/last
+* 6/24/20 FEATURE: add favorite or "like" percentage value for responses; similar to importance, but more for enjoyment of the question; add option to show questions sorted by "like"
 * 9/14/16 STYLE: in list of tags, change the color of the tag if the tag is selected, to make it clear which are selected
 * 9/11/16 FEATURE: For the selected tags, show them one per line right under "Tags selected:", along with num_questions and time periods, as is shown in the next section with all the tags.  As a user, I want to see these tags at the top and not have to hunt for them.
 * 9/7/16 MODIFY: in the admin, modify it so that the width of the question/answer text isn't a single line and extremely wide
@@ -350,7 +355,7 @@ NOTE: all new backlog items should be added to https://trello.com/b/5WCzHwdo/qui
 * 12/31/14 Allow a quiz mode that consists of a set of questions, and the user can go back and change their answers as much as they want (e.g., as part of an interview)
 * 12/31/14 Make it possible to view questions that don't have any tags ("untagged")  #high
 * 12/31/14 Have a "review all" mode that goes through all questions for the selected tags, showing you number seen and number remaining.
-* 12/31/14 REFACTOR: change all datetime_* variables to either date_* or time_*
+* 12/31/14 REFACTOR: change all datetime_* variables to either date_* or time_\*
 * 12/31/14 Change all timezones to UTC
 * 12/30/14 Implement variations (a question can have variations -- other questions that are similar but modified in a different way; e.g., 2+3=? could be a variation of 2+2=?); this is helpful so that you don't get in the habit of seeing the question and remembering the answer without understanding it
 * 12/27/14 ask how well the question was answered (maybe percentage; excellent / good / bad)
