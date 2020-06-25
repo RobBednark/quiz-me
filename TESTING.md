@@ -36,6 +36,7 @@
 ## Test Log Template
 
 Date: 
+Change summary:
 OS:  
 firefox version: 
 postgresql version:  
