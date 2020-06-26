@@ -30,8 +30,10 @@ DB_NAME_TO_RESTORE_PLAIN=restore_quizme_plain
 DB_USER=quizme
 DIR_DUMPS=db_dumps
 date:=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
-FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.custom
-FILE_DUMP_PLAIN:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain
+FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.custom.all
+FILE_DUMP_PLAIN_ALL:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.all
+FILE_DUMP_PLAIN_DATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.data-only
+FILE_DUMP_PLAIN_SCHEMA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.schema-only
 FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.txt
 SYMLINK_LATEST_TEXT:=${DIR_DUMPS}/latest.dump.txt
 
@@ -50,7 +52,9 @@ dropdb:
 dumpdb: 
 	mkdir -p db_dumps
 	pg_dump --format=custom ${DB_NAME_TO_DUMP} > ${FILE_DUMP_CUSTOM}
-	pg_dump --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN}
+	pg_dump --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN_ALL}
+	pg_dump --data-only --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN_DATA}
+	pg_dump --schema-only --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN_SCHEMA}
 	DB_QUIZME=${DB_NAME_TO_DUMP} PYTHONIOENCODING=utf-8 python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
 	rm -f ${SYMLINK_LATEST_TEXT}
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
