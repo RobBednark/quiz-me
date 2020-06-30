@@ -100,7 +100,7 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ')ltnqpp5h)&r217dm)@4ia9bq)idd5+@jr19qz62!gh0sm@7-p'
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -111,7 +111,7 @@ MIDDLEWARE_CLASSES = (
 )
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
     # Django Debug Toolbar (make sure to put it first!)
-    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
+    MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE
 
 ROOT_URLCONF = 'quizme.urls'
 

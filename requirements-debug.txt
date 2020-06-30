@@ -1,8 +1,0 @@
-# requirements-debug.txt -- python packages useful for debugging and PEP8 compliance
-
-django-debug-toolbar==1.0  # handy Django info in browser useful for debugging
-                           # Note that 1.2.2 is newer, but it requires a newer
-                           # 1.7 version of Django
-
-# flake8 for pep8 style-checking
-flake8==2.5.0
