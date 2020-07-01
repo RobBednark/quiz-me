@@ -40,21 +40,34 @@ def _get_next_question(user):
     # with the oldest schedule.date_show_next
 
     datetime_now = datetime.now(tz=pytz.utc)
+
+    # user_tags -- UserTags the user has selected that they want to be quizzed on right now
     user_tags = models.UserTag.objects.filter(user=user, enabled=True).values_list('tag', flat=True)
+    # tags -- Tags the user has selected that they want to be quizzed on right now
     tags = models.Tag.objects.filter(id__in=user_tags)
     tag_names = tags.values_list('name', flat=True)
+    # question_tags -- QuestionTags matching the tags the user wants to be quizzed on
+    # (logical OR -- questions that match any (not all) of the tags)
     question_tags = models.QuestionTag.objects.filter(enabled=True, tag__in=tags)
+    # questions_tagged -- Questions matching the question_tags
     questions_tagged = models.Question.objects.filter(questiontag__in=question_tags)
+    # schedules -- all Schedules for the user for each question, newest first by datetime_added
+    # OuterRef('pk') refers to the question.pk for each question
     schedules = (models.Schedule.objects
                  .filter(user=user, question=OuterRef('pk'))
                  .order_by('-datetime_added'))
+    # questions_annotated - questions_tagged, annotated with .date_show_next
+    # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
+    # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
     questions = questions.filter(date_show_next__lte=datetime_now)  # will this get questions with no schedules?
     questions = questions.order_by('-schedule_datetime_added')
 
     # query #1
     if questions:
+        # Show questions whose schedule.date_show_next <= now
+        # assert: there is a question with schedule.date_show_next <= now
         question_to_show = questions[0]
     else:
         # assert: no question with schedule.date_show_next <= now
