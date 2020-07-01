@@ -70,7 +70,10 @@ def _get_next_question(user):
     option_limit_to_date_show_next_before_now = True   # this affects the nulls_first; this should be False if you want unanswered questions first
     option_order_by_when_answered = True  # used with option_limit_to_date_show_next_before_now=True to show questions I want to see again quickly ; oldest first; if False, then order by date_show_next, oldest first
     option_order_by_answered_count = False
+    debug_print = os.environ.get('QM_DEBUG_PRINT', False)
     debug_sql = os.environ.get('QM_DEBUG_SQL', False)
+
+    debug_print and print('')
 
     datetime_now = datetime.now(tz=pytz.utc)
 
@@ -103,9 +106,11 @@ def _get_next_question(user):
     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
     subquery_include_unanswered = None
     if option_include_unanswered_questions:
+        debug_print and print('looking for unanswered questions')
         subquery_include_unanswered = Q(date_show_next__isnull=True)
     subquery_by_date_show_next = None
     if option_limit_to_date_show_next_before_now:
+        debug_print and print('looking for questions scheduled before now')
         subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
 
     if subquery_include_unanswered and subquery_by_date_show_next:
@@ -126,37 +131,46 @@ def _get_next_question(user):
         order_by.append(F('date_show_next').asc(nulls_first=True))
     # For unanswered questions , order by the time the question was added, oldest first.
     order_by.append(F('datetime_added').asc())
+    debug_print and print('order_by = %s' % order_by)
     questions = questions.order_by(*order_by)
 
     # query #1
     if questions:
         # Show questions whose schedule.date_show_next <= now
         # assert: there is a question with schedule.date_show_next <= now
+        debug_print and print('first "if": questions.count() = [%s] questions scheduled before now' % questions.count())
         debug_sql and print(connection.queries[-1])
         question_to_show = questions[0]
     else:
         debug_sql and print(connection.queries[-1])
+        debug_print and print('No questions scheduled before now.  Look for unanswered questions.')
         # assert: no question with schedule.date_show_next <= now
         # Look for questions with no schedules, and show the one with the
         # oldest question.datetime_added
         questions = questions_tagged
         questions = questions.filter(schedule=None)
+        debug_print and print("order_by('question.datetime_added')")
         questions = questions.order_by('datetime_added')
 
         # query #2
         if questions:
+            debug_print and print('unanswered questions found, count = [%s]' % questions.count())
             debug_sql and print(connection.queries[-1])
             question_to_show = questions[0]
         else:
+            debug_print and print('No unanswered questions found, so look for schedules in the future')
             debug_sql and print(connection.queries[-1])
             # assert: no question without a schedule
             # Return the question with the oldest schedule.date_show_next
             # query #3
             questions = questions_annotated
+            debug_print and print('order_by(question.date_show_next)')
             questions = questions.order_by('date_show_next')
             if questions:
+                debug_print and print('future scheduled questions found, count=[%s]' % questions.count())
                 question_to_show = questions[0]
             else:
+                debug_print and print('No answers whatsoever')
                 question_to_show = None
 
     # query #4
@@ -165,6 +179,8 @@ def _get_next_question(user):
         question=question_to_show
     ).count()
 
+    debug_print and print('returning question.id = [%s]' % question_to_show.id)
+    debug_print and print('')
     return NextQuestion(
         question=question_to_show,
         user_tag_names=sorted([tag for tag in tag_names]),  # query #5
