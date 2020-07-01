@@ -4,11 +4,11 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
-from django.db.models import Count, OuterRef, Subquery
+from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 import pytz
 
@@ -39,6 +39,37 @@ def _get_next_question(user):
     # If there are no questions without schedules, then return the question
     # with the oldest schedule.date_show_next
 
+    # Types of questions:
+    #   1. unanswered questions
+    #   2. questions scheduled before now that were just recently answered (e.g., today); want the option to see them as soon as possible to learn them
+    #   3. questions scheduled before now that were not recently answered (e.g., before today)
+    #   4. questions scheduled after now
+
+    # Desired questioning scenarios:
+    # 1) Order by answered_count
+    #    option_include_unanswered_questions = True
+    #    option_limit_to_date_show_next_before_now = ??
+    #    option_order_by_when_answered = False
+    #    option_order_by_answered_count = True
+    # 2) Order by date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again won't necessarily be seen quickly)
+    #    Reinforce older questions.
+    #    option_include_unanswered_questions = True
+    #    option_limit_to_date_show_next_before_now = False
+    #    option_order_by_when_answered = False
+    #    option_order_by_answered_count = False
+    # 3) Order by when answered (schedule_datetime_added), show questions before now that were just answered first, show unanswered questions last
+    #    Reinforce recently-answered questions.
+    #    option_include_unanswered_questions = False
+    #    option_limit_to_date_show_next_before_now = True
+    #    option_order_by_when_answered = True
+    #    option_order_by_answered_count = False
+
+    option_include_unanswered_questions = True  # this will show unanswered questions (nulls) first, even before ones recently answered (option_order_by_when_answered)
+    option_limit_to_date_show_next_before_now = True   # this affects the nulls_first; this should be False if you want unanswered questions first
+    option_order_by_when_answered = True  # used with option_limit_to_date_show_next_before_now=True to show questions I want to see again quickly ; oldest first; if False, then order by date_show_next, oldest first
+    option_order_by_answered_count = False
+    option_print_queries = True
+
     datetime_now = datetime.now(tz=pytz.utc)
 
     # user_tags -- UserTags the user has selected that they want to be quizzed on right now
@@ -59,10 +90,41 @@ def _get_next_question(user):
     # questions_annotated - questions_tagged, annotated with .date_show_next
     # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
+    # add num_schedules field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
+    questions_annotated = questions_annotated.annotate(num_schedules=Subquery(
+        models.Schedule.objects
+            .filter(question=OuterRef('pk'))
+            .values('question')
+            .annotate(count=Count('pk'))
+            .values('count')))
     # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
-    questions = questions.filter(date_show_next__lte=datetime_now)  # will this get questions with no schedules?
-    questions = questions.order_by('-schedule_datetime_added')
+    subquery_include_unanswered = None
+    if option_include_unanswered_questions:
+        subquery_include_unanswered = Q(date_show_next__isnull=True)
+    subquery_by_date_show_next = None
+    if option_limit_to_date_show_next_before_now:
+        subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
+
+    if subquery_include_unanswered and subquery_by_date_show_next:
+        questions = questions.filter(subquery_include_unanswered | subquery_by_date_show_next)
+    elif subquery_include_unanswered:
+        questions = questions.filter(subquery_include_unanswered)
+    elif subquery_by_date_show_next:
+        questions = questions.filter(subquery_by_date_show_next)
+    order_by = []
+    if option_order_by_answered_count:
+        order_by.append(F('num_schedules').asc(nulls_first=True))
+
+    if option_order_by_when_answered:
+        # Order by the time when the user last answered the question
+        order_by.append(F('schedule_datetime_added').desc(nulls_first=False))
+    else:
+        # Order by when the question should be shown again
+        order_by.append(F('date_show_next').asc(nulls_first=True))
+    # For unanswered questions , order by the time the question was added, oldest first.
+    order_by.append(F('datetime_added').asc())
+    questions = questions.order_by(*order_by)
 
     # query #1
     if questions:
