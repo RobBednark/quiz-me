@@ -1,9 +1,11 @@
 from collections import defaultdict, namedtuple
 from datetime import datetime
+import os
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
 from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
@@ -68,7 +70,7 @@ def _get_next_question(user):
     option_limit_to_date_show_next_before_now = True   # this affects the nulls_first; this should be False if you want unanswered questions first
     option_order_by_when_answered = True  # used with option_limit_to_date_show_next_before_now=True to show questions I want to see again quickly ; oldest first; if False, then order by date_show_next, oldest first
     option_order_by_answered_count = False
-    option_print_queries = True
+    debug_sql = os.environ.get('QM_DEBUG_SQL', False)
 
     datetime_now = datetime.now(tz=pytz.utc)
 
@@ -130,8 +132,10 @@ def _get_next_question(user):
     if questions:
         # Show questions whose schedule.date_show_next <= now
         # assert: there is a question with schedule.date_show_next <= now
+        debug_sql and print(connection.queries[-1])
         question_to_show = questions[0]
     else:
+        debug_sql and print(connection.queries[-1])
         # assert: no question with schedule.date_show_next <= now
         # Look for questions with no schedules, and show the one with the
         # oldest question.datetime_added
@@ -141,8 +145,10 @@ def _get_next_question(user):
 
         # query #2
         if questions:
+            debug_sql and print(connection.queries[-1])
             question_to_show = questions[0]
         else:
+            debug_sql and print(connection.queries[-1])
             # assert: no question without a schedule
             # Return the question with the oldest schedule.date_show_next
             # query #3
