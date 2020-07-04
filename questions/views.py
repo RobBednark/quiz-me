@@ -66,10 +66,10 @@ def _get_next_question(user):
     #    option_order_by_when_answered = True
     #    option_order_by_answered_count = False
 
-    option_include_unanswered_questions = True  # this will show unanswered questions (nulls) first, even before ones recently answered (option_order_by_when_answered)
-    option_limit_to_date_show_next_before_now = True   # this affects the nulls_first; this should be False if you want unanswered questions first
-    option_order_by_when_answered = True  # used with option_limit_to_date_show_next_before_now=True to show questions I want to see again quickly ; oldest first; if False, then order by date_show_next, oldest first
-    option_order_by_answered_count = False
+    option_include_unanswered_questions = eval(os.environ.get('QM_INCLUDE_UNANSWERED', 'True'))                        # this will show unanswered questions (nulls) first, even before ones recently answered (option_order_by_when_answered)
+    option_limit_to_date_show_next_before_now = eval(os.environ.get('QM_LIMIT_TO_DATE_SHOW_NEXT_BEFORE_NOW', 'True'))  # this affects the nulls_first; this should be False if you want unanswered questions first
+    option_order_by_when_answered = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED', 'True'))                           # used with option_limit_to_date_show_next_before_now=True to show questions I want to see again quickly ; oldest first; if False, then order by date_show_next, oldest first
+    option_order_by_answered_count = eval(os.environ.get('QM_SORT_BY_ANSWERED_COUNT', 'False'))
     debug_print = os.environ.get('QM_DEBUG_PRINT', False)
     debug_sql = os.environ.get('QM_DEBUG_SQL', False)
 
