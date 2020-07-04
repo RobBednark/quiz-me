@@ -316,9 +316,10 @@ To get webapp to connect to that db:
             'NAME': 'restore_quizme_custom'
 ```
 
-## TODO / Backlog / Features / Stories
-NOTE: all new backlog items should be added to https://trello.com/b/5WCzHwdo/quizme
+## TODO / #Backlog / #Features / #Stories
+(NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7/4/20 FEATURE: make question and answer editable while quizzing
 * 7/4/20 FEATURE: optionally sort tags by date added, or just show the date added
 * 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 6/24/20 FEATURE: add *time_since_last_seen* field to schedule, e.g., the amount of time (secs, and maybe human-readable, and maybe previous date seen) between this response and the last response
