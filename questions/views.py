@@ -41,6 +41,11 @@ def _get_next_question(user):
     # If there are no questions without schedules, then return the question
     # with the oldest schedule.date_show_next
 
+    # Fields to sort on:
+    # 1. date_show_next (null=unseen)
+    # 2. when last answered (schedule_datetime_added)
+    # 3. answered count (num_schedules)
+
     # Types of questions:
     #   1. unanswered questions
     #   2. questions scheduled before now that were just recently answered (e.g., today); want the option to see them as soon as possible to learn them
