@@ -319,6 +319,8 @@ To get webapp to connect to that db:
 ## TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
+* 7/4/20 FEATURE: add db name to each web page
 * 7/4/20 FEATURE: make question and answer editable while quizzing
 * 7/4/20 FEATURE: optionally sort tags by date added, or just show the date added
 * 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
@@ -353,7 +355,6 @@ To get webapp to connect to that db:
 * 5/29/15 show list of selected tags on one line (instead of having to look through list of all tags) #high
 * 05/17/15 show the number of questions recently answered/scheduled (e.g., 0-10mins=[5]  10-30mins=[12] 30m-2h=[4]  0-2h=[21])  #high
 * 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time  #high
-* 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev]
 * 3/10/15 don't allow duplicate tags to be created
 * 3/10/15 show the question number on the answer page, so that it can be visually seen to manually edit the question in the admin
 * Export (export questions via csv / json / yaml / xml / python data structure / plain text).  Find a way to maintain referential integrity.
