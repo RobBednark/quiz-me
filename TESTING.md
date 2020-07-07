@@ -6,24 +6,24 @@
 *Schemas*
 
 - compare schemas between new db and production
-- load production data into a new db using pg_dump and pg_restore/psql  
-```
-    dropdb quizme_new && createdb quizme_new
-    DB_QUIZME=quizme_new python manage.py migrate
-    PGDATABASE=template1 psql --user=quizme --dbname=quizme_new --quiet --no-psqlrc < dump.quizme_production.2020.06.26_Fri_18.04.57.plain.data-only
-```
 - create copy of production db (quizme_restore_custom); apply migrations to it; test against it
+    - make DB_NAME_TO_DUMP=quizme_production dumpdb
+    - make  FILE_DUMP_CUSTOM=db_dumps/restore.custom  FILE_DUMP_PLAIN=db_dumps/restore.plain  loaddb
+    - python manage.py migrate
+    - DB_QUIZME=restore_quizme_custom python manage.py runserver
 
 
 *Databases to run tests against*
 
-- restored production db
+- production db (or restored production db)
 - new postgresql db
 - new sqlite db
 
-*Tests*
+*Automated Tests*
+- all automated tests pass with postgres (make test)
 
-- all automated tests pass (make test)
+*Manual Tests*
+
 
 - logout
 - login
@@ -67,14 +67,97 @@ postgresql version (select version()) |
 python version | 
 geckodriver version | 
 phantomjs version | 
-Pipfile lock used for manual tests | 
-Pipfile lock used for automated tests | 
 
 pip freeze:
 ```
 ```
 
 ## Test Log
+
+What | Value
+---- | -----
+Date | Mon 7.6.20
+Change summary | Change _get_next_question() algorithm
+OS |  macOS Mojave 10.14.6 (kernel 18.7.0)  
+firefox version | 77.0.1
+postgresql version (select version()) | 12.3
+python version | 3.7.7
+geckodriver version | 0.26.0
+phantomjs version | 2.1.1
+
+pip freeze:
+```
+Django==2.0.3
+django-markdown-deux==1.0.5
+django-pagedown==1.0.4
+markdown2==2.3.5
+psycopg2==2.7.4
+pudb==2019.2
+py2-py3-django-email-as-username==1.7.1
+Pygments==2.6.1
+python-dateutil==2.7.2
+pytz==2018.3
+selenium==3.141.0
+six==1.11.0
+splinter==0.8.0
+urllib3==1.25.9
+urwid==2.1.0
+```
+
+DONE *Run in dev environment*
+- DONE pipenv install --ignore-pipfile --dev
+
+DONE *Schemas*
+
+- SKIP compare schemas between new db and production
+- DONE create copy of production db (quizme_restore_custom); apply migrations to it; test against it
+    - DONE make DB_NAME_TO_DUMP=quizme_production dumpdb
+    - DONE make  FILE_DUMP_CUSTOM=db_dumps/restore.custom  FILE_DUMP_PLAIN=db_dumps/restore.plain  loaddb
+    - DONE python manage.py migrate
+    - DONE DB_QUIZME=restore_quizme_custom python manage.py runserver
+
+*Databases to run tests against*
+
+- production db (or restored production db)
+- SKIP new postgresql db
+    - skipped because production db testing is good enough; this PR is read-only changes
+- SKIP new sqlite db
+    - not working due to Django issue mentioned below in previous test run
+
+*Tests* (production db)
+
+- PASS logout
+- PASS login
+
+- PASS run quiz, answer question, submit a new schedule
+- PASS add a new question/answer
+- PASS run quiz and select a different tag to quiz on
+
+- PASS click the `Edit Question` link and edit a question
+    - PASS edit the text
+    - SKIP add a tag
+    - SKIP remove a tag
+- SKIP click the `Edit Answer` link and edit the answer
+
+- PASS admin: questions page
+- PASS admin: tags page
+- PASS admin: Change tag name
+- PASS admin: answers page
+
+- PASS make dumpdb (ensure no errors)
+- SKIP loaddb into a new db, then run all tests in this file against the new db
+    - Skipped because low risk of this regressing.
+- SKIP compare prod schema to new schema
+    - No new migrations in this PR.
+
+- PASS python manage.py dump
+- PASS python manage.py makemigrations
+- PASS python manage.py showmigrations
+- PASS python manage.py migrate
+- PASS python manage.py migrate again (confirm no migrations needed)
+- PASS python manage.py showmigrations
+
+--------------------------------------------------------------------------------
 
 What|Value
 ----|-----
