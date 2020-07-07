@@ -89,13 +89,20 @@ docker rm $(docker ps -a -q)
 
 ## Development Conventions
 
-* *merge commits* -- all branch merges must have a merge commit (to make it clear when the branch changed), as opposed to a rebase, where there's no record of the rebase in git history
-* *merge commit msg details* -- for fixes, the message must detail what the bug is that has been fixed (include error text, etc.); for new functionality, the message should describe the functionality; the following labels should be used to indicate what the commit does: (new, fix, refactor)
-* *manual testing for PR* -- each branch to be merged must have all manual tests run
-* *manual test log*  -- manual testing for each branch or commit must be logged in TESTING.md and include the python version and Pipenv.lock file used
-* *PEP8*  --code style must adhere to PEP8
-* *granular commits* -- all commits should be granular, e.g., a single fix, a single new feature, a refactor; a single commit should not contain both fixes and features
-* *view &ast;.md changes before merging* - if changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct
+* **merge commits**  
+  All branch merges must have a merge commit (to make it clear when the branch changed), as opposed to a rebase, where there's no record of the rebase in git history.
+* **merge commit message details**  
+  For fixes, the message must detail what the bug is that has been fixed (include error text, etc.).  
+  For new functionality, the message should describe the functionality; the following labels should be used to indicate what the commit does:  
+      CHANGE, COMMENT, FIX, NEW, REFACTOR
+* **manual testing for PR** -- each branch to be merged must have all manual tests run
+* **manual test log**  -- manual testing for each branch or commit must be logged in TESTING.md
+* **PEP8**  --code style must adhere to PEP8; PEP8 diversions are specified in tox.ini
+* **granular commits**  
+  All commits should be granular, e.g., a single (CHANGE, COMMENT, FIX, NEW, REFACTOR).  
+  e.g., a single commit should not contain both fixes and features.
+* **view &ast;.md changes before merging**   
+  If changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct
 
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
@@ -309,9 +316,13 @@ To get webapp to connect to that db:
             'NAME': 'restore_quizme_custom'
 ```
 
-## TODO / Backlog / Features / Stories
-NOTE: all new backlog items should be added to https://trello.com/b/5WCzHwdo/quizme
+## TODO / #Backlog / #Features / #Stories
+(NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
+* 7/4/20 FEATURE: add db name to each web page
+* 7/4/20 FEATURE: make question and answer editable while quizzing
+* 7/4/20 FEATURE: optionally sort tags by date added, or just show the date added
 * 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 6/24/20 FEATURE: add *time_since_last_seen* field to schedule, e.g., the amount of time (secs, and maybe human-readable, and maybe previous date seen) between this response and the last response
 * 6/24/20 FEATURE: add option to sort questions by number of times answered
@@ -344,7 +355,6 @@ NOTE: all new backlog items should be added to https://trello.com/b/5WCzHwdo/qui
 * 5/29/15 show list of selected tags on one line (instead of having to look through list of all tags) #high
 * 05/17/15 show the number of questions recently answered/scheduled (e.g., 0-10mins=[5]  10-30mins=[12] 30m-2h=[4]  0-2h=[21])  #high
 * 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time  #high
-* 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev]
 * 3/10/15 don't allow duplicate tags to be created
 * 3/10/15 show the question number on the answer page, so that it can be visually seen to manually edit the question in the admin
 * Export (export questions via csv / json / yaml / xml / python data structure / plain text).  Find a way to maintain referential integrity.

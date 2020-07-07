@@ -95,7 +95,7 @@ test_firefox:
 	SELENIUM_BROWSER=firefox   ./manage.py test
 
 test_nonbrowser:
-	./manage.py test questions.tests.NonBrowserTests
+	./manage.py test questions.tests.tests.NonBrowserTests
 
 test_phantomjs:
 	SELENIUM_BROWSER=phantomjs ./manage.py test
