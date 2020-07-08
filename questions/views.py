@@ -371,10 +371,10 @@ def question(request, id_question):
 
         try:
             last_schedule_added = (
-                models.Schedule.objects .filter(
+                models.Schedule.objects.filter(
                     user=request.user,
                     question=next_question.question
-                ).latest(field_name='datetime_added')
+                ).latest('datetime_added')
             )
         except ObjectDoesNotExist:
             last_schedule_added = None
