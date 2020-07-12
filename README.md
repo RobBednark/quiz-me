@@ -319,6 +319,8 @@ To get webapp to connect to that db:
 ## TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.12.20 order by questions with answers first (why? to practice one's being learned)
+* 7.12.20 order by interval secs (amount of time scheduled to be seen again) (why? to practice one's being learned)
 * 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
 * 7/4/20 FEATURE: add db name to each web page
 * 7/4/20 FEATURE: make question and answer editable while quizzing
