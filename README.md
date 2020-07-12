@@ -320,6 +320,7 @@ To get webapp to connect to that db:
 ## TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards)
 * 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases)
 * 7.12.20 FEATURE prefill interval with values from previous schedule (why? to save time when reviewing)
 * 7.12.20 FEATURE order by questions with answers first (why? to practice one's being learned)
