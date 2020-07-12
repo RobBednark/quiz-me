@@ -4,12 +4,19 @@ from questions.models import CHOICES_UNITS, Schedule
 
 from pagedown.widgets import PagedownWidget
 
+class PagedownWidgetAligned(PagedownWidget):
+    class Media:
+        css = {
+                # use css that keeps it from overlapping tags
+                'all': ('pagedown/custom.css',)
+              }
+
 
 class FormAttemptNew(forms.Form):
     attempt = forms.CharField(
         label="A",
         required=False,
-        widget=PagedownWidget()
+        widget=PagedownWidgetAligned()
     )
 
 
