@@ -317,7 +317,7 @@ To get webapp to connect to that db:
             'NAME': 'restore_quizme_custom'
 ```
 
-## TODO / #Backlog / #Features / #Stories
+## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
 * 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
@@ -326,7 +326,7 @@ To get webapp to connect to that db:
 * 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases)
 * 7.12.20 FEATURE prefill interval with values from previous schedule (why? to save time when reviewing)
 * 7.12.20 FEATURE order by questions with answers first (why? to practice one's being learned)
-* 7.12.20 FEATURE order by interval secs (amount of time scheduled to be seen again) (why? to practice one's being learned)
+* 7.12.20 FEATURE order by interval secs (amount of time scheduled to be seen again) (why? to practice what I am actively learning)
 * 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
 * 7/4/20 FEATURE: add db name to each web page
 * 7/4/20 FEATURE: make question and answer editable while quizzing
