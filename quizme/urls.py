@@ -1,15 +1,21 @@
 from django.conf.urls import include, url
+from django.contrib.auth import views as auth_views
+from django.urls import path
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 
-from emailusername.views import login, logout
+from emailusername.views import logout
+
 from questions.views import answer, question, question_next
 
 admin.autodiscover()
 
 urlpatterns = [
-    url(regex=r'^login$', view=login, name='login'),
+    path(
+        route='login/',
+        view=auth_views.LoginView.as_view(template_name='questions/login.html'),
+        name='login'),
     url(regex=r'^logout$', view=logout, name='logout'),
 
     url(regex=r'^$', view=question_next),
