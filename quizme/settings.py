@@ -13,17 +13,24 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+engine = 'django.db.backends.postgresql_psycopg2'
+if (os.environ.get('QM_ENGINE', None) == 'sqlite'):
+    engine = 'django.db.backends.sqlite3'
+
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        # 'NAME': 'mydb.db',                      # Or path to database file if using sqlite3.
+        'ENGINE': engine,
         'NAME': os.environ.get('DB_QUIZME', 'quizme_default_db'),
         # The following settings are not used with sqlite3:
         'USER': 'quizme',
         'PASSWORD': '',
         'HOST': 'localhost',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',           # Set to empty string for default.
+        'TEST': {
+            # If ENGINE is sqlite, and NAME is None, then in-memory sqlite
+            # db will be used, else a file-based sqlite db will be used.
+            'NAME': os.environ.get('QM_TEST_DB', None),
+        },
     }
 }
 
