@@ -271,16 +271,6 @@ utcnow() is naive.
 
 *See https://docs.djangoproject.com/en/1.7/topics/i18n/timezones/*
 
-### HOW TO add a South migration
-1. create the migration
-```
-./manage.py schemamigration myapp --auto
-```
-1. run the migration:
-```
-DB_QUIZME=my_db_name ./manage.py migrate myapp
-```
-
 ### How to backup Postgres database and restore
 Q: How to make a backup of the database?  
 A:   
@@ -456,27 +446,6 @@ To get webapp to connect to that db:
 * DONE - postgres backups (via Makefile)
 * DONE - User login
 * DONE - add tags via Django Admin
-
-* Ask a question, and then show the answer.
-** quiz view:
-*** form:
-**** if GET:
-***** ask the first question
-**** elif POST:
-***** tell server which question was just asked
-Format:
-1. Show user a question
-1. give user an input box to put their answer
-1. Submit (user submits their answer)
-1. save the user's answer, and show the correct answer, along with a Next button
-1. Next (user clicks Next to go to the next question)
-1. go to (1)
-* Example of one answer with multiple questions:
-    Q: 
-    A:
-* Example of one question with multiple answers:
-    Q: 
-    A:
 
 ### django-quiz
 * Name of quiz is passed in the url
