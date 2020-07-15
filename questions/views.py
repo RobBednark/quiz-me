@@ -184,7 +184,7 @@ def _get_next_question(user):
         question=question_to_show
     ).count()
 
-    debug_print and print('returning question.id = [%s]' % question_to_show.id)
+    debug_print and print('returning question.id = [%s]' % (question_to_show.id if question_to_show else None))
     debug_print and print('')
     return NextQuestion(
         question=question_to_show,
