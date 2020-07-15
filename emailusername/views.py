@@ -1,9 +1,9 @@
-from django.contrib.auth.views import (login as django_login,
+from django.contrib.auth.views import (LoginView,
                                        logout_then_login)
 
 
 def login(request):
-    response = django_login(request=request,
+    response = LoginView.as_view(
                             template_name="login.html",
                             extra_context=dict(next='/'),
                             )

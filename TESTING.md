@@ -1,30 +1,32 @@
-## Manual tests to run:
+### Automated Tests
+- all automated tests pass with postgres (make test)
+- all automated tests pass with sqlite (make test)
 
-*Run in dev environment*
-- pipenv install --ignore-pipfile --dev
+### Development Process
+- Review README *Development Conventions and Process* and confirm
 
-*Schemas*
+### Run in dev environment
+- `pipenv install --ignore-pipfile --dev`
 
-- compare schemas between new db and production
+### Schemas
+
 - create copy of production db (quizme_restore_custom); apply migrations to it; test against it
-    - make DB_NAME_TO_DUMP=quizme_production dumpdb
-    - make  FILE_DUMP_CUSTOM=db_dumps/restore.custom  FILE_DUMP_PLAIN=db_dumps/restore.plain  loaddb
-    - python manage.py migrate
-    - DB_QUIZME=restore_quizme_custom python manage.py runserver
+    - `make DB_NAME_TO_DUMP=quizme_production dumpdb`
+    - `make  FILE_DUMP_CUSTOM=db_dumps/restore.custom  FILE_DUMP_PLAIN=db_dumps/restore.plain  loaddb`
+    - `python manage.py migrate`
+    - `DB_QUIZME=restore_quizme_custom python manage.py runserver`
 
 
-*Databases to run tests against*
+### Databases to run tests against
 
 - production db (or restored production db)
 - new postgresql db
 - new sqlite db
 
-*Automated Tests*
-- all automated tests pass with postgres (make test)
-
-*Manual Tests*
+### Manual Tests
 
 
+- `DB_QUIZME=my_sqlite_db QM_ENGINE=sqlite DJANGO_SUPERUSER_USERNAME=rbednark DJANGO_SUPERUSER_EMAIL=my_user@my_domain.com DJANGO_SUPERUSER_PASSWORD=p ./manage.py createsuperuser --no-input`
 - logout
 - login
 
@@ -38,30 +40,44 @@
     - remove a tag
 - click the `Edit Answer` link and edit the answer
 
-- admin: questions page
-- admin: tags page
-- admin: Change tag name
-- admin: answers page
+- admin: Answers page
+- admin: Attempts page
+- admin: Questions page
+- admin: Schedules page
+- admin: Tags page
+- admin: Tags page: change tag name
 
-- make dumpdb (ensure no errors)
+- `make dumpdb` (ensure no errors)
 - loaddb into a new db, then run all tests in this file against the new db
 - compare prod schema to new schema
+    - for new db and production:
+        `make DB_NAME_TO_DUMP=... dumpdb `
+    - diff the schema-only files
 
-- python manage.py dump
-- python manage.py makemigrations
-- python manage.py showmigrations
-- python manage.py migrate
-- python manage.py migrate again (confirm no migrations needed)
-- python manage.py showmigrations
+- `python manage.py dump`
+- `python manage.py makemigrations`
+- `python manage.py showmigrations`
+- `python manage.py migrate`
+- `python manage.py migrate` again (confirm no migrations needed)
+- `python manage.py showmigrations`
+
+- `./manage.py dumpdata --all | jq > /tmp/dumpdata`
+- `./manage.py loaddata /tmp/dumpdata` (into a new postgres db)
+    - `runserver` and poke around
+- `./manage.py loaddata /tmp/dumpdata` (into a new sqlite db)
+    - `runserver` and poke around
 
 
 ## Test Log Template
+
+----
 
 What | Value
 ---- | -----
 Date | 
 Change summary | 
 OS | 
+chrome version | 
 firefox version | 
 postgresql version (select version()) | 
 python version | 
@@ -73,6 +89,185 @@ pip freeze:
 ```
 
 ## Test Log
+
+----
+
+What | Value
+---- | -----
+Date | 14 Jul 2020 Tue
+Change summary | Upgrade all packages to latest, including Django 2 to 3
+OS |  macOS Mojave 10.14.6 (kernel 18.7.0)  
+chrome version | 83.0.4103.116
+firefox version | 78.0.2
+postgresql version (select version()) | 12.3
+python version | 3.7.7
+geckodriver version | 0.26.0
+phantomjs version | 2.1.1
+
+pip freeze:
+```
+asgiref==3.2.10
+Django==3.0.8
+django-markdown-deux==1.0.5
+django-pagedown==2.1.2
+markdown2==2.3.9
+Pillow==7.2.0
+psycopg2==2.8.5
+py2-py3-django-email-as-username==1.7.1
+python-dateutil==2.8.1
+pytz==2020.1
+selenium==3.141.0
+six==1.15.0
+splinter==0.8.0
+sqlparse==0.3.1
+urllib3==1.25.9
+```
+
+*Automated Tests*
+- PASS all automated tests pass with postgres (make test)
+- PASS all automated tests pass with sqlite (make test)
+
+## Manual tests to run:
+
+*Run in dev environment*
+- DONE pipenv install --ignore-pipfile --dev
+
+*Schemas*
+
+- PASS create copy of production db (quizme_restore_custom); apply migrations to it; test against it
+    - PASS make DB_NAME_TO_DUMP=quizme_production dumpdb
+    - PASS make  FILE_DUMP_CUSTOM=db_dumps/restore.custom  FILE_DUMP_PLAIN=db_dumps/restore.plain  loaddb
+    - PASS python manage.py migrate
+    - PASS DB_QUIZME=restore_quizme_custom python manage.py runserver
+
+
+*Databases to run tests against*
+
+- PASS production db (or restored production db)
+- PASS new postgresql db
+- PASS new sqlite db
+
+*Manual Tests* (production db)
+- SKIP DB_QUIZME=my_sqlite_db QM_ENGINE=sqlite DJANGO_SUPERUSER_USERNAME=rbednark DJANGO_SUPERUSER_EMAIL=my_user@my_domain.com DJANGO_SUPERUSER_PASSWORD=p ./manage.py createsuperuser --no-input
+- PASS logout
+- PASS login
+
+- PASS run quiz, answer question, submit a new schedule
+- PASS add a new question/answer
+- PASS run quiz and select a different tag to quiz on
+
+- PASS click the `Edit Question` link and edit a question
+    - PASS edit the text
+    - SKIP add a tag
+    - SKIP remove a tag
+- PASS click the `Edit Answer` link and edit the answer
+
+- PASS admin: Answers page
+- admin: Attempts page
+- PASS admin: Questions page
+- admin: Schedules page
+- PASS admin: Tags page
+- PASS admin: Tags page: change tag name
+
+- PASS make dumpdb (ensure no errors)
+- SKIP loaddb into a new db, then run all tests in this file against the new db
+- DONE compare prod schema to new schema
+    - for new db and production:
+        PASS make DB_NAME_TO_DUMP=... dumpdb 
+    - PASS diff the schema-only files; differences:
+        - field ordering (e.g., "user_id integer")
+        - CREATE SEQUENCE -- add "as integer"
+        - constraints have different names
+        - indexes have different names (unique name)
+        - This only appears in the new schema:
+            - ADD CONSTRAINT questions_usertag_user_id_7a2950cb_fk_emailusername_user_id FOREIGN KEY (user_id) REFERENCES public.emailusername_user(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+- PASS python manage.py dump
+- PASS python manage.py makemigrations
+- PASS python manage.py showmigrations
+- PASS python manage.py migrate
+- PASS python manage.py migrate again (confirm no migrations needed)
+- PASS python manage.py showmigrations
+
+*Manual Tests* (new postgresql db) 
+- PASS DB_QUIZME=quizme_new QM_ENGINE=postgres DJANGO_SUPERUSER_USERNAME=rbednark DJANGO_SUPERUSER_EMAIL=my_user@my_domain.com DJANGO_SUPERUSER_PASSWORD=p ./manage.py createsuperuser --no-input
+- PASS logout
+- PASS login
+
+- PASS run quiz, answer question, submit a new schedule
+- PASS add a new question/answer
+- PASS run quiz and select a different tag to quiz on
+
+- PASS click the `Edit Question` link and edit a question
+    - PASS edit the text
+    - PASS add a tag
+    - PASS remove a tag
+- PASS click the `Edit Answer` link and edit the answer
+
+- PASS admin: Answers page
+- PASS admin: Attempts page
+- PASS admin: Questions page
+- PASS admin: Schedules page
+- PASS admin: Tags page
+- SKIP admin: Tags page: change tag name
+
+
+- PASS make dumpdb (ensure no errors)
+- SKIP loaddb into a new db, then run all tests in this file against the new db
+- DONE compare prod schema to new schema (see above)
+
+- PASS python manage.py dump
+- PASS python manage.py makemigrations
+- PASS python manage.py showmigrations
+- PASS python manage.py migrate
+- PASS python manage.py migrate again (confirm no migrations needed)
+- PASS python manage.py showmigrations
+
+*Manual Tests* (new sqlite db) 
+
+- PASS DB_QUIZME=my_sqlite_db QM_ENGINE=sqlite DJANGO_SUPERUSER_USERNAME=rbednark DJANGO_SUPERUSER_EMAIL=my_user@my_domain.com DJANGO_SUPERUSER_PASSWORD=p ./manage.py createsuperuser --no-input
+- PASS logout
+- PASS login
+
+- PASS run quiz, answer question, submit a new schedule
+- PASS add a new question/answer
+- PASS run quiz and select a different tag to quiz on
+
+- PASS click the `Edit Question` link and edit a question
+    - PASS edit the text
+    - PASS add a tag
+    - PASS remove a tag
+- PASS click the `Edit Answer` link and edit the answer
+
+- PASS admin: Answers page
+- PASS admin: Attempts page
+- PASS admin: Questions page
+- PASS admin: Schedules page
+- PASS admin: Tags page
+- PASS admin: Tags page: change tag name
+
+
+- SKIP make dumpdb (ensure no errors)
+- SKIP loaddb into a new db, then run all tests in this file against the new db
+- SKIP compare prod schema to new schema
+
+- PASS python manage.py dump
+- PASS python manage.py makemigrations
+- PASS python manage.py showmigrations
+- PASS python manage.py migrate
+- PASS python manage.py migrate again (confirm no migrations needed)
+- PASS python manage.py showmigrations
+
+- PASS ./manage.py dumpdata --all | jq > /tmp/dumpdata
+- PASS ./manage.py loaddata /tmp/dumpdata (into a new postgres db)
+    - PASS runserver and poke around
+- PASS ./manage.py loaddata /tmp/dumpdata (into a new sqlite db)
+    - PASS runserver and poke around
+
+
+
+----
 
 What | Value
 ---- | -----

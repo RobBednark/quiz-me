@@ -87,7 +87,7 @@ I'm far from an expert on Docker in particular or containers in general. If some
 docker rm $(docker ps -a -q)
 ```
 
-## Development Conventions
+## Development Conventions and Process
 
 * **merge commits**  
   All branch merges must have a merge commit (to make it clear when the branch changed), as opposed to a rebase, where there's no record of the rebase in git history.
@@ -257,27 +257,19 @@ POST  |/question/|
 * question has no schedule
 * question has schedule with no interval
 
-### Time zones
-USE_TZ = True in the settings.py file, so time zone support is enabled.  Times are stored as UTC.
+### Time Zones
+`USE_TZ = True` in the settings.py file, so time zone support is enabled.  Times are stored as UTC.  
 To get the current time in UTC, use:
+
     from django.utils import timezone
     now = timezone.now()
 Note that:
+
     >>> naive = datetime.datetime.utcnow()
     >>> aware = timezone.now()
 utcnow() is naive.
 
 *See https://docs.djangoproject.com/en/1.7/topics/i18n/timezones/*
-
-### HOW TO add a South migration
-1. create the migration
-```
-./manage.py schemamigration myapp --auto
-```
-1. run the migration:
-```
-DB_QUIZME=my_db_name ./manage.py migrate myapp
-```
 
 ### How to backup Postgres database and restore
 Q: How to make a backup of the database?  
@@ -320,6 +312,9 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
+* 7.14.20 REFACTOR See if emailusername can be eliminated
+* 7.14.20 UPGRADE See if I can easily move my quizme_product db data into a fresh db
 * 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
 * 7.12.20 BUG If there is no valid session, when going to /login/?next=/question/ , it gives a 404 error instead of going to the login screen (this seems to happen when switching between databases, I don't know why).  WORKAROUND: navigate to the /admin page, it will prompt for login, login, and then you can access the question page
 * 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards)
@@ -409,27 +404,25 @@ To get webapp to connect to that db:
 * Import (import questions via csv / json / yaml / python data structure)
 * Questions (add questions from the web page instead of the admin)
 * Tags (be able to tag questions, and then select tags from which to select questions)
-** DONE - select a single tag to use for a quiz
-** DONE - select multiple tags to use for a quiz
-*** consider allowing a hierarchy of tags, e.g.,
-**** Programming
-***** Languages
-****** Python
-****** Perl
-****** C
-***** Methodologies
-****** Agile
-*** Maybe allowing multiple parent/child relationships.
+* consider allowing a hierarchy of tags, e.g.,
+    - `** Programming`
+    - `**** Languages`
+    - `****** Python`
+    - `****** Perl`
+    - `****** C`
+    - `** Methodologies`
+    - `**** Agile`
+    - (maybe allow multiple parent/child relationships)
 * NewUser registration
-** page to create account
-** email address verification/registration
+    * page to create account
+    * email address verification/registration
 * tests
 * Footer: 
-** show tags
-** show how many times seen
-** show how many times answered
-** show last time seen
-** show total number of questions
+    * show tags
+    * show how many times seen
+    * show how many times answered
+    * show last time seen
+    * show total number of questions
 * Review mode: just show questions and answers
 * email questions
 
@@ -441,9 +434,9 @@ To get webapp to connect to that db:
 * private questions/answers
 * add Google Analytics
 
-Front-end:
-* ability to add questions/answers
-* ability to modify questions/answers on-the-fly
+* Front-end:
+    * ability to add questions/answers
+    * ability to modify questions/answers on-the-fly
 
 * versions of questions/answers
 
@@ -454,41 +447,20 @@ Front-end:
 * DONE - User login
 * DONE - add tags via Django Admin
 
-* Ask a question, and then show the answer.
-** quiz view:
-*** form:
-**** if GET:
-***** ask the first question
-**** elif POST:
-***** tell server which question was just asked
-Format:
-1. Show user a question
-1. give user an input box to put their answer
-1. Submit (user submits their answer)
-1. save the user's answer, and show the correct answer, along with a Next button
-1. Next (user clicks Next to go to the next question)
-1. go to (1)
-* Example of one answer with multiple questions:
-    Q: 
-    A:
-* Example of one question with multiple answers:
-    Q: 
-    A:
-
 ### django-quiz
 * Name of quiz is passed in the url
 * views:
-** question, answer, quiz, previous are all loaded in the context
+    * question, answer, quiz, previous are all loaded in the context
 * models:
-** Category
-** Quiz
-** Progress
-** Sitting
-*** user
-*** question_list (TextField; csv of questions)
-*** incorrect_question (TextField; csv of incorrect questions)
-** Question
-** Answer
+    * Category
+    * Quiz
+    * Progress
+    * Sitting
+        * user
+        * question_list (TextField; csv of questions)
+        * incorrect_question (TextField; csv of incorrect questions)
+    * Question
+    * Answer
 
 ### User Stories / Features
 * users can create accounts for themselves
@@ -518,6 +490,7 @@ Format:
 * movie clips / YouTube videos
 
 ### Django Apps
+```
 Word meaning "piece of information":
 chunk / game / info / piece of info / library / article / meme / agents / chapter / quiz / 
 tidbit / interesting thing / atom / main / unit / info unit / knowledge / 
@@ -539,6 +512,7 @@ building block
 monad
 constituent
 entities
+```
 
 ### MVP
 Questions:
@@ -551,12 +525,12 @@ Attempts:
 * user
 
 ### Entities
-answers
-hints
-questions
-quizzes (collection of questions)
-tags
-users
+- answers
+- hints
+- questions
+- quizzes (collection of questions)
+- tags
+- users
 
 ### Screens:
 * New user (use the admin initially)
@@ -589,29 +563,29 @@ vim README
 ```
 
 ## Similar apps:
-Anki - open source; written in Python; https://github.com/dae/anki
-Brainscape (iOS)
-Eidetic (iOS)
-Flashcards (iOS)
-Flashcardlet (iOS)
-Fresh Memory - open source; Windows and Linux; last updated ; http://fresh-memory.com/ ; http://sourceforge.net/projects/freshmemory/; documentation last updated 10/6/14; app last updated 10/20/12; Mykhaylo Kopytonenko (mishakop at gmail com); c++
-Mnemosyne
-SuperMemo
-Cram
-Cram4Finals
-Cramberry 
-FlashBuddy
-Flashcard Elite
-Flashcards Deluxe
-Fresh Memory
-Mnemosyne
-MyStudyPal
-ProVoc
-Quizlet
-Repeat and Memorize
-Study Stack
-SuperMemo
-http://www.flashcardapps.info/filter/
+- Anki - open source; written in Python; https://github.com/dae/anki
+- Brainscape (iOS)
+- Eidetic (iOS)
+- Flashcards (iOS)
+- Flashcardlet (iOS)
+- Fresh Memory - open source; Windows and Linux; last updated ; http://fresh-memory.com/ ; http://sourceforge.net/projects/freshmemory/; documentation last updated 10/6/14; app last updated 10/20/12; Mykhaylo Kopytonenko (mishakop at gmail com); c++
+- Mnemosyne
+- SuperMemo
+- Cram
+- Cram4Finals
+- Cramberry 
+- FlashBuddy
+- Flashcard Elite
+- Flashcards Deluxe
+- Fresh Memory
+- Mnemosyne
+- MyStudyPal
+- ProVoc
+- Quizlet
+- Repeat and Memorize
+- Study Stack
+- SuperMemo
+- http://www.flashcardapps.info/filter/
 
 ## Product/App Names / Naming:
 ### Name Ideas:
@@ -698,6 +672,7 @@ Memory Butler
 Memory Curator
 
 ### Keywords:
+```
 aid
 ask
 assistant
@@ -742,14 +717,15 @@ study
 test
 tool
 workout
+```
 
 ### Themes / analogies:
-assistant
-curation / collecting
-exercise
-memory
-quiz
-smart
+- assistant
+- curation / collecting
+- exercise
+- memory
+- quiz
+- smart
 
 ### Naming ideas / considerations:
 * use a two-part name (e.g., Evernote, Wunderlist, Tweetbot)
