@@ -400,7 +400,13 @@ def question(request, id_question):
         # Show a NEXT button to do a GET and get the next question
         form_attempt = FormAttemptNew(request.POST)
         if form_attempt.is_valid():
-            question = models.Question.objects.get(id=id_question)
+            try:
+                question = models.Question.objects.get(id=id_question)
+            except models.Question.DoesNotExist:
+                # There was no question available.  Perhaps the user
+                # selected different tags, so try again.
+                return HttpResponseRedirect(reverse('question_next'))
+                
             attempt = models.Attempt(
                 attempt=form_attempt.cleaned_data['attempt'],
                 question=question,
