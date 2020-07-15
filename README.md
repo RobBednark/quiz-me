@@ -313,22 +313,23 @@ To get webapp to connect to that db:
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
 * 7.15.20 ADD django-toolbar back in (why? show query counts and SQL commands)
+
+* 7/4/20 FEATURE: add db name to each web page
+* 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases) (start with 0.10.0?)
+* 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 7.15.20 ADD example fixture data (a user, some questions, answers, tags)
-* 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
-* 7.14.20 REFACTOR See if emailusername can be eliminated
 * 7.14.20 UPGRADE See if I can easily move my quizme_product db data into a fresh db
-* 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
-* 7.12.20 BUG If there is no valid session, when going to /login/?next=/question/ , it gives a 404 error instead of going to the login screen (this seems to happen when switching between databases, I don't know why).  WORKAROUND: navigate to the /admin page, it will prompt for login, login, and then you can access the question page
+* 7.14.20 REFACTOR See if emailusername can be eliminated
+* 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
 * 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards)
-* 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases)
+* 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
+* 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
+* 7.12.20 BUG If there is no valid session, when going to /login/?next=/question/ , it gives a 404 error instead of going to the login screen (this seems to happen when switching between databases, I don't know why).  WORKAROUND: navigate to the /admin page, it will prompt for login, login, and then you can access the question page
 * 7.12.20 FEATURE prefill interval with values from previous schedule (why? to save time when reviewing)
 * 7.12.20 FEATURE order by questions with answers first (why? to practice one's being learned)
 * 7.12.20 FEATURE order by interval secs (amount of time scheduled to be seen again) (why? to practice what I am actively learning)
-* 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
-* 7/4/20 FEATURE: add db name to each web page
 * 7/4/20 FEATURE: make question and answer editable while quizzing
 * 7/4/20 FEATURE: optionally sort tags by date added, or just show the date added
-* 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 6/24/20 FEATURE: add *time_since_last_seen* field to schedule, e.g., the amount of time (secs, and maybe human-readable, and maybe previous date seen) between this response and the last response
 * 6/24/20 FEATURE: add option to sort questions by number of times answered
 * 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
