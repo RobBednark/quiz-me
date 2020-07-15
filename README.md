@@ -257,12 +257,14 @@ POST  |/question/|
 * question has no schedule
 * question has schedule with no interval
 
-### Time zones
-USE_TZ = True in the settings.py file, so time zone support is enabled.  Times are stored as UTC.
+### Time Zones
+`USE_TZ = True` in the settings.py file, so time zone support is enabled.  Times are stored as UTC.  
 To get the current time in UTC, use:
+
     from django.utils import timezone
     now = timezone.now()
 Note that:
+
     >>> naive = datetime.datetime.utcnow()
     >>> aware = timezone.now()
 utcnow() is naive.
@@ -412,27 +414,25 @@ To get webapp to connect to that db:
 * Import (import questions via csv / json / yaml / python data structure)
 * Questions (add questions from the web page instead of the admin)
 * Tags (be able to tag questions, and then select tags from which to select questions)
-** DONE - select a single tag to use for a quiz
-** DONE - select multiple tags to use for a quiz
-*** consider allowing a hierarchy of tags, e.g.,
-**** Programming
-***** Languages
-****** Python
-****** Perl
-****** C
-***** Methodologies
-****** Agile
-*** Maybe allowing multiple parent/child relationships.
+* consider allowing a hierarchy of tags, e.g.,
+    - `** Programming`
+    - `**** Languages`
+    - `****** Python`
+    - `****** Perl`
+    - `****** C`
+    - `** Methodologies`
+    - `**** Agile`
+    - (maybe allow multiple parent/child relationships)
 * NewUser registration
-** page to create account
-** email address verification/registration
+    * page to create account
+    * email address verification/registration
 * tests
 * Footer: 
-** show tags
-** show how many times seen
-** show how many times answered
-** show last time seen
-** show total number of questions
+    * show tags
+    * show how many times seen
+    * show how many times answered
+    * show last time seen
+    * show total number of questions
 * Review mode: just show questions and answers
 * email questions
 
@@ -444,9 +444,9 @@ To get webapp to connect to that db:
 * private questions/answers
 * add Google Analytics
 
-Front-end:
-* ability to add questions/answers
-* ability to modify questions/answers on-the-fly
+* Front-end:
+    * ability to add questions/answers
+    * ability to modify questions/answers on-the-fly
 
 * versions of questions/answers
 
@@ -481,17 +481,17 @@ Format:
 ### django-quiz
 * Name of quiz is passed in the url
 * views:
-** question, answer, quiz, previous are all loaded in the context
+    * question, answer, quiz, previous are all loaded in the context
 * models:
-** Category
-** Quiz
-** Progress
-** Sitting
-*** user
-*** question_list (TextField; csv of questions)
-*** incorrect_question (TextField; csv of incorrect questions)
-** Question
-** Answer
+    * Category
+    * Quiz
+    * Progress
+    * Sitting
+        * user
+        * question_list (TextField; csv of questions)
+        * incorrect_question (TextField; csv of incorrect questions)
+    * Question
+    * Answer
 
 ### User Stories / Features
 * users can create accounts for themselves
@@ -521,6 +521,7 @@ Format:
 * movie clips / YouTube videos
 
 ### Django Apps
+```
 Word meaning "piece of information":
 chunk / game / info / piece of info / library / article / meme / agents / chapter / quiz / 
 tidbit / interesting thing / atom / main / unit / info unit / knowledge / 
@@ -542,6 +543,7 @@ building block
 monad
 constituent
 entities
+```
 
 ### MVP
 Questions:
@@ -554,12 +556,12 @@ Attempts:
 * user
 
 ### Entities
-answers
-hints
-questions
-quizzes (collection of questions)
-tags
-users
+- answers
+- hints
+- questions
+- quizzes (collection of questions)
+- tags
+- users
 
 ### Screens:
 * New user (use the admin initially)
@@ -592,29 +594,29 @@ vim README
 ```
 
 ## Similar apps:
-Anki - open source; written in Python; https://github.com/dae/anki
-Brainscape (iOS)
-Eidetic (iOS)
-Flashcards (iOS)
-Flashcardlet (iOS)
-Fresh Memory - open source; Windows and Linux; last updated ; http://fresh-memory.com/ ; http://sourceforge.net/projects/freshmemory/; documentation last updated 10/6/14; app last updated 10/20/12; Mykhaylo Kopytonenko (mishakop at gmail com); c++
-Mnemosyne
-SuperMemo
-Cram
-Cram4Finals
-Cramberry 
-FlashBuddy
-Flashcard Elite
-Flashcards Deluxe
-Fresh Memory
-Mnemosyne
-MyStudyPal
-ProVoc
-Quizlet
-Repeat and Memorize
-Study Stack
-SuperMemo
-http://www.flashcardapps.info/filter/
+- Anki - open source; written in Python; https://github.com/dae/anki
+- Brainscape (iOS)
+- Eidetic (iOS)
+- Flashcards (iOS)
+- Flashcardlet (iOS)
+- Fresh Memory - open source; Windows and Linux; last updated ; http://fresh-memory.com/ ; http://sourceforge.net/projects/freshmemory/; documentation last updated 10/6/14; app last updated 10/20/12; Mykhaylo Kopytonenko (mishakop at gmail com); c++
+- Mnemosyne
+- SuperMemo
+- Cram
+- Cram4Finals
+- Cramberry 
+- FlashBuddy
+- Flashcard Elite
+- Flashcards Deluxe
+- Fresh Memory
+- Mnemosyne
+- MyStudyPal
+- ProVoc
+- Quizlet
+- Repeat and Memorize
+- Study Stack
+- SuperMemo
+- http://www.flashcardapps.info/filter/
 
 ## Product/App Names / Naming:
 ### Name Ideas:
@@ -701,6 +703,7 @@ Memory Butler
 Memory Curator
 
 ### Keywords:
+```
 aid
 ask
 assistant
@@ -745,14 +748,15 @@ study
 test
 tool
 workout
+```
 
 ### Themes / analogies:
-assistant
-curation / collecting
-exercise
-memory
-quiz
-smart
+- assistant
+- curation / collecting
+- exercise
+- memory
+- quiz
+- smart
 
 ### Naming ideas / considerations:
 * use a two-part name (e.g., Evernote, Wunderlist, Tweetbot)
