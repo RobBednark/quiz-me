@@ -331,10 +331,8 @@ To get webapp to connect to that db:
 * 7/4/20 FEATURE: make question and answer editable while quizzing
 * 7/4/20 FEATURE: optionally sort tags by date added, or just show the date added
 * 6/24/20 FEATURE: add *time_since_last_seen* field to schedule, e.g., the amount of time (secs, and maybe human-readable, and maybe previous date seen) between this response and the last response
-* 6/24/20 FEATURE: add option to sort questions by number of times answered
 * 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
 * 6/24/20 FEATURE: show questions ordered by importance
-* 6/24/20 FEATURE: add option to show unanswered questions first/last
 * 6/24/20 FEATURE: add favorite or "like" percentage value for responses; similar to importance, but more for enjoyment of the question; add option to show questions sorted by "like"
 * 9/14/16 STYLE: in list of tags, change the color of the tag if the tag is selected, to make it clear which are selected
 * 9/11/16 FEATURE: For the selected tags, show them one per line right under "Tags selected:", along with num_questions and time periods, as is shown in the next section with all the tags.  As a user, I want to see these tags at the top and not have to hunt for them.
@@ -387,7 +385,6 @@ To get webapp to connect to that db:
 * 10/20/14 add search ability, to search questions/answers for specified keywords
 * 10/20/14 in the admin, when viewing a question, show the answer as an inline that can also be edited; likewise, when viewing an answer, show the question inline  #high
 * 10/20/14 in the admin, when viewing a question, add a link/url to jump to the answer to view/edit it  #high
-* 10/19/14 upgrade Django to latest (currently using 1.6.7; latest is 1.7)
 * 10/18/14 per Steven Jonas, have a way to find other questions (or bookmarked webpages) with similar content to help form associations and new insights
 * 10/18/14 have questions that are a single webpagge to review (a url), and show the content of the webpage instead of just a link
 * 8/17/14 enabling tags during an answer does not enable it when the next question is shown (but it does work if enabled when asking a question)
