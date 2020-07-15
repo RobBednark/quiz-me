@@ -312,6 +312,8 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.15.20 ADD django-toolbar back in (why? show query counts and SQL commands)
+* 7.15.20 ADD example fixture data (a user, some questions, answers, tags)
 * 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
 * 7.14.20 REFACTOR See if emailusername can be eliminated
 * 7.14.20 UPGRADE See if I can easily move my quizme_product db data into a fresh db
