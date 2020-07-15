@@ -312,17 +312,43 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.24.20 NEW get next question randomly, e.g.,  
+https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
+https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm  
+https://stackoverflow.com/questions/22816704/django-get-a-random-object  
+https://books.agiliq.com/projects/django-orm-cookbook/en/latest/random.html
+* 7.23.20 NEW consider using different markdown packages, e.g.,  
+https://github.com/agusmakmun/django-markdown-editor  
+https://github.com/neutronX/django-markdownx  
+https://github.com/erwinmatijsen/django-markdownify  
+https://github.com/sv0/django-markdown-app
+* 7.15.20 ADD options to order by questions with/without answers
+* 7.15.20 ADD a RELEASE HISTORY / CHANGE LOG page to see what's been changed when
 * 7.15.20 ADD django-toolbar back in (why? show query counts and SQL commands)
+* 7.15.20 REFACTOR reduce number of queries in view code to speed up page load
+* 7.17.20 FIX django-pagedown not working with Debug=False (add question: not showing markdown; command+k not working)
+* 7.18.20 Get running on linode
+* 7.15.20 CHECK if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
+* 7.20.20 PERFORMANCE speed up admin Tags page; see https://stackoverflow.com/questions/52386873/django-admin-slow-using-tabularinline-with-many-to-many-field
+* 7.15.20 TEST change tests to use pytest (consider pytest-django)
+* 7.15.20 ADD code coverage (maybe after changing to pytest) (consider pytest-cov)
+* 7.15.20 TEST add tests for many questions/answers/tags/schedules using factory-boy
 
+* 7.16.20 FIX why markdown displayed for answer in question page is displayed differently from the answer page, e.g., 
+  > \> one  
+  > two  
+shows as two lines in the question page, but one line on the answer page (no linefeeds)
 * 7/4/20 FEATURE: add db name to each web page
 * 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases) (start with 0.10.0?)
 * 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 7.15.20 ADD example fixture data (a user, some questions, answers, tags)
 * 7.14.20 UPGRADE See if I can easily move my quizme_product db data into a fresh db
 * 7.14.20 REFACTOR See if emailusername can be eliminated
+* 7.15.20 ADD twisty/collapsible <details>/<summary> to the tags section
 * 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
 * 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards)
 * 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
+* 7.15.20 ADD a separate select-tags page to be able to change tags without submitting an answer
 * 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
 * 7.12.20 BUG If there is no valid session, when going to /login/?next=/question/ , it gives a 404 error instead of going to the login screen (this seems to happen when switching between databases, I don't know why).  WORKAROUND: navigate to the /admin page, it will prompt for login, login, and then you can access the question page
 * 7.12.20 FEATURE prefill interval with values from previous schedule (why? to save time when reviewing)
