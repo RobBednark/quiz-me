@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 selenium = "*"
 splinter = "==0.8.0"
+django-debug-toolbar = "*"
 
 [packages]
 py2-py3-django-email-as-username = "*"

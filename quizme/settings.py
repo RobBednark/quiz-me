@@ -5,7 +5,7 @@ AUTH_USER_MODEL = 'emailusername.User'
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
-ENABLE_DJANGO_DEBUG_TOOLBAR = False
+ENABLE_DJANGO_DEBUG_TOOLBAR = eval(os.environ.get('QM_USE_TOOLBAR', 'False'))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -13,6 +13,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# Default database engine to postgres, but can override with QM_ENGINE=sqlite
 engine = 'django.db.backends.postgresql_psycopg2'
 if (os.environ.get('QM_ENGINE', None) == 'sqlite'):
     engine = 'django.db.backends.sqlite3'
@@ -117,7 +118,7 @@ MIDDLEWARE = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
-    # Django Debug Toolbar (make sure to put it first!)
+    # Django Debug Toolbar (per the docs, make sure to put it first!)
     MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE
 
 ROOT_URLCONF = 'quizme.urls'
@@ -162,8 +163,10 @@ INSTALLED_APPS = (
     'emailusername',  # used for User; so email addresses can be used as username
 )
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
-    # Django Debug Toolbar
     INSTALLED_APPS += ('debug_toolbar',)
+    DEBUG_TOOLBAR_CONFIG = {
+        'PROFILER_MAX_DEPTH': 20,
+    }
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -194,33 +197,14 @@ LOGGING = {
     }
 }
 
-if ENABLE_DJANGO_DEBUG_TOOLBAR:
-    if False:
-        # Django Debug Toolbar:
-        DEBUG_TOOLBAR_PANELS = (
-            'debug_toolbar.panels.version.VersionDebugPanel',
-            'debug_toolbar.panels.timer.TimerDebugPanel',
-            'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
-            'debug_toolbar.panels.headers.HeaderDebugPanel',
-            'debug_toolbar.panels.profiling.ProfilingDebugPanel',
-            'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
-            'debug_toolbar.panels.sql.SQLDebugPanel',
-            'debug_toolbar.panels.template.TemplateDebugPanel',
-            'debug_toolbar.panels.cache.CacheDebugPanel',
-            'debug_toolbar.panels.signals.SignalDebugPanel',
-            'debug_toolbar.panels.logger.LoggingPanel',
-        )
-
-    DEBUG_TOOLBAR_CONFIG = {
-        'INTERCEPT_REDIRECTS': False,   # set this to True if you want to intercept redirects
-        'SHOW_TEMPLATE_CONTEXT': True,  # This shows all the context variables available when rendering the template
-        # 'SHOW_TOOLBAR_CALLBACK' : lambda request: True,
-    }
-
 # This is the default test runner.  Added here to suppress warnings after upgrade to Django 1.7
 # Can probably be removed after upgrading to 1.10, as I read something that indicated Django
 # was removing the warning.
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+INTERNAL_IPS = [
+        '127.0.0.1',  # needed for django_debug_toolbar
+]
 
 try:
     # Simple way of allowing for custom local dev/testing settings
