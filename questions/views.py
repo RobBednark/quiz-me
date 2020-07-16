@@ -267,7 +267,7 @@ def _get_tag2periods(user, modelformset_usertag=None):
 
 def _create_and_get_usertags(request):
     """For the given :request:, return a modelformset_usertag that is an
-    iterable which a form for each usertag.
+    iterable with a form for each usertag.
     request.user will be used to get the corresponding usertags for that user.
     if request.method == 'GET', then find all the tags and create a form for each tag.
     if request.method == 'POST', then save any changes made by the user to any of the forms.
