@@ -295,7 +295,7 @@ def _create_and_get_usertags(request):
         tags = models.Tag.objects.all()
 
         # Get all the UserTag's for this user
-        qs_user_tags = models.UserTag.objects.filter(user=user)
+        qs_user_tags = models.UserTag.objects.filter(user=user).prefetch_related('tag')
         user_tags_by_tagname = {
             user_tag.tag.name: user_tag for user_tag in qs_user_tags
         }
