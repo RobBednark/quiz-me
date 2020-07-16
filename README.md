@@ -315,6 +315,9 @@ To get webapp to connect to that db:
 * 7.15.20 ADD a RELEASE HISTORY page to see what's been changed when
 * 7.15.20 ADD django-toolbar back in (why? show query counts and SQL commands)
 * 7.15.20 REFACTOR reduce number of queries in view code to speed up page load
+* 7.15.20 CHECK if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
+* 7.15.20 TEST change tests to use pytest (consider pytest-django)
+* 7.15.20 ADD code coverage (maybe after changing to pytest) (consider pytest-cov)
 * 7.15.20 TEST add tests for many questions/answers/tags/schedules using factory-boy
 
 * 7/4/20 FEATURE: add db name to each web page
