@@ -282,6 +282,7 @@ def _create_and_get_usertags(request):
         models.UserTag.objects.filter(user=user)
         # annotate the number of questions so it can be displayed to the user
         .annotate(num_questions=Count('tag__questions'))
+        .prefetch_related('tag')
         .order_by('tag__name')
     )
 
