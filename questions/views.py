@@ -223,13 +223,10 @@ def _get_tag2periods(user, modelformset_usertag=None):
             enabled=True, tag=tag
         )
 
-        # Also get the questions for each QuestionTag so that we don't need to do additional queries
-        question_tags = question_tags.select_related('question')
         # for each question, get the most recently-added schedule for that user
         question_tags = question_tags.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
 
         for question_tag in question_tags:
-            question = question_tag.question
             if question_tag.date_show_next is None:
                 tag2interval2cnt[tag.name]['unseen'] += 1
                 if 'unseen' not in tag2interval_order[tag.name]:
