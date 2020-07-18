@@ -73,17 +73,17 @@
                 {{ modelformset_usertag.errors }}
             {% endif %}
           </div>
-      <details>
-          <summary>Tags</summary>
-          <div>
+          <details>
+            <summary>Tags</summary>
+            <div>
             {% for form_usertag in modelformset_usertag.forms %}
               {{ form_usertag }} 
               (num_questions=[{{ form_usertag.instance.num_questions }}]) 
               {{ form_usertag.interval_counts }}
               </br>
             {% endfor %}
-          </div>
-      </details>
+            </div>
+          </details>
           <input class="btn btn-primary btn-lg" type="submit" value="Submit" />
         </div>
 
