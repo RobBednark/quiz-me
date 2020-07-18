@@ -63,6 +63,8 @@
         <br/>Schedules recently added (# questions answered in last 30m, ...): 
         <br/>Tags selected: [{{ user_tag_names }}]
 
+      <details>
+          <summary>Tags</summary>
         <!-- Show all the tags -->
         <p>
         Ask questions with these tags:<br>
@@ -81,11 +83,13 @@
             {{ form_usertag.interval_counts }}
             </br>
         {% endfor %}
+      </details>
 
         </p>
         <input class="btn btn-primary btn-lg" type="submit" value="Submit" />
         <p>
       </div>
+
 		</form>
 	</body>
 </html>

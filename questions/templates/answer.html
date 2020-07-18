@@ -73,6 +73,8 @@
                 {{ modelformset_usertag.errors }}
             {% endif %}
           </div>
+      <details>
+          <summary>Tags</summary>
           <div>
             {% for form_usertag in modelformset_usertag.forms %}
               {{ form_usertag }} 
@@ -81,6 +83,7 @@
               </br>
             {% endfor %}
           </div>
+      </details>
           <input class="btn btn-primary btn-lg" type="submit" value="Submit" />
         </div>
 
