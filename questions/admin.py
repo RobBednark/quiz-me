@@ -21,6 +21,8 @@ class AnswerAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
+    # enable searching for Answer's on these two fields
+    search_fields = ['answer', 'question__question']
 
 
 class AttemptAdmin(admin.ModelAdmin):
