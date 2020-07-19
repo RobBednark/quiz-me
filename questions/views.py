@@ -229,42 +229,44 @@ def _get_tag2periods(user, modelformset_usertag=None):
         (1, "year", "1y"))
     tag2interval2cnt = defaultdict(lambda: defaultdict(int))
     tag2interval_order = defaultdict(list)
-    tags = models.Tag.objects.all()
-    schedules = (models.Schedule.objects
-                 .filter(user=user, question=OuterRef('question_id'))
+    # OuterRef('question_id') refers to the QuestionTag field
+    subquery_schedules = (models.Schedule.objects
+                 .filter(user=user,
+                         question=OuterRef('question_id'))
                  .order_by('-datetime_added'))
-    for tag in tags:
-        # Get all QuestionTag's for this tag
-        question_tags = models.QuestionTag.objects.filter(
-            enabled=True, tag=tag
-        )
+    # Get all QuestionTag's that are enabled, and who's tags are enabled
+    question_tags = (models
+                        .QuestionTag.objects
+                        .filter(enabled=True)
+                        # for each question, get the most recently-added schedule for that user
+                        .annotate(date_show_next=Subquery(subquery_schedules[:1].values('date_show_next')))
+                        .select_related('tag')
+    )
 
-        # for each question, get the most recently-added schedule for that user
-        question_tags = question_tags.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
-
-        for question_tag in question_tags:
-            if question_tag.date_show_next is None:
-                tag2interval2cnt[tag.name]['unseen'] += 1
-                if 'unseen' not in tag2interval_order[tag.name]:
-                    tag2interval_order[tag.name].append('unseen')
-            else:
-                interval_previous = (None, None, '')
-                # Find which interval this schedule is in
-                for interval in INTERVALS:
-                    if interval[0] is None:
-                        continue
-                    delta = relativedelta(**({interval[1]: interval[0]}))
-                    now = timezone.now()
-                    if question_tag.date_show_next <= now + delta:
-                        interval_name = '%s-%s' % (
-                            interval_previous[2],
-                            interval[2]
-                        )
-                        tag2interval2cnt[tag.name][interval_name] += 1
-                        if interval_name not in tag2interval_order[tag.name]:
-                            tag2interval_order[tag.name].append(interval_name)
-                        break
-                    interval_previous = interval
+    for question_tag in question_tags:
+        tag_name = question_tag.tag.name
+        if question_tag.date_show_next is None:
+            tag2interval2cnt[tag_name]['unseen'] += 1
+            if 'unseen' not in tag2interval_order[tag_name]:
+                tag2interval_order[tag_name].append('unseen')
+        else:
+            interval_previous = (None, None, '')
+            # Find which interval this schedule is in
+            for interval in INTERVALS:
+                if interval[0] is None:
+                    continue
+                delta = relativedelta(**({interval[1]: interval[0]}))
+                now = timezone.now()
+                if question_tag.date_show_next <= now + delta:
+                    interval_name = '%s-%s' % (
+                        interval_previous[2],
+                        interval[2]
+                    )
+                    tag2interval2cnt[tag_name][interval_name] += 1
+                    if interval_name not in tag2interval_order[tag_name]:
+                        tag2interval_order[tag_name].append(interval_name)
+                    break
+                interval_previous = interval
 
     for form in modelformset_usertag:
         # update the corresponding tag in modelformset
