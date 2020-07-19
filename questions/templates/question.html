@@ -20,15 +20,20 @@
         {% endif %}
 
 
-        {% if not question.answer %}
-            (NOTE: there is no answer for this question)
+        {% if question.answer %}
+        <details open=true >
+        {% else %}
+        (NOTE: there is no answer for this question)
+        <details>
         {% endif %}
-        <!-- Show the form fields for the attempt -->
-        <div class="fieldWrapper">
+        <summary>Answer</summary>
+          <!-- Show the form fields for the attempt -->
+          <div class="fieldWrapper">
             {{ form_attempt.attempt.label_tag }}
             {{ form_attempt.attempt }}
             {{ form_attempt.attempt.errors }}
-        </div>
+          </div>
+        </details>
 
         {% if form_attempt.errors %}
             <p> Errors:
