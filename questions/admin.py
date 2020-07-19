@@ -6,11 +6,17 @@ from pagedown.widgets import AdminPagedownWidget
 from .models import Answer, Attempt, Tag, Question, Schedule
 
 
+class AnswerQuestionRelationshipInline(admin.TabularInline):
+    model = Question
+
+
 class TagQuestionRelationshipInline(admin.TabularInline):
     model = Tag.questions.through
 
 
 class AnswerAdmin(admin.ModelAdmin):
+    # Show questions that are linked with this answer
+    inlines = [AnswerQuestionRelationshipInline]
     list_display = ['answer', 'datetime_added', 'datetime_updated']
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
