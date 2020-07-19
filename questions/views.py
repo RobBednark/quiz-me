@@ -81,6 +81,9 @@ def _get_next_question(user):
     # Does not affect order-by.
     option_limit_to_date_show_next_before_now = eval(os.environ.get('QM_LIMIT_TO_DATE_SHOW_NEXT_BEFORE_NOW', 'True'))
 
+    # True => order nulls first (for date_show_next, num_schedules, schedule_datetime_added)
+    option_nulls_first = eval(os.environ.get('QM_NULLS_FIRST', 'True'))
+
     # True  => order by when answered,  newest first (schedule_datetime_added DESC NULLS LAST)
     # False => order by date_show_next, oldest first (date_show_next ASC NULLS FIRST)
     # used with
@@ -145,18 +148,18 @@ def _get_next_question(user):
         questions = questions.filter(subquery_by_date_show_next)
     order_by = []
     if option_order_by_answered_count:
-        order_by.append(F('num_schedules').asc(nulls_first=True))
+        order_by.append(F('num_schedules').asc(nulls_first=option_nulls_first))
 
     if option_order_by_when_answered_oldest:
         # Order by the time when the user last answered the question, oldest first
-        order_by.append(F('schedule_datetime_added').asc(nulls_first=False))
+        order_by.append(F('schedule_datetime_added').asc(nulls_first=option_nulls_first))
 
     if option_order_by_when_answered_newest:
         # Order by the time when the user last answered the question, newest first
-        order_by.append(F('schedule_datetime_added').desc(nulls_first=False))
+        order_by.append(F('schedule_datetime_added').desc(nulls_first=option_nulls_first))
     else:
         # Order by when the question should be shown again
-        order_by.append(F('date_show_next').asc(nulls_first=True))
+        order_by.append(F('date_show_next').asc(nulls_first=option_nulls_first))
     # For unanswered questions , order by the time the question was added, oldest first.
     order_by.append(F('datetime_added').asc())
     debug_print and print('order_by = %s' % order_by)
