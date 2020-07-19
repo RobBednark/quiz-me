@@ -88,8 +88,11 @@ def _get_next_question(user):
     # to show questions to reinforce (see again quickly)
     option_order_by_when_answered_newest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_NEWEST', 'True'))
 
-    # Takes precedence over all order_by's
+    # Takes precedence over all other order_by's
     option_order_by_answered_count = eval(os.environ.get('QM_SORT_BY_ANSWERED_COUNT', 'False'))
+
+    # Takes precedence over all other order_by's, except for option_order_by_answered_count
+    option_order_by_when_answered_oldest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_OLDEST', 'False'))
 
     debug_print = os.environ.get('QM_DEBUG_PRINT', False)
     debug_sql = os.environ.get('QM_DEBUG_SQL', False)
@@ -143,6 +146,10 @@ def _get_next_question(user):
     order_by = []
     if option_order_by_answered_count:
         order_by.append(F('num_schedules').asc(nulls_first=True))
+
+    if option_order_by_when_answered_oldest:
+        # Order by the time when the user last answered the question, oldest first
+        order_by.append(F('schedule_datetime_added').asc(nulls_first=False))
 
     if option_order_by_when_answered_newest:
         # Order by the time when the user last answered the question, newest first
