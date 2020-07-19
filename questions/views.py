@@ -64,7 +64,7 @@ def _get_next_question(user):
     #    option_limit_to_date_show_next_before_now = False
     #    option_order_by_when_answered = False
     #    option_order_by_answered_count = False
-    # 3) Order by when answered (schedule_datetime_added), show questions before now that were just answered first, show unanswered questions last
+    # 3) Order by when answered (schedule_datetime_added), newest first, show questions before now that were just answered first, show unanswered questions last
     #    Reinforce recently-answered questions.
     #    option_include_unanswered_questions = False
     #    option_limit_to_date_show_next_before_now = True
@@ -81,14 +81,14 @@ def _get_next_question(user):
     # Does not affect order-by.
     option_limit_to_date_show_next_before_now = eval(os.environ.get('QM_LIMIT_TO_DATE_SHOW_NEXT_BEFORE_NOW', 'True'))
 
-    # True  => order by when answered,  oldest first (schedule_datetime_added DESC NULLS LAST)
-    # False => order by date_show_next, newest first (date_show_next ASC NULLS FIRST)
+    # True  => order by when answered,  newest first (schedule_datetime_added DESC NULLS LAST)
+    # False => order by date_show_next, oldest first (date_show_next ASC NULLS FIRST)
     # used with
     #   option_limit_to_date_show_next_before_now=True
     # to show questions to reinforce (see again quickly)
     option_order_by_when_answered = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED', 'True'))
 
-    # Takes precedence over other order_by's
+    # Takes precedence over all order_by's
     option_order_by_answered_count = eval(os.environ.get('QM_SORT_BY_ANSWERED_COUNT', 'False'))
 
     debug_print = os.environ.get('QM_DEBUG_PRINT', False)
@@ -145,7 +145,7 @@ def _get_next_question(user):
         order_by.append(F('num_schedules').asc(nulls_first=True))
 
     if option_order_by_when_answered:
-        # Order by the time when the user last answered the question
+        # Order by the time when the user last answered the question, newest first
         order_by.append(F('schedule_datetime_added').desc(nulls_first=False))
     else:
         # Order by when the question should be shown again
