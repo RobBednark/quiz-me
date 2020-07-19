@@ -31,6 +31,7 @@ DB_USER=quizme
 DIR_DUMPS=db_dumps
 date:=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
 FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.custom.all
+FILE_DUMP_DUMPDATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.dumpdata.json
 FILE_DUMP_PLAIN_ALL:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.all
 FILE_DUMP_PLAIN_DATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.data-only
 FILE_DUMP_PLAIN_SCHEMA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.schema-only
@@ -56,6 +57,7 @@ dumpdb:
 	pg_dump --data-only --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN_DATA}
 	pg_dump --schema-only --format=plain ${DB_NAME_TO_DUMP} > ${FILE_DUMP_PLAIN_SCHEMA}
 	DB_QUIZME=${DB_NAME_TO_DUMP} PYTHONIOENCODING=utf-8 python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
+	DB_QUIZME=${DB_NAME_TO_DUMP} python ./manage.py dumpdata --all --indent=2 > ${FILE_DUMP_DUMPDATA} 2>&1
 	rm -f ${SYMLINK_LATEST_TEXT}
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
 	ls -ltr db_dumps/. |tail -5
