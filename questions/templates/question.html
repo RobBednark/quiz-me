@@ -26,13 +26,13 @@
         (NOTE: there is no answer for this question)
         <details>
         {% endif %}
-        <summary>Answer</summary>
-          <!-- Show the form fields for the attempt -->
-          <div class="fieldWrapper">
-            {{ form_attempt.attempt.label_tag }}
-            {{ form_attempt.attempt }}
-            {{ form_attempt.attempt.errors }}
-          </div>
+          <summary>Answer</summary>
+            <!-- Show the form fields for the attempt -->
+            <div class="fieldWrapper">
+              {{ form_attempt.attempt.label_tag }}
+              {{ form_attempt.attempt }}
+              {{ form_attempt.attempt.errors }}
+            </div>
         </details>
 
         {% if form_attempt.errors %}
@@ -70,24 +70,24 @@
 
       <details>
           <summary>Tags</summary>
-        <!-- Show all the tags -->
-        <p>
-        Ask questions with these tags:<br>
-        {{ modelformset_usertag.management_form }}
-        {% if modelformset_usertag.non_form_errors %}
+          <!-- Show all the tags -->
+          <p>
+          Ask questions with these tags:<br>
+          {{ modelformset_usertag.management_form }}
+          {% if modelformset_usertag.non_form_errors %}
             {{ modelformset_usertag.non_form_errors }}
-        {% endif %}
-        {% if modelformset_usertag.errors %}
+          {% endif %}
+          {% if modelformset_usertag.errors %}
             {{ modelformset_usertag.errors }}
-        {% endif %}
+          {% endif %}
 
 
-        {% for form_usertag in modelformset_usertag.forms %}
+          {% for form_usertag in modelformset_usertag.forms %}
             {{ form_usertag }} 
             (num_questions=[{{ form_usertag.instance.num_questions }}]) 
             {{ form_usertag.interval_counts }}
             </br>
-        {% endfor %}
+          {% endfor %}
       </details>
 
         </p>
