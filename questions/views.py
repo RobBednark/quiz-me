@@ -56,19 +56,19 @@ def _get_next_question(user):
     # 1) Order by answered_count
     #    option_include_unanswered_questions = True
     #    option_limit_to_date_show_next_before_now = ??
-    #    option_order_by_when_answered = False
+    #    option_order_by_when_answered_newest = False
     #    option_order_by_answered_count = True
     # 2) Order by date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again won't necessarily be seen quickly)
     #    Reinforce older questions.
     #    option_include_unanswered_questions = True
     #    option_limit_to_date_show_next_before_now = False
-    #    option_order_by_when_answered = False
+    #    option_order_by_when_answered_newest = False
     #    option_order_by_answered_count = False
     # 3) Order by when answered (schedule_datetime_added), newest first, show questions before now that were just answered first, show unanswered questions last
     #    Reinforce recently-answered questions.
     #    option_include_unanswered_questions = False
     #    option_limit_to_date_show_next_before_now = True
-    #    option_order_by_when_answered = True
+    #    option_order_by_when_answered_newest = True
     #    option_order_by_answered_count = False
 
     # Include unanswered questions (nulls) in first bucket query.
@@ -86,7 +86,7 @@ def _get_next_question(user):
     # used with
     #   option_limit_to_date_show_next_before_now=True
     # to show questions to reinforce (see again quickly)
-    option_order_by_when_answered = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED', 'True'))
+    option_order_by_when_answered_newest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_NEWEST', 'True'))
 
     # Takes precedence over all order_by's
     option_order_by_answered_count = eval(os.environ.get('QM_SORT_BY_ANSWERED_COUNT', 'False'))
@@ -144,7 +144,7 @@ def _get_next_question(user):
     if option_order_by_answered_count:
         order_by.append(F('num_schedules').asc(nulls_first=True))
 
-    if option_order_by_when_answered:
+    if option_order_by_when_answered_newest:
         # Order by the time when the user last answered the question, newest first
         order_by.append(F('schedule_datetime_added').desc(nulls_first=False))
     else:
