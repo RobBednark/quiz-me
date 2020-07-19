@@ -45,6 +45,8 @@ class QuestionAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
+    # enable searching for Question's on these two fields
+    search_fields = ['answer__answer', 'question']
 
 
 class ScheduleAdmin(admin.ModelAdmin):
