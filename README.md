@@ -312,12 +312,14 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.15.20 ADD options to order by questions with/without answers
 * 7.15.20 ADD a RELEASE HISTORY / CHANGE LOG page to see what's been changed when
 * 7.15.20 ADD django-toolbar back in (why? show query counts and SQL commands)
 * 7.15.20 REFACTOR reduce number of queries in view code to speed up page load
 * 7.17.20 FIX django-pagedown not working with Debug=False (add question: not showing markdown; command+k not working)
 * 7.18.20 Get running on linode
 * 7.15.20 CHECK if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
+* 7.20.20 PERFORMANCE speed up admin Tags page; see https://stackoverflow.com/questions/52386873/django-admin-slow-using-tabularinline-with-many-to-many-field
 * 7.15.20 TEST change tests to use pytest (consider pytest-django)
 * 7.15.20 ADD code coverage (maybe after changing to pytest) (consider pytest-cov)
 * 7.15.20 TEST add tests for many questions/answers/tags/schedules using factory-boy
