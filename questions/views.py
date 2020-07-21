@@ -244,7 +244,7 @@ def _get_tag2periods(user, modelformset_usertag=None):
                  .filter(user=user,
                          question=OuterRef('question_id'))
                  .order_by('-datetime_added'))
-    # Get all QuestionTag's that are enabled, and who's tags are enabled
+    # Get all QuestionTag's that are enabled
     question_tags = (models
                         .QuestionTag.objects
                         .filter(enabled=True)
