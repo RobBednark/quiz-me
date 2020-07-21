@@ -385,7 +385,7 @@ def question(request, id_question):
                 sorted([
                     str(
                         qtag.tag.name
-                    ) for qtag in next_question.question.questiontag_set.all()
+                    ) for qtag in next_question.question.questiontag_set.filter(enabled=True)
                 ])
             )
         else:
