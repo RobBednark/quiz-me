@@ -48,7 +48,7 @@ class QuestionAdmin(admin.ModelAdmin):
         models.TextField: {'widget': AdminPagedownWidget},
     }
     # enable searching for Question's on these two fields
-    search_fields = ['answer__answer', 'question']
+    search_fields = ['answer__answer', 'pk', 'question']
 
 
 class ScheduleAdmin(admin.ModelAdmin):
