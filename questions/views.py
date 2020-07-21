@@ -121,6 +121,7 @@ def _get_next_question(user):
     # question_tags -- QuestionTags matching the tags the user wants to be quizzed on
     # (logical OR -- questions that match any (not all) of the tags)
     question_tags = models.QuestionTag.objects.filter(enabled=True, tag__in=tags)
+
     # questions_tagged -- Questions matching the question_tags
     questions_tagged = models.Question.objects.filter(questiontag__in=question_tags)
     # schedules -- all Schedules for the user for each question, newest first by datetime_added
