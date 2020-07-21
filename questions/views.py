@@ -72,6 +72,14 @@ def _get_next_question(user):
     #    option_order_by_when_answered_newest = True
     #    option_order_by_answered_count = False
 
+    # True  => for questions scheduled before now, only show questions that have answers
+    # False => disabled
+    option_questions_with_answers_first = eval(os.environ.get('QM_WITH_ANSWERS_FIRST', 'False'))
+
+    # True  => for questions scheduled before now, only show questions that DON'T have answers
+    # False => disabled
+    option_questions_without_answers_first = eval(os.environ.get('QM_WITHOUT_ANSWERS_FIRST', 'False'))
+
     # Include unanswered questions (nulls) in first bucket query.
     # Does not affect order-by.
     option_include_unanswered_questions = eval(os.environ.get('QM_INCLUDE_UNANSWERED', 'True'))
@@ -140,6 +148,10 @@ def _get_next_question(user):
     if option_limit_to_date_show_next_before_now:
         debug_print and print('looking for questions scheduled before now')
         subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
+    if option_questions_with_answers_first:
+        questions = questions.filter(answer__isnull=False)
+    if option_questions_without_answers_first:
+        questions = questions.filter(answer__isnull=True)
 
     if subquery_include_unanswered and subquery_by_date_show_next:
         questions = questions.filter(subquery_include_unanswered | subquery_by_date_show_next)

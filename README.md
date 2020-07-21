@@ -402,7 +402,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
 * 7.12.20 BUG If there is no valid session, when going to /login/?next=/question/ , it gives a 404 error instead of going to the login screen (this seems to happen when switching between databases, I don't know why).  WORKAROUND: navigate to the /admin page, it will prompt for login, login, and then you can access the question page
 * 7.12.20 FEATURE prefill interval with values from previous schedule (why? to save time when reviewing)
-* 7.12.20 FEATURE order by questions with answers first (why? to practice one's being learned)
 * 7.12.20 FEATURE order by interval secs (amount of time scheduled to be seen again) (why? to practice what I am actively learning)
 * 7/4/20 FEATURE: make question and answer editable while quizzing
 * 7/4/20 FEATURE: optionally sort tags by date added, or just show the date added
