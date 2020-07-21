@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
+import humanize
 import pytz
 
 from .forms import FormAttemptNew, FormSchedule
@@ -402,6 +403,8 @@ def question(request, id_question):
                     question=next_question.question
                 ).latest('datetime_added')
             )
+            last_schedule_added.human_datetime_added = humanize.naturaldelta(
+                timezone.now() - last_schedule_added.datetime_added)
         except ObjectDoesNotExist:
             last_schedule_added = None
 

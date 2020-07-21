@@ -17,6 +17,7 @@ pytz = "*"
 six = "*"
 python-dateutil = "*"
 Django = "*"
+humanize = "*"
 
 [requires]
 python_version = "3.7"
