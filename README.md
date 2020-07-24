@@ -329,9 +329,9 @@ https://github.com/sv0/django-markdown-app
 * 7.15.20 ADD code coverage (maybe after changing to pytest) (consider pytest-cov)
 * 7.15.20 TEST add tests for many questions/answers/tags/schedules using factory-boy
 
-* 7.16.20 FIX why markdown displayed for answer in question page is displayed differently from the answer page (e.g., 
-  > one
-  two
+* 7.16.20 FIX why markdown displayed for answer in question page is displayed differently from the answer page, e.g., 
+  > \> one  
+  > two  
 shows as two lines in the question page, but one line on the answer page (no linefeeds)
 * 7/4/20 FEATURE: add db name to each web page
 * 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases) (start with 0.10.0?)
