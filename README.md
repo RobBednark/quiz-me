@@ -312,6 +312,11 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.24.20 NEW get next question randomly, e.g.,  
+https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
+https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm  
+https://stackoverflow.com/questions/22816704/django-get-a-random-object  
+https://books.agiliq.com/projects/django-orm-cookbook/en/latest/random.html
 * 7.23.20 NEW consider using different markdown packages, e.g.,  
 https://github.com/agusmakmun/django-markdown-editor  
 https://github.com/neutronX/django-markdownx  
