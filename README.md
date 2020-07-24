@@ -312,6 +312,9 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
+* 7.18.20 NEW Get running on linode
+* 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
 * 7.24.20 NEW get next question randomly, e.g.,  
 https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
 https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm  
@@ -324,8 +327,6 @@ https://github.com/erwinmatijsen/django-markdownify
 https://github.com/sv0/django-markdown-app
 * 7.15.20 ADD a RELEASE HISTORY / CHANGE LOG page to see what's been changed when
 * 7.17.20 FIX django-pagedown not working with Debug=False (add question: not showing markdown; command+k not working)
-* 7.18.20 Get running on linode
-* 7.15.20 CHECK if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.20.20 PERFORMANCE speed up admin Tags page; see https://stackoverflow.com/questions/52386873/django-admin-slow-using-tabularinline-with-many-to-many-field
 * 7.15.20 TEST change tests to use pytest (consider pytest-django)
 * 7.15.20 ADD code coverage (maybe after changing to pytest) (consider pytest-cov)
@@ -353,7 +354,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 7/4/20 FEATURE: make question and answer editable while quizzing
 * 7/4/20 FEATURE: optionally sort tags by date added, or just show the date added
 * 6/24/20 FEATURE: add *time_since_last_seen* field to schedule, e.g., the amount of time (secs, and maybe human-readable, and maybe previous date seen) between this response and the last response
-* 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
 * 6/24/20 FEATURE: show questions ordered by importance
 * 6/24/20 FEATURE: add favorite or "like" percentage value for responses; similar to importance, but more for enjoyment of the question; add option to show questions sorted by "like"
 * 9/14/16 STYLE: in list of tags, change the color of the tag if the tag is selected, to make it clear which are selected
