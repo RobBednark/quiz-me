@@ -21,3 +21,7 @@ humanize = "*"
 
 [requires]
 python_version = "3.7"
+
+# django-markdown-deux -- for "markdown" template tag to convert markdown to html
+# django-pagedown -- markdown wysiwyg editor
+# humanize -- converts time durations to human-readable times (e.g., "11 days")
