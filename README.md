@@ -322,10 +322,7 @@ https://github.com/agusmakmun/django-markdown-editor
 https://github.com/neutronX/django-markdownx  
 https://github.com/erwinmatijsen/django-markdownify  
 https://github.com/sv0/django-markdown-app
-* 7.15.20 ADD options to order by questions with/without answers
 * 7.15.20 ADD a RELEASE HISTORY / CHANGE LOG page to see what's been changed when
-* 7.15.20 ADD django-toolbar back in (why? show query counts and SQL commands)
-* 7.15.20 REFACTOR reduce number of queries in view code to speed up page load
 * 7.17.20 FIX django-pagedown not working with Debug=False (add question: not showing markdown; command+k not working)
 * 7.18.20 Get running on linode
 * 7.15.20 CHECK if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
@@ -344,7 +341,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 7.15.20 ADD example fixture data (a user, some questions, answers, tags)
 * 7.14.20 UPGRADE See if I can easily move my quizme_product db data into a fresh db
 * 7.14.20 REFACTOR See if emailusername can be eliminated
-* 7.15.20 ADD twisty/collapsible <details>/<summary> to the tags section
 * 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
 * 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards)
 * 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
