@@ -103,6 +103,12 @@ docker rm $(docker ps -a -q)
   e.g., a single commit should not contain both fixes and features.
 * **view &ast;.md changes before merging**   
   If changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct
+* **update README.md**
+  Update README.md accordingly, including:  
+    * TODO section -- remove corresponding item(s) if they have been implemented in this commit
+* **update VERSION**  
+  Update the version values in the questions/__version__.py file
+* **update CHANGELOG**
 
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
@@ -312,8 +318,41 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+
+* 8.16.20 CHANGE: Django Admin - prepopulate user with the logged-in user  (see https://stackoverflow.com/questions/53253288/django-admin-prepopulate-field-and-set-readonly)
+* 8.16.20 CHANGE Django Admin -- autopopulate the user when adding a new question/answer/tag
+* 8.16.20 CHANGE see if Django admin can be set to not prepulate dropdowns (e.g., viewing a tag, don't populate the question dropdowns; when adding a question, don't populate the answer dropdowns)
+* 8.14.20 NEW modify so that in multi-user environment, /flashcard only sees logged-in user's tags and questions; admin: user cannot see/edit other users content
+* 8.14.20 NEW capture HTTP requests/responses in different db (endpoint, IP address, status code) (e.g., django-wiretap) (WHY? to capture suspicious activity)
+* 8.14.20 NEW add feature to show a random photo from some collection (e.g., Google Photos, unsplash, r/pics)
+* 8.14.20 FIX flashcard page has multiple HEADs and BODYs
+* 8.13.20 NEW optionally show questions based questions matching text inputted by user
+* 8.12.20 CHANGE combine questions and answers in the same table; I made them separate, thinking it would be useful to have multiple questions for the same answer, but I don't think that is worth it anymore; (why? so it is simpler to add and edit questions and answers in a single page)
+* 8.11.20 NEW add a section to show all answers/attempts submitted for a given question
+* 8.08.20 REMOVE models: Hint, Quiz
+* 8.08.20 NEW add option to cycle through random fonts for each question
+* 8.06.20 NEW quiz on questions with no tags
+* 8.01.20 NEW Add auto-advance option for playing audios/videos automatically, and auto-advancing to the next one (why?  to listen to flashcards while walking, running, ...)
+* 8.01.20 NEW Add a "seen" button, or else consider seen if no atttempt or schedule;
+  Use cases:
+    - create a schedule
+    - mark only percent correct
+    - mark only percent confidence
+    - mark both percent correct and percent confidence
+  |attempt_text  |schedule  |%_correct  |%_confidence   |outcome|
+  |------------  |--------  |---------  |------------   |-------|
+  |yes           |yes       |yes        |yes            |typical schedule|
+  |no            |no        |no         |no             |mark seen (stats are null, so ignore when querying based on %correct/confidence)|
+  |no            |no        |yes        |yes            |mark seen and capture stats|
+* 7.31.20 CHANGE get nicer UI colors and font (e.g., https://www.mentalnodes.com/a-gardening-guide-for-your-mind)
+* 7.30.20 NEW add input for % percent confidence in answer (and then optionally use that for picking next question)
+* 7.28.20 COMMENT add to the Readme a list of features, particularly the ones that make this different from other apps
+* 7.27.20 NEW admin: add related schedules to questions, but make them read-only (why? to see what schedules are associated with a question, so I don't have to create a db query to see them)
+* 7.27.20 NEW show stats of questions asks and added each day, week, month for the past n months
+* 7.25.20 NEW add version number to the header and/or footer (why? to see what version is running)
 * 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.18.20 NEW Get running on linode
+* 7.24.20 NEW add a button to deselect/clear all tags
 * 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
 * 7.24.20 NEW get next question randomly, e.g.,  
 https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
