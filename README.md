@@ -312,6 +312,11 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.23.20 NEW consider using different markdown packages, e.g.,  
+https://github.com/agusmakmun/django-markdown-editor  
+https://github.com/neutronX/django-markdownx  
+https://github.com/erwinmatijsen/django-markdownify  
+https://github.com/sv0/django-markdown-app
 * 7.15.20 ADD options to order by questions with/without answers
 * 7.15.20 ADD a RELEASE HISTORY / CHANGE LOG page to see what's been changed when
 * 7.15.20 ADD django-toolbar back in (why? show query counts and SQL commands)
