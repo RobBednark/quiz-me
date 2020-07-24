@@ -106,8 +106,8 @@ def _get_next_question(user):
     # Takes precedence over all other order_by's, except for option_order_by_answered_count
     option_order_by_when_answered_oldest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_OLDEST', 'False'))
 
-    debug_print = os.environ.get('QM_DEBUG_PRINT', False)
-    debug_sql = os.environ.get('QM_DEBUG_SQL', False)
+    debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
+    debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
     debug_print and print('')
 
