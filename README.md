@@ -314,6 +314,7 @@ To get webapp to connect to that db:
 
 * 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.18.20 NEW Get running on linode
+* 7.24.20 NEW add a button to deselect/clear all tags
 * 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
 * 7.24.20 NEW get next question randomly, e.g.,  
 https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
