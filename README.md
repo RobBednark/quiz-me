@@ -312,6 +312,7 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.25.20 NEW add version number to the header and/or footer (why? to see what version is running)
 * 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.18.20 NEW Get running on linode
 * 7.24.20 NEW add a button to deselect/clear all tags
