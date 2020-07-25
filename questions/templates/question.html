@@ -14,7 +14,7 @@
         <div class="col-md-6">
         <!-- Show the question -->
         {% if question %}
-            Q: {{ question.question|markdown }}
+            Q: {{ question.question|markdown:"do-not-escape-html" }}
         {% else %}
             (NOTE: there are no questions)
         {% endif %}
