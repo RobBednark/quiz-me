@@ -206,6 +206,15 @@ INTERNAL_IPS = [
         '127.0.0.1',  # needed for django_debug_toolbar
 ]
 
+# Used by django-markdown-deux for the '|markdown' template tag
+MARKDOWN_DEUX_STYLES = {
+    "do-not-escape-html": {
+        # Do not escape html tags, just leave them as is
+        # (i.e., "unsafe" mode)
+        "safe_mode": False,
+    },
+}
+
 try:
     # Simple way of allowing for custom local dev/testing settings
     from local_settings import *  # noqa
