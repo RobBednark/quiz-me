@@ -72,6 +72,9 @@ def _get_next_question(user):
     #    option_order_by_when_answered_newest = True
     #    option_order_by_answered_count = False
 
+    debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
+    debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
+
     # True  => for questions scheduled before now, only show questions that have answers
     # False => disabled
     option_questions_with_answers_first = eval(os.environ.get('QM_WITH_ANSWERS_FIRST', 'False'))
@@ -105,9 +108,6 @@ def _get_next_question(user):
 
     # Takes precedence over all other order_by's, except for option_order_by_answered_count
     option_order_by_when_answered_oldest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_OLDEST', 'False'))
-
-    debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
-    debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
     debug_print and print('')
 
