@@ -110,6 +110,9 @@ def _get_next_question(user):
     option_order_by_when_answered_oldest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_OLDEST', 'False'))
 
     debug_print and print('')
+    # Print out the values for each of the option_* variables
+    for var_name in sorted([var_name for var_name in locals().keys() if var_name.startswith('option_')]):
+        debug_print and print('%s: [%s]' % (var_name, locals()[var_name]))
 
     datetime_now = datetime.now(tz=pytz.utc)
 
