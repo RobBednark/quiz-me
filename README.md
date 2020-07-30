@@ -312,6 +312,9 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 7.28.20 COMMENT add to the Readme a list of features, particularly the ones that make this different from other apps
+* 7.27.20 NEW admin: add related schedules to questions, but make them read-only (why? to see what schedules are associated with a question, so I don't have to create a db query to see them)
+* 7.27.20 NEW show stats of questions asks and added each day, week, month for the past n months
 * 7.25.20 NEW add version number to the header and/or footer (why? to see what version is running)
 * 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.18.20 NEW Get running on linode
