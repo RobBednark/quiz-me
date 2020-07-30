@@ -36,7 +36,8 @@ class TagAdmin(admin.ModelAdmin):
     # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
     exclude = ('questions',)
     inlines = [TagQuestionRelationshipInline]
-    list_display = ['datetime_added', 'datetime_updated', 'name']
+    list_display = ['datetime_added', 'datetime_updated', 'name', 'pk']
+    list_per_page = 999  # how many items to show per page
     ordering = ('name',)
 
 
