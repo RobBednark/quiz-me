@@ -20,17 +20,6 @@ class FormAttemptNew(forms.Form):
     )
 
 
-class ModelFormSchedule(ModelForm):
-    class Meta:
-        model = Schedule
-        fields = (
-            'percent_correct',
-            'percent_importance',
-            'date_show_next',
-            'interval_num',
-            'interval_unit'
-        )
-
 
 class FormSchedule(forms.Form):
     percent_correct = forms.DecimalField(
