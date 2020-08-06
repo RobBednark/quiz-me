@@ -26,7 +26,7 @@ class AnswerAdmin(admin.ModelAdmin):
 
 
 class AttemptAdmin(admin.ModelAdmin):
-    list_display = ['attempt', 'question']
+    list_display = ['id', 'datetime_added', 'attempt', 'question']
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
