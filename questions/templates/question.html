@@ -10,6 +10,7 @@
 	<body>
     <h1>Take a Quiz</h1>
 		<form action="" method="post"> {% csrf_token %}
+          {{ form_attempt.hidden_question_id }}
       <div class="row">
         <div class="col-md-6">
         <!-- Show the question -->

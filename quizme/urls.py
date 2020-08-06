@@ -8,7 +8,7 @@ from django.contrib import admin
 
 from emailusername.views import logout
 
-from questions.views import answer, question, question_next
+from questions.views import answer, flashcard, question, question_next
 
 admin.autodiscover()
 
@@ -20,6 +20,7 @@ urlpatterns = [
     url(regex=r'^logout$', view=logout, name='logout'),
 
     url(regex=r'^$', view=question_next),
+    url(regex=r'^flashcard/$', view=flashcard, name='flashcard'),
     url(regex=r'^question/$', view=question_next, name='question_next'),
     url(regex=r'^question/(?P<id_question>[0-9]*)/$', view=question, name='question'),
     url(regex=r'^answer/(?P<id_attempt>[0-9]*)/$', view=answer, name='answer'),
