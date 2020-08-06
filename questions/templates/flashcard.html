@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load markdown_deux_tags %}
+
+{% block content %}
+  <head>
+    {{ form_flashcard.media }}
+    <title>Quiz</title>
+    <meta url-encoding="utf-8" />
+  </head>
+
+  <body>
+    <h1>Take a Quiz</h1>
+    <form action="" method="post">
+      {% csrf_token %}
+      {{ form_flashcard.hidden_question_id }}
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="alert alert-info" role="alert">
+            <!-- Show the question -->
+            {% if question %}
+              {{ question.question|markdown:"do-not-escape-html" }}
+            {% else %}
+              (There are no questions. Add a question, and/or select a tag that has a question.)
+            {% endif %}
+          </div>
+
+          {% if question %}
+            <div class="alert alert-warning" role="alert">
+              {% if question.answer %}
+                <details open=true >
+              {% else %}
+                (there is no answer for this question)
+                <details>
+              {% endif %}
+                  <summary>Your Answer</summary>
+                  <!-- Show the form fields for the attempt -->
+                  <div class="fieldWrapper">
+                    {{ form_flashcard.attempt.label_tag }}
+                    {{ form_flashcard.attempt }}
+                    {{ form_flashcard.attempt.errors }}
+                  </div>
+                </details>
+            </div>
+            <div class="alert alert-success" role="alert">
+              {% if question.answer %}
+                <details>
+                  <summary>Correct Answer</summary>
+                  {{ question.answer.answer|markdown }}
+              {% else %}
+                <details open=true >
+                  <summary>(there is no answer for this question)</summary>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if form_flashcard.errors %}
+            Errors:
+            <div class="fieldWrapper">
+              {{ form_flashcard.errors }}
+            </div>
+          {% endif %}
+        </div>
+      </div>  <!-- End: Question and Answer section -->
+
+      {% if question %}
+        <div class="row"> <!-- Begin: inputting schedule values -->
+          <div class="col-xs-12">
+            <div class="input-group">
+              <input id="id_percent_correct" placeholder="Percent Correct" name={{ form_flashcard.percent_correct.name }} step="0.01" type="number" value={{ form_flashcard.percent_correct.value }} />
+            </div>
+            <div class="input-group">
+              <input id="id_percent_importance" placeholder="Percent Importance" name={{ form_flashcard.percent_importance.name }} step="0.01" type="number" value={{ form_flashcard.percent_importance.value }} />
+            </div>
+            <div class="input-group">
+              <input id="id_interval_num" placeholder="Interval Number" name={{ form_flashcard.interval_num.name }} step="0.01" type="number" value={{ form_flashcard.interval_num.value }}/>
+            </div>
+            <div class="input-group">
+              <select id="id_interval_unit" placeholder="Interval Unit" name={{ form_flashcard.interval_unit.name }} value={{ form_flashcard.interval_unit.value }}>
+                <option value="seconds">seconds</option>
+                <option value="minutes">minutes</option>
+                <option value="hours">hours</option>
+                <option value="days">days</option>
+                <option value="weeks">weeks</option>
+                <option value="months">months</option>
+                <option value="years">years</option>
+              </select>
+            </div>
+          </div>
+        </div> <!-- End inputting schedule values -->
+      {% endif %}
+      <input class="btn btn-primary btn-lg" type="submit" value="Answer" /> 
+
+      <!-- Add urls to edit the question and answer in the Django admin -->
+      <div>
+      {% if question %}
+          <a href="{% url 'admin:questions_question_change' question.id %}">Edit question</a>
+
+        {% if question.answer %}
+          <a href="{% url 'admin:questions_answer_change' question.answer.id %}"> | Edit answer </a>
+        {% endif %}
+      {% endif %}
+      </div>
+
+      <div class="col-xs-12">
+        {% if question %}
+          <br>Tags for this question: [{{ question_tag_names }}]
+          <br>
+          <br/>[{{ last_schedule_added.human_datetime_added }}] ago last answered
+          <br>Question added  date  : [{{ question.datetime_added }}]
+          <br>Question updated date : [{{ question.datetime_updated }}]
+
+          <!-- Last attempt for this question -->
+          <br/>Last time this question was scheduled (answered): [{{ last_schedule_added.datetime_added }}]
+          <br/>Num times this question was answered: [{{ num_schedules }}]
+          <br/>Next scheduled time for this question: [{{ last_schedule_added.date_show_next }}]
+        {% endif %}
+
+        <br/>Tags selected: [{{ user_tag_names }}]
+
+        {% if question %}
+          <details>
+        {% else %}
+          <details open=true >
+        {% endif %}
+          <summary>Tags</summary>
+          <!-- Show all the tags -->
+          <p>
+            Ask questions with these tags:
+            <br/>
+            {{ modelformset_usertag.management_form }}
+            {% if modelformset_usertag__total_error_count %}
+              {{ modelformset_usertag__non_form_errors }}
+              {{ modelformset_usertag.errors }}
+            {% endif %}
+
+            {% for form_usertag in modelformset_usertag.forms %}
+              {{ form_usertag }} 
+              (num_questions=[{{ form_usertag.instance.num_questions }}]) 
+              {{ form_usertag.interval_counts }}
+              </br>
+            {% endfor %}
+          </p>
+        </details>
+        <input class="btn btn-primary btn-lg" type="submit" value="Answer" />
+      </div>
+    </form>
+  </body>
+</html>
+{% endblock %}

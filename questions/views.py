@@ -15,7 +15,7 @@ from django.utils import timezone
 import humanize
 import pytz
 
-from .forms import FormAttemptNew, FormSchedule
+from .forms import FormAttemptNew, FormSchedule, FormFlashcard
 from questions import models
 
 
@@ -396,7 +396,7 @@ def question(request, id_question):
             user=request.user,
             modelformset_usertag=modelformset_usertag
         )
-        form_attempt = FormAttemptNew()
+        form_attempt = FormAttemptNew(initial=dict(hidden_question_id=next_question.question.id))
         if next_question.question:
             question_tag_names = ", ".join(
                 sorted([
@@ -559,3 +559,182 @@ def answer(request, id_attempt):
             )
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
+
+@login_required(login_url='/login')
+def _get_flashcard(request, form_flashcard=None):
+    # Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
+    # because _create_and_get_usertags might create new usertags, which are used
+    # by _get_next_question().
+    modelformset_usertag = _NEW_create_and_get_usertags(request=request)
+
+    next_question = _get_next_question(user=request.user)
+    id_question = next_question.question.id if next_question.question else 0
+
+    _get_tag2periods(
+        user=request.user,
+        modelformset_usertag=modelformset_usertag
+    )
+    if not form_flashcard:
+        form_flashcard = FormFlashcard(initial=dict(hidden_question_id=id_question))
+    if next_question.question:
+        question_tag_names = ", ".join(
+            sorted([
+                str(
+                    qtag.tag.name
+                ) for qtag in next_question.question.questiontag_set.filter(enabled=True)
+            ])
+        )
+    else:
+        question_tag_names = []
+
+    try:
+        last_schedule_added = (
+            models.Schedule.objects.filter(
+                user=request.user,
+                question=next_question.question
+            ).latest('datetime_added')
+        )
+        last_schedule_added.human_datetime_added = humanize.naturaldelta(
+            timezone.now() - last_schedule_added.datetime_added)
+    except ObjectDoesNotExist:
+        last_schedule_added = None
+
+    return render(
+        request=request,
+        template_name='flashcard.html',
+        context=dict(
+            form_flashcard=form_flashcard,
+            last_schedule_added=last_schedule_added,
+            modelformset_usertag=modelformset_usertag,
+            modelformset_usertag__total_error_count=modelformset_usertag.total_error_count(),
+            modelformset_usertag__non_form_errors=modelformset_usertag.non_form_errors(),
+            question=next_question.question,
+            question_tag_names=question_tag_names,
+            user_tag_names=next_question.user_tag_names,
+            num_schedules=next_question.num_schedules
+        )
+    )
+
+def _post_flashcard(request):
+    # Save the attempt and the schedule.
+    form_flashcard = FormFlashcard(request.POST)
+    if form_flashcard.is_valid():
+        id_question = form_flashcard.cleaned_data["hidden_question_id"]
+        try:
+            question = models.Question.objects.get(id=id_question)
+        except models.Question.DoesNotExist:
+            # There was no question available.  Perhaps the user
+            # selected different tags now, so try again.
+            return _get_flashcard(request)
+        data = form_flashcard.cleaned_data
+        attempt = models.Attempt(
+            attempt=data['attempt'],
+            question=question,
+            user=request.user
+        )
+        try:
+            attempt.save()
+        except Exception:
+            # TODO: do something here,
+            # e.g., log it, show it to the user
+            pass
+        schedule = models.Schedule(
+            percent_correct=data['percent_correct'],
+            percent_importance=data['percent_importance'],
+            interval_num=data['interval_num'],
+            interval_unit=data['interval_unit'],
+            question=attempt.question,
+            user=request.user
+        )
+        schedule.save()
+        return _get_flashcard(request)
+    else:
+        # Assert: form is NOT valid
+        # Need to return the errors to the template,
+        # and have the template show the errors.
+        return _get_flashcard(request=request, form_flashcard=form_flashcard)
+
+def flashcard(request):
+    if request.method == 'GET':
+        return _get_flashcard(request=request)
+    elif request.method == 'POST':
+        return _post_flashcard(request=request)
+    else:
+        raise Exception("Unknown request.method=[%s]" % request.method)
+
+def _NEW_create_and_get_usertags(request):
+    """For the given :request:, return a modelformset_usertag that is an
+    iterable with a form for each usertag.
+    request.user will be used to get the corresponding usertags for that user.
+    if request.method == 'GET', then find all the tags and create a form for each tag.
+    if request.method == 'POST', then save any changes made by the user to any of the forms.
+    Returns modelformset_usertag (an iterable of one form for each usertag).
+    """
+    ModelFormset_UserTag = modelformset_factory(
+        model=models.UserTag, extra=0, fields=('enabled',)
+    )
+
+    user = request.user
+    queryset = (
+        models.UserTag.objects.filter(user=user)
+        # annotate the number of questions so it can be displayed to the user
+        .annotate(num_questions=Count('tag__questions'))
+        .prefetch_related('tag')
+        .order_by('tag__name')
+    )
+
+    # Get the user, find all the tags, and create a form for each tag.
+    #        GET:
+    #            For each of the tags, show a checkbox.
+    #            If there is no UserTag for that tag, then show the tag and default to False.
+
+    # Get all the Tag's
+    tags = models.Tag.objects.all()
+
+    # Get all the UserTag's for this user
+    qs_user_tags = models.UserTag.objects.filter(user=user).prefetch_related('tag')
+    user_tags_by_tagname = {
+        user_tag.tag.name: user_tag for user_tag in qs_user_tags
+    }
+
+    # Create UserTag's for any new tags
+    for tag in tags:
+        if tag.name not in user_tags_by_tagname:
+            # There isn't a tag, so create one
+            models.UserTag(user=user, tag=tag, enabled=False).save()
+
+    if request.method == 'GET':
+        modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
+        for form in modelformset_usertag.forms:
+            # For each checkbox, display to the user the tag name
+            form.fields['enabled'].label = form.instance.tag.name
+        return modelformset_usertag
+    elif request.method == 'POST':
+        modelformset_usertag = ModelFormset_UserTag(
+            queryset=queryset,
+            data=request.POST
+        )
+        for form in modelformset_usertag.forms:
+            # For each checkbox, display to the user the tag name
+            form.fields['enabled'].label = form.instance.tag.name
+
+        # Save the changes made by the user (selecting/unselecting tags)
+        if modelformset_usertag.is_valid():  # All validation rules pass
+            modelformset_usertag.save()
+
+            # Create a new modelformset without the POST data, because there might be new tags
+            # that have been added after the page was displayed and before the Submit button was
+            # clicked.
+            modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
+            for form in modelformset_usertag.forms:
+                # For each checkbox, display to the user the tag name
+                form.fields['enabled'].label = form.instance.tag.name
+            return modelformset_usertag
+        else:
+            # ASSERT: modelformset_usertag.is_valid() was called, so modelformset_usertag modified itself to contain
+            # any errors, and these errors will be displayed in the form using the form.as_p
+            # attribute.
+            #  It puts the errors in form._errors and form.errors,
+            #   e.g., form.errors['sender'] == 'Enter a valid email address.'
+            pass
+        return modelformset_usertag
