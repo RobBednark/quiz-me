@@ -312,6 +312,21 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 8.06.20 NEW quiz on questions with no tags
+* 8.01.20 NEW Add auto-advance option for playing audios/videos automatically, and auto-advancing to the next one (why?  to listen to flashcards while walking, running, ...)
+* 8.01.20 NEW Add a "seen" button, or else consider seen if no atttempt or schedule;
+  Use cases:
+    - create a schedule
+    - mark only percent correct
+    - mark only percent confidence
+    - mark both percent correct and percent confidence
+  |attempt_text  |schedule  |%_correct  |%_confidence   |outcome|
+  |------------  |--------  |---------  |------------   |-------|
+  |yes           |yes       |yes        |yes            |typical schedule|
+  |no            |no        |no         |no             |mark seen (stats are null, so ignore when querying based on %correct/confidence)|
+  |no            |no        |yes        |yes            |mark seen and capture stats|
+* 7.31.20 CHANGE get nicer UI colors and font (e.g., https://www.mentalnodes.com/a-gardening-guide-for-your-mind)
+* 7.30.20 NEW add input for % percent confidence in answer (and then optionally use that for picking next question)
 * 7.28.20 COMMENT add to the Readme a list of features, particularly the ones that make this different from other apps
 * 7.27.20 NEW admin: add related schedules to questions, but make them read-only (why? to see what schedules are associated with a question, so I don't have to create a db query to see them)
 * 7.27.20 NEW show stats of questions asks and added each day, week, month for the past n months
