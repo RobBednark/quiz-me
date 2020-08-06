@@ -17,7 +17,7 @@ class TagQuestionRelationshipInline(admin.TabularInline):
 class AnswerAdmin(admin.ModelAdmin):
     # Show questions that are linked with this answer
     inlines = [AnswerQuestionRelationshipInline]
-    list_display = ['answer', 'datetime_added', 'datetime_updated']
+    list_display = ['id', 'datetime_added', 'answer', 'datetime_updated']
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
