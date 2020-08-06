@@ -54,6 +54,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'datetime_added',
         'percent_correct',
         'percent_importance',
