@@ -3,41 +3,55 @@
 ## How to install and run
 1. clone the repo
 1. create a virtual environment using pipenv, e.g.,
+
         $ pipenv install
     or create a virtualenv using mkvirtualenv, e.g.,
-        mkvirtualenv quizme
+
+        $ mkvirtualenv quizme
+
 1. activate the virtualenv, e.g.,
+
         $ pipenv shell
     or using virtualenv:
+
         $ workon quizme
 1. If using virtualenv instead of pipenv, install the required packages in the virtualenv, e.g.,
-        pip install --requirement requirements.txt
+
+        $ pip install --requirement requirements.txt
 1. install and run postgresql (if using postgresql); e.g., on OSX,
-    brew install postgresql (or "brew update")
-    ("brew info postgresql" to see how to start/stop)
-    (if errors, consider "brew reinstall postgresql")
+
+        $ brew install postgresql (or "brew update")
+    (`brew info postgresql` to see how to start/stop)
+    (if errors, consider `brew reinstall postgresql`)
 1. start postgres; e.g., on OSX,
-    launchctl list | grep postgres  # see if launchctl knows about postgres, and if so, what the last exit status is
-    brew services list  # list all running services, and see if postgresql is there
-    brew services stop postgresql
-1. create a postgres database
-    createdb quizme
-    (note that the database name "quizme" is a setting in settings.py for
-     DATABASES['default']['NAME']
+
+        $ launchctl list | grep postgres  # see if launchctl knows about postgres, and if so, what the last exit status is
+
+        $ brew services list  # list all running services, and see if postgresql is there
+        $ brew services stop postgresql
+1. create a postgres database, e.g.,
+
+        $ createdb quizme
+    (note that the database name "quizme" is a setting in `settings.py` for
+     `DATABASES['default']['NAME']`
     )
 1. create a postgres user:
-    createuser quizme
+
+        $ createuser quizme
     --or--
-        psql --command="CREATE USER quizme"
+
+        $ psql --command="CREATE USER quizme"
 
     Test it:
-        psql --user=quizme quizme
-1. copy database
-   --or--
-   DB_QUIZME=my_db_name ./manage.py syncdb
-   DB_QUIZME=my_db_name ./manage.py migrate
+
+        $ psql --user=quizme quizme
+1. load existing data into database, or start with an empty database:
+
+        $ DB_QUIZME=my_db_name ./manage.py syncdb
+        $ DB_QUIZME=my_db_name ./manage.py migrate
 1. create a superuser
-DB_QUIZME=my_db_name ./manage.py createsuperuser --email my_user@my_domain.com
+
+        $ DB_QUIZME=my_db_name ./manage.py createsuperuser --email my_user@my_domain.com
 
 ## How to run tests
 
