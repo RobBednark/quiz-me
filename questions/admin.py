@@ -49,7 +49,7 @@ class QuestionAdmin(admin.ModelAdmin):
         models.TextField: {'widget': AdminPagedownWidget},
     }
     # enable searching for Question's on these two fields
-    search_fields = ['answer__answer', 'pk', 'question']
+    search_fields = ['answer__answer', 'pk', 'question', 'tag__name']
 
     def tags_display(self, obj):
         # Use for list_display to show the names of all the tags (a many-to-many field)
