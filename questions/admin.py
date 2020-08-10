@@ -43,13 +43,20 @@ class TagAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [TagQuestionRelationshipInline]
-    list_display = ['datetime_added', 'datetime_updated', 'question', 'answer', 'pk']
+    list_display = ['datetime_added', 'datetime_updated', 'question', 'answer', 'pk', 'tags_display']
     # list_filter = ['',]
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
     # enable searching for Question's on these two fields
     search_fields = ['answer__answer', 'pk', 'question']
+
+    def tags_display(self, obj):
+        # Use for list_display to show the names of all the tags (a many-to-many field)
+        return ", ".join([
+            tag.name for tag in obj.tag_set.all()
+        ])
+    tags_display.short_description = "Tags"
 
 
 class ScheduleAdmin(admin.ModelAdmin):
