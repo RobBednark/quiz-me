@@ -6,17 +6,8 @@
 # db_dumps -- directory for putting database dumps via Makefile commands
 db_dumps
 tmp/
-# virtualenv dirs:
-bin
 ignore*
-include
-lib
-local
-pip-selfcheck.json
 # local_settings django file
 local_settings.py
-# not sure what's in these dirs :/
-selenium
-share
 # ignore collected static files (output from `python manage.py collectstatic`)
 /static
