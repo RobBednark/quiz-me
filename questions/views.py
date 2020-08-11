@@ -22,7 +22,9 @@ from questions import models
 NextQuestion = namedtuple(
     typename='NextQuestion',
     field_names=[
+        'count_questions_before_now',
         'num_schedules',
+        'option_limit_to_date_show_next_before_now',
         'question',
         'user_tag_names'
     ]
@@ -182,11 +184,13 @@ def _get_next_question(user):
     debug_print and print('order_by = %s' % order_by)
     questions = questions.order_by(*order_by)
 
+    count_questions_before_now = 0
     # query #1
     if questions:
         # Show questions whose schedule.date_show_next <= now
         # assert: there is a question with schedule.date_show_next <= now
-        debug_print and print('first "if": questions.count() = [%s] questions scheduled before now' % questions.count())
+        count_questions_before_now = questions.count()
+        debug_print and print('first "if": questions.count() = [%s] questions scheduled before now' % count_questions_before_now)
         debug_sql and print(connection.queries[-1])
         question_to_show = questions[0]
     else:
@@ -230,6 +234,8 @@ def _get_next_question(user):
     debug_print and print('returning question.id = [%s]' % (question_to_show.id if question_to_show else None))
     debug_print and print('')
     return NextQuestion(
+        count_questions_before_now=count_questions_before_now,
+        option_limit_to_date_show_next_before_now=option_limit_to_date_show_next_before_now,
         question=question_to_show,
         user_tag_names=sorted([tag for tag in tag_names]),  # query #5
         num_schedules=num_schedules,
@@ -603,11 +609,13 @@ def _get_flashcard(request, form_flashcard=None):
         request=request,
         template_name='flashcard.html',
         context=dict(
+            count_questions_before_now=next_question.count_questions_before_now,
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,
             modelformset_usertag=modelformset_usertag,
             modelformset_usertag__total_error_count=modelformset_usertag.total_error_count(),
             modelformset_usertag__non_form_errors=modelformset_usertag.non_form_errors(),
+            option_limit_to_date_show_next_before_now=next_question.option_limit_to_date_show_next_before_now,
             question=next_question.question,
             question_tag_names=question_tag_names,
             user_tag_names=next_question.user_tag_names,

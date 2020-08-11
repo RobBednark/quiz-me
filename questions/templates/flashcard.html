@@ -105,6 +105,11 @@
         {% if question %}
           <br>Tags for this question: [{{ question_tag_names }}]
           <br>
+          {% if option_limit_to_date_show_next_before_now %}
+            <br/>[{{ count_questions_before_now }}] questions past due for all selected tags
+          {% else %}
+            <br/>[{{ count_questions_before_now }}] questions for all selected tags
+          {% endif %}
           <br/>[{{ last_schedule_added.human_datetime_added }}] ago last answered
           <br/>Last time this question was scheduled (answered): [{{ last_schedule_added.datetime_added }}]
           <br/>Num times this question was answered: [{{ num_schedules }}]
