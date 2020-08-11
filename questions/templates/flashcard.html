@@ -106,13 +106,11 @@
           <br>Tags for this question: [{{ question_tag_names }}]
           <br>
           <br/>[{{ last_schedule_added.human_datetime_added }}] ago last answered
-          <br>Question added  date  : [{{ question.datetime_added }}]
-          <br>Question updated date : [{{ question.datetime_updated }}]
-
-          <!-- Last attempt for this question -->
           <br/>Last time this question was scheduled (answered): [{{ last_schedule_added.datetime_added }}]
           <br/>Num times this question was answered: [{{ num_schedules }}]
           <br/>Next scheduled time for this question: [{{ last_schedule_added.date_show_next }}]
+          <br>Question added  date  : [{{ question.datetime_added }}]
+          <br>Question updated date : [{{ question.datetime_updated }}]
         {% endif %}
 
         <br/>Tags selected: [{{ user_tag_names }}]
