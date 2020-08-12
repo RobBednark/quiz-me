@@ -68,14 +68,18 @@ dumpdb:
 flake8:
 	flake8 --max-line-length=999
 
-loaddb:
+loaddb: loaddb-custom loaddb-plain
+
+loaddb-custom:
 	# Load the dumps into new db's to test them
 	PGDATABASE=template1 psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_CUSTOM}"
-	PGDATABASE=template1 psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_PLAIN}"
 	PGDATABASE=template1 psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_CUSTOM}"
-	PGDATABASE=template1 psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_PLAIN}"
-
 	pg_restore --dbname=${DB_NAME_TO_RESTORE_CUSTOM} ${FILE_DUMP_CUSTOM}
+
+loaddb-plain:
+	# Load the dumps into new db's to test them
+	PGDATABASE=template1 psql --command="DROP DATABASE IF EXISTS ${DB_NAME_TO_RESTORE_PLAIN}"
+	PGDATABASE=template1 psql --command="CREATE DATABASE ${DB_NAME_TO_RESTORE_PLAIN}"
 	PGDATABASE=template1 psql --user=${DB_USER} --dbname=${DB_NAME_TO_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN}
 
 migrate:
