@@ -39,6 +39,7 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ['datetime_added', 'datetime_updated', 'name', 'pk']
     list_per_page = 999  # how many items to show per page
     ordering = ('name',)
+    search_fields = ['name']
 
 
 class QuestionAdmin(admin.ModelAdmin):
