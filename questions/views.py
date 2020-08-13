@@ -23,6 +23,7 @@ NextQuestion = namedtuple(
     typename='NextQuestion',
     field_names=[
         'count_questions_before_now',
+        'count_questions_tagged',
         'num_schedules',
         'option_limit_to_date_show_next_before_now',
         'question',
@@ -129,6 +130,7 @@ def _get_next_question(user):
 
     # questions_tagged -- Questions matching the question_tags
     questions_tagged = models.Question.objects.filter(questiontag__in=question_tags)
+    count_questions_tagged = questions_tagged.count()
     # schedules -- all Schedules for the user for each question, newest first by datetime_added
     # OuterRef('pk') refers to the question.pk for each question
     schedules = (models.Schedule.objects
@@ -235,6 +237,7 @@ def _get_next_question(user):
     debug_print and print('')
     return NextQuestion(
         count_questions_before_now=count_questions_before_now,
+        count_questions_tagged=count_questions_tagged,
         option_limit_to_date_show_next_before_now=option_limit_to_date_show_next_before_now,
         question=question_to_show,
         user_tag_names=sorted([tag for tag in tag_names]),  # query #5
@@ -611,6 +614,7 @@ def _get_flashcard(request, form_flashcard=None):
         template_name='flashcard.html',
         context=dict(
             count_questions_before_now=next_question.count_questions_before_now,
+            count_questions_tagged=next_question.count_questions_tagged,
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,
             modelformset_usertag=modelformset_usertag,
