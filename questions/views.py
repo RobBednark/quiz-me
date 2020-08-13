@@ -288,6 +288,7 @@ def _get_tag2periods(user, modelformset_usertag=None):
             for interval in INTERVALS:
                 if interval[0] is None:
                     continue
+                # e.g., delta = relativedelta(minutes=4)
                 delta = relativedelta(**({interval[1]: interval[0]}))
                 now = timezone.now()
                 if question_tag.date_show_next <= now + delta:
