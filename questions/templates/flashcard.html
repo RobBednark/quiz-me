@@ -45,7 +45,7 @@
               {% if question.answer %}
                 <details>
                   <summary>Correct Answer</summary>
-                  {{ question.answer.answer|markdown }}
+                  {{ question.answer.answer|markdown:"do-not-escape-html" }}
               {% else %}
                 <details open=true >
                   <summary>(there is no answer for this question)</summary>
