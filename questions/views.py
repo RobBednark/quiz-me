@@ -251,7 +251,7 @@ def _get_next_question(user):
         option_limit_to_date_show_next_before_now=option_limit_to_date_show_next_before_now,
         question=question_to_show,
         schedules_recent_count=schedules_recent_count,
-        user_tag_names=sorted([tag for tag in tag_names]),  # query #5
+        user_tag_names=','.join(sorted([tag for tag in tag_names])),  # query #5
         num_schedules=num_schedules,
     )
 
