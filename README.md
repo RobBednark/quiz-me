@@ -514,12 +514,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 
 * versions of questions/answers
 
-* DONE - 8/29/14 Show the tags for the question being asked/answered.
-* DONE - 3/10/15 show the answer id in answer.__unicode__ in the admin [DONE 3/10/15]
-* DONE - 12/27/14 Show the number of questions for each tag (total number of questions, and number of questions past deadline)
-* DONE - postgres backups (via Makefile)
-* DONE - User login
-* DONE - add tags via Django Admin
 
 ### django-quiz
 * Name of quiz is passed in the url
