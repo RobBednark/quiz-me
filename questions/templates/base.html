@@ -29,6 +29,9 @@
         Signed in as {{ user }} | <a href="/logout" class="navbar-link">Logout</a>
       </p>
       {% endblock %}
+      <div class="navbar-text navbar-right">
+        v{{ settings.VERSION }} {{ settings.VERSION_DATE }}
+      </div>
     </div>
   </nav>
 

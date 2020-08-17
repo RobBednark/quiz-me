@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
@@ -635,6 +636,7 @@ def _get_flashcard(request, form_flashcard=None):
             question=next_question.question,
             question_tag_names=question_tag_names,
             schedules_recent_count=next_question.schedules_recent_count,
+            settings = settings,
             user_tag_names=next_question.user_tag_names,
             num_schedules=next_question.num_schedules
         )
