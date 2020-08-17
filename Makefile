@@ -63,7 +63,7 @@ dumpdb:
 	compress ${FILE_DUMP_DUMPDATA}
 	rm -f ${SYMLINK_LATEST_TEXT}
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
-	ls -ltr db_dumps/. |tail -5
+	ls -hltr db_dumps/. |tail -8
 
 flake8:
 	flake8 --max-line-length=999
