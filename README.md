@@ -388,7 +388,6 @@ https://github.com/sv0/django-markdown-app
   > \> one  
   > two  
 shows as two lines in the question page, but one line on the answer page (no linefeeds)
-* 7/4/20 FEATURE: add db name to each web page
 * 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases) (start with 0.10.0?)
 * 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 7.15.20 ADD example fixture data (a user, some questions, answers, tags)

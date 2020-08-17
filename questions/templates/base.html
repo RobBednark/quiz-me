@@ -30,6 +30,9 @@
       </p>
       {% endblock %}
       <div class="navbar-text navbar-right">
+        database=[{{ settings.DATABASES.default.NAME }}]
+      </div>
+      <div class="navbar-text navbar-right">
         v{{ settings.VERSION }} {{ settings.VERSION_DATE }}
       </div>
     </div>
