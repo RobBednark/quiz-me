@@ -367,7 +367,7 @@ To get webapp to connect to that db:
 * 7.18.20 NEW Get running on linode
 * 7.24.20 NEW add a button to deselect/clear all tags
 * 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
-* 7.24.20 NEW get next question randomly, e.g.,  
+* 7.24.20 NEW get next question randomly; e.g., for the selected tags, store the last question seen in random mode, and get a random question from everything older than that scheduled/last seen, so that all questions are being cycle through before being seen again; if doing SQL random SELECT, consider:
 https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
 https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm  
 https://stackoverflow.com/questions/22816704/django-get-a-random-object  
