@@ -101,9 +101,9 @@
       </div>
 
       <div class="col-xs-12">
+        [{{ user_tag_names }}] tags selected
         {% if question %}
-          <br>Tags for this question: [{{ question_tag_names }}]
-          <br>
+          <br>[{{ question_tag_names }}] tags for this question
           {% if option_limit_to_date_show_next_before_now %}
             <br/>[{{ count_questions_before_now }}] questions past due for all selected tags
           {% else %}
@@ -111,15 +111,13 @@
           {% endif %}
           <br/>[{{ schedules_recent_count }}] flashcards reviewed in last 30 minutes
           <br/>[{{ count_questions_tagged }}] flashcards with the selected tags
-          <br/>[{{ last_schedule_added.human_datetime_added }}] ago last answered
-          <br/>Last time this question was scheduled (answered): [{{ last_schedule_added.datetime_added }}]
-          <br/>Num times this question was answered: [{{ num_schedules }}]
-          <br/>Next scheduled time for this question: [{{ last_schedule_added.date_show_next }}]
-          <br>Question added  date  : [{{ question.datetime_added }}]
-          <br>Question updated date : [{{ question.datetime_updated }}]
+          <br/>[{{ num_schedules }} times this flashcard has been seen
+          <br/>[{{ last_schedule_added.human_datetime_added }}] ago last seen
+          <br/>[{{ last_schedule_added.datetime_added }}] last time this was seen
+          <br/>[{{ last_schedule_added.date_show_next }}] next scheduled time
+          <br>[{{ question.datetime_added }}] flashcard added
+          <br>[{{ question.datetime_updated }}] flashcard updated
         {% endif %}
-
-        <br/>Tags selected: [{{ user_tag_names }}]
 
         {% if question %}
           <details>
