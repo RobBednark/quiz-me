@@ -6,9 +6,9 @@ from django.urls import path
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 
-from emailusername.views import logout
+import emailusername.views as emailusername_views
 
-from questions.views import answer, flashcard, question, question_next
+import questions.views as question_views
 
 admin.autodiscover()
 
@@ -17,13 +17,9 @@ urlpatterns = [
         route='login/',
         view=auth_views.LoginView.as_view(template_name='questions/login.html'),
         name='login'),
-    url(regex=r'^logout$', view=logout, name='logout'),
-
-    url(regex=r'^$', view=question_next),
-    url(regex=r'^flashcard/$', view=flashcard, name='flashcard'),
-    url(regex=r'^question/$', view=question_next, name='question_next'),
-    url(regex=r'^question/(?P<id_question>[0-9]*)/$', view=question, name='question'),
-    url(regex=r'^answer/(?P<id_attempt>[0-9]*)/$', view=answer, name='answer'),
+    url(regex=r'^logout$', view=emailusername_views.logout, name='logout'),
+    url(regex=r'^$', view=question_views.flashcard),
+    url(regex=r'^flashcard/$', view=question_views.flashcard, name='flashcard'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
