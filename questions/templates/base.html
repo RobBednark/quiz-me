@@ -28,14 +28,14 @@
         <a class="navbar-brand" href="/">QuizME</a>
       </div>
       {% block logout %}
-      <p class="navbar-text navbar-right">
+      <div class="navbar-text">
         Signed in as {{ user }} | <a href="/logout" class="navbar-link">Logout</a>
-      </p>
+      </div>
       {% endblock %}
-      <div class="navbar-text navbar-right">
+      <div class="navbar-text">
         database=[{{ settings.DATABASES.default.NAME }}]
       </div>
-      <div class="navbar-text navbar-right">
+      <div class="navbar-text">
         v{{ settings.VERSION }} {{ settings.VERSION_DATE }}
       </div>
     </div>
