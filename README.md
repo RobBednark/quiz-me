@@ -420,23 +420,13 @@ shows as two lines in the question page, but one line on the answer page (no lin
         - unseen
 * 7/1/15 FEATURE: in addition to tags, consider keywords
 * 6/28/15 FEATURE: show how long (duration/interval) it has been between when we last answered the question and now; this will me when I answer determine how long I want to set the next interval (both question and answer pages)
-* 6/2/15 BUG: I added a new question with tags=[file_systems, unix]; when I went to quiz myself with a bunch of tags selected, but neither [file_systems, unix], I still got that question; after I answered that question, I then got another question with those same tags
-  - it might be because the schedules query 
-  - questions being shown that should not be:
-        http://localhost:8000/question/1052/  
-        http://localhost:8000/question/1053/
-* 5/29/15 show list of selected tags on one line (instead of having to look through list of all tags) #high
 * 05/17/15 show the number of questions recently answered/scheduled (e.g., 0-10mins=[5]  10-30mins=[12] 30m-2h=[4]  0-2h=[21])  #high
 * 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time  #high
 * 3/10/15 don't allow duplicate tags to be created
-* 3/10/15 show the question number on the answer page, so that it can be visually seen to manually edit the question in the admin
 * Export (export questions via csv / json / yaml / xml / python data structure / plain text).  Find a way to maintain referential integrity.
 * 02/11/15 On the answer page, add an input box where the user can type to practice the answer.  Maybe or maybe not save it (only value in saving it would be to see the effort that was made).  #high
-* 01/23/15 Django Admin: be able to click on the answer from the list of questions page.
-* 02/15/15 Django Admin: show the associated question(s) for each answer, and be able to click on the question 
 * 01/23/15 Django Admin: add ability to edit answer in same page as editing question.
 * 2/11/15  Show the schedule numbers for the total of selected tags (just like is done for each individual tag)  #high
-* 01/23/15 Add search to Django admin to search in questions and answers.
 * 12/31/14 Added schedule intervals for "immediate" and "never"
 * 12/31/14 Allow a quiz mode that consists of a set of questions, and the user can go back and change their answers as much as they want (e.g., as part of an interview)
 * 12/31/14 Make it possible to view questions that don't have any tags ("untagged")  #high
@@ -445,7 +435,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 12/31/14 Change all timezones to UTC
 * 12/30/14 Implement variations (a question can have variations -- other questions that are similar but modified in a different way; e.g., 2+3=? could be a variation of 2+2=?); this is helpful so that you don't get in the habit of seeing the question and remembering the answer without understanding it
 * 12/27/14 ask how well the question was answered (maybe percentage; excellent / good / bad)
-* 12/21/14 Modify to pass question number in endpoint instead of as hidden field
 * 12/21/14 Add contributors.md
 * 12/21/14 Add to readthedocs
 * 02/15/15 Consider adding a priority field (interval is ideally when you want to see it again, but priority is how important it is to you; so 2 different questions could have the same interval, but the one with the higher priority gets shown first; however, what to do if question1 has interval 1 month and priority "high", and question2 has interval 1 minute and priority "low" -- which gets shown first?)
@@ -453,17 +442,11 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 11/17/14 add ability to select all or deselect all for tags  #high
 * 10/20/14 add search ability, to search questions/answers for specified keywords
 * 10/20/14 in the admin, when viewing a question, show the answer as an inline that can also be edited; likewise, when viewing an answer, show the question inline  #high
-* 10/20/14 in the admin, when viewing a question, add a link/url to jump to the answer to view/edit it  #high
 * 10/18/14 per Steven Jonas, have a way to find other questions (or bookmarked webpages) with similar content to help form associations and new insights
 * 10/18/14 have questions that are a single webpagge to review (a url), and show the content of the webpage instead of just a link
-* 8/17/14 enabling tags during an answer does not enable it when the next question is shown (but it does work if enabled when asking a question)
-* BUG: clicking on tag (to disable) during a question does not disable it when the answer is shown
 * Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
-* 7/15/14 - add admin "list_filter" setting to be able to filter by tags on questions and answers
-* use a single template: combine show_question.html and show_question_and_answer.html
 * add an inline in the admin to edit the answer for a given question
 * ability to change tags for the question shown #high
-* Frequency (user selects when they want to see again (hr, day, 2 days, week, month, 2 mos)
 * deploy to heroku
 * 7/14/14 - add a "SKIP" button to skip a question
 * 7/14/14 - capture the elapsed time that it took the user to reply
@@ -472,7 +455,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * FEATURE: display url's as clickable url's (href's) if they aren't already in markdown url format #high
 * Import (import questions via csv / json / yaml / python data structure)
 * Questions (add questions from the web page instead of the admin)
-* Tags (be able to tag questions, and then select tags from which to select questions)
 * consider allowing a hierarchy of tags, e.g.,
     - `** Programming`
     - `**** Languages`
@@ -485,20 +467,12 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * NewUser registration
     * page to create account
     * email address verification/registration
-* tests
 * Footer: 
-    * show tags
-    * show how many times seen
-    * show how many times answered
-    * show last time seen
     * show total number of questions
 * Review mode: just show questions and answers
 * email questions
-
-* Rich Text for questions and answers
 * graph database
 * Questions (modify questions from the web page while asking the question)
-* unique url's (e.g., either based on question words, or based on an id)
 * "Ignore" tag -- never see the question again
 * private questions/answers
 * add Google Analytics
@@ -506,7 +480,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * Front-end:
     * ability to add questions/answers
     * ability to modify questions/answers on-the-fly
-
 * versions of questions/answers
 
 
