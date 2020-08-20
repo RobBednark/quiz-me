@@ -365,7 +365,6 @@ To get webapp to connect to that db:
 * 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.18.20 NEW Get running on linode
 * 7.24.20 NEW add a button to deselect/clear all tags
-* 6/24/20 FEATURE: put question and response in a single page, with the answer collapsed
 * 7.24.20 NEW get next question randomly; e.g., for the selected tags, store the last question seen in random mode, and get a random question from everything older than that scheduled/last seen, so that all questions are being cycle through before being seen again; if doing SQL random SELECT, consider:
 https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
 https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm  
@@ -390,7 +389,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases) (start with 0.10.0?)
 * 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 7.15.20 ADD example fixture data (a user, some questions, answers, tags)
-* 7.14.20 UPGRADE See if I can easily move my quizme_product db data into a fresh db
 * 7.14.20 REFACTOR See if emailusername can be eliminated
 * 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
 * 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards)
