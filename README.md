@@ -421,13 +421,10 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 7/1/15 FEATURE: in addition to tags, consider keywords
 * 6/28/15 FEATURE: show how long (duration/interval) it has been between when we last answered the question and now; this will me when I answer determine how long I want to set the next interval (both question and answer pages)
 * 05/17/15 show the number of questions recently answered/scheduled (e.g., 0-10mins=[5]  10-30mins=[12] 30m-2h=[4]  0-2h=[21])  #high
-* 04/03/15 add a "note" section to the schedule, as a scratchpad, and also to mention what I forgot and what to remember next time  #high
 * 3/10/15 don't allow duplicate tags to be created
 * Export (export questions via csv / json / yaml / xml / python data structure / plain text).  Find a way to maintain referential integrity.
-* 02/11/15 On the answer page, add an input box where the user can type to practice the answer.  Maybe or maybe not save it (only value in saving it would be to see the effort that was made).  #high
 * 01/23/15 Django Admin: add ability to edit answer in same page as editing question.
 * 2/11/15  Show the schedule numbers for the total of selected tags (just like is done for each individual tag)  #high
-* 12/31/14 Added schedule intervals for "immediate" and "never"
 * 12/31/14 Allow a quiz mode that consists of a set of questions, and the user can go back and change their answers as much as they want (e.g., as part of an interview)
 * 12/31/14 Make it possible to view questions that don't have any tags ("untagged")  #high
 * 12/31/14 Have a "review all" mode that goes through all questions for the selected tags, showing you number seen and number remaining.
@@ -438,7 +435,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 12/21/14 Add contributors.md
 * 12/21/14 Add to readthedocs
 * 02/15/15 Consider adding a priority field (interval is ideally when you want to see it again, but priority is how important it is to you; so 2 different questions could have the same interval, but the one with the higher priority gets shown first; however, what to do if question1 has interval 1 month and priority "high", and question2 has interval 1 minute and priority "low" -- which gets shown first?)
-* 12/21/14 Add tasks to either github issues or to Trello
 * 11/17/14 add ability to select all or deselect all for tags  #high
 * 10/20/14 add search ability, to search questions/answers for specified keywords
 * 10/20/14 in the admin, when viewing a question, show the answer as an inline that can also be edited; likewise, when viewing an answer, show the question inline  #high
@@ -447,7 +443,6 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
 * add an inline in the admin to edit the answer for a given question
 * ability to change tags for the question shown #high
-* deploy to heroku
 * 7/14/14 - add a "SKIP" button to skip a question
 * 7/14/14 - capture the elapsed time that it took the user to reply
 * 7/14/14 - show all questions/answers for given tags on a single page
@@ -471,12 +466,9 @@ shows as two lines in the question page, but one line on the answer page (no lin
     * show total number of questions
 * Review mode: just show questions and answers
 * email questions
-* graph database
 * Questions (modify questions from the web page while asking the question)
 * "Ignore" tag -- never see the question again
 * private questions/answers
-* add Google Analytics
-
 * Front-end:
     * ability to add questions/answers
     * ability to modify questions/answers on-the-fly
