@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 {% load markdown_deux_tags %}
 
-{% block content %}
-  <head>
+{% block content_head %}
     {{ form_flashcard.media }}
     <title>Quiz</title>
     <meta url-encoding="utf-8" />
-  </head>
+{% endblock %}
 
-  <body>
+{% block content_body %}
     <h1>Take a Quiz</h1>
     <form action="" method="post">
       {% csrf_token %}
@@ -149,6 +148,4 @@
         <input class="btn btn-primary btn-lg" type="submit" value="Answer" />
       </div>
     </form>
-  </body>
-</html>
 {% endblock %}

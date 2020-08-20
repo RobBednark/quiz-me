@@ -339,7 +339,6 @@ To get webapp to connect to that db:
 * 8.14.20 NEW modify so that in multi-user environment, /flashcard only sees logged-in user's tags and questions; admin: user cannot see/edit other users content
 * 8.14.20 NEW capture HTTP requests/responses in different db (endpoint, IP address, status code) (e.g., django-wiretap) (WHY? to capture suspicious activity)
 * 8.14.20 NEW add feature to show a random photo from some collection (e.g., Google Photos, unsplash, r/pics)
-* 8.14.20 FIX flashcard page has multiple HEADs and BODYs
 * 8.13.20 NEW optionally show questions based questions matching text inputted by user
 * 8.12.20 CHANGE combine questions and answers in the same table; I made them separate, thinking it would be useful to have multiple questions for the same answer, but I don't think that is worth it anymore; (why? so it is simpler to add and edit questions and answers in a single page)
 * 8.11.20 NEW add a section to show all answers/attempts submitted for a given question
