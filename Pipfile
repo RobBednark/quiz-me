@@ -20,7 +20,7 @@ Django = "*"
 humanize = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
 
 # django-markdown-deux -- for "markdown" template tag to convert markdown to html
 # django-pagedown -- markdown wysiwyg editor
