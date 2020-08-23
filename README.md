@@ -411,7 +411,6 @@ Attempts:
 
 ### Entities
 - answers
-- hints
 - questions
 - quizzes (collection of questions)
 - tags
@@ -433,7 +432,6 @@ Question Types:
 * video clip
 * image
 * click on photo (e.g., US map, states)
-Hints:
 
 Modes:
 

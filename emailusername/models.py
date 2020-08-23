@@ -39,7 +39,6 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     # answer_set = ForeignKey(Answer)
     # attempt_set = ForeignKey(Attempt)
-    # hint_set = ForeignKey(Hint)
     # question_set = ForeignKey(Question)
     # questiontag_set = ForeignKey(QuestionTag)
     # quiz_set = ForeignKey(Quiz)

@@ -61,7 +61,6 @@ class Question(CreatedBy):
 @python_2_unicode_compatible
 class Answer(CreatedBy):
     answer = models.TextField()
-    # hint_set
     # question_set
     # user
     # user_set
@@ -73,13 +72,6 @@ class Answer(CreatedBy):
 class Attempt(CreatedBy):
     attempt = models.TextField()
     question = models.ForeignKey('Question', on_delete=models.CASCADE, null=False)
-    # user
-    # user_set
-
-
-class Hint(CreatedBy):
-    answer = models.ForeignKey('Answer', on_delete=models.CASCADE, null=True)
-    hint = models.TextField()
     # user
     # user_set
 
