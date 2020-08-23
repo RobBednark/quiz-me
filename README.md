@@ -338,7 +338,6 @@ To get webapp to connect to that db:
     * question, answer, quiz, previous are all loaded in the context
 * models:
     * Category
-    * Quiz
     * Progress
     * Sitting
         * user
@@ -412,7 +411,6 @@ Attempts:
 ### Entities
 - answers
 - questions
-- quizzes (collection of questions)
 - tags
 - users
 

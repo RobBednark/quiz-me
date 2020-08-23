@@ -41,7 +41,6 @@ class User(AbstractBaseUser):
     # attempt_set = ForeignKey(Attempt)
     # question_set = ForeignKey(Question)
     # questiontag_set = ForeignKey(QuestionTag)
-    # quiz_set = ForeignKey(Quiz)
     # tag_set = ManyToMany(Tag)
     # usertag_set = ForeignKey(UserTag)
 

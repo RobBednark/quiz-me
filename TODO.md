@@ -11,7 +11,6 @@
 * 8.13.20 NEW optionally show questions based questions matching text inputted by user
 * 8.12.20 CHANGE combine questions and answers in the same table; I made them separate, thinking it would be useful to have multiple questions for the same answer, but I don't think that is worth it anymore; (why? so it is simpler to add and edit questions and answers in a single page)
 * 8.11.20 NEW add a section to show all answers/attempts submitted for a given question
-* 8.08.20 REMOVE models: Quiz
 * 8.08.20 NEW add option to cycle through random fonts for each question
 * 8.06.20 NEW quiz on questions with no tags
 * 8.01.20 NEW Add auto-advance option for playing audios/videos automatically, and auto-advancing to the next one (why?  to listen to flashcards while walking, running, ...)

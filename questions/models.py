@@ -97,13 +97,6 @@ class Tag(CreatedBy):
         return self.name
 
 
-class Quiz(CreatedBy):
-    # Just a placeholder for now.
-    name = models.CharField(max_length=1000)
-    # user
-    # user_set
-
-
 @python_2_unicode_compatible
 class QuestionTag(CreatedBy):
     # This is a tag applied to a question.
@@ -175,8 +168,6 @@ class UserTag(models.Model):
     # Maybe it would be better to be called QuizTag.
     # For each user, they will have a UserTag for each tag,
     # with an enable=True/False
-    # Eventually, will have different quizzes where each quiz has its
-    # own set of UserTag's.
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     enabled = models.BooleanField(default=False)
