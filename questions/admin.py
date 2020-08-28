@@ -30,6 +30,7 @@ class AttemptAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
+    readonly_fields = ('datetime_added', 'datetime_updated')
     # enable searching for Attempt's on these fields
     search_fields = ['attempt', 'question__id', 'question__question']
 
