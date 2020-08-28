@@ -28,7 +28,8 @@ NextQuestion = namedtuple(
         'num_schedules',
         'option_limit_to_date_show_next_before_now',
         'question',
-        'schedules_recent_count',
+        'schedules_recent_count_30',
+        'schedules_recent_count_60',
         'user_tag_names'
     ]
 )
@@ -188,13 +189,21 @@ def _get_next_question(user):
     debug_print and print('order_by = %s' % order_by)
     questions = questions.order_by(*order_by)
 
-    SCHEDULES_SINCE_INTERVAL = { 'minutes': 30 }
-    delta = relativedelta(**SCHEDULES_SINCE_INTERVAL)  # e.g., (minutes=30)
-    schedules_since = datetime_now - delta
-    schedules_recent_count = (
+    SCHEDULES_SINCE_INTERVAL_30 = { 'minutes': 30 }
+    SCHEDULES_SINCE_INTERVAL_60 = { 'minutes': 60 }
+    delta_30 = relativedelta(**SCHEDULES_SINCE_INTERVAL_30)  # e.g., (minutes=30)
+    delta_60 = relativedelta(**SCHEDULES_SINCE_INTERVAL_60)  # e.g., (minutes=30)
+    schedules_since_30 = datetime_now - delta_30
+    schedules_since_60 = datetime_now - delta_60
+    schedules_recent_count_30 = (
         models.Schedule.objects
         .filter(user=user)
-        .filter(datetime_added__gte=schedules_since)
+        .filter(datetime_added__gte=schedules_since_30)
+        .count())
+    schedules_recent_count_60 = (
+        models.Schedule.objects
+        .filter(user=user)
+        .filter(datetime_added__gte=schedules_since_60)
         .count())
 
     count_questions_before_now = 0
@@ -251,7 +260,8 @@ def _get_next_question(user):
         count_questions_tagged=count_questions_tagged,
         option_limit_to_date_show_next_before_now=option_limit_to_date_show_next_before_now,
         question=question_to_show,
-        schedules_recent_count=schedules_recent_count,
+        schedules_recent_count_30=schedules_recent_count_30,
+        schedules_recent_count_60=schedules_recent_count_60,
         user_tag_names=','.join(sorted([tag for tag in tag_names])),  # query #5
         num_schedules=num_schedules,
     )
@@ -382,7 +392,8 @@ def _get_flashcard(request, form_flashcard=None):
             option_limit_to_date_show_next_before_now=next_question.option_limit_to_date_show_next_before_now,
             question=next_question.question,
             question_tag_names=question_tag_names,
-            schedules_recent_count=next_question.schedules_recent_count,
+            schedules_recent_count_30=next_question.schedules_recent_count_30,
+            schedules_recent_count_60=next_question.schedules_recent_count_60,
             settings = settings,
             user_tag_names=next_question.user_tag_names,
             num_schedules=next_question.num_schedules

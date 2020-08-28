@@ -109,7 +109,8 @@
           {% else %}
             <br/>[{{ count_questions_before_now }}] questions for all selected tags
           {% endif %}
-          <br/>[{{ schedules_recent_count }}] flashcards reviewed in last 30 minutes
+          <br/>[{{ schedules_recent_count_30 }}] flashcards reviewed in last 30 minutes
+          <br/>[{{ schedules_recent_count_60 }}] flashcards reviewed in last 60 minutes
           <br/>[{{ count_questions_tagged }}] flashcards with the selected tags
           <br/>[{{ num_schedules }} times this flashcard has been seen
           <br/>[{{ last_schedule_added.human_datetime_added }}] ago last seen
