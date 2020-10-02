@@ -1,7 +1,20 @@
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
-
+* 9.21.20 ADD feature to create a blank attempt for a question when it is added (Why?  To eliminate the problem of seeing unanswered questions first (or not seeing them if nulls are last)
+* 9.19.20 ADD hover over tags for question to show questions as a popup list for easier viewing
+* 9.19.20 ADD option for default opening hints and answers
+* 9.16.20 Admin: add question: show number of questions for each tag name in the dropdown to select a tag
+* 9.16.20 Admin: Tab list view: show number of questions for each tage
+* 9.14.20 scheduled (e.g., iterate through x selected tags one at a time, select y cards from each tag)
+    ** input: selected tags
+    ** input: x cards per tag
+    ** implementation: selected_tags_set, remaining_tags_set
+    ** implementation: instead of selected tags, choose one tag from remaining_tags_set, and use that as the selected tag (don't want to use all remaining tags, because we need to know which tag to remove from the set; or else remove one of the tags associated with the question that is in the remaining_tags_set)
+    ** implementation: store the sets, so that when user selects that set of tags again, it uses the same set
+* 9.14.20 random time range (e.g., choose card from 1 day range from date of next card)
+* 9.13.20 ADD ability to type in question without saving it or having to delete it (practice typing; type it to learn it)
+* 9.5.20 ADD functionality to import from other sources (iBooks notes, Google Play Books notes, Evernote, Keep, Google Sheets, Notion, ...)
 * 8.16.20 CHANGE: Django Admin - prepopulate user with the logged-in user  (see https://stackoverflow.com/questions/53253288/django-admin-prepopulate-field-and-set-readonly)
 * 8.16.20 CHANGE Django Admin -- autopopulate the user when adding a new question/answer/tag
 * 8.16.20 CHANGE see if Django admin can be set to not prepulate dropdowns (e.g., viewing a tag, don't populate the question dropdowns; when adding a question, don't populate the answer dropdowns)
