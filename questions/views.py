@@ -273,6 +273,7 @@ def _get_tag2periods(user, modelformset_usertag=None):
        the .interval_counts attribute of the corresponding form in :modelformset_usertag:
        e.g.,
         modelformset_usertag[0].interval_counts == '-now=3 1d-1w=8 unseen=22'
+       SIDE EFFECT: modifies modelformset_usertag (adds the ".interval_counts" property on to each form)
     """
     # TODO: also pass in the selected tags and count the questions for those tags
     INTERVALS = (
