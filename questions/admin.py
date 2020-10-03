@@ -26,13 +26,20 @@ class AnswerAdmin(admin.ModelAdmin):
 
 
 class AttemptAdmin(admin.ModelAdmin):
-    list_display = ['id', 'datetime_added', 'attempt', 'question']
+    list_display = ['id', 'datetime_added', 'tags_display', 'attempt', 'question']
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
     readonly_fields = ('datetime_added', 'datetime_updated')
     # enable searching for Attempt's on these fields
-    search_fields = ['attempt', 'question__id', 'question__question']
+    search_fields = ['attempt', 'question__id', 'question__question', 'question__tag__name']
+
+    def tags_display(self, obj):
+        # Use for list_display to show the names of all the tags (a many-to-many field)
+        return ", ".join([
+            tag.name for tag in obj.question.tag_set.all()
+        ])
+    tags_display.short_description = "Tags"
 
 
 class TagAdmin(admin.ModelAdmin):
