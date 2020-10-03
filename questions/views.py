@@ -374,7 +374,7 @@ def _get_flashcard(request, form_flashcard=None):
                 question=next_question.question
             ).latest('datetime_added')
         )
-        last_schedule_added.human_datetime_added = humanize.naturaldelta(
+        last_schedule_added.human_datetime_added = humanize.precisedelta(
             timezone.now() - last_schedule_added.datetime_added)
     except ObjectDoesNotExist:
         last_schedule_added = None
