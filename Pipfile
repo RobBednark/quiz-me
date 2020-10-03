@@ -9,6 +9,7 @@ splinter = "==0.8.0"
 django-debug-toolbar = "*"
 django-extensions = "*"
 jupyterlab = "*"
+pudb = "*"
 
 [packages]
 py2-py3-django-email-as-username = "*"
@@ -27,3 +28,4 @@ python_version = "3.8"
 # django-pagedown -- markdown wysiwyg editor
 # humanize -- converts time durations to human-readable times (e.g., "11 days")
 # jupyterlab -- used with django-extensions "manage.py shell_plus --notebook" to run IPython Jupyter Notebook (note: also need "brew install jupyter")
+# pudb -- a full-screen python debugger
