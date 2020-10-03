@@ -164,6 +164,9 @@ INSTALLED_APPS = (
     'questions',
     'emailusername',  # used for User; so email addresses can be used as username
 )
+if DEBUG:
+    INSTALLED_APPS += ('django_extensions',)
+
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
     DEBUG_TOOLBAR_CONFIG = {
