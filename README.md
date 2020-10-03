@@ -116,7 +116,7 @@ docker rm $(docker ps -a -q)
   All commits should be granular, e.g., a single (CHANGE, COMMENT, FIX, NEW, REFACTOR).  
   e.g., a single commit should not contain both fixes and features.
 * **view &ast;.md changes before merging**   
-  If changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct
+  If changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct.  `grip` (`brew install grip`) is a good utility for doing this.
 * **update README.md**
   Update README.md accordingly, including:  
     * TODO section -- remove corresponding item(s) if they have been implemented in this commit
