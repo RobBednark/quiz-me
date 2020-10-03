@@ -42,7 +42,10 @@
 * 7.30.20 NEW add input for % percent confidence in answer (and then optionally use that for picking next question)
 * 7.28.20 COMMENT add to the Readme a list of features, particularly the ones that make this different from other apps
 * 7.27.20 NEW admin: add related schedules to questions, but make them read-only (why? to see what schedules are associated with a question, so I don't have to create a db query to see them)
-* 7.27.20 NEW show stats of questions asks and added each day, week, month for the past n months
+* 7.27.20 NEW show/view stats of cards reviewed/seen and cards added each day, week, month, year for the past n months  (#high)
+  query: foreach tag:
+    - return all schedules for that tag, DESC by date_added
+      (last schedule for each question, or all schedules?)
 * 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.18.20 NEW Get running on linode
 * 7.24.20 NEW add a button to deselect/clear all tags
@@ -72,7 +75,10 @@ shows as two lines in the question page, but one line on the answer page (no lin
 * 7.15.20 ADD example fixture data (a user, some questions, answers, tags)
 * 7.14.20 REFACTOR See if emailusername can be eliminated
 * 7/4/20, 3/28/15 allow a tree structure of tags, so that selecting a tag would select that and everything below it [suggested by Nev] (I discovered that I'm not reviewing as many flashcards because of not having this; e.g., select all non-software tags)
-* 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards)
+* 7.12.20 FEATURE consider a "frequency" field to indicate how often to see the flashcard (why? to show important/frequent cards that I want to see often, like daily, before other cards that are waiting to be seen before now) (e.g., show this card every 1 days, and if it hasn't been seen in the last day, then show it before other cards) #high  
+
+    * from last time seen, calc next due date (last_seen + frequency_interval)
+    * order by either due ascending, or percent_overdue (amount_overdue / frequency_interval)
 * 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
 * 7.15.20 ADD a separate select-tags page to be able to change tags without submitting an answer
 * 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
