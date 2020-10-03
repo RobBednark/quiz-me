@@ -7,10 +7,10 @@
 * 9.16.20 Admin: add question: show number of questions for each tag name in the dropdown to select a tag
 * 9.16.20 Admin: Tab list view: show number of questions for each tage
 * 9.14.20 scheduled (e.g., iterate through x selected tags one at a time, select y cards from each tag)
-    ** input: selected tags
-    ** input: x cards per tag
-    ** implementation: selected_tags_set, remaining_tags_set
-    ** implementation: instead of selected tags, choose one tag from remaining_tags_set, and use that as the selected tag (don't want to use all remaining tags, because we need to know which tag to remove from the set; or else remove one of the tags associated with the question that is in the remaining_tags_set)
+    * input: selected tags
+    * input: x cards per tag
+    * implementation: selected_tags_set, remaining_tags_set
+    * implementation: instead of selected tags, choose one tag from remaining_tags_set, and use that as the selected tag (don't want to use all remaining tags, because we need to know which tag to remove from the set; or else remove one of the tags associated with the question that is in the remaining_tags_set)
     ** implementation: store the sets, so that when user selects that set of tags again, it uses the same set
 * 9.14.20 random time range (e.g., choose card from 1 day range from date of next card)
 * 9.13.20 ADD ability to type in question without saving it or having to delete it (practice typing; type it to learn it)
@@ -33,6 +33,7 @@
     - mark only percent correct
     - mark only percent confidence
     - mark both percent correct and percent confidence
+
   |attempt_text  |schedule  |%_correct  |%_confidence   |outcome|
   |------------  |--------  |---------  |------------   |-------|
   |yes           |yes       |yes        |yes            |typical schedule|
@@ -42,14 +43,14 @@
 * 7.30.20 NEW add input for % percent confidence in answer (and then optionally use that for picking next question)
 * 7.28.20 COMMENT add to the Readme a list of features, particularly the ones that make this different from other apps
 * 7.27.20 NEW admin: add related schedules to questions, but make them read-only (why? to see what schedules are associated with a question, so I don't have to create a db query to see them)
-* 7.27.20 NEW show/view stats of cards reviewed/seen and cards added each day, week, month, year for the past n months  (#high)
+* 7.27.20 NEW show/view stats of cards reviewed/seen and cards added each day, week, month, year for the past n months  (#high)  
   query: foreach tag:
     - return all schedules for that tag, DESC by date_added
       (last schedule for each question, or all schedules?)
 * 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 * 7.18.20 NEW Get running on linode
 * 7.24.20 NEW add a button to deselect/clear all tags
-* 7.24.20 NEW get next question randomly; e.g., for the selected tags, store the last question seen in random mode, and get a random question from everything older than that scheduled/last seen, so that all questions are being cycle through before being seen again; if doing SQL random SELECT, consider:
+* 7.24.20 NEW get next question randomly; e.g., for the selected tags, store the last question seen in random mode, and get a random question from everything older than that scheduled/last seen, so that all questions are being cycle through before being seen again; if doing SQL random SELECT, consider:  
 https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
 https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm  
 https://stackoverflow.com/questions/22816704/django-get-a-random-object  
@@ -69,7 +70,8 @@ https://github.com/sv0/django-markdown-app
 * 7.16.20 FIX why markdown displayed for answer in question page is displayed differently from the answer page, e.g., 
   > \> one  
   > two  
-shows as two lines in the question page, but one line on the answer page (no linefeeds)
+
+    shows as two lines in the question page, but one line on the answer page (no linefeeds)
 * 7.12.20 DEV_PROCESS update the release process to use github "releases" (why? to see release history, and see what was added when) (e.g., https://github.com/timmyomahony/django-pagedown/releases) (start with 0.10.0?)
 * 6/24/20 FEATURE: when outputting dates, add the day-of-the-week, e.g. *__Tue__ June 23, 2020, 3:42 a.m.*
 * 7.15.20 ADD example fixture data (a user, some questions, answers, tags)
