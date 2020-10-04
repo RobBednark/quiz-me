@@ -1,3 +1,5 @@
+# *.ipynb* -- ignore IPython Notebook files
+*.ipynb*
 *.pyc
 # *.log -- e.g. geckodriver.log ghostdriver.log
 *.log
