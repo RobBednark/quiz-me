@@ -345,7 +345,7 @@ def _get_flashcard(request, form_flashcard=None):
     # Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
     # because _create_and_get_usertags might create new usertags, which are used
     # by _get_next_question().
-    modelformset_usertag = _NEW_create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
+    modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
 
     next_question = _get_next_question(user=request.user)
     id_question = next_question.question.id if next_question.question else 0
@@ -464,7 +464,7 @@ def _get_modelformset_usertag(method, queryset, post_data):
     return modelformset_usertag
 
 
-def _NEW_create_and_get_usertags(user, method, post_data=None):
+def _create_and_get_usertags(user, method, post_data=None):
     """For the given :request:, return a modelformset_usertag that is an
     iterable with a form for each usertag.
     request.user will be used to get the corresponding usertags for that user.
