@@ -448,6 +448,22 @@ def flashcard(request):
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 
+def _get_modelformset_usertag(method, queryset, post_data):
+    ModelFormset_UserTag = modelformset_factory(
+        model=models.UserTag, extra=0, fields=('enabled',))
+    if method == 'GET':
+        modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
+    elif method == 'POST':
+        # Create a new modelformset without the POST data, because there might be new tags
+        # that have been added after the page was displayed and before the Submit button was
+        # clicked.
+        modelformset_usertag = ModelFormset_UserTag(
+            queryset=queryset,
+            data=post_data
+        )
+    return modelformset_usertag
+
+
 def _NEW_create_and_get_usertags(user, method, post_data=None):
     """For the given :request:, return a modelformset_usertag that is an
     iterable with a form for each usertag.
@@ -456,10 +472,6 @@ def _NEW_create_and_get_usertags(user, method, post_data=None):
     if method == 'POST', then save any changes made by the user to any of the forms.
     Returns modelformset_usertag (an iterable of one form for each usertag).
     """
-    ModelFormset_UserTag = modelformset_factory(
-        model=models.UserTag, extra=0, fields=('enabled',)
-    )
-
     queryset = (
         models.UserTag.objects.filter(user=user)
         # annotate the number of questions so it can be displayed to the user
@@ -488,16 +500,12 @@ def _NEW_create_and_get_usertags(user, method, post_data=None):
             # There isn't a tag, so create one
             models.UserTag(user=user, tag=tag, enabled=False).save()
 
+    modelformset_usertag = _get_modelformset_usertag(method=method, queryset=queryset, post_data=post_data)
     if method == 'GET':
-        modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
         for form in modelformset_usertag.forms:
             # For each checkbox, display to the user the tag name
             form.fields['enabled'].label = form.instance.tag.name
         return modelformset_usertag
-        modelformset_usertag = ModelFormset_UserTag(
-            queryset=queryset,
-            data=post_data
-        )
     elif method == 'POST':
         for form in modelformset_usertag.forms:
             # For each checkbox, display to the user the tag name
@@ -507,10 +515,6 @@ def _NEW_create_and_get_usertags(user, method, post_data=None):
         if modelformset_usertag.is_valid():  # All validation rules pass
             modelformset_usertag.save()
 
-            # Create a new modelformset without the POST data, because there might be new tags
-            # that have been added after the page was displayed and before the Submit button was
-            # clicked.
-            modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
             for form in modelformset_usertag.forms:
                 # For each checkbox, display to the user the tag name
                 form.fields['enabled'].label = form.instance.tag.name
