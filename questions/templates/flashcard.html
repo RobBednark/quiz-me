@@ -127,9 +127,7 @@
         {% endif %}
           <summary>Tags</summary>
           <!-- Show all the tags -->
-          <p>
             Ask questions with these tags:
-            <br/>
             {{ modelformset_usertag.management_form }}
             {% if modelformset_usertag__total_error_count %}
               {{ modelformset_usertag__non_form_errors }}
@@ -137,12 +135,13 @@
             {% endif %}
 
             {% for form_usertag in modelformset_usertag.forms %}
+              <div>
               {{ form_usertag }} 
               (num_questions=[{{ form_usertag.instance.num_questions }}]) 
               {{ form_usertag.interval_counts }}
-              </br>
+              </div>
             {% endfor %}
-          </p>
+
         </details>
         <input class="btn btn-primary btn-lg" type="submit" value="Answer" />
       </div>
