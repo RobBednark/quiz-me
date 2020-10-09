@@ -7,7 +7,7 @@
 
 {% block content_body %}
     <h1>Take a Quiz</h1>
-    <form action="" method="post">
+    <form method="post">
       {% csrf_token %}
       {{ form_flashcard.hidden_question_id }}
       <div class="row">
