@@ -24,7 +24,7 @@
           {% if question %}
             <div class="alert alert-warning" role="alert">
               {% if question.answer %}
-                <details open=true >
+                <details open >
               {% else %}
                 (there is no answer for this question)
                 <details>
@@ -44,7 +44,7 @@
                   <summary>Correct Answer</summary>
                   {{ question.answer.answer|markdown:"do-not-escape-html" }}
               {% else %}
-                <details open=true >
+                <details open >
                   <summary>(there is no answer for this question)</summary>
               {% endif %}
             </div>
@@ -121,7 +121,7 @@
         {% if question %}
           <details>
         {% else %}
-          <details open=true >
+          <details open >
         {% endif %}
           <summary>Tags</summary>
           <!-- Show all the tags -->
