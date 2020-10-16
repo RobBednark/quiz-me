@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.db.models import Count, F, OuterRef, Q, Subquery
+from django.db.models import IntegerField, Sum, Case, When
+from django.db.models.functions import Coalesce
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -267,6 +269,27 @@ def _get_next_question(user):
     )
 
 
+def _get_tag_schedule_counts(user):
+    # get counts of schedules for each tag
+    # Returns tags queryset, , e.g.,
+    #  [ dict(id=55, name='my_tag', question_count_since_week_ago=44) ]
+    one_week = relativedelta(days=7)
+    now = datetime.now(tz=pytz.utc)
+    week_ago = now - one_week
+
+    user_tags = models.UserTag.objects.filter(user=user).values_list('tag', flat=True)
+    tags = (models.Tag.objects
+        .filter(id__in=user_tags)
+        .annotate(question_count_since_week_ago=
+            Coalesce(Sum(
+                         Case(
+                              When(questions__schedule__datetime_added__gte=week_ago, then=1)
+                         ),
+                         output_field=IntegerField(),
+                         default=0),
+                     0)))
+    return tags
+
 def _get_tag2periods(user, modelformset_usertag=None):
     """For the given :user:, find the number of questions scheduled to be answered in each time
        period (unseen, -now, now-10m, ...).  Assign this as a string to
@@ -338,13 +361,24 @@ def _get_tag2periods(user, modelformset_usertag=None):
         form.interval_counts = interval_str
     return tag2interval2cnt
 
+def _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag):
+    # e.g.,
+    # tag_schedule_counts == 
+    name2instance = { tag.name: tag for tag in tag_schedule_counts }
+    for form in modelformset_usertag:
+        # update the corresponding tag in modelformset
+        tag_name = form.instance.tag.name
+        form.question_count_since_week_ago = name2instance[tag_name].question_count_since_week_ago
 
 @login_required(login_url='/login')
 def _get_flashcard(request, form_flashcard=None):
     # Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
     # because _create_and_get_usertags might create new usertags, which are used
     # by _get_next_question().
+
+    tag_schedule_counts = _get_tag_schedule_counts(user=request.user)
     modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
+    _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
 
     next_question = _get_next_question(user=request.user)
     id_question = next_question.question.id if next_question.question else 0
