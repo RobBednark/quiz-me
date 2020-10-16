@@ -106,9 +106,22 @@ docker rm $(docker ps -a -q)
 * **merge commits**  
   All branch merges must have a merge commit (to make it clear when the branch changed), as opposed to a rebase, where there's no record of the rebase in git history.
 * **merge commit message details**  
-  For fixes, the message must detail what the bug is that has been fixed (include error text, etc.).  
-  For new functionality, the message should describe the functionality; the following labels should be used to indicate what the commit does:  
-      CHANGE, COMMENT, FIX, NEW, REFACTOR
+    * The following labels should be used to indicate what the commit does:  
+        * *CHANGE*
+        * *COMMENT*
+        * *FIX*
+        * *NEW*
+        * *REFACTOR*
+    * For *CHANGE* commits, the message must include:
+        * *OLD BEHAVIOR*:
+        * *NEW BEHAVIOR*:
+    * For *FIX* commits, the message must include:
+        * *ISSUE* (include what the user sees, error text, etc.)
+        * *FIX* (what the fix is)
+        * *BEHAVIOR* (what the change in behavior is)
+    * For *NEW* commits, the message must include:
+        * *BEHAVIOR*: what difference in behavior the user will see
+    * Note that *BEHAVIOR* descriptions should minimally be from the user's point of view (and optionally from the developer's point of view)
 * **manual testing for PR** -- each branch to be merged must have all manual tests run
 * **manual test log**  -- manual testing for each branch or commit must be logged in TESTING.md
 * **PEP8**  --code style must adhere to PEP8; PEP8 diversions are specified in tox.ini
