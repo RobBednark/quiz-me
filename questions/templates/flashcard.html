@@ -137,6 +137,7 @@
               <div>
               {{ form_usertag }} 
               (num_questions=[{{ form_usertag.instance.num_questions }}]) 
+              (seen_past_week={{ form_usertag.question_count_since_week_ago }})
               {{ form_usertag.interval_counts }}
               </div>
             {% endfor %}
