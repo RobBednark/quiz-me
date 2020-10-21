@@ -132,13 +132,41 @@
               {{ modelformset_usertag__non_form_errors }}
               {{ modelformset_usertag.errors }}
             {% endif %}
+            <div class="row">
+                <div class="col-sm-6">
+                    Tag
+                </div>
 
+                <div class="col-sm-1">
+                    Seen in the past week
+                </div>
+
+                <div class="col-sm-1">
+                    # of questions
+                </div>
+
+                <div class="col-sm-3">
+                   # schedules per interval
+                </div>
+              </div>
             {% for form_usertag in modelformset_usertag.forms %}
               <div>
+            <div class="row">
+                <div class="col-sm-6">
               {{ form_usertag }} 
-              (num_questions=[{{ form_usertag.instance.num_questions }}]) 
-              (seen_past_week={{ form_usertag.question_count_since_week_ago }})
+                </div>
+
+                <div class="col-sm-1">
+              {{ form_usertag.question_count_since_week_ago }}
+                </div>
+
+                <div class="col-sm-1">
+              {{ form_usertag.instance.num_questions }}
+                </div>
+
+                <div class="col-sm-3">
               {{ form_usertag.interval_counts }}
+                </div>
               </div>
             {% endfor %}
 
