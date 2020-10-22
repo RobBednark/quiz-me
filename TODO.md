@@ -133,7 +133,7 @@ https://github.com/sv0/django-markdown-app
 1. Show linefeeds as linefeeds for questions/answers/attempts (add <br/> tags; or add a rich text editor)
 1. add an inline in the admin to edit the answer for a given question
 1. ability to change tags for the question shown #high
-1. 7/14/14 - add a "SKIP" button to skip a question
+1. 7/14/14 ADD a "SKIP" button to skip a question Why? Because user wants to go to the next card, but still wants the skipped card to be queued up.  "skip" means "show me the second card instead" or "push this card down in the stack to the second position" (How would that work?  Skipped for how long?  Where would it go in the queue? Can the user only skip a single card?)
 1. 7/14/14 - capture the elapsed time that it took the user to reply
 1. 7/14/14 - show all questions/answers for given tags on a single page
 1. add documentation for other users to use
