@@ -1,6 +1,7 @@
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+1. 10.24.20 ADD color-coding for # questions seen past day/week/... (maybe as static numbers, e.g., 1-5=red, 6-10=orange, ...; maybe as percentages of total for that tag, e.g., 100%=green, 80-99%-light green, ...)
 1. 10.5.20 ADD show total number of questions per tag
 1. 9.21.20 ADD feature to create a blank attempt for a question when it is added (Why?  To eliminate the problem of seeing unanswered questions first (or not seeing them if nulls are last)
 1. 9.19.20 ADD hover over tags for question to show questions as a popup list for easier viewing
