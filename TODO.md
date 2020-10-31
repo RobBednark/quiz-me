@@ -14,7 +14,7 @@
     * implementation: selected_tags_set, remaining_tags_set
     * implementation: instead of selected tags, choose one tag from remaining_tags_set, and use that as the selected tag (don't want to use all remaining tags, because we need to know which tag to remove from the set; or else remove one of the tags associated with the question that is in the remaining_tags_set)
     ** implementation: store the sets, so that when user selects that set of tags again, it uses the same set
-1. 9.14.20 random time range (e.g., choose card from 1 day range from date of next card)
+1. 9.14.20 random time range (e.g., choose card from 1 day range from date of next card, e.g., if next card should be shown 1/5/2021, then pick a random card from all cards that should be shown 1/5/2020-1/6/2020)
 1. 9.13.20 ADD ability to type in question without saving it or having to delete it (practice typing; type it to learn it)
 1. 9.5.20 ADD functionality to import from other sources (iBooks notes, Google Play Books notes, Evernote, Keep, Google Sheets, Notion, ...)
 1. 8.16.20 CHANGE: Django Admin - prepopulate user with the logged-in user  (see https://stackoverflow.com/questions/53253288/django-admin-prepopulate-field-and-set-readonly)
@@ -52,7 +52,7 @@
 1. 7.15.20 PERFORMANCE check if there is an unnecessary redirect; when hitting http://127.0.0.1:8000/question/ there is a ("GET / HTTP/1.1" 302 0) and _get_next_question() logs the same messages twice
 1. 7.18.20 NEW Get running on linode
 1. 7.24.20 NEW add a button to deselect/clear all tags
-1. 7.24.20 NEW get next question randomly; e.g., for the selected tags, store the last question seen in random mode, and get a random question from everything older than that scheduled/last seen, so that all questions are being cycle through before being seen again; if doing SQL random SELECT, consider:  
+1. 7.24.20 NEW get next question randomly; e.g., for the selected tags, store the last question seen in random mode, and get a random question from everything older than that scheduled/last seen, so that all questions are being cycled through before being seen again; if doing SQL random SELECT, consider:  
 https://stackoverflow.com/questions/8674718/best-way-to-select-random-rows-postgresql  
 https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm  
 https://stackoverflow.com/questions/22816704/django-get-a-random-object  
