@@ -1,6 +1,11 @@
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+1. 12.28.20 NEW create a command-line command to output statistics (tags, # questions last n periods, percentages per tag, etc.)
+1. 12.27.20 NEW for each tag, show the duration/interval since the oldest and newest answered/seen questions, e.g.,
+  tag      since_oldest   since_latest
+  my_tag   5 mos 3 days   2 days 4 hrs
+1. 11.9.20 ADD more tag rows to the page for adding a new question
 1. 10.24.20 ADD color-coding for # questions seen past day/week/... (maybe as static numbers, e.g., 1-5=red, 6-10=orange, ...; maybe as percentages of total for that tag, e.g., 100%=green, 80-99%-light green, ...)
 1. 10.5.20 ADD show total number of questions per tag
 1. 9.21.20 ADD feature to create a blank attempt for a question when it is added (Why?  To eliminate the problem of seeing unanswered questions first (or not seeing them if nulls are last)
