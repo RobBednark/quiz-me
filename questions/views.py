@@ -67,7 +67,7 @@ def _get_next_question(user):
     #    option_limit_to_date_show_next_before_now = ??
     #    option_order_by_when_answered_newest = False
     #    option_order_by_answered_count = True
-    # 2) Order by date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again won't necessarily be seen quickly)
+    # 2) Order by date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again will come after unanswered questions)
     #    Reinforce older questions.
     #    option_include_unanswered_questions = True
     #    option_limit_to_date_show_next_before_now = False
