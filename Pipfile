@@ -21,10 +21,10 @@ six = "*"
 python-dateutil = "*"
 Django = "*"
 humanize = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
-
 # Django -- the Django framework
 # django-debug-toolbar -- useful for viewing queries, and profiling performance
 # django-extensions -- many useful development extensions, e.g., manage.py commands:
