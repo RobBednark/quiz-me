@@ -6,7 +6,7 @@ from questions import VERSION, VERSION_DATE
 AUTH_USER_MODEL = 'emailusername.User'
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
-DEBUG = True
+DEBUG = eval(os.environ.get('QM_DEBUG', 'True'))
 ENABLE_DJANGO_DEBUG_TOOLBAR = eval(os.environ.get('QM_USE_TOOLBAR', 'False'))
 
 ADMINS = (
