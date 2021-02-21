@@ -65,13 +65,13 @@ dumpdb:
 	mkdir -p db_dumps
 	pg_dump --format=custom ${DB_CONNECTION_STRING} > ${FILE_DUMP_CUSTOM}
 	pg_dump --format=plain  ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_ALL}
-	compress ${FILE_DUMP_PLAIN_ALL}
+	gzip ${FILE_DUMP_PLAIN_ALL}
 	pg_dump --data-only --format=plain ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_DATA}
-	compress ${FILE_DUMP_PLAIN_DATA}
+	gzip ${FILE_DUMP_PLAIN_DATA}
 	pg_dump --schema-only --format=plain ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_SCHEMA}
 	DB_QUIZME=${DB_NAME_TO_DUMP} PYTHONIOENCODING=utf-8 python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
 	DB_QUIZME=${DB_NAME_TO_DUMP} python ./manage.py dumpdata --all --indent=2 > ${FILE_DUMP_DUMPDATA} 2>&1
-	compress ${FILE_DUMP_DUMPDATA}
+	gzip ${FILE_DUMP_DUMPDATA}
 	rm -f ${SYMLINK_LATEST_TEXT}
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
 	ls -hltr db_dumps/. |tail -8
