@@ -1,6 +1,9 @@
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+1. 2.3.21 NEW redesign the tags <details> to look better on mobile phone
+1. 2.2.21 NEW add Sentry
+1. 2.2.21 NEW add New Relic
 1. 1.10.21 NEW log failed login attempts (monitoring)
 1. 12.28.20 NEW create a command-line command to output statistics (tags, # questions last n periods, percentages per tag, etc.)
 1. 12.27.20 NEW for each tag, show the duration/interval since the oldest and newest answered/seen questions, e.g.,
