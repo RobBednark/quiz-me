@@ -312,6 +312,7 @@ To get webapp to connect to that db:
 ## #TODO / #Backlog / #Features / #Stories
 (NOTE: deprecate the Trello board and move the backlog items from https://trello.com/b/5WCzHwdo/quizme to here)
 
+* 12.29.21  FEATURE  show times of recent flashcards answered / marked seen (e.g., 10:05pm, 10:07pm, 10:15pm)
 * 12.29.21  FEATURE  import Anki decks
 * 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
 * 7.14.20 REFACTOR See if emailusername can be eliminated
