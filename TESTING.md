@@ -30,6 +30,14 @@
 - logout
 - login
 
+- review with no questions, no usertags, and confirm that behavior is correct (allows changing tags):
+    1. confirm there are no questions
+    2. GET /flashcard (confirm message indicating no questions; confirm tags section is open with no tags)
+    3. add a question with a tag
+    4. GET /flashcard (confirm message indicating no questions; confirm tags section is open with a tag)
+    5. select the tag and submit
+    6. confirm question is shown, and there are no errors shown
+    7. submit (confirm no errors, and that question is shown again)
 - run quiz, answer question, submit a new schedule
 - add a new question/answer
 - run quiz and select a different tag to quiz on

@@ -61,7 +61,6 @@ class Question(CreatedBy):
 @python_2_unicode_compatible
 class Answer(CreatedBy):
     answer = models.TextField()
-    # hint_set
     # question_set
     # user
     # user_set
@@ -73,13 +72,6 @@ class Answer(CreatedBy):
 class Attempt(CreatedBy):
     attempt = models.TextField()
     question = models.ForeignKey('Question', on_delete=models.CASCADE, null=False)
-    # user
-    # user_set
-
-
-class Hint(CreatedBy):
-    answer = models.ForeignKey('Answer', on_delete=models.CASCADE, null=True)
-    hint = models.TextField()
     # user
     # user_set
 
@@ -103,13 +95,6 @@ class Tag(CreatedBy):
 
     def __str__(self):
         return self.name
-
-
-class Quiz(CreatedBy):
-    # Just a placeholder for now.
-    name = models.CharField(max_length=1000)
-    # user
-    # user_set
 
 
 @python_2_unicode_compatible
@@ -183,8 +168,6 @@ class UserTag(models.Model):
     # Maybe it would be better to be called QuizTag.
     # For each user, they will have a UserTag for each tag,
     # with an enable=True/False
-    # Eventually, will have different quizzes where each quiz has its
-    # own set of UserTag's.
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     enabled = models.BooleanField(default=False)

@@ -3,41 +3,55 @@
 ## How to install and run
 1. clone the repo
 1. create a virtual environment using pipenv, e.g.,
+
         $ pipenv install
     or create a virtualenv using mkvirtualenv, e.g.,
-        mkvirtualenv quizme
+
+        $ mkvirtualenv quizme
+
 1. activate the virtualenv, e.g.,
+
         $ pipenv shell
     or using virtualenv:
+
         $ workon quizme
 1. If using virtualenv instead of pipenv, install the required packages in the virtualenv, e.g.,
-        pip install --requirement requirements.txt
+
+        $ pip install --requirement requirements.txt
 1. install and run postgresql (if using postgresql); e.g., on OSX,
-    brew install postgresql (or "brew update")
-    ("brew info postgresql" to see how to start/stop)
-    (if errors, consider "brew reinstall postgresql")
+
+        $ brew install postgresql (or "brew update")
+    (`brew info postgresql` to see how to start/stop)
+    (if errors, consider `brew reinstall postgresql`)
 1. start postgres; e.g., on OSX,
-    launchctl list | grep postgres  # see if launchctl knows about postgres, and if so, what the last exit status is
-    brew services list  # list all running services, and see if postgresql is there
-    brew services stop postgresql
-1. create a postgres database
-    createdb quizme
-    (note that the database name "quizme" is a setting in settings.py for
-     DATABASES['default']['NAME']
+
+        $ launchctl list | grep postgres  # see if launchctl knows about postgres, and if so, what the last exit status is
+
+        $ brew services list  # list all running services, and see if postgresql is there
+        $ brew services stop postgresql
+1. create a postgres database, e.g.,
+
+        $ createdb quizme
+    (note that the database name "quizme" is a setting in `settings.py` for
+     `DATABASES['default']['NAME']`
     )
 1. create a postgres user:
-    createuser quizme
+
+        $ createuser quizme
     --or--
-        psql --command="CREATE USER quizme"
+
+        $ psql --command="CREATE USER quizme"
 
     Test it:
-        psql --user=quizme quizme
-1. copy database
-   --or--
-   DB_QUIZME=my_db_name ./manage.py syncdb
-   DB_QUIZME=my_db_name ./manage.py migrate
+
+        $ psql --user=quizme quizme
+1. load existing data into database, or start with an empty database:
+
+        $ DB_QUIZME=my_db_name ./manage.py syncdb
+        $ DB_QUIZME=my_db_name ./manage.py migrate
 1. create a superuser
-DB_QUIZME=my_db_name ./manage.py createsuperuser --email my_user@my_domain.com
+
+        $ DB_QUIZME=my_db_name ./manage.py createsuperuser --email my_user@my_domain.com
 
 ## How to run tests
 
@@ -92,9 +106,22 @@ docker rm $(docker ps -a -q)
 * **merge commits**  
   All branch merges must have a merge commit (to make it clear when the branch changed), as opposed to a rebase, where there's no record of the rebase in git history.
 * **merge commit message details**  
-  For fixes, the message must detail what the bug is that has been fixed (include error text, etc.).  
-  For new functionality, the message should describe the functionality; the following labels should be used to indicate what the commit does:  
-      CHANGE, COMMENT, FIX, NEW, REFACTOR
+    * The following labels should be used to indicate what the commit does:  
+        * *CHANGE*
+        * *COMMENT*
+        * *FIX*
+        * *NEW*
+        * *REFACTOR*
+    * For *CHANGE* commits, the message must include:
+        * *OLD BEHAVIOR*:
+        * *NEW BEHAVIOR*:
+    * For *FIX* commits, the message must include:
+        * *ISSUE* (include what the user sees, error text, etc.)
+        * *FIX* (what the fix is)
+        * *BEHAVIOR* (what the change in behavior is)
+    * For *NEW* commits, the message must include:
+        * *BEHAVIOR*: what difference in behavior the user will see
+    * Note that *BEHAVIOR* descriptions should minimally be from the user's point of view (and optionally from the developer's point of view)
 * **manual testing for PR** -- each branch to be merged must have all manual tests run
 * **manual test log**  -- manual testing for each branch or commit must be logged in TESTING.md
 * **PEP8**  --code style must adhere to PEP8; PEP8 diversions are specified in tox.ini
@@ -102,7 +129,13 @@ docker rm $(docker ps -a -q)
   All commits should be granular, e.g., a single (CHANGE, COMMENT, FIX, NEW, REFACTOR).  
   e.g., a single commit should not contain both fixes and features.
 * **view &ast;.md changes before merging**   
-  If changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct
+  If changes are made to a markdown file (e.g., README.md), those changes should be viewed in a markdown editor (preferably github) before merging, to confirm that the formatting is correct.  `grip` (`brew install grip`) is a good utility for doing this.
+* **update README.md**
+  Update README.md accordingly, including:  
+    * TODO section -- remove corresponding item(s) if they have been implemented in this commit
+* **update VERSION**  
+  Update the version values in the questions/__version__.py file
+* **update CHANGELOG**
 
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
@@ -448,6 +481,7 @@ To get webapp to connect to that db:
 * DONE - postgres backups (via Makefile)
 * DONE - User login
 * DONE - add tags via Django Admin
+(see **TODO.md** file)
 
 ### django-quiz
 * Name of quiz is passed in the url
@@ -455,7 +489,6 @@ To get webapp to connect to that db:
     * question, answer, quiz, previous are all loaded in the context
 * models:
     * Category
-    * Quiz
     * Progress
     * Sitting
         * user
@@ -528,9 +561,7 @@ Attempts:
 
 ### Entities
 - answers
-- hints
 - questions
-- quizzes (collection of questions)
 - tags
 - users
 
@@ -550,7 +581,6 @@ Question Types:
 * video clip
 * image
 * click on photo (e.g., US map, states)
-Hints:
 
 Modes:
 

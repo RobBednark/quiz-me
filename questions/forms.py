@@ -18,18 +18,7 @@ class FormAttemptNew(forms.Form):
         required=False,
         widget=PagedownWidgetAligned()
     )
-
-
-class ModelFormSchedule(ModelForm):
-    class Meta:
-        model = Schedule
-        fields = (
-            'percent_correct',
-            'percent_importance',
-            'date_show_next',
-            'interval_num',
-            'interval_unit'
-        )
+    hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
 
 
 class FormSchedule(forms.Form):
@@ -49,3 +38,31 @@ class FormSchedule(forms.Form):
         required=False
     )
     interval_unit = forms.ChoiceField(choices=CHOICES_UNITS)
+
+class FormFlashcard(forms.Form):
+    attempt = forms.CharField(
+        label="A",
+        required=False,
+        widget=PagedownWidgetAligned()
+    )
+    hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    percent_correct = forms.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        required=False
+    )
+    percent_importance = forms.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        required=False
+    )
+    interval_num = forms.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        required=False
+    )
+    interval_unit = forms.ChoiceField(
+        choices=CHOICES_UNITS,
+        required=False)
+
