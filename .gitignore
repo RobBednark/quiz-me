@@ -2,6 +2,7 @@
 *.pyc
 *.log
 *.swp
+.vscode/
 db_dumps
 tmp/
 ignore*
