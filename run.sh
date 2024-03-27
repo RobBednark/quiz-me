@@ -2,6 +2,10 @@
 
 set -euvx
 date
+pwd
+git status
+git show --no-patch
+
 DB_QUIZME=${DB_QUIZME:?'ERROR: shell variable DB_QUIZME must be set'}
 DB_USER=${DB_USER:?ERROR: shell variable DB_USER must be set}
 QM_DB_HOST=${QM_DB_HOST:?ERROR: shell variable QM_DB_HOST must be set}
