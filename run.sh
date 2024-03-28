@@ -5,6 +5,7 @@ date
 pwd
 git status
 git show --no-patch
+git log --max-count=4
 
 DB_QUIZME=${DB_QUIZME:?'ERROR: shell variable DB_QUIZME must be set'}
 DB_USER=${DB_USER:?ERROR: shell variable DB_USER must be set}
