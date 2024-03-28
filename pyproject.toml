@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 asgiref = "3.*.*"
-django = "3.*.*"
+django = "4.*.*"
 django-markdown-deux = "*.*.*"
 django-pagedown = "*.*.*"
 gunicorn = "*.*.*"

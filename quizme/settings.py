@@ -220,6 +220,11 @@ MARKDOWN_DEUX_STYLES = {
     },
 }
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://0.0.0.0',
+    'http://localhost',
+]
+
 try:
     # Simple way of allowing for custom local dev/testing settings
     from local_settings import *  # noqa
