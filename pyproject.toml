@@ -7,7 +7,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-asgiref = "3.*.*"
 django = "5.*.*"
 django-markdown-deux = "*.*.*"
 django-pagedown = "*.*.*"
