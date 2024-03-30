@@ -230,3 +230,6 @@ try:
     from local_settings import *  # noqa
 except ImportError:
     pass
+
+# Set the default primiary-key field type for models that don't have a primary-key field explicitly set
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
