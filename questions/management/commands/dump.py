@@ -15,7 +15,7 @@ class Command(BaseCommand):
         # user = models.User.objects.all()[0]
         # user_tags = models.UserTag.objects.filter(enabled=True, user=user)
         # question_tags = models.QuestionTag.objects.filter(tag__in=user_tags, enabled=True)
-        for num, question in enumerate(questions.order_by('-id')):
+        for num, question in enumerate(questions.order_by('id')):
             question_ = question.question.replace(CR, '')
             print("\n=== [%s] of [%s] ============================= id=[%s] ==" % (num + 1, len(questions), question.id))
             print('Q: ', question_)
