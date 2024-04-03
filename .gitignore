@@ -2,7 +2,7 @@
 *.log
 *.pyc
 *.swp
-.venv/
+.venv
 .vscode/
 db_dumps
 ignore*
