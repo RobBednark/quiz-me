@@ -167,10 +167,15 @@ INSTALLED_APPS = (
 if DEBUG:
     INSTALLED_APPS += ('django_extensions',)
 
+def show_toolbar_callback(request):
+    # This func is called by DEBUG_TOOLBAR_CONFIG['SHOW_TOOLBAR_CALLBACK']
+    return ENABLE_DJANGO_DEBUG_TOOLBAR
+
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
     DEBUG_TOOLBAR_CONFIG = {
         'PROFILER_MAX_DEPTH': 20,
+        'SHOW_TOOLBAR_CALLBACK': 'quizme.settings.show_toolbar_callback',
     }
 
 # A sample logging configuration. The only tangible logging
@@ -208,6 +213,7 @@ LOGGING = {
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 INTERNAL_IPS = [
+        '0.0.0.0',
         '127.0.0.1',  # needed for django_debug_toolbar
 ]
 
