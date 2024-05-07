@@ -29,6 +29,8 @@ set +vx
 echo "+ $(poetry env info --path)/bin/activate"
 source $(poetry env info --path)/bin/activate
 set -vx; \
+
+TIMEOUT_SECONDS_GUNICORN=120
 time gunicorn \
         --bind 0.0.0.0:80 \
             --access-logfile - \
@@ -36,6 +38,7 @@ time gunicorn \
             --log-level info \
             --max-requests 100 \
             --max-requests-jitter 10 \
+            --timeout $TIMEOUT_SECONDS_GUNICORN \
         quizme.wsgi; \
 date
 echo 'gunicorn exited'

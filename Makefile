@@ -35,20 +35,19 @@ DB_SERVER=
 DB_USER=
 DB_CONNECTION_STRING:=postgres://${DB_USER}:${DB_PASSWORD}@${DB_SERVER}:${DB_PORT}/${DB_NAME_TO_DUMP}
 DIR_DUMPS=db_dumps
-date:=$(shell date "+%Y.%m.%d_%a_%H.%M.%S")
-FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.custom.all
-FILE_DUMP_DUMPDATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.dumpdata.json
-FILE_DUMP_PLAIN_ALL:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.all
-FILE_DUMP_PLAIN_DATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.data-only
-FILE_DUMP_PLAIN_SCHEMA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.plain.schema-only
-FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.${date}.txt
+FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.custom.all
+FILE_DUMP_DUMPDATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.dumpdata.json
+FILE_DUMP_PLAIN_ALL:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.all
+FILE_DUMP_PLAIN_DATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.data-only
+FILE_DUMP_PLAIN_SCHEMA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.schema-only
+FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.txt
 SYMLINK_LATEST_TEXT:=${DIR_DUMPS}/latest.dump.txt
 
 first_target:
 	echo "This is the default target and it does nothing.  Specify a target."
 
 create_superuser:
-	./manage.py createsuperuser --email rbednark@gmail.com
+	poetry run ./manage.py createsuperuser --email rbednark@gmail.com
 
 createdb: 
 	createdb --username=${DB_USER} ${DB_NAME_TO_DUMP}
@@ -62,15 +61,16 @@ dumpdb:
 	test -n "$(DB_PORT)" || (echo 'error: DB_PORT not set'; false)
 	test -n "$(DB_SERVER)" || (echo 'error: DB_SERVER not set'; false)
 	test -n "$(DB_USER)" || (echo 'error: DB_USER not set'; false)
+	rm -fr db_dumps
 	mkdir -p db_dumps
-	pg_dump --format=custom ${DB_CONNECTION_STRING} > ${FILE_DUMP_CUSTOM}
-	pg_dump --format=plain  ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_ALL}
+	time pg_dump --format=custom ${DB_CONNECTION_STRING} > ${FILE_DUMP_CUSTOM}
+	time pg_dump --format=plain  ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_ALL}
 	gzip ${FILE_DUMP_PLAIN_ALL}
-	pg_dump --data-only --format=plain ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_DATA}
+	time pg_dump --data-only --format=plain ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_DATA}
 	gzip ${FILE_DUMP_PLAIN_DATA}
-	pg_dump --schema-only --format=plain ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_SCHEMA}
-	DB_QUIZME=${DB_NAME_TO_DUMP} PYTHONIOENCODING=utf-8 python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
-	DB_QUIZME=${DB_NAME_TO_DUMP} python ./manage.py dumpdata --all --indent=2 > ${FILE_DUMP_DUMPDATA} 2>&1
+	time pg_dump --schema-only --format=plain ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_SCHEMA}
+	DB_QUIZME=${DB_NAME_TO_DUMP} PYTHONIOENCODING=utf-8 poetry run python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
+	DB_QUIZME=${DB_NAME_TO_DUMP} poetry run python ./manage.py dumpdata --all --indent=2 > ${FILE_DUMP_DUMPDATA} 2>&1
 	gzip ${FILE_DUMP_DUMPDATA}
 	rm -f ${SYMLINK_LATEST_TEXT}
 	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
@@ -94,28 +94,28 @@ loaddb-plain:
 	PGDATABASE=template1 psql --user=${DB_USER} --dbname=${DB_NAME_TO_RESTORE_PLAIN} --quiet --no-psqlrc < ${FILE_DUMP_PLAIN}
 
 migrate:
-	./manage.py migrate
+	poetry run ./manage.py migrate
 
 recreatedb: dropdb createdb syncdb migrate create_superuser
 
 recreate_migrations:
 	rm -fr questions/migrations
-	./manage.py schemamigration --initial questions
+	poetry run ./manage.py schemamigration --initial questions
 	# Add a dependency to the emailusername migration
 	perl -pi -e 's/(class Migration\(SchemaMigration\):)/$$1\n    depends_on = \(\("emailusername", "0001_initial"\),\)/' questions/migrations/0001_initial.py
 
 style-check: flake8
 	
 syncdb:
-	./manage.py syncdb --noinput
+	poetry run ./manage.py syncdb --noinput
 
 test: test_phantomjs test_firefox
 
 test_firefox:
-	SELENIUM_BROWSER=firefox   ./manage.py test
+	SELENIUM_BROWSER=firefox   poetry run ./manage.py test
 
 test_nonbrowser:
-	./manage.py test questions.tests.tests.NonBrowserTests
+	poetry run ./manage.py test questions.tests.tests.NonBrowserTests
 
 test_phantomjs:
-	SELENIUM_BROWSER=phantomjs ./manage.py test
+	SELENIUM_BROWSER=phantomjs poetry run ./manage.py test
