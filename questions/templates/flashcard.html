@@ -119,6 +119,63 @@
           <br>[{{ question.datetime_updated }}] flashcard updated
         {% endif %}
 
+
+        <!-- QueryPreferences-->
+
+        <!--  Commented-out temporarily
+        {% if question %}
+          <details>
+        {% else %}
+          <details open >
+        {% endif %}
+          <summary>Query Preferences</summary>
+            {{ modelformset_querypreferences.management_form }}
+            {% if modelformset_querypreferences__total_error_count %}
+              {{ modelformset_querypreferences__non_form_errors }}
+              {{ modelformset_querypreferences.errors }}
+            {% endif %}
+            <div class="row">
+                <div class="col-sm-6">
+                    Tag
+                </div>
+
+                <div class="col-sm-1">
+                    Seen in the past week
+                </div>
+
+                <div class="col-sm-1">
+                    # of questions
+                </div>
+
+                <div class="col-sm-3">
+                   # schedules per interval
+                </div>
+              </div>
+            {% for form_querypreferences in modelformset_querypreferences.forms %}
+              <div>
+            <div class="row">
+                <div class="col-sm-6">
+              {{ form_querypreferences }} 
+                </div>
+
+                <div class="col-sm-1">
+              {{ form_querypreferences.question_count_since_week_ago }}
+                </div>
+
+                <div class="col-sm-1">
+              {{ form_querypreferences.instance.num_questions }}
+                </div>
+
+                <div class="col-sm-3">
+              {{ form_querypreferences.interval_counts }}
+                </div>
+              </div>
+            {% endfor %}
+
+        </details>
+      -->
+
+        
         {% if question %}
           <details>
         {% else %}
