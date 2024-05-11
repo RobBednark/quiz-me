@@ -29,19 +29,6 @@ class CreatedBy(models.Model):
     class Meta:
         abstract = True
 
-# ENUM_SORT_BY_QUESTIONS_WITH_ANSWERS_FIRST = 'ENUM_SORT_BY_QUESTIONS_WITH_ANSWERS_FIRST'
-# ENUM_SORT_BY_WHEN_ANSWERED = 'ENUM_SORT_BY_WHEN_ANSWERED'
-# MODEL_QUERY_PREFERENCES = 'QueryPreferences'
-# FIELD_SORT_BY_QUESTIONS_WITH_ANSWERS_FIRST = 'sort_by_questions_with_answers_first'
-#
-#class Enum(CreatedBy):
-#    MAX_DESCRIPTION_LENGTH = 2000
-#    MAX_NAME_LENGTH = 2000
-#    name = models.TextField(max_length=MAX_NAME_LENGTH)
-#    description = models.TextField(blank=True, null=True)
-#    model = models.TextField(blank=False, null=False)
-#    field = models.TextField(blank=False, null=False)
-
 #class QueryPreferences(CreatedBy):
 #     #   ENUM_with_answers_first                           # old: option_questions_with_answers_first
 #     #   ENUM_without_answers_first                        # old: option_questions_without_answers_first
