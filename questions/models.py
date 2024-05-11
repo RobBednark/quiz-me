@@ -32,8 +32,6 @@ class CreatedBy(models.Model):
 #class QueryPreferences(CreatedBy):
 #     #   ENUM_with_answers_first                           # old: option_questions_with_answers_first
 #     #   ENUM_without_answers_first                        # old: option_questions_without_answers_first
-#     #   ENUM_do_not_show_questions_with_answers
-#     #   null (no preference)
 
 #                                                                               # old: option_questions_with_answers_first
 #    sort_by_questions_with_answers_first = models.TextField(null=False, blank=False, default=ENUM_SORT_BY_QUESTIONS_WITH_ANSWERS_FIRST)
