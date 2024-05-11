@@ -43,28 +43,22 @@ class CreatedBy(models.Model):
 #    field = models.TextField(blank=False, null=False)
 
 #class QueryPreferences(CreatedBy):
-#     # sort_by_questions_with_answers_first is an enum with three values:
 #     #   ENUM_with_answers_first                           # old: option_questions_with_answers_first
 #     #   ENUM_without_answers_first                        # old: option_questions_without_answers_first
 #     #   ENUM_do_not_show_questions_with_answers
 #     #   null (no preference)
 
+#                                                                               # old: option_questions_with_answers_first
 #    sort_by_questions_with_answers_first = models.TextField(null=False, blank=False, default=ENUM_SORT_BY_QUESTIONS_WITH_ANSWERS_FIRST)
 #    include_unanswered_questions = models.BooleanField(default=True)           # old: option_include_unanswered_questions
 #    limit_to_date_show_next_before_now = models.BooleanField(default=False)    # old: option_limit_to_date_show_next_before_now
 #    sort_by_nulls_first = models.BooleanField(default=False)                   # old: option_nulls_first
 #    sort_by_lowest_answered_count_first = models.BooleanField(default=False)   # old: option_order_by_answered_count
 #    sort_by_questions_with_answers_first = models.BooleanField(default=False), # old: option_questions_with_answers_first
-#    sort_by_unanswered_questions_first = models.BooleanField(default=True)
 
-
-
-#     
 #     # sort_by_when_answered:
 #     #   ENUM_newest_answered_first            # old: option_order_by_when_answered_newest
 #     #   ENUM_oldest_answered_first            # old: option_order_by_when_answered_oldest
-#     #   ENUM_do_not_sort_by_when_answered
-# 
 
 #     include_unanswered_questions = models.BooleanField(default=True)           # old: option_include_unanswered_questions
 # 
@@ -74,9 +68,6 @@ class CreatedBy(models.Model):
 # 
 #     sort_by_lowest_answered_count_first = models.BooleanField(default=False)   # old: option_order_by_answered_count
 #     sort_by_questions_with_answers_first = models.BooleanField(default=False), # old: option_questions_with_answers_first
-#     sort_by_unanswered_questions_first = models.BooleanField(default=True)
-    
-    
     
 class QuestionManager(models.Manager):
 
