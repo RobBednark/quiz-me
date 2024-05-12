@@ -30,8 +30,8 @@ class CreatedBy(models.Model):
         abstract = True
 
 #class QueryPreferences(CreatedBy):
-#     #   ENUM_with_answers_first                           # old: option_questions_with_answers_first
-#     #   ENUM_without_answers_first                        # old: option_questions_without_answers_first
+#   include_questions_with_answers                                              # old: option_questions_with_answers_first
+#   include_questions_without_answers                                           # old: option_questions_without_answers_first
 
 #                                                                               # old: option_questions_with_answers_first
 #    sort_by_questions_with_answers_first = models.TextField(null=False, blank=False, default=ENUM_SORT_BY_QUESTIONS_WITH_ANSWERS_FIRST)
@@ -41,9 +41,8 @@ class CreatedBy(models.Model):
 #    sort_by_lowest_answered_count_first = models.BooleanField(default=False)   # old: option_order_by_answered_count
 #    sort_by_questions_with_answers_first = models.BooleanField(default=False), # old: option_questions_with_answers_first
 
-#     # sort_by_when_answered:
-#     #   ENUM_newest_answered_first            # old: option_order_by_when_answered_newest
-#     #   ENUM_oldest_answered_first            # old: option_order_by_when_answered_oldest
+#     sort_by_newest_answered_first            # old: option_order_by_when_answered_newest
+#     sort_by_oldest_answered_first            # old: option_order_by_when_answered_oldest
 
 #     include_unanswered_questions = models.BooleanField(default=True)           # old: option_include_unanswered_questions
 # 
