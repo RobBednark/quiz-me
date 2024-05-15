@@ -406,49 +406,6 @@ class NonBrowserTests(TestCase):
                 self.assertEquals(next_question.question, question2)
 
 
-class FormScheduleTests(TestCase):
-
-    def test_form_with_valid_data(self):
-        data = {
-            'percent_correct': 23.32,
-            'percent_importance': 43.89,
-            'interval_num': 67.89,
-            'interval_unit': 'minutes'
-        }
-        formschedule_instance = forms.FormSchedule(data)
-
-        self.assertTrue(formschedule_instance.is_valid())
-
-    def test_form_with_invalid_decimal(self):
-        data = {
-            'percent_importance': 1234243.89,
-        }
-        formschedule_instance = forms.FormSchedule(data)
-
-        self.assertFalse(formschedule_instance.is_valid())
-        self.assertIn('percent_importance', formschedule_instance.errors)
-
-    def test_form_with_invalid_unit(self):
-        data = {
-            'interval_unit': 'invalid_foo'
-        }
-        formschedule_instance = forms.FormSchedule(data)
-
-        self.assertFalse(formschedule_instance.is_valid())
-        self.assertIn('interval_unit', formschedule_instance.errors)
-
-    def test_form_with_multiple_invalid(self):
-        data = {
-            'percent_correct': 8694923,
-            'interval_unit': 'invalid_foo'
-        }
-        formschedule_instance = forms.FormSchedule(data)
-
-        self.assertFalse(formschedule_instance.is_valid())
-        self.assertIn('percent_correct', formschedule_instance.errors)
-        self.assertIn('interval_unit', formschedule_instance.errors)
-
-
 class ViewAnswerTests(TestCase):
 
     modelformset_usertag_dict = {

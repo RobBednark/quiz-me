@@ -21,24 +21,6 @@ class FormAttemptNew(forms.Form):
     hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
 
 
-class FormSchedule(forms.Form):
-    percent_correct = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        required=False
-    )
-    percent_importance = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        required=False
-    )
-    interval_num = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        required=False
-    )
-    interval_unit = forms.ChoiceField(choices=CHOICES_UNITS)
-
 class FormFlashcard(forms.Form):
     attempt = forms.CharField(
         label="A",

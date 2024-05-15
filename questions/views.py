@@ -18,7 +18,7 @@ from django.utils import timezone
 import humanize
 import pytz
 
-from .forms import FormAttemptNew, FormSchedule, FormFlashcard
+from .forms import FormAttemptNew, FormFlashcard
 from questions import models
 
 
