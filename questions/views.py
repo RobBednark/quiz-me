@@ -11,14 +11,12 @@ from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.db.models import IntegerField, Sum, Case, When
 from django.db.models.functions import Coalesce
 from django.forms.models import modelformset_factory
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
 from django.utils import timezone
 import humanize
 import pytz
 
-from .forms import FormAttemptNew, FormFlashcard
+from .forms import FormFlashcard
 from questions import models
 
 
