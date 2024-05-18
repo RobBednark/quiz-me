@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import ModelForm
 from questions.models import CHOICES_UNITS, Schedule
 
 from pagedown.widgets import PagedownWidget
