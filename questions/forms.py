@@ -10,16 +10,6 @@ class PagedownWidgetAligned(PagedownWidget):
                 'all': ('pagedown/custom.css',)
               }
 
-
-class FormAttemptNew(forms.Form):
-    attempt = forms.CharField(
-        label="A",
-        required=False,
-        widget=PagedownWidgetAligned()
-    )
-    hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
-
-
 class FormFlashcard(forms.Form):
     attempt = forms.CharField(
         label="A",
