@@ -1,6 +1,11 @@
 from collections import defaultdict, namedtuple
 from datetime import datetime
+import humanize
 import os
+from pprint import pformat
+import pytz
+import traceback
+
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -13,9 +18,6 @@ from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict, modelformset_factory
 from django.shortcuts import render
 from django.utils import timezone
-import humanize
-from pprint import pformat
-import pytz
 
 from .forms import FormFlashcard
 from questions import models
@@ -40,15 +42,21 @@ NextQuestion = namedtuple(
 )
 
 def _debug_print_questions(questions, msg):
-    NUM_QUESTIONS_FIRST = 3
-    NUM_QUESTIONS_LAST = 3
+    NUM_QUESTIONS_FIRST = 2
+    NUM_QUESTIONS_LAST = 2
     _debug_print_n_questions(questions=questions, msg=msg, num_questions=NUM_QUESTIONS_FIRST)
     _debug_print_n_questions(questions=questions, msg=msg, num_questions= -NUM_QUESTIONS_LAST)
         
+def _debug_print_n_schedules(question):
+    scheds = question.schedule_set.all()
+    print(f'num schedules: {len(scheds)}')
 def _debug_print_n_questions(questions, msg, num_questions):
     if debug_print:
         print("=" * 80)
         LENGTH_QUESTION = 50
+        count = questions.count()
+        print(f'questions.count(): {count}')
+
         if num_questions == 0:
             return
         elif num_questions > 0:
@@ -61,32 +69,47 @@ def _debug_print_n_questions(questions, msg, num_questions):
         print(f'_debug_print [{first_or_last}] questions (): {msg}')
         print(f'num questions: {len(questions)}')
         for idx, question in enumerate(questions):
+            num_question = idx + 1
             print()
             question_text = question.question
             question_text = question_text.replace('\r','')
             question_text = question_text.replace('\n',' ')
             question_text = question_text.strip()
             question_text = question_text[:LENGTH_QUESTION]
-            print(f'question [{idx + 1}/{num_questions}] pk=[{question.pk}] text=[{question_text}]')
+            if num_questions < 0:
+                # assert: num_questions is negative (e.g., -5), so adding it to count is really subtraction
+                num_of_count = count + num_questions + num_question
+            else:
+                num_of_count = num_question
+            print(f'question [{num_of_count}/{count}]  [{num_question}/{num_questions}]  pk=[{question.pk}] text=[{question_text}]')
+            
+            # print annotations
             try:
                 schedule_datetime_added = question.schedule_datetime_added
             except AttributeError:
                 # assert: schedule_datetime_added annotation is not present
                 schedule_datetime_added = None
             print(f'schedule_datetime_added: {schedule_datetime_added}')
+
             try:
                 date_show_next = question.date_show_next
             except AttributeError:
                 # assert: date_show_next annotation is not present
                 date_show_next = None
             print(f'schedule.date_show_next: {date_show_next}')
+
             try:
                 num_schedules = question.num_schedules
             except AttributeError:
                 # assert: num_schedules annotation is not present
                 num_schedules = None
             print(f'num_schedules: {num_schedules}')
+            
+            _debug_print_n_schedules(question=question)
+
             print(f'question.datetime_added: {question.datetime_added}')
+
+
             if question.answer:
                 answer_text = question.answer.answer
                 answer_text = answer_text.replace('\r','')
@@ -529,7 +552,9 @@ def _post_flashcard(request):
         except Exception:
             # TODO: do something here,
             # e.g., log it, show it to the user
-            pass
+            print('EXCEPTION: attempt.save():')
+            print(traceback.format_exc())
+
         schedule = models.Schedule(
             percent_correct=data['percent_correct'],
             percent_importance=data['percent_importance'],
