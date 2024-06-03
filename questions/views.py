@@ -39,6 +39,64 @@ NextQuestion = namedtuple(
     ]
 )
 
+def _debug_print_questions(questions, msg):
+    NUM_QUESTIONS_FIRST = 3
+    NUM_QUESTIONS_LAST = 3
+    _debug_print_n_questions(questions=questions, msg=msg, num_questions=NUM_QUESTIONS_FIRST)
+    _debug_print_n_questions(questions=questions, msg=msg, num_questions= -NUM_QUESTIONS_LAST)
+        
+def _debug_print_n_questions(questions, msg, num_questions):
+    if debug_print:
+        print("=" * 80)
+        LENGTH_QUESTION = 50
+        if num_questions == 0:
+            return
+        elif num_questions > 0:
+            first_or_last = 'first'
+            questions = questions[:num_questions]
+        else:
+            first_or_last = 'last'
+            questions = list(questions)
+            questions = questions[num_questions:]
+        print(f'_debug_print [{first_or_last}] questions (): {msg}')
+        print(f'num questions: {len(questions)}')
+        for idx, question in enumerate(questions):
+            print()
+            question_text = question.question
+            question_text = question_text.replace('\r','')
+            question_text = question_text.replace('\n',' ')
+            question_text = question_text.strip()
+            question_text = question_text[:LENGTH_QUESTION]
+            print(f'question [{idx + 1}/{num_questions}] pk=[{question.pk}] text=[{question_text}]')
+            try:
+                schedule_datetime_added = question.schedule_datetime_added
+            except AttributeError:
+                # assert: schedule_datetime_added annotation is not present
+                schedule_datetime_added = None
+            print(f'schedule_datetime_added: {schedule_datetime_added}')
+            try:
+                date_show_next = question.date_show_next
+            except AttributeError:
+                # assert: date_show_next annotation is not present
+                date_show_next = None
+            print(f'schedule.date_show_next: {date_show_next}')
+            try:
+                num_schedules = question.num_schedules
+            except AttributeError:
+                # assert: num_schedules annotation is not present
+                num_schedules = None
+            print(f'num_schedules: {num_schedules}')
+            print(f'question.datetime_added: {question.datetime_added}')
+            if question.answer:
+                answer_text = question.answer.answer
+                answer_text = answer_text.replace('\r','')
+                answer_text = answer_text.replace('\n',' ')
+                answer_text = answer_text.strip()
+                answer_text = answer_text[:LENGTH_QUESTION]
+                print(f'answer: {question.answer.answer[:LENGTH_QUESTION]}')
+            else:
+                print('answer: None')
+        print("=" * 80)
 
 def _get_next_question(user, query_prefs):
     # This function queries UserTag to determine which tags to use for the question query.
@@ -56,7 +114,7 @@ def _get_next_question(user, query_prefs):
     # with the oldest schedule.date_show_next
 
     # Fields to sort on:
-    # 1. date_show_next (null=unseen)
+    # 1. schedule.date_show_next (null=unseen)
     # 2. when last answered (schedule_datetime_added)
     # 3. answered count (num_schedules)
 
@@ -72,7 +130,7 @@ def _get_next_question(user, query_prefs):
     #    option_limit_to_date_show_next_before_now = ??
     #    option_order_by_when_answered_newest = False
     #    option_order_by_answered_count = True
-    # 2) Order by date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again will come after unanswered questions)
+    # 2) Order by schedule.date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again will come after unanswered questions)
     #    Reinforce older questions.
     #    option_include_unanswered_questions = True
     #    option_limit_to_date_show_next_before_now = False
@@ -110,7 +168,7 @@ def _get_next_question(user, query_prefs):
                  .filter(user=user, question=OuterRef('pk'))
                  .order_by('-datetime_added'))
     
-    # questions_annotated - questions_tagged, annotated with .date_show_next
+    # questions_annotated - questions_tagged, annotated with (schedule).date_show_next
     # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
     # add num_schedules field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
@@ -126,11 +184,9 @@ def _get_next_question(user, query_prefs):
     if query_prefs.include_unanswered_questions:
         # Include unanswered questions (nulls) in first bucket query.
         # Does not affect order-by.
-        debug_print and print('looking for: unanswered questions')
         subquery_include_unanswered = Q(date_show_next__isnull=True)
     subquery_by_date_show_next = None
     if query_prefs.limit_to_date_show_next_before_now:
-        debug_print and print('looking for: questions scheduled before now')
         subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
     if query_prefs.include_questions_with_answers:
         # True  => for questions scheduled before now, only show questions that have answers
@@ -202,32 +258,7 @@ def _get_next_question(user, query_prefs):
 
     count_questions_before_now = 0
     
-    if debug_print:
-        print("=" * 80)
-        NUM_QUESTIONS = 50
-        LENGTH_QUESTION = 50
-        for idx, question in enumerate(questions[:NUM_QUESTIONS]):
-            print()
-            question_text = question.question
-            question_text = question_text.replace('\r','')
-            question_text = question_text.replace('\n',' ')
-            question_text = question_text.strip()
-            question_text = question_text[:LENGTH_QUESTION]
-            print(f'question [{idx + 1}/{NUM_QUESTIONS}] pk=[{question.pk}] text=[{question_text}]')
-            #print(f'question [{idx + 1}/{NUM_QUESTIONS}]: [{question.question[:LENGTH_QUESTION].strip()}]')
-            print(f'schedule_datetime_added: {question.schedule_datetime_added}')
-            print(f'date_show_next: {question.date_show_next}')
-            print(f'num_schedules: {question.num_schedules}')
-            if question.answer:
-                answer_text = question.answer.answer
-                answer_text = answer_text.replace('\r','')
-                answer_text = answer_text.replace('\n',' ')
-                answer_text = answer_text.strip()
-                answer_text = answer_text[:LENGTH_QUESTION]
-                print(f'answer: {question.answer.answer[:LENGTH_QUESTION]}')
-            else:
-                print('answer: None')
-        print("=" * 80)
+    debug_print and _debug_print_questions(questions=questions, msg='query 1')
     # query #1
     if questions:
         # Show questions whose schedule.date_show_next <= now
@@ -237,15 +268,17 @@ def _get_next_question(user, query_prefs):
         debug_sql and print(connection.queries[-1])
         question_to_show = questions[0]
     else:
-        debug_sql and print(connection.queries[-1])
-        debug_print and print('No questions scheduled before now.  Look for unanswered questions.')
+        debug_sql and print(f'sql: most recent query: {connection.queries[-1]}')
         # assert: no question with schedule.date_show_next <= now
         # Look for questions with no schedules, and show the one with the
         # oldest question.datetime_added
+        
+        # TODO: CHECK: using questions_tagged here, but query #3 is using questions_annotated -- is that correct?
         questions = questions_tagged
         questions = questions.filter(schedule=None)
         debug_print and print("order_by('question.datetime_added')")
         questions = questions.order_by('datetime_added')
+        debug_print and _debug_print_questions(questions=questions, msg='query 2 (schedule=None, order_by(datetime_added) (AKA unanswered questions / no schedule)')
 
         # query #2
         if questions:
@@ -253,19 +286,18 @@ def _get_next_question(user, query_prefs):
             debug_sql and print(connection.queries[-1])
             question_to_show = questions[0]
         else:
-            debug_print and print('No unanswered questions found, so look for schedules in the future')
             debug_sql and print(connection.queries[-1])
             # assert: no question without a schedule
             # Return the question with the oldest schedule.date_show_next
             # query #3
             questions = questions_annotated
-            debug_print and print('order_by(question.date_show_next)')
             questions = questions.order_by('date_show_next')
+            debug_print and _debug_print_questions(questions=questions, msg='query 3 (order by schedule.date_show_next ASC; use the oldest)')
             if questions:
                 debug_print and print('future scheduled questions found, count=[%s]' % questions.count())
                 question_to_show = questions[0]
             else:
-                debug_print and print('No answers whatsoever')
+                debug_print and print('No questions whatsoever')
                 question_to_show = None
 
     # query #4
