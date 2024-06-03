@@ -1,5 +1,5 @@
 from django import forms
-from questions.models import CHOICES_UNITS
+from questions.models import CHOICES_UNITS, QueryPreferences
 
 from pagedown.widgets import PagedownWidget
 
@@ -37,3 +37,9 @@ class FormFlashcard(forms.Form):
         choices=CHOICES_UNITS,
         required=False)
 
+    # query_prefs is a ModelChoiceField / dropdown for QueryPrefs, where each value shown is a QueryPrefs.name
+    query_prefs = forms.ModelChoiceField(
+        required=False,
+        label="Query Preferences",
+        queryset=QueryPreferences.objects.all().order_by('-date_last_used'),
+    )
