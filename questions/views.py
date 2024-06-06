@@ -166,6 +166,7 @@ def _get_next_question(user, query_prefs):
     #    option_order_by_when_answered_newest = True
     #    option_order_by_answered_count = False
 
+    assert query_prefs is not None
     debug_print and print('\nquery_prefs:\n' + pformat(model_to_dict(query_prefs)))
 
     datetime_now = datetime.now(tz=pytz.utc)
@@ -454,6 +455,7 @@ def _get_query_prefs(user, query_prefs):
                         .filter(is_default=True, user=user)
                         .latest('date_last_used')
         )
+        return query_prefs
     except models.QueryPreferences.DoesNotExist:
         # No default query_prefs, so create one
         query_prefs = models.QueryPreferences(
@@ -462,10 +464,10 @@ def _get_query_prefs(user, query_prefs):
             user=user,
             date_last_used=timezone.now())
         query_prefs.save()
-    return query_prefs
+        return query_prefs
 
 @login_required(login_url='/login')
-def _get_flashcard(request, query_prefs, form_flashcard=None):
+def _get_flashcard(request, query_prefs, form_flashcard):
     # Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
     # because _create_and_get_usertags might create new usertags, which are used
     # by _get_next_question().
@@ -481,9 +483,8 @@ def _get_flashcard(request, query_prefs, form_flashcard=None):
         user=request.user,
         modelformset_usertag=modelformset_usertag
     )
-    if not form_flashcard:
-        form_flashcard = FormFlashcard(initial=dict(hidden_question_id=id_question))
-    form_flashcard.fields['query_prefs'].initial = query_prefs
+
+    form_flashcard = FormFlashcard(dict(hidden_question_id=id_question, query_prefs=query_prefs))
 
     if next_question.question:
         question_tag_names = ", ".join(
@@ -535,12 +536,14 @@ def _post_flashcard(request):
     form_flashcard = FormFlashcard(request.POST)
     if form_flashcard.is_valid():
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
+        query_prefs = form_flashcard.cleaned_data['query_prefs']
         try:
             question = models.Question.objects.get(id=id_question)
         except models.Question.DoesNotExist:
             # There was no question available.  Perhaps the user
             # selected different tags now, so try again.
-            return _get_flashcard(request=request, query_prefs=form_flashcard.cleaned_data['query_prefs'])
+            debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
+            return _get_flashcard(request=request, query_prefs=query_prefs, form_flashcard=None)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -564,18 +567,19 @@ def _post_flashcard(request):
             user=request.user
         )
         schedule.save()
-        debug_print and print('data:\n' + pformat(data))
+        debug_print and print('_post_flashcard, afer schedule.save(), before _get_flashcard(): data:\n' + pformat(data))
     else:
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
-        pass
-    return _get_flashcard(request=request, form_flashcard=form_flashcard, query_prefs=form_flashcard.cleaned_data['query_prefs'])
+        debug_print and print('ERROR: _post_flashcard: form is NOT valid')
+        query_prefs = _get_query_prefs(user=request.user, query_prefs=None)
+        return _get_flashcard(request=request, form_flashcard=form_flashcard, query_prefs=query_prefs)
 
 @login_required(login_url='/login')
 def flashcard(request):
     if request.method == 'GET':
-        return _get_flashcard(request=request, query_prefs=_get_query_prefs(user=request.user, query_prefs=None))
+        return _get_flashcard(request=request, query_prefs=_get_query_prefs(user=request.user, query_prefs=None), form_flashcard=None)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:
