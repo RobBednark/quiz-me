@@ -97,8 +97,8 @@ def _debug_print_n_questions(questions, msg, num_questions):
                 num_schedules = None
 
             print(f'question [{num_of_count}/{questions_count}]  [{num_question}/{num_questions}]  pk=[{question.pk}] text=[{question_text}]')
-            print(f'question.datetime_added: {question.datetime_added}')
             print(f'schedule.date_show_next: {date_show_next}')
+            print(f'question.datetime_added: {question.datetime_added}')
             print(f'schedule_datetime_added: {schedule_datetime_added}')
             print(f'num_schedules: {num_schedules}')
             
