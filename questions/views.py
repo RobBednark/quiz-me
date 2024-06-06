@@ -568,6 +568,7 @@ def _post_flashcard(request):
         )
         schedule.save()
         debug_print and print('_post_flashcard, afer schedule.save(), before _get_flashcard(): data:\n' + pformat(data))
+        return _get_flashcard(request=request, query_prefs=query_prefs, form_flashcard=None)
     else:
         # Assert: form is NOT valid
         # Need to return the errors to the template,
