@@ -47,18 +47,14 @@ def _debug_print_questions(questions, msg):
     _debug_print_n_questions(questions=questions, msg=msg, num_questions=NUM_QUESTIONS_FIRST)
     _debug_print_n_questions(questions=questions, msg=msg, num_questions= -NUM_QUESTIONS_LAST)
         
-def _debug_print_n_schedules(question):
-    scheds = question.schedule_set.all()
-    print(f'num schedules: {len(scheds)}')
 def _debug_print_n_questions(questions, msg, num_questions):
     if debug_print:
         print("=" * 80)
         LENGTH_QUESTION = 50
-        count = questions.count()
-        print(f'questions.count(): {count}')
+        questions_count = questions.count()
 
         if num_questions == 0:
-            return
+            first_or_last = '(show none)'
         elif num_questions > 0:
             first_or_last = 'first'
             questions = questions[:num_questions]
@@ -66,8 +62,7 @@ def _debug_print_n_questions(questions, msg, num_questions):
             first_or_last = 'last'
             questions = list(questions)
             questions = questions[num_questions:]
-        print(f'_debug_print [{first_or_last}] questions (): {msg}')
-        print(f'num questions: {len(questions)}')
+        print(f'[{first_or_last:5}] questions (): {msg}')
         for idx, question in enumerate(questions):
             num_question = idx + 1
             print()
@@ -78,10 +73,9 @@ def _debug_print_n_questions(questions, msg, num_questions):
             question_text = question_text[:LENGTH_QUESTION]
             if num_questions < 0:
                 # assert: num_questions is negative (e.g., -5), so adding it to count is really subtraction
-                num_of_count = count + num_questions + num_question
+                num_of_count = questions_count + num_questions + num_question
             else:
                 num_of_count = num_question
-            print(f'question [{num_of_count}/{count}]  [{num_question}/{num_questions}]  pk=[{question.pk}] text=[{question_text}]')
             
             # print annotations
             try:
@@ -89,27 +83,25 @@ def _debug_print_n_questions(questions, msg, num_questions):
             except AttributeError:
                 # assert: schedule_datetime_added annotation is not present
                 schedule_datetime_added = None
-            print(f'schedule_datetime_added: {schedule_datetime_added}')
 
             try:
                 date_show_next = question.date_show_next
             except AttributeError:
                 # assert: date_show_next annotation is not present
                 date_show_next = None
-            print(f'schedule.date_show_next: {date_show_next}')
 
             try:
                 num_schedules = question.num_schedules
             except AttributeError:
                 # assert: num_schedules annotation is not present
                 num_schedules = None
+
+            print(f'question [{num_of_count}/{questions_count}]  [{num_question}/{num_questions}]  pk=[{question.pk}] text=[{question_text}]')
+            print(f'question.datetime_added: {question.datetime_added}')
+            print(f'schedule.date_show_next: {date_show_next}')
+            print(f'schedule_datetime_added: {schedule_datetime_added}')
             print(f'num_schedules: {num_schedules}')
             
-            _debug_print_n_schedules(question=question)
-
-            print(f'question.datetime_added: {question.datetime_added}')
-
-
             if question.answer:
                 answer_text = question.answer.answer
                 answer_text = answer_text.replace('\r','')
@@ -119,7 +111,6 @@ def _debug_print_n_questions(questions, msg, num_questions):
                 print(f'answer: {question.answer.answer[:LENGTH_QUESTION]}')
             else:
                 print('answer: None')
-        print("=" * 80)
 
 def _get_next_question(user, query_prefs):
     # This function queries UserTag to determine which tags to use for the question query.
