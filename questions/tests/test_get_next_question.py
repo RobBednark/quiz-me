@@ -16,12 +16,13 @@ class TestGetNextQuestion(TestCase):
         # Create a user
         self.PASSWORD = 'p'
         self.USERNAME = 'foo@bar.com'
+        self.query_prefs = models.QueryPreferences.objects.create()
         self.user = User(email=self.USERNAME)
         self.user.set_password(self.PASSWORD)
         self.user.save()
 
     def test_user_with_no_questions(self):
-        next_question = _get_next_question(self.user)
+        next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
@@ -29,14 +30,14 @@ class TestGetNextQuestion(TestCase):
     def test_user_with_one_unassociated_question(self):
 
         models.Question.objects.create(
-            question='fakebar',
+            question='question #1',
         )
 
         # One untagged question that doesn't get returned because it has
         # no tags.
 
         with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-            next_question = _get_next_question(self.user)
+            next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
@@ -46,13 +47,13 @@ class TestGetNextQuestion(TestCase):
 
     def test_user_with_one_question(self):
         question = models.Question.objects.create(
-            question='fakebar',
+            question='question #1',
         )
-        util.assign_question_to_user(self.user, question, 'fake_tag')
+        util.assign_question_to_user(self.user, question, 'tag #1')
         util.schedule_question_for_user(self.user, question)
 
         with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
-            next_question = _get_next_question(self.user)
+            next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)
@@ -63,13 +64,13 @@ class TestGetNextQuestion(TestCase):
     def test_user_with_ten_questions(self):
         for i in range(10):
             question = models.Question.objects.create(
-                question='fakebar',
+                question='question #1',
             )
-            util.assign_question_to_user(self.user, question, 'fake_tag')
+            util.assign_question_to_user(self.user, question, 'tag #1')
             util.schedule_question_for_user(self.user, question)
 
         with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
-            next_question = _get_next_question(self.user)
+            next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)

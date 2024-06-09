@@ -13,7 +13,7 @@ import pytz
 
 from emailusername.models import User
 from questions import forms
-from questions.models import Answer, Attempt, Question, QuestionTag, Schedule, Tag, UserTag
+from questions.models import Answer, Attempt, QueryPreferences, Question, QuestionTag, Schedule, Tag, UserTag
 from questions.views import _get_next_question
 
 # By default, LiveServerTestCase uses port 8081.
@@ -210,6 +210,7 @@ class NonBrowserTests(TestCase):
         tag1 = Tag.objects.create(name='tag1')
         tag2 = Tag.objects.create(name='tag2')
 
+        query_prefs = QueryPreferences.objects.create()
         question1 = Question.objects.create(question="question1")
         question2 = Question.objects.create(question="question2")
 
@@ -227,7 +228,7 @@ class NonBrowserTests(TestCase):
         self.assertTrue(Tag.objects.all().count() == 2)
         self.assertTrue(UserTag.objects.all().count() == 0)
         with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-            next_question = _get_next_question(user=user1)
+            next_question = _get_next_question(user=user1, query_prefs=query_prefs)
             self.assertTrue(next_question.question is None)
 
         # Test: no question when UserTag but no questions with that tag
@@ -243,7 +244,7 @@ class NonBrowserTests(TestCase):
 
         for _ in range(5):
             with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-                next_question = _get_next_question(user=user1)
+                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
                 self.assertTrue(next_question.question is None)
 
         # Bucket 2: question with no schedules
@@ -271,7 +272,7 @@ class NonBrowserTests(TestCase):
 
         for n in range(4):
             with self.assertNumQueries(NUM_QUERIES_UNSCHEDULED_QUESTION):
-                next_question = _get_next_question(user=user1)
+                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
                 self.assertTrue(next_question.question == question1)
 
         # Test: No question returned when tag.enabled == False
@@ -293,7 +294,7 @@ class NonBrowserTests(TestCase):
         )
         for _ in range(4):
             with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-                next_question = _get_next_question(user=user1)
+                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
                 self.assertTrue(next_question.question is None)
 
         # Bucket 2: question with no schedules
@@ -321,7 +322,7 @@ class NonBrowserTests(TestCase):
         self.assertTrue(Question.objects.get(id=question1.id).schedule_set.count() == 1)
         for _ in range(5):
             with self.assertNumQueries(NUM_QUERIES_UNSCHEDULED_QUESTION):
-                next_question = _get_next_question(user=user1)
+                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
                 self.assertTrue(next_question.question == question2)
 
         # Bucket 1: question.schedule.date_show_next < now
@@ -358,7 +359,7 @@ class NonBrowserTests(TestCase):
         self.assertTrue(Schedule.objects.all().count() == 3)
         for _ in range(5):
             with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
-                next_question = _get_next_question(user=user1)
+                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
                 self.assertEquals(next_question.question, question1)
 
         # Bucket 3: question.schedule_date_show_next > now
@@ -394,7 +395,7 @@ class NonBrowserTests(TestCase):
                 if True:
                     # trigger the debugger
                     pytz.show = False
-                next_question = _get_next_question(user=user1)
+                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
                 self.assertEquals(next_question.question, question2)
 
         # Add a new question with a different tag, and assert that it
@@ -402,7 +403,7 @@ class NonBrowserTests(TestCase):
         Question.objects.create(question="question3")
         for _ in range(5):
             with self.assertNumQueries(NUM_QUERIES_SCHEDULED_AFTER_NOW):
-                next_question = _get_next_question(user=user1)
+                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
                 self.assertEquals(next_question.question, question2)
 
 
