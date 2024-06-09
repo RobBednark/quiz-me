@@ -4,8 +4,9 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Python Debugger: Django",
+            "name": "1) runserver",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
@@ -14,6 +15,40 @@
                 "0.0.0.0:80"
             ],
             "django": true,
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+        {
+            "name": "2) tests --failfast",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "./manage.py",
+            "env": {
+                "QM_ENGINE": "sqlite"
+            },
+            "args": [
+                 "test",
+                 "--failfast"
+            ]
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+        {
+            "name": "3) tests test_user_with_one_question",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "./manage.py",
+            "env": {
+                "QM_ENGINE": "sqlite",
+                "QM_TEST_DB": "sqlite.db"
+            },
+            "args": [
+                 "test",
+                 "--failfast",
+                 "-k",
+                 "test_user_with_one_question"
+            ]
+            "justMyCode": true,
             "autoStartBrowser": false
         }
     ]
