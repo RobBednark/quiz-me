@@ -29,7 +29,7 @@ DATABASES = {
         'ENGINE': engine,
         'NAME': os.environ.get('DB_QUIZME', 'quizme_default_db'),
         # The following settings are not used with sqlite3:
-        'USER': os.environ.get('QM_DB_USER', 'quizme'), # Set to empty string for default.
+        'USER': os.environ.get('DB_USER', 'quizme'), # Set to empty string for default.
         'PASSWORD': os.environ.get('QM_DB_PASSWORD', ''),
         'HOST': os.environ.get('QM_DB_HOST', 'localhost'), # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': os.environ.get('QM_DB_PORT', ''), # Set to empty string for default.

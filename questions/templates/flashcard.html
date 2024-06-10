@@ -7,6 +7,10 @@
 
 {% block content_body %}
     <h1>Take a Quiz</h1>
+    <!--
+    hidden_question_id.value=[ {{ form_flashcard.hidden_question_id.value }} ]
+    question.pk=             [ {{ question.pk }} ]
+    -->
     <form method="post">
       {% csrf_token %}
       {{ form_flashcard.hidden_question_id }}
@@ -99,6 +103,8 @@
       {% endif %}
       </div>
 
+      {{ form_flashcard.query_prefs }}
+
       <div class="col-xs-12">
         [{{ user_tag_names }}] tags selected
         {% if question %}
@@ -119,11 +125,14 @@
           <br>[{{ question.datetime_updated }}] flashcard updated
         {% endif %}
 
+
         {% if question %}
           <details>
         {% else %}
           <details open >
         {% endif %}
+
+
           <summary>Tags</summary>
           <!-- Show all the tags -->
             Ask questions with these tags:

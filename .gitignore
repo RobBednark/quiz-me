@@ -1,9 +1,12 @@
+# override "".vscode/launch.json" from the global .gitignore containing ".vscode"
+#!.vscode/launch.json
+!.vscode/
+
 *.ipynb*
 *.log
 *.pyc
 *.swp
 .venv
-.vscode/
 db_dumps
 ignore*
 local_settings.py

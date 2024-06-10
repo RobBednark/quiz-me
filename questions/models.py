@@ -29,7 +29,53 @@ class CreatedBy(models.Model):
     class Meta:
         abstract = True
 
+class QueryPreferences(CreatedBy):
+    MAX_LENGTH_NAME = 1000
 
+    name = models.TextField(max_length=MAX_LENGTH_NAME, null=False, default='')
+    date_last_used = models.DateTimeField(null=True, default=None)
+    is_default = models.BooleanField(default=False)
+
+    # Include unanswered questions (nulls) in first bucket query.
+    # Does not affect order-by
+    include_unanswered_questions = models.BooleanField(default=True)           # old: option_include_unanswered_questions
+    
+    # True  => for questions scheduled before now, only show questions that have answers
+    # False => disable
+    include_questions_with_answers = models.BooleanField(default=True)         # old: option_questions_with_answers_first
+    
+    
+    # True  => for questions scheduled before now, only show questions that DON'T have answers
+    # False => disable
+    include_questions_without_answers = models.BooleanField(default=True)      # old: option_questions_without_answers_first
+
+    # True  => date_show_next <= now
+    # False => don't limit to date_show_next (desirable if want to order by
+    #          answered count or when_answered, regardless of schedule)
+    # Does not affect order-by
+    limit_to_date_show_next_before_now = models.BooleanField(default=False)    # old: option_limit_to_date_show_next_before_now
+
+    # True => order nulls first (for date_show_next, num_schedules, schedule_datetime_added)
+    sort_by_nulls_first = models.BooleanField(default=False)                   # old: option_nulls_first
+
+    # Takes precedence over all other order_by's
+    sort_by_lowest_answered_count_first = models.BooleanField(default=False)   # old: option_order_by_answered_count
+    sort_by_questions_with_answers_first = models.BooleanField(default=False)  # old: option_questions_with_answers_first
+
+    # True  => order by when answered,  newest first (schedule_datetime_added DESC NULLS LAST)
+    # False => order by date_show_next, oldest first (date_show_next ASC NULLS FIRST)
+    # used with
+    #   option_limit_to_date_show_next_before_now=True
+    # to show questions to reinforce (see again quickly)
+    sort_by_newest_answered_first = models.BooleanField(default=False)         # old: option_order_by_when_answered_newest
+
+    # Takes precedence over all other order_by's, except for option_order_by_answered_count
+    sort_by_oldest_answered_first = models.BooleanField(default=True)          # old: option_order_by_when_answered_oldest
+ 
+    def __str__(self):
+        return self.name
+    
+    
 class QuestionManager(models.Manager):
 
     def get_user_questions(self, user):

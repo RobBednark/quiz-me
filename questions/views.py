@@ -1,6 +1,11 @@
 from collections import defaultdict, namedtuple
 from datetime import datetime
+import humanize
 import os
+from pprint import pformat
+import pytz
+import traceback
+
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -10,16 +15,16 @@ from django.db import connection
 from django.db.models import Count, F, OuterRef, Q, Subquery
 from django.db.models import IntegerField, Sum, Case, When
 from django.db.models.functions import Coalesce
-from django.forms.models import modelformset_factory
-from django.http import HttpResponseRedirect
+from django.forms.models import model_to_dict, modelformset_factory
 from django.shortcuts import render
-from django.urls import reverse
 from django.utils import timezone
-import humanize
-import pytz
 
-from .forms import FormAttemptNew, FormSchedule, FormFlashcard
+from .forms import FormFlashcard
 from questions import models
+
+
+debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
+debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
 
 NextQuestion = namedtuple(
@@ -36,8 +41,80 @@ NextQuestion = namedtuple(
     ]
 )
 
+def _debug_print_questions(questions, msg):
+    NUM_QUESTIONS_FIRST = 2
+    NUM_QUESTIONS_LAST = 2
+    _debug_print_n_questions(questions=questions, msg=msg, num_questions=NUM_QUESTIONS_FIRST)
+    _debug_print_n_questions(questions=questions, msg=msg, num_questions= -NUM_QUESTIONS_LAST)
+        
+def _debug_print_n_questions(questions, msg, num_questions):
+    if debug_print:
+        print("=" * 80)
+        LENGTH_QUESTION = 50
+        questions_count = questions.count()
 
-def _get_next_question(user):
+        if num_questions == 0:
+            first_or_last = '(show none)'
+        elif num_questions > 0:
+            first_or_last = 'first'
+            questions = questions[:num_questions]
+        else:
+            first_or_last = 'last'
+            questions = list(questions)
+            questions = questions[num_questions:]
+        print(f'[{first_or_last:5}] questions (): {msg}')
+        for idx, question in enumerate(questions):
+            num_question = idx + 1
+            print()
+            question_text = question.question
+            question_text = question_text.replace('\r','')
+            question_text = question_text.replace('\n',' ')
+            question_text = question_text.strip()
+            question_text = question_text[:LENGTH_QUESTION]
+            if num_questions < 0:
+                # assert: num_questions is negative (e.g., -5), so adding it to count is really subtraction
+                num_of_count = questions_count + num_questions + num_question
+            else:
+                num_of_count = num_question
+            
+            # print annotations
+            try:
+                schedule_datetime_added = question.schedule_datetime_added
+            except AttributeError:
+                # assert: schedule_datetime_added annotation is not present
+                schedule_datetime_added = None
+
+            try:
+                date_show_next = question.date_show_next
+            except AttributeError:
+                # assert: date_show_next annotation is not present
+                date_show_next = None
+
+            try:
+                num_schedules = question.num_schedules
+            except AttributeError:
+                # assert: num_schedules annotation is not present
+                num_schedules = None
+
+            print(f'question [{num_of_count}/{questions_count}]  [{num_question}/{num_questions}]  pk=[{question.pk}] text=[{question_text}]')
+            print(f'schedule.date_show_next: {date_show_next}')
+            print(f'question.datetime_added: {question.datetime_added}')
+            print(f'schedule_datetime_added: {schedule_datetime_added}')
+            print(f'num_schedules: {num_schedules}')
+            
+            if question.answer:
+                answer_text = question.answer.answer
+                answer_text = answer_text.replace('\r','')
+                answer_text = answer_text.replace('\n',' ')
+                answer_text = answer_text.strip()
+                answer_text = answer_text[:LENGTH_QUESTION]
+                print(f'answer: {question.answer.answer[:LENGTH_QUESTION]}')
+            else:
+                print('answer: None')
+
+def _get_next_question(user, query_prefs):
+    # This function queries UserTag to determine which tags to use for the question query.
+
     # Bucket 1: questions scheduled before now
     # First look for questions with schedule.date_show_next <= now,
     # and return the question with the newest schedule.datetime_added.
@@ -51,7 +128,7 @@ def _get_next_question(user):
     # with the oldest schedule.date_show_next
 
     # Fields to sort on:
-    # 1. date_show_next (null=unseen)
+    # 1. schedule.date_show_next (null=unseen)
     # 2. when last answered (schedule_datetime_added)
     # 3. answered count (num_schedules)
 
@@ -67,7 +144,7 @@ def _get_next_question(user):
     #    option_limit_to_date_show_next_before_now = ??
     #    option_order_by_when_answered_newest = False
     #    option_order_by_answered_count = True
-    # 2) Order by date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again will come after unanswered questions)
+    # 2) Order by schedule.date_show_next, but show unanswered questions first (questions recently-answered that should be seen quickly again will come after unanswered questions)
     #    Reinforce older questions.
     #    option_include_unanswered_questions = True
     #    option_limit_to_date_show_next_before_now = False
@@ -80,55 +157,18 @@ def _get_next_question(user):
     #    option_order_by_when_answered_newest = True
     #    option_order_by_answered_count = False
 
-    debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
-    debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
-
-    # True  => for questions scheduled before now, only show questions that have answers
-    # False => disabled
-    option_questions_with_answers_first = eval(os.environ.get('QM_WITH_ANSWERS_FIRST', 'False'))
-
-    # True  => for questions scheduled before now, only show questions that DON'T have answers
-    # False => disabled
-    option_questions_without_answers_first = eval(os.environ.get('QM_WITHOUT_ANSWERS_FIRST', 'False'))
-
-    # Include unanswered questions (nulls) in first bucket query.
-    # Does not affect order-by.
-    option_include_unanswered_questions = eval(os.environ.get('QM_INCLUDE_UNANSWERED', 'True'))
-
-    # True  => date_show_next <= now
-    # False => don't limit to date_show_next (desirable if want to order by
-    #          answered count or when_answered, regardless of schedule)
-    # Does not affect order-by.
-    option_limit_to_date_show_next_before_now = eval(os.environ.get('QM_LIMIT_TO_DATE_SHOW_NEXT_BEFORE_NOW', 'True'))
-
-    # True => order nulls first (for date_show_next, num_schedules, schedule_datetime_added)
-    option_nulls_first = eval(os.environ.get('QM_NULLS_FIRST', 'True'))
-
-    # True  => order by when answered,  newest first (schedule_datetime_added DESC NULLS LAST)
-    # False => order by date_show_next, oldest first (date_show_next ASC NULLS FIRST)
-    # used with
-    #   option_limit_to_date_show_next_before_now=True
-    # to show questions to reinforce (see again quickly)
-    option_order_by_when_answered_newest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_NEWEST', 'True'))
-
-    # Takes precedence over all other order_by's
-    option_order_by_answered_count = eval(os.environ.get('QM_SORT_BY_ANSWERED_COUNT', 'False'))
-
-    # Takes precedence over all other order_by's, except for option_order_by_answered_count
-    option_order_by_when_answered_oldest = eval(os.environ.get('QM_SORT_BY_WHEN_ANSWERED_OLDEST', 'False'))
-
-    debug_print and print('')
-    # Print out the values for each of the option_* variables
-    for var_name in sorted([var_name for var_name in locals().keys() if var_name.startswith('option_')]):
-        debug_print and print('%s: [%s]' % (var_name, locals()[var_name]))
+    assert query_prefs is not None
+    debug_print and print('\nquery_prefs:\n' + pformat(model_to_dict(query_prefs)))
 
     datetime_now = datetime.now(tz=pytz.utc)
 
     # user_tags -- UserTags the user has selected that they want to be quizzed on right now
     user_tags = models.UserTag.objects.filter(user=user, enabled=True).values_list('tag', flat=True)
+
     # tags -- Tags the user has selected that they want to be quizzed on right now
     tags = models.Tag.objects.filter(id__in=user_tags)
     tag_names = tags.values_list('name', flat=True)
+    
     # question_tags -- QuestionTags matching the tags the user wants to be quizzed on
     # (logical OR -- questions that match any (not all) of the tags)
     question_tags = models.QuestionTag.objects.filter(enabled=True, tag__in=tags)
@@ -136,12 +176,14 @@ def _get_next_question(user):
     # questions_tagged -- Questions matching the question_tags
     questions_tagged = models.Question.objects.filter(questiontag__in=question_tags)
     count_questions_tagged = questions_tagged.count()
+
     # schedules -- all Schedules for the user for each question, newest first by datetime_added
     # OuterRef('pk') refers to the question.pk for each question
     schedules = (models.Schedule.objects
                  .filter(user=user, question=OuterRef('pk'))
                  .order_by('-datetime_added'))
-    # questions_annotated - questions_tagged, annotated with .date_show_next
+    
+    # questions_annotated - questions_tagged, annotated with (schedule).date_show_next
     # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
     # add num_schedules field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
@@ -154,41 +196,62 @@ def _get_next_question(user):
     # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
     subquery_include_unanswered = None
-    if option_include_unanswered_questions:
-        debug_print and print('looking for unanswered questions')
+    if query_prefs.include_unanswered_questions:
+        # Include unanswered questions (nulls) in first bucket query.
+        # Does not affect order-by.
         subquery_include_unanswered = Q(date_show_next__isnull=True)
     subquery_by_date_show_next = None
-    if option_limit_to_date_show_next_before_now:
-        debug_print and print('looking for questions scheduled before now')
+    if query_prefs.limit_to_date_show_next_before_now:
         subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
-    if option_questions_with_answers_first:
+    if query_prefs.include_questions_with_answers:
+        # True  => for questions scheduled before now, only show questions that have answers
+        # False => disabled
         questions = questions.filter(answer__isnull=False)
-    if option_questions_without_answers_first:
+    if query_prefs.include_questions_without_answers:
+        # True  => for questions scheduled before now, only show questions that DON'T have answers
+        # False => disabled
         questions = questions.filter(answer__isnull=True)
 
     if subquery_include_unanswered and subquery_by_date_show_next:
+        # True  => date_show_next <= now
+        # False => don't limit to date_show_next (desirable if want to order by
+        #          answered count or when_answered, regardless of schedule)
+        # Does not affect order-by.
         questions = questions.filter(subquery_include_unanswered | subquery_by_date_show_next)
     elif subquery_include_unanswered:
         questions = questions.filter(subquery_include_unanswered)
     elif subquery_by_date_show_next:
         questions = questions.filter(subquery_by_date_show_next)
     order_by = []
-    if option_order_by_answered_count:
-        order_by.append(F('num_schedules').asc(nulls_first=option_nulls_first))
+    
+    # sort_by_nulls_first (used for all four order_by's):
+    # True => order nulls first (for date_show_next, num_schedules, schedule_datetime_added)
 
-    if option_order_by_when_answered_oldest:
+    if query_prefs.sort_by_lowest_answered_count_first:
+        # Takes precedence over all other order_by's
+        # nulls_first parm must be True or None
+        order_by.append(F('num_schedules').asc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
+
+    if query_prefs.sort_by_oldest_answered_first:
+        # Takes precedence over all other order_by's, except for option_order_by_answered_count
+        # True  => order by when answered,  newest first (schedule_datetime_added DESC NULLS LAST)
+        # False => order by date_show_next, oldest first (date_show_next ASC NULLS FIRST)
+        # used with
+        #   option_limit_to_date_show_next_before_now=True
+        # to show questions to reinforce (see again quickly)
+        #
         # Order by the time when the user last answered the question, oldest first
-        order_by.append(F('schedule_datetime_added').asc(nulls_first=option_nulls_first))
+        order_by.append(F('schedule_datetime_added').asc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
 
-    if option_order_by_when_answered_newest:
+    if query_prefs.sort_by_newest_answered_first:
         # Order by the time when the user last answered the question, newest first
-        order_by.append(F('schedule_datetime_added').desc(nulls_first=option_nulls_first))
+        order_by.append(F('schedule_datetime_added').desc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
     else:
         # Order by when the question should be shown again
-        order_by.append(F('date_show_next').asc(nulls_first=option_nulls_first))
+        order_by.append(F('date_show_next').asc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
     # For unanswered questions , order by the time the question was added, oldest first.
     order_by.append(F('datetime_added').asc())
-    debug_print and print('order_by = %s' % order_by)
+    debug_print and print('order_by:\n' + pformat(order_by))
     questions = questions.order_by(*order_by)
 
     SCHEDULES_SINCE_INTERVAL_30 = { 'minutes': 30 }
@@ -209,6 +272,8 @@ def _get_next_question(user):
         .count())
 
     count_questions_before_now = 0
+    
+    debug_print and _debug_print_questions(questions=questions, msg='query 1')
     # query #1
     if questions:
         # Show questions whose schedule.date_show_next <= now
@@ -218,15 +283,17 @@ def _get_next_question(user):
         debug_sql and print(connection.queries[-1])
         question_to_show = questions[0]
     else:
-        debug_sql and print(connection.queries[-1])
-        debug_print and print('No questions scheduled before now.  Look for unanswered questions.')
+        debug_sql and print(f'sql: most recent query: {connection.queries[-1]}')
         # assert: no question with schedule.date_show_next <= now
         # Look for questions with no schedules, and show the one with the
         # oldest question.datetime_added
+        
+        # TODO: CHECK: using questions_tagged here, but query #3 is using questions_annotated -- is that correct?
         questions = questions_tagged
         questions = questions.filter(schedule=None)
         debug_print and print("order_by('question.datetime_added')")
         questions = questions.order_by('datetime_added')
+        debug_print and _debug_print_questions(questions=questions, msg='query 2 (schedule=None, order_by(datetime_added) (AKA unanswered questions / no schedule)')
 
         # query #2
         if questions:
@@ -234,19 +301,18 @@ def _get_next_question(user):
             debug_sql and print(connection.queries[-1])
             question_to_show = questions[0]
         else:
-            debug_print and print('No unanswered questions found, so look for schedules in the future')
             debug_sql and print(connection.queries[-1])
             # assert: no question without a schedule
             # Return the question with the oldest schedule.date_show_next
             # query #3
             questions = questions_annotated
-            debug_print and print('order_by(question.date_show_next)')
             questions = questions.order_by('date_show_next')
+            debug_print and _debug_print_questions(questions=questions, msg='query 3 (order by schedule.date_show_next ASC; use the oldest)')
             if questions:
                 debug_print and print('future scheduled questions found, count=[%s]' % questions.count())
                 question_to_show = questions[0]
             else:
-                debug_print and print('No answers whatsoever')
+                debug_print and print('No questions whatsoever')
                 question_to_show = None
 
     # query #4
@@ -260,7 +326,7 @@ def _get_next_question(user):
     return NextQuestion(
         count_questions_before_now=count_questions_before_now,
         count_questions_tagged=count_questions_tagged,
-        option_limit_to_date_show_next_before_now=option_limit_to_date_show_next_before_now,
+        option_limit_to_date_show_next_before_now=query_prefs.limit_to_date_show_next_before_now,
         question=question_to_show,
         schedules_recent_count_30=schedules_recent_count_30,
         schedules_recent_count_60=schedules_recent_count_60,
@@ -370,8 +436,29 @@ def _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag):
         tag_name = form.instance.tag.name
         form.question_count_since_week_ago = name2instance[tag_name].question_count_since_week_ago
 
+    
+def _get_query_prefs(user, query_prefs):
+    if query_prefs:
+        return query_prefs
+    
+    try:
+        query_prefs = (models.QueryPreferences.objects
+                        .filter(is_default=True, user=user)
+                        .latest('date_last_used')
+        )
+        return query_prefs
+    except models.QueryPreferences.DoesNotExist:
+        # No default query_prefs, so create one
+        query_prefs = models.QueryPreferences(
+            is_default=True,
+            name='Default query preferences (auto-created)',
+            user=user,
+            date_last_used=timezone.now())
+        query_prefs.save()
+        return query_prefs
+
 @login_required(login_url='/login')
-def _get_flashcard(request, form_flashcard=None):
+def _get_flashcard(request, query_prefs, form_flashcard):
     # Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
     # because _create_and_get_usertags might create new usertags, which are used
     # by _get_next_question().
@@ -380,15 +467,16 @@ def _get_flashcard(request, form_flashcard=None):
     modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
     _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
 
-    next_question = _get_next_question(user=request.user)
+    next_question = _get_next_question(user=request.user, query_prefs=query_prefs)
     id_question = next_question.question.id if next_question.question else 0
 
     _get_tag2periods(
         user=request.user,
         modelformset_usertag=modelformset_usertag
     )
-    if not form_flashcard:
-        form_flashcard = FormFlashcard(initial=dict(hidden_question_id=id_question))
+
+    form_flashcard = FormFlashcard(dict(hidden_question_id=id_question, query_prefs=query_prefs))
+
     if next_question.question:
         question_tag_names = ", ".join(
             sorted([
@@ -439,12 +527,14 @@ def _post_flashcard(request):
     form_flashcard = FormFlashcard(request.POST)
     if form_flashcard.is_valid():
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
+        query_prefs = form_flashcard.cleaned_data['query_prefs']
         try:
             question = models.Question.objects.get(id=id_question)
         except models.Question.DoesNotExist:
             # There was no question available.  Perhaps the user
             # selected different tags now, so try again.
-            return _get_flashcard(request)
+            debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
+            return _get_flashcard(request=request, query_prefs=query_prefs, form_flashcard=None)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -456,7 +546,9 @@ def _post_flashcard(request):
         except Exception:
             # TODO: do something here,
             # e.g., log it, show it to the user
-            pass
+            print('EXCEPTION: attempt.save():')
+            print(traceback.format_exc())
+
         schedule = models.Schedule(
             percent_correct=data['percent_correct'],
             percent_importance=data['percent_importance'],
@@ -466,16 +558,20 @@ def _post_flashcard(request):
             user=request.user
         )
         schedule.save()
-        return _get_flashcard(request)
+        debug_print and print('_post_flashcard, afer schedule.save(), before _get_flashcard(): data:\n' + pformat(data))
+        return _get_flashcard(request=request, query_prefs=query_prefs, form_flashcard=None)
     else:
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
-        return _get_flashcard(request=request, form_flashcard=form_flashcard)
+        debug_print and print('ERROR: _post_flashcard: form is NOT valid')
+        query_prefs = _get_query_prefs(user=request.user, query_prefs=None)
+        return _get_flashcard(request=request, form_flashcard=form_flashcard, query_prefs=query_prefs)
 
+@login_required(login_url='/login')
 def flashcard(request):
     if request.method == 'GET':
-        return _get_flashcard(request=request)
+        return _get_flashcard(request=request, query_prefs=_get_query_prefs(user=request.user, query_prefs=None), form_flashcard=None)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:
