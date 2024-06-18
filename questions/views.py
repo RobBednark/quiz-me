@@ -19,7 +19,7 @@ from django.forms.models import model_to_dict, modelformset_factory
 from django.shortcuts import render
 from django.utils import timezone
 
-from .forms import FormFlashcard
+from .forms import FormFlashcard, FormSelectTags
 from questions import models
 
 
@@ -112,7 +112,7 @@ def _debug_print_n_questions(questions, msg, num_questions):
             else:
                 print('answer: None')
 
-def _get_next_question(user, query_prefs):
+def _get_next_question(user, query_prefs, tags_selected):
     # This function queries UserTag to determine which tags to use for the question query.
 
     # Bucket 1: questions scheduled before now
@@ -162,11 +162,11 @@ def _get_next_question(user, query_prefs):
 
     datetime_now = datetime.now(tz=pytz.utc)
 
-    # user_tags -- UserTags the user has selected that they want to be quizzed on right now
-    user_tags = models.UserTag.objects.filter(user=user, enabled=True).values_list('tag', flat=True)
+    ## # user_tags -- UserTags the user has selected that they want to be quizzed on right now
+    ## user_tags = models.UserTag.objects.filter(user=user, enabled=True).values_list('tag', flat=True)
 
     # tags -- Tags the user has selected that they want to be quizzed on right now
-    tags = models.Tag.objects.filter(id__in=user_tags)
+    tags = models.Tag.objects.filter(id__in=tags_selected)
     tag_names = tags.values_list('name', flat=True)
     
     # question_tags -- QuestionTags matching the tags the user wants to be quizzed on
@@ -458,22 +458,22 @@ def _get_query_prefs(user, query_prefs):
         return query_prefs
 
 @login_required(login_url='/login')
-def _get_flashcard(request, query_prefs, form_flashcard):
+def _get_flashcard(request, query_prefs, tags_selected):
     # Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
     # because _create_and_get_usertags might create new usertags, which are used
     # by _get_next_question().
 
-    tag_schedule_counts = _get_tag_schedule_counts(user=request.user)
-    modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
-    _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
+    ## tag_schedule_counts = _get_tag_schedule_counts(user=request.user)
+    ## modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
+    ## _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
 
-    next_question = _get_next_question(user=request.user, query_prefs=query_prefs)
+    next_question = _get_next_question(user=request.user, query_prefs=query_prefs, tags_selected=tags_selected)
     id_question = next_question.question.id if next_question.question else 0
 
-    _get_tag2periods(
-        user=request.user,
-        modelformset_usertag=modelformset_usertag
-    )
+    ## _get_tag2periods(
+    ##     user=request.user,
+    ##     modelformset_usertag=modelformset_usertag
+    ## )
 
     form_flashcard = FormFlashcard(dict(hidden_question_id=id_question, query_prefs=query_prefs))
 
@@ -502,15 +502,15 @@ def _get_flashcard(request, query_prefs, form_flashcard):
 
     return render(
         request=request,
-        template_name='flashcard.html',
+        template_name='question.html',
         context=dict(
             count_questions_before_now=next_question.count_questions_before_now,
             count_questions_tagged=next_question.count_questions_tagged,
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,
-            modelformset_usertag=modelformset_usertag,
-            modelformset_usertag__total_error_count=modelformset_usertag.total_error_count(),
-            modelformset_usertag__non_form_errors=modelformset_usertag.non_form_errors(),
+            ## modelformset_usertag=modelformset_usertag,
+            ## modelformset_usertag__total_error_count=modelformset_usertag.total_error_count(),
+            ## modelformset_usertag__non_form_errors=modelformset_usertag.non_form_errors(),
             option_limit_to_date_show_next_before_now=next_question.option_limit_to_date_show_next_before_now,
             question=next_question.question,
             question_tag_names=question_tag_names,
@@ -522,10 +522,43 @@ def _get_flashcard(request, query_prefs, form_flashcard):
         )
     )
 
+def get_tag_form_name2fields(request):
+    tag_form_name2fields = {}
+    for tag in models.Tag.objects.filter(user=request.user):
+        tag_form_name = f'id_form_name_{tag.id}'
+        tag_form_name2fields[tag_form_name] = dict(
+                tag_form_name=tag_form_name,
+                tag_form_label=tag.name,
+                tag_id=tag.id)
+    return tag_form_name2fields
+
+def view_get_select_tags(request):
+    form_select_tags = FormSelectTags(dict(query_prefs=_get_query_prefs(user=request.user, query_prefs=None)))
+    return render(
+        request=request,
+        template_name='select_tags.html',
+        context=dict(
+            form_select_tags=form_select_tags,
+            tag_form_name2fields=get_tag_form_name2fields(request=request),
+        )
+    )
+
+def NEW_get_enabled_tags(request):
+    tag_form_name2fields = get_tag_form_name2fields(request=request)
+    selected_tags = []
+    for tag_form_name, tag_fields in tag_form_name2fields.items():
+        if request.POST.get(tag_form_name, None):
+            selected_tags.append(tag_fields['tag_id'])
+    return selected_tags
+
+
 def _post_flashcard(request):
     # Save the attempt and the schedule.
+    #### TODO: rm this call -- just for debugging
+    tags_selected = NEW_get_enabled_tags(request=request)
     form_flashcard = FormFlashcard(request.POST)
     if form_flashcard.is_valid():
+        tags_selected = NEW_get_enabled_tags(request=request)
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
         query_prefs = form_flashcard.cleaned_data['query_prefs']
         try:
@@ -534,7 +567,7 @@ def _post_flashcard(request):
             # There was no question available.  Perhaps the user
             # selected different tags now, so try again.
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
-            return _get_flashcard(request=request, query_prefs=query_prefs, form_flashcard=None)
+            return _get_flashcard(request=request, query_prefs=query_prefs, tags_selected=selected_tags)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -559,19 +592,20 @@ def _post_flashcard(request):
         )
         schedule.save()
         debug_print and print('_post_flashcard, afer schedule.save(), before _get_flashcard(): data:\n' + pformat(data))
-        return _get_flashcard(request=request, query_prefs=query_prefs, form_flashcard=None)
+        return _get_flashcard(request=request, query_prefs=query_prefs, tags_selected=tags_selected)
     else:
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
         debug_print and print('ERROR: _post_flashcard: form is NOT valid')
         query_prefs = _get_query_prefs(user=request.user, query_prefs=None)
-        return _get_flashcard(request=request, form_flashcard=form_flashcard, query_prefs=query_prefs)
+        return _get_flashcard(request=request, query_prefs=query_prefs, tags_selected=tags_selected)
 
 @login_required(login_url='/login')
 def flashcard(request):
     if request.method == 'GET':
-        return _get_flashcard(request=request, query_prefs=_get_query_prefs(user=request.user, query_prefs=None), form_flashcard=None)
+        return view_get_select_tags(request=request)
+        # return _get_flashcard(request=request, query_prefs=_get_query_prefs(user=request.user, query_prefs=None), form_flashcard=None)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:
@@ -656,3 +690,10 @@ def _create_and_get_usertags(user, method, post_data=None):
             #   e.g., form.errors['sender'] == 'Enter a valid email address.'
             pass
         return modelformset_usertag
+
+def _get_tags(user):
+    queryset = (models.Tag.objects.filter(user=user).order_by('name'))
+    ModelFormset_Tag = modelformset_factory(
+        model=models.Tag, extra=0, fields=('name',))
+    modelformset_tag = ModelFormset_Tag(queryset=queryset)
+    return modelformset_tag
