@@ -516,7 +516,7 @@ def _get_flashcard(request, query_prefs, tags_selected):
             question_tag_names=question_tag_names,
             schedules_recent_count_30=next_question.schedules_recent_count_30,
             schedules_recent_count_60=next_question.schedules_recent_count_60,
-            settings = settings,
+            ## settings = settings,
             user_tag_names=next_question.user_tag_names,
             num_schedules=next_question.num_schedules
         )
@@ -543,31 +543,29 @@ def view_get_select_tags(request):
         )
     )
 
-def NEW_get_enabled_tags(request):
+def NEW_get_selected_tags(request):
     tag_form_name2fields = get_tag_form_name2fields(request=request)
-    selected_tags = []
+    tags_selected = []
     for tag_form_name, tag_fields in tag_form_name2fields.items():
         if request.POST.get(tag_form_name, None):
-            selected_tags.append(tag_fields['tag_id'])
-    return selected_tags
+            tags_selected.append(tag_fields['tag_id'])
+    return tags_selected
 
 
 def _post_flashcard(request):
     # Save the attempt and the schedule.
-    #### TODO: rm this call -- just for debugging
-    tags_selected = NEW_get_enabled_tags(request=request)
     form_flashcard = FormFlashcard(request.POST)
+    tags_selected = NEW_get_selected_tags(request=request)
     if form_flashcard.is_valid():
-        tags_selected = NEW_get_enabled_tags(request=request)
-        id_question = form_flashcard.cleaned_data["hidden_question_id"]
         query_prefs = form_flashcard.cleaned_data['query_prefs']
+        id_question = form_flashcard.cleaned_data["hidden_question_id"]
         try:
             question = models.Question.objects.get(id=id_question)
         except models.Question.DoesNotExist:
             # There was no question available.  Perhaps the user
             # selected different tags now, so try again.
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
-            return _get_flashcard(request=request, query_prefs=query_prefs, tags_selected=selected_tags)
+            return _get_flashcard(request=request, query_prefs=query_prefs, tags_selected=tags_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -581,6 +579,7 @@ def _post_flashcard(request):
             # e.g., log it, show it to the user
             print('EXCEPTION: attempt.save():')
             print(traceback.format_exc())
+            raise
 
         schedule = models.Schedule(
             percent_correct=data['percent_correct'],

@@ -10,8 +10,11 @@
     <form method="post">
       {% csrf_token %}
 
+      <input class="btn btn-primary btn-lg" type="submit" value="Submit" />
+      <p/>
+      <p/>
       {{ form_select_tags.query_prefs }}
-
+      <p/>
       <div class="col-xs-12">
             {% for tag_form_name, tag_fields in tag_form_name2fields.items %}
               <div class="row">
