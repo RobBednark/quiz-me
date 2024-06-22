@@ -17,6 +17,7 @@ class FormFlashcard(forms.Form):
         widget=PagedownWidgetAligned()
     )
     hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
+    hidden_tags_selected = forms.IntegerField(widget=forms.MultipleHiddenInput())
 
     percent_correct = forms.DecimalField(
         max_digits=5,
