@@ -477,7 +477,7 @@ def _render_question(request, query_prefs_obj, tags_selected):
     ##     modelformset_usertag=modelformset_usertag
     ## )
 
-    form_flashcard = FormFlashcard(data=dict(hidden_tags_selected=tags_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
+    form_flashcard = FormFlashcard(data=dict(hidden_query_id=query_prefs_obj.id, hidden_tags_selected=tags_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
 
     if next_question.question:
         question_tag_names = ", ".join(
@@ -646,11 +646,13 @@ def view_select_tags(request):
 @login_required(login_url='/login')
 def view_question(request):
     if request.method == 'GET':
-        tag_ids_selected = request.GET.get('tag_ids_selected', None)
-        tag_ids_selected = request.GET.get('tag_ids', None)
+        tag_ids_selected = request.GET.get('tag_ids_selected', '')
+        tag_ids_selected = tag_ids_selected.split(',')
+        tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
+        tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
         query_prefs_id = request.GET.get('query_prefs_id', None)
         query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
-        return _render_question(request=request, tags_selected=tag_ids_selected, query_prefs_obj=query_prefs_obj)
+        return _render_question(request=request, tags_selected=tag_objs_selected, query_prefs_obj=query_prefs_obj)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:

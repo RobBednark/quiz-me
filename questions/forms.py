@@ -16,6 +16,7 @@ class FormFlashcard(forms.Form):
         required=False,
         widget=PagedownWidgetAligned()
     )
+    hidden_query_prefs_id = forms.IntegerField(widget=forms.HiddenInput())
     hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
     hidden_tags_selected = forms.IntegerField(widget=forms.MultipleHiddenInput())
 
