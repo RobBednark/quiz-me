@@ -34,7 +34,9 @@ class QueryPreferences(CreatedBy):
 
     name = models.TextField(max_length=MAX_LENGTH_NAME, null=False, default='')
     date_last_used = models.DateTimeField(null=True, default=None)
-    is_default = models.BooleanField(default=False)
+
+    ## Remove.  No longer needed.
+    ## is_default = models.BooleanField(default=False)
 
     # Include unanswered questions (nulls) in first bucket query.
     # Does not affect order-by

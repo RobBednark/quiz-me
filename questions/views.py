@@ -114,7 +114,8 @@ def _debug_print_n_questions(questions, msg, num_questions):
             else:
                 print('answer: None')
 
-def _get_next_question(user, query_prefs, tags_selected):
+def _get_next_question(user, query_prefs_obj, tags_selected):
+    # query_prefs_obj -- QueryPrefs object
     # This function queries UserTag to determine which tags to use for the question query.
 
     # Bucket 1: questions scheduled before now
@@ -159,8 +160,8 @@ def _get_next_question(user, query_prefs, tags_selected):
     #    option_order_by_when_answered_newest = True
     #    option_order_by_answered_count = False
 
-    assert query_prefs is not None
-    debug_print and print('\nquery_prefs:\n' + pformat(model_to_dict(query_prefs)))
+    assert query_prefs_obj is not None
+    debug_print and print('\nquery_prefs_obj:\n' + pformat(model_to_dict(query_prefs_obj)))
 
     datetime_now = datetime.now(tz=pytz.utc)
 
@@ -198,18 +199,18 @@ def _get_next_question(user, query_prefs, tags_selected):
     # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
     subquery_include_unanswered = None
-    if query_prefs.include_unanswered_questions:
+    if query_prefs_obj.include_unanswered_questions:
         # Include unanswered questions (nulls) in first bucket query.
         # Does not affect order-by.
         subquery_include_unanswered = Q(date_show_next__isnull=True)
     subquery_by_date_show_next = None
-    if query_prefs.limit_to_date_show_next_before_now:
+    if query_prefs_obj.limit_to_date_show_next_before_now:
         subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
-    if query_prefs.include_questions_with_answers:
+    if query_prefs_obj.include_questions_with_answers:
         # True  => for questions scheduled before now, only show questions that have answers
         # False => disabled
         questions = questions.filter(answer__isnull=False)
-    if query_prefs.include_questions_without_answers:
+    if query_prefs_obj.include_questions_without_answers:
         # True  => for questions scheduled before now, only show questions that DON'T have answers
         # False => disabled
         questions = questions.filter(answer__isnull=True)
@@ -229,12 +230,12 @@ def _get_next_question(user, query_prefs, tags_selected):
     # sort_by_nulls_first (used for all four order_by's):
     # True => order nulls first (for date_show_next, num_schedules, schedule_datetime_added)
 
-    if query_prefs.sort_by_lowest_answered_count_first:
+    if query_prefs_obj.sort_by_lowest_answered_count_first:
         # Takes precedence over all other order_by's
         # nulls_first parm must be True or None
-        order_by.append(F('num_schedules').asc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
+        order_by.append(F('num_schedules').asc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
 
-    if query_prefs.sort_by_oldest_answered_first:
+    if query_prefs_obj.sort_by_oldest_answered_first:
         # Takes precedence over all other order_by's, except for option_order_by_answered_count
         # True  => order by when answered,  newest first (schedule_datetime_added DESC NULLS LAST)
         # False => order by date_show_next, oldest first (date_show_next ASC NULLS FIRST)
@@ -243,14 +244,14 @@ def _get_next_question(user, query_prefs, tags_selected):
         # to show questions to reinforce (see again quickly)
         #
         # Order by the time when the user last answered the question, oldest first
-        order_by.append(F('schedule_datetime_added').asc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
+        order_by.append(F('schedule_datetime_added').asc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
 
-    if query_prefs.sort_by_newest_answered_first:
+    if query_prefs_obj.sort_by_newest_answered_first:
         # Order by the time when the user last answered the question, newest first
-        order_by.append(F('schedule_datetime_added').desc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
+        order_by.append(F('schedule_datetime_added').desc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
     else:
         # Order by when the question should be shown again
-        order_by.append(F('date_show_next').asc(nulls_first=query_prefs.sort_by_nulls_first if query_prefs.sort_by_nulls_first else None))
+        order_by.append(F('date_show_next').asc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
     # For unanswered questions , order by the time the question was added, oldest first.
     order_by.append(F('datetime_added').asc())
     debug_print and print('order_by:\n' + pformat(order_by))
@@ -328,7 +329,7 @@ def _get_next_question(user, query_prefs, tags_selected):
     return NextQuestion(
         count_questions_before_now=count_questions_before_now,
         count_questions_tagged=count_questions_tagged,
-        option_limit_to_date_show_next_before_now=query_prefs.limit_to_date_show_next_before_now,
+        option_limit_to_date_show_next_before_now=query_prefs_obj.limit_to_date_show_next_before_now,
         question=question_to_show,
         schedules_recent_count_30=schedules_recent_count_30,
         schedules_recent_count_60=schedules_recent_count_60,
@@ -439,28 +440,30 @@ def _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag):
         form.question_count_since_week_ago = name2instance[tag_name].question_count_since_week_ago
 
     
-def _get_query_prefs(user, query_prefs):
-    if query_prefs:
-        return query_prefs
-    
+def _ensure_one_query_prefs_obj(user):
+    # Ensure there's at least one QueryPrefs object for the given :user: when the go to the Select Tags page.
+    # If there's not, create one.
     try:
-        query_prefs = (models.QueryPreferences.objects
+        query_prefs_obj = (models.QueryPreferences.objects
                         .filter(is_default=True, user=user)
                         .latest('date_last_used')
         )
-        return query_prefs
     except models.QueryPreferences.DoesNotExist:
         # No default query_prefs, so create one
-        query_prefs = models.QueryPreferences(
+        query_prefs_obj = models.QueryPreferences(
             is_default=True,
             name='Default query preferences (auto-created)',
             user=user,
             date_last_used=timezone.now())
-        query_prefs.save()
-        return query_prefs
+        query_prefs_obj.save()
+
+def _get_selected_query_prefs_obj(user, query_prefs_id):
+    query_prefs_obj = 
 
 @login_required(login_url='/login')
-def _render_question(request, query_prefs, tags_selected):
+def _render_question(request, query_prefs_obj, tags_selected):
+    # query_prefs_obj -- a QueryPrefs object
+    
     ## Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
     ## because _create_and_get_usertags might create new usertags, which are used
     ## by _get_next_question().
@@ -469,7 +472,7 @@ def _render_question(request, query_prefs, tags_selected):
     ## modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
     ## _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
 
-    next_question = _get_next_question(user=request.user, query_prefs=query_prefs, tags_selected=tags_selected)
+    next_question = _get_next_question(user=request.user, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
     id_question = next_question.question.id if next_question.question else 0
 
     ## _get_tag2periods(
@@ -477,7 +480,7 @@ def _render_question(request, query_prefs, tags_selected):
     ##     modelformset_usertag=modelformset_usertag
     ## )
 
-    form_flashcard = FormFlashcard(data=dict(hidden_tags_selected=tags_selected, hidden_question_id=id_question, query_prefs=query_prefs))
+    form_flashcard = FormFlashcard(data=dict(hidden_tags_selected=tags_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
 
     if next_question.question:
         question_tag_names = ", ".join(
@@ -543,7 +546,8 @@ def get_tag_form_name2fields(request):
     return tag_form_name2fields
 
 def view_get_select_tags(request):#
-    form_select_tags = FormSelectTags(data=dict(query_prefs=_get_query_prefs(user=request.user, query_prefs=None)))
+    _ensure_one_query_prefs_obj(user=request.user)
+    form_select_tags = FormSelectTags()
     return render(
         request=request,
         template_name='select_tags.html',
@@ -555,15 +559,15 @@ def view_get_select_tags(request):#
 
 def _post_select_tags(request):
     form_select_tags = FormSelectTags(data=request.POST)
-    tags_selected = NEW_get_selected_tags(request=request)
-    tags_selected = ','.join(str(tag) for tag in tags_selected)
+    tag_ids_selected = NEW_get_selected_tags(request=request)
+    tag_ids_selected = ','.join(str(tag) for tag in tag_ids_selected)
     if form_select_tags.is_valid():
-        query_prefs = form_select_tags.cleaned_data['query_prefs']
+        query_prefs_obj = form_select_tags.cleaned_data['query_prefs']
         # redirect to /question/?tag_ids=...?query_prefs=...
         query_string = ''
         query_string = urlencode(dict(
-            tag_ids=tags_selected,
-            query_prefs_id=query_prefs.id))
+            tag_ids_selected=tag_ids_selected,
+            query_prefs_id=query_prefs_obj.id))
         redirect_url = reverse(viewname='question')
         redirect_url += f'?{query_string}'
         return redirect(to=redirect_url, permanent=True)
@@ -571,10 +575,8 @@ def _post_select_tags(request):
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
-        query_prefs = _get_query_prefs(user=request.user, query_prefs=None)
-        return _render_question(request=request, query_prefs=query_prefs, tags_selected=tags_selected)
-
-
+        query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_obj=None)
+        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
 
 def NEW_get_selected_tags(request):
     # return tags_selected, a list of tag id's
@@ -591,15 +593,17 @@ def _post_flashcard(request):
     form_flashcard = FormFlashcard(data=request.POST)
     tags_selected = NEW_get_selected_tags(request=request)
     if form_flashcard.is_valid():
-        query_prefs = form_flashcard.cleaned_data['query_prefs']
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
+        query_prefs_id = form_flashcard.cleaned_data["hidden_query_prefs_id"]
+        query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
+
         try:
             question = models.Question.objects.get(id=id_question)
         except models.Question.DoesNotExist:
             # There was no question available.  Perhaps the user
             # selected different tags now, so try again.
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
-            return _render_question(request=request, query_prefs=query_prefs, tags_selected=tags_selected)
+            return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -625,14 +629,13 @@ def _post_flashcard(request):
         )
         schedule.save()
         debug_print and print('_post_flashcard, afer schedule.save(), before _render_question(): data:\n' + pformat(data))
-        return _render_question(request=request, query_prefs=query_prefs, tags_selected=tags_selected)
+        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
     else:
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
         debug_print and print('ERROR: _post_flashcard: form is NOT valid')
-        query_prefs = _get_query_prefs(user=request.user, query_prefs=None)
-        return _render_question(request=request, query_prefs=query_prefs, tags_selected=tags_selected)
+        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
 
 @login_required(login_url='/login')
 def view_select_tags(request):
@@ -646,8 +649,11 @@ def view_select_tags(request):
 @login_required(login_url='/login')
 def view_question(request):
     if request.method == 'GET':
-        # TODO: return an error; only POST is supported
-        pass
+        tag_ids_selected = request.GET.get('tag_ids_selected', None)
+        tag_ids_selected = request.GET.get('tag_ids', None)
+        query_prefs_id = request.GET.get('query_prefs_id', None)
+        query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
+        return _render_question(request=request, tags_selected=tag_ids_selected, query_prefs_obj=query_prefs_obj)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:
@@ -733,9 +739,9 @@ def view_question(request):
 ##             pass
 ##         return modelformset_usertag
 
-def _get_tags(user):
-    queryset = (models.Tag.objects.filter(user=user).order_by('name'))
-    ModelFormset_Tag = modelformset_factory(
-        model=models.Tag, extra=0, fields=('name',))
-    modelformset_tag = ModelFormset_Tag(queryset=queryset)
-    return modelformset_tag
+## def _get_tags(user):
+##     queryset = (models.Tag.objects.filter(user=user).order_by('name'))
+##     ModelFormset_Tag = modelformset_factory(
+##         model=models.Tag, extra=0, fields=('name',))
+##     modelformset_tag = ModelFormset_Tag(queryset=queryset)
+##     return modelformset_tag
