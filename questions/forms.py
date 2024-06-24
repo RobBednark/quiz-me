@@ -18,7 +18,7 @@ class FormFlashcard(forms.Form):
     )
     hidden_query_prefs_id = forms.IntegerField(widget=forms.HiddenInput())
     hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
-    hidden_tags_selected = forms.IntegerField(widget=forms.MultipleHiddenInput())
+    hidden_tag_ids_selected = forms.CharField(widget=forms.HiddenInput())
 
     percent_correct = forms.DecimalField(
         max_digits=5,

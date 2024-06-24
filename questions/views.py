@@ -460,6 +460,7 @@ def _get_selected_query_prefs_obj(user, query_prefs_id):
 @login_required(login_url='/login')
 def _render_question(request, query_prefs_obj, tags_selected):
     # query_prefs_obj -- a QueryPrefs object
+    # tags_selected -- a list of Tag objects -- the tags selected by the user
     
     ## Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
     ## because _create_and_get_usertags might create new usertags, which are used
@@ -477,7 +478,8 @@ def _render_question(request, query_prefs_obj, tags_selected):
     ##     modelformset_usertag=modelformset_usertag
     ## )
 
-    form_flashcard = FormFlashcard(data=dict(hidden_query_id=query_prefs_obj.id, hidden_tags_selected=tags_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
+    tag_ids_selected = ",".join([str(tag.id) for tag in tags_selected])
+    form_flashcard = FormFlashcard(data=dict(hidden_query_prefs_id=query_prefs_obj.id, hidden_tag_ids_selected=tag_ids_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
 
     if next_question.question:
         question_tag_names = ", ".join(
@@ -573,10 +575,11 @@ def _post_select_tags(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_obj=None)
-        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
+        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=TODO)
 
 def get_selected_tag_ids(request):
-    # return tags_selected, a list of tag id's
+    # return a list of tag id's that were selected, e.g.,
+    # [1, 2]
     tag_form_name2fields = get_tag_form_name2fields(request=request)
     tags_selected = []
     for tag_form_name, tag_fields in tag_form_name2fields.items():
@@ -593,13 +596,17 @@ def _post_flashcard(request):
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
         query_prefs_id = form_flashcard.cleaned_data["hidden_query_prefs_id"]
         query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
-
+        tag_ids_selected = form_flashcard.cleaned_data["hidden_tag_ids_selected"]
+        tag_ids_selected = tag_ids_selected.split(',')
+        tag_ids_selected = [int(tag) for tag in tag_ids_selected]
+        tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
         try:
             question = models.Question.objects.get(id=id_question)
         except models.Question.DoesNotExist:
             # There was no question available.  Perhaps the user
             # selected different tags now, so try again.
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
+            # TODO
             return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
@@ -626,13 +633,13 @@ def _post_flashcard(request):
         )
         schedule.save()
         debug_print and print('_post_flashcard, afer schedule.save(), before _render_question(): data:\n' + pformat(data))
-        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
+        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_objs_selected)
     else:
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
         debug_print and print('ERROR: _post_flashcard: form is NOT valid')
-        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
+        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_objs_selected)
 
 @login_required(login_url='/login')
 def view_select_tags(request):

@@ -13,8 +13,9 @@
     -->
     <form method="post">
       {% csrf_token %}
+      {{ form_flashcard.hidden_query_prefs_id }}
       {{ form_flashcard.hidden_question_id }}
-      {{ form_flashcard.hidden_tags_selected }}
+      {{ form_flashcard.hidden_tag_ids_selected }}
       <div class="row">
         <div class="col-xs-12">
           <div class="alert alert-info" role="alert">
