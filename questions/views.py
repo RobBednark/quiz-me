@@ -444,21 +444,18 @@ def _ensure_one_query_prefs_obj(user):
     # Ensure there's at least one QueryPrefs object for the given :user: when the go to the Select Tags page.
     # If there's not, create one.
     try:
-        query_prefs_obj = (models.QueryPreferences.objects
-                        .filter(is_default=True, user=user)
-                        .latest('date_last_used')
-        )
+        query_prefs_obj = models.QueryPreferences.objects.filter(user=user)
     except models.QueryPreferences.DoesNotExist:
         # No default query_prefs, so create one
         query_prefs_obj = models.QueryPreferences(
-            is_default=True,
+            # is_default=True,
             name='Default query preferences (auto-created)',
             user=user,
             date_last_used=timezone.now())
         query_prefs_obj.save()
 
 def _get_selected_query_prefs_obj(user, query_prefs_id):
-    query_prefs_obj = 
+    return models.QueryPreferences.objects.get(id=query_prefs_id, user=user)
 
 @login_required(login_url='/login')
 def _render_question(request, query_prefs_obj, tags_selected):
@@ -559,7 +556,7 @@ def view_get_select_tags(request):#
 
 def _post_select_tags(request):
     form_select_tags = FormSelectTags(data=request.POST)
-    tag_ids_selected = NEW_get_selected_tags(request=request)
+    tag_ids_selected = get_selected_tag_ids(request=request)
     tag_ids_selected = ','.join(str(tag) for tag in tag_ids_selected)
     if form_select_tags.is_valid():
         query_prefs_obj = form_select_tags.cleaned_data['query_prefs']
@@ -578,7 +575,7 @@ def _post_select_tags(request):
         query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_obj=None)
         return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
 
-def NEW_get_selected_tags(request):
+def get_selected_tag_ids(request):
     # return tags_selected, a list of tag id's
     tag_form_name2fields = get_tag_form_name2fields(request=request)
     tags_selected = []
@@ -591,7 +588,7 @@ def NEW_get_selected_tags(request):
 def _post_flashcard(request):
     # Save the attempt and the schedule.
     form_flashcard = FormFlashcard(data=request.POST)
-    tags_selected = NEW_get_selected_tags(request=request)
+    tag_ids_selected = get_selected_tag_ids(request=request)
     if form_flashcard.is_valid():
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
         query_prefs_id = form_flashcard.cleaned_data["hidden_query_prefs_id"]

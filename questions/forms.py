@@ -39,11 +39,11 @@ class FormFlashcard(forms.Form):
         required=False)
 
     # query_prefs is a ModelChoiceField / dropdown for QueryPrefs, where each value shown is a QueryPrefs.name
-    query_prefs = forms.ModelChoiceField(
-        required=True,
-        label="Query Preferences",
-        queryset=QueryPreferences.objects.all().order_by('-date_last_used'),
-    )
+    ## query_prefs = forms.ModelChoiceField(
+    ##     required=True,
+    ##     label="Query Preferences",
+    ##     queryset=QueryPreferences.objects.all().order_by('-date_last_used'),
+    ## )
 class FormSelectTags(forms.Form):
     # query_prefs is a ModelChoiceField / dropdown for QueryPrefs, where each value shown is a QueryPrefs.name
     query_prefs = forms.ModelChoiceField(
