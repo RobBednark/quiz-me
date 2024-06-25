@@ -335,107 +335,6 @@ def _get_next_question(user, query_prefs_obj, tags_selected):
     )
 
 
-def _get_tag_schedule_counts(user, tags_selected):
-    # get counts of schedules for each tag
-    # Returns tags queryset, , e.g.,
-    #  [ dict(id=55, name='my_tag', question_count_since_week_ago=44) ]
-    one_week = relativedelta(days=7)
-    now = datetime.now(tz=pytz.utc)
-    week_ago = now - one_week
-
-    tags = (models.Tag.objects
-        .filter(id__in=tags_selected)
-        .annotate(question_count_since_week_ago=
-            Coalesce(Sum(
-                         Case(
-                              When(questions__schedule__datetime_added__gte=week_ago, then=1)
-                         ),
-                         output_field=IntegerField(),
-                         default=0),
-                     0)))
-    return tags
-
-def _get_tag2periods(user, modelformset_usertag=None):
-    """For the given :user:, find the number of questions scheduled to be answered in each time
-       period (unseen, -now, now-10m, ...).  Assign this as a string to
-       the .interval_counts attribute of the corresponding form in :modelformset_usertag:
-       e.g.,
-        modelformset_usertag[0].interval_counts == '-now=3 1d-1w=8 unseen=22'
-       SIDE EFFECT: modifies modelformset_usertag (adds the ".interval_counts" property on to each form)
-    """
-    INTERVALS = (
-        # integer, unit, display-name
-        (None, None, "unseen"),
-        (0, "minutes", "now"),
-        (10, "minutes", "10m"),
-        (1, "hour", "1h"),
-        (1, "day", "1d"),
-        (1, "weeks", "1w"),
-        (1, "months", "1mo"),
-        (1, "year", "1y"))
-    tag2interval2cnt = defaultdict(lambda: defaultdict(int))
-    tag2interval_order = defaultdict(list)
-    # OuterRef('question_id') refers to the QuestionTag field
-    subquery_schedules = (models.Schedule.objects
-                 .filter(user=user,
-                         question=OuterRef('question_id'))
-                 .order_by('-datetime_added'))
-    # Get all QuestionTag's that are enabled
-    question_tags = (models
-                        .QuestionTag.objects
-                        .filter(enabled=True)
-                        # for each question, get the most recently-added schedule for that user
-                        .annotate(date_show_next=Subquery(subquery_schedules[:1].values('date_show_next')))
-                        .select_related('tag')
-    )
-
-    for question_tag in question_tags:
-        tag_name = question_tag.tag.name
-        if question_tag.date_show_next is None:
-            tag2interval2cnt[tag_name]['unseen'] += 1
-            if 'unseen' not in tag2interval_order[tag_name]:
-                tag2interval_order[tag_name].append('unseen')
-        else:
-            interval_previous = (None, None, '')
-            # Find which interval this schedule is in
-            for interval in INTERVALS:
-                if interval[0] is None:
-                    continue
-                # e.g., delta = relativedelta(minutes=4)
-                delta = relativedelta(**({interval[1]: interval[0]}))
-                now = timezone.now()
-                if question_tag.date_show_next <= now + delta:
-                    interval_name = '%s-%s' % (
-                        interval_previous[2],
-                        interval[2]
-                    )
-                    tag2interval2cnt[tag_name][interval_name] += 1
-                    if interval_name not in tag2interval_order[tag_name]:
-                        tag2interval_order[tag_name].append(interval_name)
-                    break
-                interval_previous = interval
-
-    for form in modelformset_usertag:
-        # update the corresponding tag in modelformset
-        tag_name = form.instance.tag.name
-        interval_str = ''
-        for interval in tag2interval_order[tag_name]:
-            interval_str += '{interval}={count}  '.format(
-                interval=interval, count=tag2interval2cnt[tag_name][interval]
-            )
-        form.interval_counts = interval_str
-    return tag2interval2cnt
-
-def _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag):
-    # e.g.,
-    # tag_schedule_counts == 
-    name2instance = { tag.name: tag for tag in tag_schedule_counts }
-    for form in modelformset_usertag:
-        # update the corresponding tag in modelformset
-        tag_name = form.instance.tag.name
-        form.question_count_since_week_ago = name2instance[tag_name].question_count_since_week_ago
-
-    
 def _ensure_one_query_prefs_obj(user):
     # Ensure there's at least one QueryPrefs object for the given :user: when the go to the Select Tags page.
     # If there's not, create one.
@@ -458,17 +357,8 @@ def _render_question(request, query_prefs_obj, tags_selected):
     # query_prefs_obj -- a QueryPrefs object
     # tags_selected -- a list of Tag objects -- the tags selected by the user
     
-    tag_schedule_counts = _get_tag_schedule_counts(user=request.user, tags_selected=tags_selected)
-    ## modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
-    ## _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
-
     next_question = _get_next_question(user=request.user, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
     id_question = next_question.question.id if next_question.question else 0
-
-    ## _get_tag2periods(
-    ##     user=request.user,
-    ##     modelformset_usertag=modelformset_usertag
-    ## )
 
     tag_ids_selected = ",".join([str(tag.id) for tag in tags_selected])
     form_flashcard = FormFlashcard(data=dict(hidden_query_prefs_id=query_prefs_obj.id, hidden_tag_ids_selected=tag_ids_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
@@ -504,9 +394,6 @@ def _render_question(request, query_prefs_obj, tags_selected):
             count_questions_tagged=next_question.count_questions_tagged,
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,
-            ## modelformset_usertag=modelformset_usertag,
-            ## modelformset_usertag__total_error_count=modelformset_usertag.total_error_count(),
-            ## modelformset_usertag__non_form_errors=modelformset_usertag.non_form_errors(),
             option_limit_to_date_show_next_before_now=next_question.option_limit_to_date_show_next_before_now,
             question=next_question.question,
             question_tag_names=question_tag_names,
@@ -656,90 +543,3 @@ def view_question(request):
         return _post_flashcard(request=request)
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
-
-## def _get_modelformset_usertag(method, queryset, post_data):
-##     ModelFormset_UserTag = modelformset_factory(
-##         model=models.UserTag, extra=0, fields=('enabled',))
-##     if method == 'GET':
-##         modelformset_usertag = ModelFormset_UserTag(queryset=queryset)
-##     elif method == 'POST':
-##         # Create a new modelformset without the POST data, because there might be new tags
-##         # that have been added after the page was displayed and before the Submit button was
-##         # clicked.
-##         modelformset_usertag = ModelFormset_UserTag(
-##             queryset=queryset,
-##             data=post_data
-##         )
-##     return modelformset_usertag
-
-
-## def _create_and_get_usertags(user, method, post_data=None):
-##     """For the given :request:, return a modelformset_usertag that is an
-##     iterable with a form for each usertag.
-##     request.user will be used to get the corresponding usertags for that user.
-##     if method == 'GET', then find all the tags and create a form for each tag.
-##     if method == 'POST', then save any changes made by the user to any of the forms.
-##     Returns modelformset_usertag (an iterable of one form for each usertag).
-##     """
-##     queryset = (
-##         models.UserTag.objects.filter(user=user)
-##         # annotate the number of questions so it can be displayed to the user
-##         .annotate(num_questions=Count('tag__questions'))
-##         .prefetch_related('tag')
-##         .order_by('tag__name')
-##     )
-## 
-##     # Get the user, find all the tags, and create a form for each tag.
-##     #        GET:
-##     #            For each of the tags, show a checkbox.
-##     #            If there is no UserTag for that tag, then show the tag and default to False.
-## 
-##     # Get all the Tag's
-##     tags = models.Tag.objects.all()
-## 
-##     # Get all the UserTag's for this user
-##     qs_user_tags = models.UserTag.objects.filter(user=user).prefetch_related('tag')
-##     user_tags_by_tagname = {
-##         user_tag.tag.name: user_tag for user_tag in qs_user_tags
-##     }
-## 
-##     # Create UserTag's for any new tags
-##     for tag in tags:
-##         if tag.name not in user_tags_by_tagname:
-##             # There isn't a tag, so create one
-##             models.UserTag(user=user, tag=tag, enabled=False).save()
-## 
-##     modelformset_usertag = _get_modelformset_usertag(method=method, queryset=queryset, post_data=post_data)
-##     if method == 'GET':
-##         for form in modelformset_usertag.forms:
-##             # For each checkbox, display to the user the tag name
-##             form.fields['enabled'].label = form.instance.tag.name
-##         return modelformset_usertag
-##     elif method == 'POST':
-##         for form in modelformset_usertag.forms:
-##             # For each checkbox, display to the user the tag name
-##             form.fields['enabled'].label = form.instance.tag.name
-## 
-##         # Save the changes made by the user (selecting/unselecting tags)
-##         if modelformset_usertag.is_valid():  # All validation rules pass
-##             modelformset_usertag.save()
-## 
-##             for form in modelformset_usertag.forms:
-##                 # For each checkbox, display to the user the tag name
-##                 form.fields['enabled'].label = form.instance.tag.name
-##             return modelformset_usertag
-##         else:
-##             # ASSERT: modelformset_usertag.is_valid() was called, so modelformset_usertag modified itself to contain
-##             # any errors, and these errors will be displayed in the form using the form.as_p
-##             # attribute.
-##             #  It puts the errors in form._errors and form.errors,
-##             #   e.g., form.errors['sender'] == 'Enter a valid email address.'
-##             pass
-##         return modelformset_usertag
-
-## def _get_tags(user):
-##     queryset = (models.Tag.objects.filter(user=user).order_by('name'))
-##     ModelFormset_Tag = modelformset_factory(
-##         model=models.Tag, extra=0, fields=('name',))
-##     modelformset_tag = ModelFormset_Tag(queryset=queryset)
-##     return modelformset_tag
