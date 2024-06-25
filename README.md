@@ -145,19 +145,14 @@ docker rm $(docker ps -a -q)
 
 ## Show schedules for each tag
 
-User > UserTag's > QuestionTag's > Question's > Schedule's > Schedule.date_added
+User > QuestionTag's > Question's > Schedule's > Schedule.date_added
 
 Want: most recently-added Schedule for each Question for the specified User
 To get latest Schedule's, need Question's and User
-To get Question's, need QuestionTag's
-To get QuestionTag's, need UserTag's (specifically, need the tag's from UserTag's to get the QuestionTag's)
-To get UserTag's, need User
+To get Question's, need QuestionTags -- need tags and user
 
 Reference: http://stackoverflow.com/questions/27544223/django-query-filter-many-to-many-to-many-etc
 Reference: http://stackoverflow.com/questions/3630619/django-queryset-for-many-to-many-field
-
-Could just add this code to _get_tag2periods, just need to add UserTag's.
-Keep track of most-recently schedule question by seeing if that question has a UserTag (need an extra query for each question though)
 
 Data structure to process schedules:
   questions2schedules[question_id] == latest_schedule
@@ -229,7 +224,6 @@ A: I have the queryset of questions.
         interval_unit -- interval_value, interval
 
 * *tag* - an arbitrary symbol associated with a question
-* *usertag* - ??  tags added by users?
 
 TODO: see if tables can be renamed in Django (eliminate the "questions_" prefix)
 
@@ -802,15 +796,8 @@ name  |
 ------|
 my_tag|
 
-UserTag:
-
-user_id|tag_id|enabled
--------|------|-------
-1      |1     |True
-
 For questions:
 ```
-user_tags = UserTag.objects.filter(user=user, enabled=True)
 question_tags = QuestionTag.objects.filter(enabled=True, tag__in=user_tags)
 questions = Question.objects.filter(question__in=question_tags)
 ```

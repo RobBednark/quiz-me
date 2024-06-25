@@ -30,7 +30,7 @@
 - logout
 - login
 
-- review with no questions, no usertags, and confirm that behavior is correct (allows changing tags):
+- review with no questions, no tags, and confirm that behavior is correct (allows changing tags):
     1. confirm there are no questions
     2. GET /flashcard (confirm message indicating no questions; confirm tags section is open with no tags)
     3. add a question with a tag
@@ -187,8 +187,6 @@ urllib3==1.25.9
         - CREATE SEQUENCE -- add "as integer"
         - constraints have different names
         - indexes have different names (unique name)
-        - This only appears in the new schema:
-            - ADD CONSTRAINT questions_usertag_user_id_7a2950cb_fk_emailusername_user_id FOREIGN KEY (user_id) REFERENCES public.emailusername_user(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 - PASS python manage.py dump
