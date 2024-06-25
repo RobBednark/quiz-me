@@ -7,10 +7,6 @@
 
 {% block content_body %}
     <h1>Take a Quiz</h1>
-    <!--
-    hidden_question_id.value=[ {{ form_flashcard.hidden_question_id.value }} ]
-    question.pk=             [ {{ question.pk }} ]
-    -->
     <form method="post">
       {% csrf_token %}
       {{ form_flashcard.hidden_query_prefs_id }}
