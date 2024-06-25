@@ -462,10 +462,6 @@ def _render_question(request, query_prefs_obj, tags_selected):
     # query_prefs_obj -- a QueryPrefs object
     # tags_selected -- a list of Tag objects -- the tags selected by the user
     
-    ## Note: make sure to call _create_and_get_usertags() *before* _get_next_question(),
-    ## because _create_and_get_usertags might create new usertags, which are used
-    ## by _get_next_question().
-
     ## tag_schedule_counts = _get_tag_schedule_counts(user=request.user)
     ## modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
     ## _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
