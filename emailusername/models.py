@@ -42,7 +42,6 @@ class User(AbstractBaseUser):
     # question_set = ForeignKey(Question)
     # questiontag_set = ForeignKey(QuestionTag)
     # tag_set = ManyToMany(Tag)
-    # usertag_set = ForeignKey(UserTag)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'

@@ -11,9 +11,7 @@ class Command(BaseCommand):
         questions = models.Question.objects.all()
         # tags = models.Tag.objects.all()
         # question_tags = models.QuestionTag.objects.all()
-        # user_tags = models.UserTag.objects.all()
         # user = models.User.objects.all()[0]
-        # user_tags = models.UserTag.objects.filter(enabled=True, user=user)
         # question_tags = models.QuestionTag.objects.filter(tag__in=user_tags, enabled=True)
         for num, question in enumerate(questions.order_by('id')):
             question_ = question.question.replace(CHAR_CR, '')

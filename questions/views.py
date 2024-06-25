@@ -116,8 +116,8 @@ def _debug_print_n_questions(questions, msg, num_questions):
 
 def _get_next_question(user, query_prefs_obj, tags_selected):
     # query_prefs_obj -- QueryPrefs object
-    # This function queries UserTag to determine which tags to use for the question query.
-
+    # tags_selected -- 
+    
     # Bucket 1: questions scheduled before now
     # First look for questions with schedule.date_show_next <= now,
     # and return the question with the newest schedule.datetime_added.
@@ -164,9 +164,6 @@ def _get_next_question(user, query_prefs_obj, tags_selected):
     debug_print and print('\nquery_prefs_obj:\n' + pformat(model_to_dict(query_prefs_obj)))
 
     datetime_now = datetime.now(tz=pytz.utc)
-
-    ## # user_tags -- UserTags the user has selected that they want to be quizzed on right now
-    ## user_tags = models.UserTag.objects.filter(user=user, enabled=True).values_list('tag', flat=True)
 
     # tags -- Tags the user has selected that they want to be quizzed on right now
     tags = models.Tag.objects.filter(id__in=tags_selected)
@@ -338,7 +335,7 @@ def _get_next_question(user, query_prefs_obj, tags_selected):
     )
 
 
-def _get_tag_schedule_counts(user):
+def _get_tag_schedule_counts(user, tags_selected):
     # get counts of schedules for each tag
     # Returns tags queryset, , e.g.,
     #  [ dict(id=55, name='my_tag', question_count_since_week_ago=44) ]
@@ -346,9 +343,8 @@ def _get_tag_schedule_counts(user):
     now = datetime.now(tz=pytz.utc)
     week_ago = now - one_week
 
-    user_tags = models.UserTag.objects.filter(user=user).values_list('tag', flat=True)
     tags = (models.Tag.objects
-        .filter(id__in=user_tags)
+        .filter(id__in=tags_selected)
         .annotate(question_count_since_week_ago=
             Coalesce(Sum(
                          Case(
@@ -462,7 +458,7 @@ def _render_question(request, query_prefs_obj, tags_selected):
     # query_prefs_obj -- a QueryPrefs object
     # tags_selected -- a list of Tag objects -- the tags selected by the user
     
-    ## tag_schedule_counts = _get_tag_schedule_counts(user=request.user)
+    tag_schedule_counts = _get_tag_schedule_counts(user=request.user, tags_selected=tags_selected)
     ## modelformset_usertag = _create_and_get_usertags(user=request.user, method=request.method, post_data=request.POST)
     ## _add_tag_schedule_counts(tag_schedule_counts, modelformset_usertag)
 
