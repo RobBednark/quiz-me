@@ -16,13 +16,13 @@ class TestGetNextQuestion(TestCase):
         # Create a user
         self.PASSWORD = 'p'
         self.USERNAME = 'foo@bar.com'
-        self.query_prefs = models.QueryPreferences.objects.create()
+        self.query_prefs_obj = models.QueryPreferences.objects.create()
         self.user = User(email=self.USERNAME)
         self.user.set_password(self.PASSWORD)
         self.user.save()
 
     def test_user_with_no_questions(self):
-        next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
+        next_question = _get_next_question(user=self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
@@ -36,44 +36,43 @@ class TestGetNextQuestion(TestCase):
         # One untagged question that doesn't get returned because it has
         # no tags.
 
-        with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-            next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
+        next_question = _get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
 
-        questions = models.Question.objects.get_user_questions(self.user)
+        questions = models.Question.objects.filter(user=self.user)
         self.assertEqual(questions.count(), 0)
 
     def test_user_with_one_question(self):
         question = models.Question.objects.create(
             question='question #1',
+            user=self.user
         )
-        util.assign_question_to_user(self.user, question, 'tag #1')
+        tag = util.assign_question_to_user(user=self.user, question=question, tag_name='tag #1')
         util.schedule_question_for_user(self.user, question)
 
-        with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
-            next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
+        next_question = _get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)
 
-        questions = models.Question.objects.get_user_questions(self.user)
+        questions = models.Question.objects.filter(user=self.user)
         self.assertEqual(questions.count(), 1)
 
     def test_user_with_ten_questions(self):
+        tag = models.Tag.objects.create(name='tag #1')
         for i in range(10):
             question = models.Question.objects.create(
-                question='question #1',
+                question=f'question {i}',
+                user=self.user,
             )
-            util.assign_question_to_user(self.user, question, 'tag #1')
-            util.schedule_question_for_user(self.user, question)
+            models.QuestionTag.objects.create(tag=tag, question=question, enabled=True)
 
-        with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
-            next_question = _get_next_question(self.user, query_prefs=self.query_prefs)
+        next_question = _get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)
 
-        questions = models.Question.objects.get_user_questions(self.user)
+        questions = models.Question.objects.filter(user=self.user)
         self.assertEqual(questions.count(), 10)

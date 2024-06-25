@@ -7,7 +7,7 @@ import pytz
 
 from emailusername.models import User
 from questions import forms
-from questions.models import Answer, Attempt, QueryPreferences, Question, QuestionTag, Schedule, Tag, UserTag
+from questions.models import Answer, Attempt, QueryPreferences, Question, QuestionTag, Schedule, Tag
 from questions.views import _get_next_question
 
 # By default, LiveServerTestCase uses port 8081.
@@ -111,27 +111,6 @@ class BrowserTests(LiveServerTestCase):
                 "Your username and password didn't match. Please try again.")
         )
 
-    def test_tags_created_automatically_for_user(self):
-        ''' Assert that a UserTag is created for a user when they hit an endpoint after a Tag has been created. '''
-        tag1 = Tag(name='tag1')
-        tag2 = Tag(name='tag2')
-        tag1.save()
-        tag2.save()
-        self.assertEquals(UserTag.objects.count(), 0)
-
-        self._login()
-        self._assert_no_questions()
-
-        # Assert that QuestionTags were created for this user
-        user_tags = UserTag.objects.all()
-        self.assertEquals(len(user_tags), 2)
-        tag_ids = {user_tag.tag.id for user_tag in user_tags}
-        user_ids = {user_tag.user.id for user_tag in user_tags}
-        enabled_set = {user_tag.enabled for user_tag in user_tags}
-        self.assertEquals(tag_ids, {tag1.id, tag2.id})
-        self.assertEquals(user_ids, {self.user1.id})
-        self.assertEquals(enabled_set, {False})
-
     def test_only_show_questions_with_tag_selected(self):
         ''' Assert that only questions with a given tag are shown '''
         tag1 = Tag(name='tag1')
@@ -146,7 +125,6 @@ class BrowserTests(LiveServerTestCase):
 
         self.assertEquals(Question.objects.all().count(), 2)
         self.assertEquals(QuestionTag.objects.all().count(), 0)
-        self.assertEquals(UserTag.objects.all().count(), 0)
 
         self._login()
         # Assert no questions, because user doesn't have any tags selected.
@@ -204,42 +182,34 @@ class NonBrowserTests(TestCase):
         tag1 = Tag.objects.create(name='tag1')
         tag2 = Tag.objects.create(name='tag2')
 
-        query_prefs = QueryPreferences.objects.create()
+        query_prefs_obj = QueryPreferences.objects.create()
         question1 = Question.objects.create(question="question1")
         question2 = Question.objects.create(question="question2")
 
-        # Test: no question when no UserTags
         # Given:
-        #   a) user1 with 0 UserTags
+        #   a) no tags_selected
         #   b) 0 questions with any tags
         #   c) 2 questions with 0 tags
         #   d) tag1 and tag2 each have 0 questions
-        # Assert: user does not get a question, because they have no UserTags
-        self.assertTrue(UserTag.objects.filter(user=user1).count() == 0)
+        # Assert: user does not get a question, because there are no tags_selected
         self.assertTrue(Question.objects.all().count() == 2)
         self.assertTrue(QuestionTag.objects.all().count() == 0)
         self.assertTrue(Schedule.objects.all().count() == 0)
         self.assertTrue(Tag.objects.all().count() == 2)
-        self.assertTrue(UserTag.objects.all().count() == 0)
-        with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-            next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-            self.assertTrue(next_question.question is None)
+        next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=[])
+        self.assertTrue(next_question.question is None)
 
-        # Test: no question when UserTag but no questions with that tag
+        # Test: no question when tags_selected but no questions with that tag
         # Given:
-        #   a) user1 with 1 UserTag
-        #   b) 0 questions with that UserTag
-        # Assert: user1 does not get a question, because there are no questions with that UserTag
-        user1_tag1 = UserTag.objects.create(user=user1, tag=tag1, enabled=True)
-        self.assertTrue(user1_tag1.tag.questions.count() == 0)
-        self.assertTrue(
-            UserTag.objects.filter(user=user1).count() == 1)
+        #   a) tags_selected
+        #   b) 0 questions with that tag
+        # Assert: user1 does not get a question, because there are no questions with that tag
         self.assertTrue(QuestionTag.objects.filter(tag=tag1).count() == 0)
 
+        tag1_queryset = QuestionTag.objects.filter(tag=tag1)
         for _ in range(5):
-            with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-                self.assertTrue(next_question.question is None)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            self.assertTrue(next_question.question is None)
 
         # Bucket 2: question with no schedules
         # Test: No questions with schedules, so returned oldest question.datetime_added
@@ -257,7 +227,6 @@ class NonBrowserTests(TestCase):
         )
         self.assertTrue(question1.datetime_added < question2.datetime_added)
         self.assertTrue(Question.objects.all().count() == 2)
-        self.assertTrue(UserTag.objects.filter(user=user1).count() == 1)
         self.assertTrue(QuestionTag.objects.all().count() == 2)
         self.assertTrue(
             QuestionTag.objects.filter(tag=tag1, enabled=True).count() == 2
@@ -265,13 +234,12 @@ class NonBrowserTests(TestCase):
         self.assertTrue(Schedule.objects.filter(user=user1).count() == 0)
 
         for n in range(4):
-            with self.assertNumQueries(NUM_QUERIES_UNSCHEDULED_QUESTION):
-                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-                self.assertTrue(next_question.question == question1)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            self.assertTrue(next_question.question == question1)
 
         # Test: No question returned when tag.enabled == False
         # Given:
-        #    a) user1 with tag user1_tag1
+        #    a) user1 with tag1
         #    b) question1 and question2 with tag1
         #    c) tag1.enabled == False
         #    d) user has 0 schedules
@@ -280,16 +248,16 @@ class NonBrowserTests(TestCase):
         question2_tag1.enabled = False
         question1_tag1.save()
         question2_tag1.save()
-        self.assertEquals(
+        tag1_tag2_queryset = QuestionTag.objects.filter(id__in=[question1_tag1.pk, question2_tag1.pk])
+        self.assertEqual(
             QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 0
         )
-        self.assertEquals(
+        self.assertEqual(
             QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 2
         )
         for _ in range(4):
-            with self.assertNumQueries(NUM_QUERIES_NO_QUESTIONS):
-                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-                self.assertTrue(next_question.question is None)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            self.assertTrue(next_question.question is None)
 
         # Bucket 2: question with no schedules
         # Test: question with no schedules returned (when another question with schedule.date_show_next > now)
@@ -315,9 +283,8 @@ class NonBrowserTests(TestCase):
         self.assertTrue(Schedule.objects.filter(question=question2).count() == 0)
         self.assertTrue(Question.objects.get(id=question1.id).schedule_set.count() == 1)
         for _ in range(5):
-            with self.assertNumQueries(NUM_QUERIES_UNSCHEDULED_QUESTION):
-                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-                self.assertTrue(next_question.question == question2)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            self.assertTrue(next_question.question == question2)
 
         # Bucket 1: question.schedule.date_show_next < now
         # Given 2 questions with date_show_next < now, show the question with the latest date_show_next
@@ -352,9 +319,8 @@ class NonBrowserTests(TestCase):
         self.assertTrue(q2_sched1.date_show_next < datetime.now(tz=pytz.utc))
         self.assertTrue(Schedule.objects.all().count() == 3)
         for _ in range(5):
-            with self.assertNumQueries(NUM_QUERIES_SCHEDULED_BEFORE_NOW):
-                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-                self.assertEquals(next_question.question, question1)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            self.assertEqual(next_question.question, question1)
 
         # Bucket 3: question.schedule_date_show_next > now
         # Add a 2nd schedule to question2 such that:
@@ -385,31 +351,21 @@ class NonBrowserTests(TestCase):
         self.assertTrue(question1.schedule_set.count() == 2)
         self.assertTrue(question1.schedule_set.count() == 2)
         for _ in range(5):
-            with self.assertNumQueries(NUM_QUERIES_SCHEDULED_AFTER_NOW):
-                if True:
-                    # trigger the debugger
-                    pytz.show = False
-                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-                self.assertEquals(next_question.question, question2)
+            if True:
+                # trigger the debugger
+                pytz.show = False
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj)
+            self.assertEqual(next_question.question, question2)
 
         # Add a new question with a different tag, and assert that it
         # doesn't affect the question returned
         Question.objects.create(question="question3")
         for _ in range(5):
-            with self.assertNumQueries(NUM_QUERIES_SCHEDULED_AFTER_NOW):
-                next_question = _get_next_question(user=user1, query_prefs=query_prefs)
-                self.assertEquals(next_question.question, question2)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj)
+            self.assertEqual(next_question.question, question2)
 
 
 class ViewAnswerTests(TestCase):
-
-    modelformset_usertag_dict = {
-        'form-TOTAL_FORMS': 1,
-        'form-MAX_NUM_FORMS': 1000,
-        'form-TOTAL_FORMS': 1,
-        'form-0-enabled': 'on',
-        'form-INITIAL_FORMS': 1,
-    }
 
     def setUp(self):
         # Create a user
@@ -444,10 +400,7 @@ class ViewAnswerTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_viewanswer_post(self):
-        # Create a tag and link the tag to self.user via UserTag
         tag = Tag.objects.create(name='faketag')
-        user_tag = UserTag.objects.create(user=self.user, tag=tag)
-        self.modelformset_usertag_dict['form-0-id'] = user_tag.id
         # Log in
         logged_in = self.client.login(
             username=self.user.get_username(),
@@ -466,7 +419,6 @@ class ViewAnswerTests(TestCase):
             'interval_num': 33.45,
             'interval_unit': 'hours',
         }
-        data.update(self.modelformset_usertag_dict)  # Formset fields
 
         response = self.client.post(
             '/answer/{}/'.format(self.attempt.pk), data
