@@ -309,6 +309,12 @@ class NonBrowserTests(TestCase):
             interval_num=5,
             interval_unit='minutes',
         )
+        q2_sched1 = Schedule.objects.create(
+            user=user1,
+            question=question2,
+            interval_num=5,
+            interval_unit='minutes',
+        )
         q2_sched2 = Schedule.objects.create(
             user=user1,
             question=question2,
@@ -317,8 +323,8 @@ class NonBrowserTests(TestCase):
         )
         q1_sched2.date_show_next = datetime.now(tz=pytz.utc) + timedelta(minutes=99)
         q1_sched2.save()
-        q1_sched2.date_show_next = date_show_next=datetime.now(tz=pytz.utc) + timedelta(minutes=1)
-        q1_sched2.save()
+        q2_sched2.date_show_next = date_show_next=datetime.now(tz=pytz.utc) + timedelta(minutes=1)
+        q2_sched2.save()
         self.assertTrue(q2_sched2.date_show_next > datetime.now(tz=pytz.utc))
         self.assertTrue(q1_sched2.date_show_next > datetime.now(tz=pytz.utc))
         self.assertTrue(q2_sched2.date_show_next < q1_sched2.date_show_next)
@@ -332,14 +338,15 @@ class NonBrowserTests(TestCase):
             if True:
                 # trigger the debugger
                 pytz.show = False
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertEqual(next_question.question, question2)
 
         # Add a new question with a different tag, and assert that it
         # doesn't affect the question returned
         Question.objects.create(question="question3")
         for _ in range(5):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj)
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj,
+                    tags_selected=tag1_queryset)
             self.assertEqual(next_question.question, question2)
 
     def test_schedule_date_show_next_less_than_now(self):
