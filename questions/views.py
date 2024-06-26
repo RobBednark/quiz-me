@@ -44,10 +44,13 @@ NextQuestion = namedtuple(
 )
 
 def _debug_print_questions(questions, msg):
+    if not debug_print:
+        return
     NUM_QUESTIONS_FIRST = 2
     NUM_QUESTIONS_LAST = 2
     _debug_print_n_questions(questions=questions, msg=msg, num_questions=NUM_QUESTIONS_FIRST)
     _debug_print_n_questions(questions=questions, msg=msg, num_questions= -NUM_QUESTIONS_LAST)
+    print()
         
 def _debug_print_n_questions(questions, msg, num_questions):
     if debug_print:
@@ -306,10 +309,10 @@ def _get_next_question(user, query_prefs_obj, tags_selected):
             # Return the question with the oldest schedule.date_show_next
             # query #3
             questions = questions_annotated
-            questions = questions.order_by('date_show_next')
+            questions = questions.order_by('date_show_next') # ascending
             debug_print and _debug_print_questions(questions=questions, msg='query 3 (order by schedule.date_show_next ASC; use the oldest)')
             if questions:
-                debug_print and print('future scheduled questions found, count=[%s]' % questions.count())
+                debug_print and print('scheduled questions found, count=[%s]' % questions.count())
                 question_to_show = questions[0]
             else:
                 debug_print and print('No questions whatsoever')
