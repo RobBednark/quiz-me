@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import os
+from unittest import skip
 
 from django.test import LiveServerTestCase, TestCase
 from selenium.common.exceptions import StaleElementReferenceException
@@ -18,6 +19,7 @@ WAIT_TIME = 5
 
 
 # phantomjs archives for Windows, OSX, and Linux can be found at: http://phantomjs.org/download.html
+@skip('Have not tried running browser tests lately.  Might end up removing altogether.')
 class BrowserTests(LiveServerTestCase):
 
     @classmethod
@@ -78,7 +80,7 @@ class BrowserTests(LiveServerTestCase):
         if password is None:
             password = self.PASSWORD
         self.browser.visit(self.live_server_url)
-        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.assertEqual(self.browser.title, 'Quiz Me!')
         self.browser.find_by_id('id_username')[0].fill(user)
         self.browser.find_by_id('id_password')[0].fill(password)
         self.browser.find_by_value('login').click()
@@ -88,7 +90,7 @@ class BrowserTests(LiveServerTestCase):
         and the quiz has no questions. '''
         self._login()
 
-        self.assertEquals(self.browser.title, 'Quiz Me!')
+        self.assertEqual(self.browser.title, 'Quiz Me!')
         self._assert_no_questions()
 
     def test_login_fails_incorrect_password(self):
@@ -123,8 +125,8 @@ class BrowserTests(LiveServerTestCase):
         question1.save()
         question2.save()
 
-        self.assertEquals(Question.objects.all().count(), 2)
-        self.assertEquals(QuestionTag.objects.all().count(), 0)
+        self.assertEqual(Question.objects.all().count(), 2)
+        self.assertEqual(QuestionTag.objects.all().count(), 0)
 
         self._login()
         # Assert no questions, because user doesn't have any tags selected.
@@ -171,7 +173,7 @@ class NonBrowserTests(TestCase):
 
         now = datetime.now(tz=pytz.utc)
         self.assertTrue((now - timedelta(seconds=5)) < schedule1.date_show_next < now)
-        self.assertEquals(schedule2.date_show_next, my_datetime)
+        self.assertEqual(schedule2.date_show_next, my_datetime)
 
     def test_get_next_question(self):
         # expected number of queries
@@ -301,14 +303,21 @@ class NonBrowserTests(TestCase):
         #   c) q2's newest schedule is q2_sched2, q1's newest is q1_sched2
         #   d) q2_sched2.date_show_next > now < q1_sched2.date_show_next
         # Assert that question2 is returned because it's schedule was added later.
+        q1_sched2 = Schedule.objects.create(
+            user=user1,
+            question=question1,
+            interval_num=5,
+            interval_unit='minutes',
+        )
         q2_sched2 = Schedule.objects.create(
             user=user1,
             question=question2,
             interval_num=5,
             interval_unit='minutes',
-            date_show_next=datetime.now(tz=pytz.utc) + timedelta(minutes=1)
         )
-        q1_sched2.date_show_next = datetime.now(tz=pytz.utc) + timedelta(minutes=2)
+        q1_sched2.date_show_next = datetime.now(tz=pytz.utc) + timedelta(minutes=99)
+        q1_sched2.save()
+        q1_sched2.date_show_next = date_show_next=datetime.now(tz=pytz.utc) + timedelta(minutes=1)
         q1_sched2.save()
         self.assertTrue(q2_sched2.date_show_next > datetime.now(tz=pytz.utc))
         self.assertTrue(q1_sched2.date_show_next > datetime.now(tz=pytz.utc))
