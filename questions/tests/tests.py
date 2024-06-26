@@ -157,6 +157,11 @@ class BrowserTests(LiveServerTestCase):
 
 
 class NonBrowserTests(TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        super(TestCase, cls).tearDownClass()
+        Question.objects.all().delete()
+        Schedule.objects.all().delete()
 
     def test_schedule_save(self):
         my_datetime = pytz.utc.localize(datetime(year=2017, month=7, day=4))
@@ -286,42 +291,6 @@ class NonBrowserTests(TestCase):
             next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertTrue(next_question.question == question2)
 
-        # Bucket 1: question.schedule.date_show_next < now
-        # Given 2 questions with date_show_next < now, show the question with the latest date_show_next
-        # Given:
-        #       a) question1 and question2 both have tag1
-        #       b) question1 has 2 schedules, question2 has 1 schedule
-        #       c) question1's newest schedule (q1_sched2) has date_show_next > question2's schedule.date_show_next
-        #       d) question1's newest schedule (q1_sched2) has date_show_next < now
-        #       e) question1's oldest schedule (q1_sched1) has date_show_next < now
-        #       f) question2's schedule (q2_sched1) has date_show_next < now
-        #       g) question1's newest schedule (q1_sched2).date_show_next > q2_sched1.date_show_next
-        # Assert: question1 is returned because it has a later schedule.date_show_next
-        q2_sched1 = Schedule.objects.create(
-            user=user1,
-            question=question2,
-            interval_num=1,
-            interval_unit='months',
-            date_show_next=datetime.now(tz=pytz.utc) - timedelta(days=2))
-        q1_sched2 = Schedule.objects.create(
-            user=user1,
-            question=question1,
-            interval_num=1,
-            interval_unit='days',
-            date_show_next=datetime.now(tz=pytz.utc) - timedelta(days=1))
-        q1_sched1.date_show_next = datetime.now(tz=pytz.utc) - timedelta(days=1)
-        q1_sched1.save()
-        q2_sched1.save()
-        self.assertTrue(q1_sched2.datetime_added > q1_sched1.datetime_added)
-        self.assertTrue(q1_sched2.date_show_next > q2_sched1.date_show_next)
-        self.assertTrue(q1_sched1.date_show_next < datetime.now(tz=pytz.utc))
-        self.assertTrue(q1_sched2.date_show_next < datetime.now(tz=pytz.utc))
-        self.assertTrue(q2_sched1.date_show_next < datetime.now(tz=pytz.utc))
-        self.assertTrue(Schedule.objects.all().count() == 3)
-        for _ in range(5):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
-            self.assertEqual(next_question.question, question1)
-
         # Bucket 3: question.schedule_date_show_next > now
         # Add a 2nd schedule to question2 such that:
         #    now < question2's schedule.date_show_next < question1's schedule.date_show_next
@@ -363,6 +332,79 @@ class NonBrowserTests(TestCase):
         for _ in range(5):
             next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj)
             self.assertEqual(next_question.question, question2)
+
+    def test_schedule_date_show_next_less_than_now(self):
+        # Bucket 1: question.schedule.date_show_next < now
+        # Given 2 questions with date_show_next < now, show the question with the latest date_show_next
+        # Given:
+        #       A) QueryPrefs.sort_by_newest_answered_first = True
+        #       a) question1 and question2 both have tag1
+        #       b) question1 has 2 schedules, question2 has 1 schedule
+        #       c) question1's newest schedule (q1_sched2) has date_show_next > question2's schedule.date_show_next
+        #       d) question1's newest schedule (q1_sched2) has date_show_next < now
+        #       e) question1's oldest schedule (q1_sched1) has date_show_next < now
+        #       f) question2's schedule (q2_sched1) has date_show_next < now
+        #       g) question1's newest schedule (q1_sched2).date_show_next > q2_sched1.date_show_next
+        # Assert: question1 is returned because it has a later schedule.date_show_next
+        user1 = User.objects.create(email="user1@bednark.com")
+        user2 = User.objects.create(email="user2@bednark.com")
+
+        tag1 = Tag.objects.create(name='tag1')
+        tag2 = Tag.objects.create(name='tag2')
+
+        query_prefs_obj = QueryPreferences.objects.create()
+        question1 = Question.objects.create(question="question1")
+        question2 = Question.objects.create(question="question2")
+        question1_tag1 = QuestionTag.objects.create(
+            question=question1, tag=tag1, enabled=True
+        )
+        question2_tag1 = QuestionTag.objects.create(
+            question=question2, tag=tag1, enabled=True
+        )
+        tag1_queryset = QuestionTag.objects.filter(tag=tag1)
+ 
+
+        query_prefs_obj_newest_answered_first = QueryPreferences.objects.create(
+            user=user1,
+            sort_by_newest_answered_first=True
+        )
+        q2_sched1 = Schedule.objects.create(
+            user=user1,
+            question=question2,
+            interval_num=1,
+            interval_unit='months',
+            date_show_next=datetime.now(tz=pytz.utc) - timedelta(days=2))
+        q1_sched1 = Schedule.objects.create(
+            user=user1,
+            question=question1,
+            interval_num=1,
+            interval_unit='weeks')
+        q1_sched2 = Schedule.objects.create(
+            user=user1,
+            question=question1,
+            interval_num=1,
+            interval_unit='days')
+        #       c) question1's newest schedule (q1_sched2) has date_show_next > question2's schedule.date_show_next
+        #       d) question1's newest schedule (q1_sched2) has date_show_next < now
+        #       e) question1's oldest schedule (q1_sched1) has date_show_next < now
+        q1_sched1.date_show_next = datetime.now(tz=pytz.utc) - timedelta(days=99)
+        q1_sched1.save()
+        q1_sched2.date_show_next = datetime.now(tz=pytz.utc) - timedelta(days=1)
+        q1_sched2.save()
+        #       f) question2's schedule (q2_sched1) has date_show_next < now
+        #       g) question1's newest schedule (q1_sched2).date_show_next > q2_sched1.date_show_next
+        q2_sched1.date_show_next = datetime.now(tz=pytz.utc) - timedelta(days=2)
+        q2_sched1.save()
+
+        self.assertTrue(q1_sched2.datetime_added > q1_sched1.datetime_added)
+        self.assertTrue(q1_sched2.date_show_next > q2_sched1.date_show_next)
+        self.assertTrue(q1_sched1.date_show_next < datetime.now(tz=pytz.utc))
+        self.assertTrue(q1_sched2.date_show_next < datetime.now(tz=pytz.utc))
+        self.assertTrue(q2_sched1.date_show_next < datetime.now(tz=pytz.utc))
+        self.assertTrue(Schedule.objects.all().count() == 3)
+        for _ in range(5):
+            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj_newest_answered_first, tags_selected=tag1_queryset)
+            self.assertEqual(next_question.question, question1)
 
 
 class ViewAnswerTests(TestCase):
