@@ -28,10 +28,6 @@ urllib3 = "*.*.*"
 [tool.poetry.group.dev.dependencies]
 django-debug-toolbar = "*.*.*"
 django-extensions = "*.*.*"
-pudb = "*.*"
-selenium = "*.*.*"
-splinter = "*.*.*"
-urwid = "*.*.*"
 
 [build-system]
 requires = ["poetry-core"]
