@@ -9,7 +9,7 @@ from questions import forms
 from questions.models import Answer, Attempt, QueryPreferences, Question, QuestionTag, Schedule, Tag
 from questions.views import _get_next_question
 
-class NonBrowserTests(TestCase):
+class Tests(TestCase):
     @classmethod
     def tearDownClass(cls):
         super(TestCase, cls).tearDownClass()
