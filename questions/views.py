@@ -443,7 +443,7 @@ def _post_select_tags(request):
     tag_ids_selected = ','.join(str(tag) for tag in tag_ids_selected)
     if form_select_tags.is_valid():
         query_prefs_obj = form_select_tags.cleaned_data['query_prefs']
-        # redirect to /question/?tag_ids=...?query_prefs=...
+        # redirect to /question/?tag_ids=...&query_prefs=...
         query_string = ''
         query_string = urlencode(dict(
             tag_ids_selected=tag_ids_selected,
@@ -477,8 +477,8 @@ def _post_flashcard(request):
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
         query_prefs_id = form_flashcard.cleaned_data["hidden_query_prefs_id"]
         query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
-        tag_ids_selected = form_flashcard.cleaned_data["hidden_tag_ids_selected"]
-        tag_ids_selected = tag_ids_selected.split(',')
+        tag_ids_selected_str = form_flashcard.cleaned_data["hidden_tag_ids_selected"]
+        tag_ids_selected = tag_ids_selected_str.split(',')
         tag_ids_selected = [int(tag) for tag in tag_ids_selected]
         tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
         try:
@@ -513,8 +513,15 @@ def _post_flashcard(request):
             user=request.user
         )
         schedule.save()
-        debug_print and print('_post_flashcard, afer schedule.save(), before _render_question(): data:\n' + pformat(data))
-        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_objs_selected)
+
+        # redirect to /question/?tag_ids=...&query_prefs=...
+        query_string = ''
+        query_string = urlencode(dict(
+            tag_ids_selected=tag_ids_selected_str,
+            query_prefs_id=query_prefs_id))
+        redirect_url = reverse(viewname='question')
+        redirect_url += f'?{query_string}'
+        return redirect(to=redirect_url, permanent=True)
     else:
         # Assert: form is NOT valid
         # Need to return the errors to the template,
