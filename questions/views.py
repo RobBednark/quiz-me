@@ -346,7 +346,6 @@ def _ensure_one_query_prefs_obj(user):
     except models.QueryPreferences.DoesNotExist:
         # No default query_prefs, so create one
         query_prefs_obj = models.QueryPreferences(
-            # is_default=True,
             name='Default query preferences (auto-created)',
             user=user,
             date_last_used=timezone.now())
