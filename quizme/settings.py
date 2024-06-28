@@ -7,10 +7,6 @@ AUTH_USER_MODEL = 'emailusername.User'
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 DEBUG = eval(os.environ.get('QM_DEBUG', 'True'))
-if DEBUG:
-    print(f'DEBUG is True [{DEBUG}]')
-else:
-    print(f'DEBUG is False [{DEBUG}]')
 ENABLE_DJANGO_DEBUG_TOOLBAR = eval(os.environ.get('QM_USE_TOOLBAR', 'False'))
 
 ADMINS = (
@@ -125,10 +121,8 @@ MIDDLEWARE = (
 )
 if ENABLE_DJANGO_DEBUG_TOOLBAR:
     # Django Debug Toolbar (per the docs, make sure to put it first!)
-    print(f'Django Debug Toolbar IS ENABLED in middleware (ENABLE_DJANGO_DEBUG_TOOLBAR = [{ENABLE_DJANGO_DEBUG_TOOLBAR}])')
     MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE
 else:
-    print(f'Django Debug Toolbar is NOT enabled in middleware (ENABLE_DJANGO_DEBUG_TOOLBAR = [{ENABLE_DJANGO_DEBUG_TOOLBAR}])')
 ROOT_URLCONF = 'quizme.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
