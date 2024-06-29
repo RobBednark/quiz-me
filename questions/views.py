@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 from datetime import datetime
 import humanize
 import os
-from pprint import pformat
+from pprint import pformat, pprint
 import pytz
 import traceback
 
@@ -284,10 +284,9 @@ def _get_next_question(user, query_prefs_obj, tags_selected):
         # assert: there is a question with schedule.date_show_next <= now
         count_questions_before_now = questions.count()
         debug_print and print('first "if": questions.count() = [%s] questions scheduled before now' % count_questions_before_now)
-        debug_sql and print(connection.queries[-1])
+        debug_sql and pprint(connection.queries[-1], width=100)
         question_to_show = questions[0]
     else:
-        debug_sql and print(f'sql: most recent query: {connection.queries[-1]}')
         # assert: no question with schedule.date_show_next <= now
         # Look for questions with no schedules, and show the one with the
         # oldest question.datetime_added
@@ -302,10 +301,10 @@ def _get_next_question(user, query_prefs_obj, tags_selected):
         # query #2
         if questions:
             debug_print and print('unanswered questions found, count = [%s]' % questions.count())
-            debug_sql and print(connection.queries[-1])
+            debug_sql and pprint(connection.queries[-1], width=100)
             question_to_show = questions[0]
         else:
-            debug_sql and print(connection.queries[-1])
+            debug_sql and pprint(connection.queries[-1], width=100)
             # assert: no question without a schedule
             # Return the question with the oldest schedule.date_show_next
             # query #3
@@ -488,7 +487,7 @@ def _post_flashcard(request):
             # There was no question available.  Perhaps the user
             # selected different tags now, so try again.
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
-            # TODO
+            # TODO: print warning to user
             return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
