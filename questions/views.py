@@ -488,7 +488,7 @@ def _post_flashcard(request):
             # selected different tags now, so try again.
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
             # TODO: print warning to user
-            return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
+            return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_ids_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
