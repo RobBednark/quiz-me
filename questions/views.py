@@ -456,7 +456,8 @@ def _post_select_tags(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_obj=None)
-        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=TODO)
+        # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
+        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_ids_selected)
 
 def get_selected_tag_ids(request):
     # return a list of tag id's that were selected, e.g.,
@@ -488,6 +489,7 @@ def _post_flashcard(request):
             # selected different tags now, so try again.
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
             # TODO: print warning to user
+            # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
             return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_ids_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
