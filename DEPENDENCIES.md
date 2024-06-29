@@ -27,7 +27,3 @@ These are the dependencies for the QuizMe app, and what they are needed for.
         - runserver_plus  
         - shell_plus  
         - validate_templates  
-- pudb -- a full-screen python debugger
-- selenium -- for testing web pages
-- splinter -- for testing
-- urwid

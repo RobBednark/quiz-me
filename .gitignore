@@ -11,6 +11,8 @@ db_dumps
 ignore*
 local_settings.py
 quizme-env.sh
+sqlite.db
+sqlite.db-journal
 /static
 tmp/
 

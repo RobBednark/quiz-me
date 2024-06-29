@@ -92,7 +92,6 @@ https://github.com/sv0/django-markdown-app
 
     * from last time seen, calc next due date (last_seen + frequency_interval)
     * order by either due ascending, or percent_overdue (amount_overdue / frequency_interval)
-1. 7.12.20 UPGRADE Upgrade splinter to the latest, using headless Chrome and/or Firefox instead of phantomjs
 1. 7.15.20 ADD a separate select-tags page to be able to change tags without submitting an answer
 1. 7.14.20 COMMENT README cleanup (get rid of Naming Ideas; check formatting; proofread whole file)
 1. 7.12.20 BUG If there is no valid session, when going to /login/?next=/question/ , it gives a 404 error instead of going to the login screen (this seems to happen when switching between databases, I don't know why).  WORKAROUND: navigate to the /admin page, it will prompt for login, login, and then you can access the question page

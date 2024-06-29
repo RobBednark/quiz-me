@@ -3,7 +3,7 @@ from django.db import models
 
 from pagedown.widgets import AdminPagedownWidget
 
-from .models import Answer, Attempt, Tag, QueryPreferences, Question, Schedule, UserTag
+from .models import Answer, Attempt, Tag, QueryPreferences, Question, Schedule
 
 
 class AnswerQuestionRelationshipInline(admin.TabularInline):
@@ -86,18 +86,9 @@ class ScheduleAdmin(admin.ModelAdmin):
         'user',
     ]
 
-class UserTagAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'enabled',
-        'tag',
-        'user',
-        ]
-
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Attempt, AttemptAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(QueryPreferences, QueryPreferencesAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
-admin.site.register(UserTag, UserTagAdmin)

@@ -39,14 +39,16 @@
             "request": "launch",
             "program": "./manage.py",
             "env": {
+                "QM_DEBUG_PRINT": True,
                 "QM_ENGINE": "sqlite",
                 "QM_TEST_DB": "sqlite.db"
             },
             "args": [
                  "test",
                  "--failfast",
+                 "--no-input",
                  "-k",
-                 "test_user_with_one_question"
+                 "test_schedule_date_show_next_less_than_now"
             ]
             "justMyCode": true,
             "autoStartBrowser": false

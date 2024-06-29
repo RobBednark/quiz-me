@@ -18,8 +18,9 @@ urlpatterns = [
         view=auth_views.LoginView.as_view(template_name='questions/login.html'),
         name='login'),
     re_path(route=r'^logout$', view=emailusername_views.logout, name='logout'),
-    re_path(route=r'^$', view=question_views.flashcard),
-    re_path(route=r'^flashcard/$', view=question_views.flashcard, name='flashcard'),
+    re_path(route=r'^$', view=question_views.view_select_tags),
+    re_path(route=r'^question/$', view=question_views.view_question, name='question'),
+    re_path(route=r'^select-tags/$', view=question_views.view_select_tags, name='select_tags'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),

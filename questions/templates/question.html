@@ -7,13 +7,11 @@
 
 {% block content_body %}
     <h1>Take a Quiz</h1>
-    <!--
-    hidden_question_id.value=[ {{ form_flashcard.hidden_question_id.value }} ]
-    question.pk=             [ {{ question.pk }} ]
-    -->
     <form method="post">
       {% csrf_token %}
+      {{ form_flashcard.hidden_query_prefs_id }}
       {{ form_flashcard.hidden_question_id }}
+      {{ form_flashcard.hidden_tag_ids_selected }}
       <div class="row">
         <div class="col-xs-12">
           <div class="alert alert-info" role="alert">
@@ -124,62 +122,6 @@
           <br>[{{ question.datetime_added }}] flashcard added
           <br>[{{ question.datetime_updated }}] flashcard updated
         {% endif %}
-
-
-        {% if question %}
-          <details>
-        {% else %}
-          <details open >
-        {% endif %}
-
-
-          <summary>Tags</summary>
-          <!-- Show all the tags -->
-            Ask questions with these tags:
-            {{ modelformset_usertag.management_form }}
-            {% if modelformset_usertag__total_error_count %}
-              {{ modelformset_usertag__non_form_errors }}
-              {{ modelformset_usertag.errors }}
-            {% endif %}
-            <div class="row">
-                <div class="col-sm-6">
-                    Tag
-                </div>
-
-                <div class="col-sm-1">
-                    Seen in the past week
-                </div>
-
-                <div class="col-sm-1">
-                    # of questions
-                </div>
-
-                <div class="col-sm-3">
-                   # schedules per interval
-                </div>
-              </div>
-            {% for form_usertag in modelformset_usertag.forms %}
-              <div>
-            <div class="row">
-                <div class="col-sm-6">
-              {{ form_usertag }} 
-                </div>
-
-                <div class="col-sm-1">
-              {{ form_usertag.question_count_since_week_ago }}
-                </div>
-
-                <div class="col-sm-1">
-              {{ form_usertag.instance.num_questions }}
-                </div>
-
-                <div class="col-sm-3">
-              {{ form_usertag.interval_counts }}
-                </div>
-              </div>
-            {% endfor %}
-
-        </details>
         </div>
         <input class="btn btn-primary btn-lg" type="submit" value="Answer" />
       </div>

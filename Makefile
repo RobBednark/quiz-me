@@ -109,13 +109,5 @@ style-check: flake8
 syncdb:
 	poetry run ./manage.py syncdb --noinput
 
-test: test_phantomjs test_firefox
-
-test_firefox:
-	SELENIUM_BROWSER=firefox   poetry run ./manage.py test
-
-test_nonbrowser:
-	poetry run ./manage.py test questions.tests.tests.NonBrowserTests
-
-test_phantomjs:
-	SELENIUM_BROWSER=phantomjs poetry run ./manage.py test
+test: 
+	poetry run ./manage.py test

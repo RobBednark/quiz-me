@@ -34,20 +34,22 @@ class QueryPreferences(CreatedBy):
 
     name = models.TextField(max_length=MAX_LENGTH_NAME, null=False, default='')
     date_last_used = models.DateTimeField(null=True, default=None)
-    is_default = models.BooleanField(default=False)
 
     # Include unanswered questions (nulls) in first bucket query.
+    # TODO: should this be "only include unanswered questions"?
     # Does not affect order-by
-    include_unanswered_questions = models.BooleanField(default=True)           # old: option_include_unanswered_questions
+    include_unanswered_questions = models.BooleanField(default=False)           # old: option_include_unanswered_questions
     
     # True  => for questions scheduled before now, only show questions that have answers
+    # TODO: should this be "*only* include questions with answers scheduled before now"?
     # False => disable
-    include_questions_with_answers = models.BooleanField(default=True)         # old: option_questions_with_answers_first
+    include_questions_with_answers = models.BooleanField(default=False)         # old: option_questions_with_answers_first
     
     
     # True  => for questions scheduled before now, only show questions that DON'T have answers
+    # TODO: should this be "*only* include questions without answers scheduled before now"?
     # False => disable
-    include_questions_without_answers = models.BooleanField(default=True)      # old: option_questions_without_answers_first
+    include_questions_without_answers = models.BooleanField(default=False)      # old: option_questions_without_answers_first
 
     # True  => date_show_next <= now
     # False => don't limit to date_show_next (desirable if want to order by
@@ -66,27 +68,15 @@ class QueryPreferences(CreatedBy):
     # False => order by date_show_next, oldest first (date_show_next ASC NULLS FIRST)
     # used with
     #   option_limit_to_date_show_next_before_now=True
-    # to show questions to reinforce (see again quickly)
+    # to show questions to reinforce (see again quickly) by selecting the most recently answered question scheduled before now
     sort_by_newest_answered_first = models.BooleanField(default=False)         # old: option_order_by_when_answered_newest
 
     # Takes precedence over all other order_by's, except for option_order_by_answered_count
-    sort_by_oldest_answered_first = models.BooleanField(default=True)          # old: option_order_by_when_answered_oldest
+    sort_by_oldest_answered_first = models.BooleanField(default=False)          # old: option_order_by_when_answered_oldest
  
     def __str__(self):
         return self.name
     
-    
-class QuestionManager(models.Manager):
-
-    def get_user_questions(self, user):
-
-        questions = self.filter(
-            tag__usertag__user=user,
-            tag__usertag__enabled=True
-        )
-
-        return questions
-
 
 @python_2_unicode_compatible
 class Question(CreatedBy):
@@ -98,7 +88,6 @@ class Question(CreatedBy):
     # tag_set
     # user
     # user_set
-    objects = QuestionManager()
 
     def __str__(self):
         return '<Question id=[%s] question=[%s] datetime_added=[%s]>' % (self.id, self.question, self.datetime_added)
@@ -134,10 +123,8 @@ class Tag(CreatedBy):
     '''
     name = models.CharField(max_length=1000)
     questions = models.ManyToManyField('Question', blank=True, through='QuestionTag')
-    users = models.ManyToManyField(User, blank=True, through='UserTag', related_name='users')
     # questiontag_set
     # user
-    # user_set
 
     def __str__(self):
         return self.name
@@ -200,22 +187,3 @@ class Schedule(CreatedBy):
                           self.interval_unit, interval_num, type(interval_num), exception))
                 raise
         return super(Schedule, self).save(*args, **kwargs)
-
-
-class UserTagManager(models.Manager):
-
-    def tags_available_for_user(self, user):
-        return self.filter(user=user).exists()
-
-
-class UserTag(models.Model):
-    # This allows the user to dynamically tell the app which questions
-    # they want to see.
-    # Maybe it would be better to be called QuizTag.
-    # For each user, they will have a UserTag for each tag,
-    # with an enable=True/False
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    enabled = models.BooleanField(default=False)
-
-    objects = UserTagManager()

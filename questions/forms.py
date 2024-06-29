@@ -16,7 +16,9 @@ class FormFlashcard(forms.Form):
         required=False,
         widget=PagedownWidgetAligned()
     )
+    hidden_query_prefs_id = forms.IntegerField(widget=forms.HiddenInput())
     hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
+    hidden_tag_ids_selected = forms.CharField(widget=forms.HiddenInput())
 
     percent_correct = forms.DecimalField(
         max_digits=5,
@@ -37,6 +39,7 @@ class FormFlashcard(forms.Form):
         choices=CHOICES_UNITS,
         required=False)
 
+class FormSelectTags(forms.Form):
     # query_prefs is a ModelChoiceField / dropdown for QueryPrefs, where each value shown is a QueryPrefs.name
     query_prefs = forms.ModelChoiceField(
         required=True,
