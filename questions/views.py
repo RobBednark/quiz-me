@@ -53,69 +53,70 @@ def _debug_print_questions(questions, msg):
     print()
         
 def _debug_print_n_questions(questions, msg, num_questions):
-    if debug_print:
-        print("=" * 80)
-        LENGTH_QUESTION = 50
-        questions_count = questions.count()
+    if not debug_print:
+        return
+    print("=" * 80)
+    LENGTH_QUESTION = 50
+    questions_count = questions.count()
 
-        if num_questions == 0:
-            first_or_last = '(show none)'
-        elif num_questions > 0:
-            first_or_last = 'first'
-            questions = questions[:num_questions]
+    if num_questions == 0:
+        first_or_last = '(show none)'
+    elif num_questions > 0:
+        first_or_last = 'first'
+        questions = questions[:num_questions]
+    else:
+        first_or_last = 'last'
+        questions = list(questions)
+        questions = questions[num_questions:]
+    print(f'[{first_or_last:5}] questions (): {msg}')
+    for idx, question in enumerate(questions):
+        num_question = idx + 1
+        print()
+        question_text = question.question
+        question_text = question_text.replace('\r','')
+        question_text = question_text.replace('\n',' ')
+        question_text = question_text.strip()
+        question_text = question_text[:LENGTH_QUESTION]
+        if num_questions < 0:
+            # assert: num_questions is negative (e.g., -5), so adding it to count is really subtraction
+            num_of_count = questions_count + num_questions + num_question
         else:
-            first_or_last = 'last'
-            questions = list(questions)
-            questions = questions[num_questions:]
-        print(f'[{first_or_last:5}] questions (): {msg}')
-        for idx, question in enumerate(questions):
-            num_question = idx + 1
-            print()
-            question_text = question.question
-            question_text = question_text.replace('\r','')
-            question_text = question_text.replace('\n',' ')
-            question_text = question_text.strip()
-            question_text = question_text[:LENGTH_QUESTION]
-            if num_questions < 0:
-                # assert: num_questions is negative (e.g., -5), so adding it to count is really subtraction
-                num_of_count = questions_count + num_questions + num_question
-            else:
-                num_of_count = num_question
-            
-            # print annotations
-            try:
-                schedule_datetime_added = question.schedule_datetime_added
-            except AttributeError:
-                # assert: schedule_datetime_added annotation is not present
-                schedule_datetime_added = None
+            num_of_count = num_question
+        
+        # print annotations
+        try:
+            schedule_datetime_added = question.schedule_datetime_added
+        except AttributeError:
+            # assert: schedule_datetime_added annotation is not present
+            schedule_datetime_added = None
 
-            try:
-                date_show_next = question.date_show_next
-            except AttributeError:
-                # assert: date_show_next annotation is not present
-                date_show_next = None
+        try:
+            date_show_next = question.date_show_next
+        except AttributeError:
+            # assert: date_show_next annotation is not present
+            date_show_next = None
 
-            try:
-                num_schedules = question.num_schedules
-            except AttributeError:
-                # assert: num_schedules annotation is not present
-                num_schedules = None
+        try:
+            num_schedules = question.num_schedules
+        except AttributeError:
+            # assert: num_schedules annotation is not present
+            num_schedules = None
 
-            print(f'question [{num_of_count}/{questions_count}]  [{num_question}/{num_questions}]  pk=[{question.pk}] text=[{question_text}]')
-            print(f'schedule.date_show_next: {date_show_next}')
-            print(f'question.datetime_added: {question.datetime_added}')
-            print(f'schedule_datetime_added: {schedule_datetime_added}')
-            print(f'num_schedules: {num_schedules}')
-            
-            if question.answer:
-                answer_text = question.answer.answer
-                answer_text = answer_text.replace('\r','')
-                answer_text = answer_text.replace('\n',' ')
-                answer_text = answer_text.strip()
-                answer_text = answer_text[:LENGTH_QUESTION]
-                print(f'answer: {question.answer.answer[:LENGTH_QUESTION]}')
-            else:
-                print('answer: None')
+        print(f'question [{num_of_count}/{questions_count}]  [{num_question}/{num_questions}]  pk=[{question.pk}] text=[{question_text}]')
+        print(f'schedule.date_show_next: {date_show_next}')
+        print(f'question.datetime_added: {question.datetime_added}')
+        print(f'schedule_datetime_added: {schedule_datetime_added}')
+        print(f'num_schedules: {num_schedules}')
+        
+        if question.answer:
+            answer_text = question.answer.answer
+            answer_text = answer_text.replace('\r','')
+            answer_text = answer_text.replace('\n',' ')
+            answer_text = answer_text.strip()
+            answer_text = answer_text[:LENGTH_QUESTION]
+            print(f'answer: {question.answer.answer[:LENGTH_QUESTION]}')
+        else:
+            print('answer: None')
 
 def _get_next_question(user, query_prefs_obj, tags_selected):
     # query_prefs_obj -- QueryPrefs object
