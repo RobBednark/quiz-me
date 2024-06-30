@@ -407,33 +407,36 @@ def _render_question(request, query_prefs_obj, tags_selected):
         )
     )
 
-def get_tag_form_name2fields(request):
-    # find all the tags for a user, and return tag_form_name2fields, where for each tag::
-    #   key: tag_form_name
-    #   fields: dict with keys [tag_form_name, tag_form_label, tag_id]
+def get_tag_fields(user):
+    # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag.
     # e.g.,
-    # { id_form_name_3: 
+    #  [
     #   { tag_form_name: 'id_form_name_3',
     #     tag_form_label: 'my tag',
-    #     tag_id: 3 },
-    tag_form_name2fields = {}
-    for tag in models.Tag.objects.filter(user=request.user):
+    #     tag_id: 3
+    #   }
+    #  ]
+    tag_fields_list = []
+    for tag in models.Tag.objects.filter(user=user):
         tag_form_name = f'id_form_name_{tag.id}'
-        tag_form_name2fields[tag_form_name] = dict(
+        tag_fields_list.append(dict(
                 tag_form_name=tag_form_name,
                 tag_form_label=tag.name,
-                tag_id=tag.id)
-    return tag_form_name2fields
+                tag_id=tag.id))
+    # sort by tag_form_label
+    tag_fields_list.sort(key=lambda x: x['tag_form_label'])
+    return tag_fields_list
 
 def view_get_select_tags(request):#
     _ensure_one_query_prefs_obj(user=request.user)
     form_select_tags = FormSelectTags()
+    tag_fields_list = get_tag_fields(user=request.user)
     return render(
         request=request,
         template_name='select_tags.html',
         context=dict(
             form_select_tags=form_select_tags,
-            tag_form_name2fields=get_tag_form_name2fields(request=request),
+            tag_fields_list=tag_fields_list
         )
     )
 
@@ -462,10 +465,10 @@ def _post_select_tags(request):
 def get_selected_tag_ids(request):
     # return a list of tag id's that were selected, e.g.,
     # [1, 2]
-    tag_form_name2fields = get_tag_form_name2fields(request=request)
+    tag_fields_list = get_tag_fields(user=request.user)
     tags_selected = []
-    for tag_form_name, tag_fields in tag_form_name2fields.items():
-        if request.POST.get(tag_form_name, None):
+    for tag_fields in tag_fields_list:
+        if request.POST.get(tag_fields['tag_form_name'], None):
             tags_selected.append(tag_fields['tag_id'])
     return tags_selected
 

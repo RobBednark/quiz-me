@@ -16,11 +16,11 @@
       {{ form_select_tags.query_prefs }}
       <p/>
       <div class="col-xs-12">
-            {% for tag_form_name, tag_fields in tag_form_name2fields.items %}
+            {% for tag_fields in tag_fields_list %}
               <div class="row">
                   <div class="col-sm-6">
                     <input type="checkbox" 
-                      id="{{ tag_form_name }}"
+                      id="{{ tag_fields.tag_form_name }}"
                       name="{{ tag_fields.tag_form_name }}" 
                       value="{{ tag_fields.tag_form_label }}"
                     />
