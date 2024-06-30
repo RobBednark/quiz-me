@@ -401,7 +401,6 @@ def _render_question(request, query_prefs_obj, tags_selected):
             question_tag_names=question_tag_names,
             schedules_recent_count_30=next_question.schedules_recent_count_30,
             schedules_recent_count_60=next_question.schedules_recent_count_60,
-            ## settings = settings,
             user_tag_names=next_question.user_tag_names,
             num_schedules=next_question.num_schedules
         )
