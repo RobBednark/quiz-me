@@ -39,7 +39,7 @@ NextQuestion = namedtuple(
         'question',
         'schedules_recent_count_30',
         'schedules_recent_count_60',
-        'user_tag_names'
+        'selected_tag_names'
     ]
 )
 
@@ -333,7 +333,7 @@ def _get_next_question(user, query_prefs_obj, tags_selected):
         question=question_to_show,
         schedules_recent_count_30=schedules_recent_count_30,
         schedules_recent_count_60=schedules_recent_count_60,
-        user_tag_names=','.join(sorted([tag for tag in tag_names])),  # query #5
+        selected_tag_names=sorted([tag for tag in tag_names]),  # query #5
         num_schedules=num_schedules,
     )
 
@@ -366,13 +366,12 @@ def _render_question(request, query_prefs_obj, tags_selected):
     form_flashcard = FormFlashcard(data=dict(hidden_query_prefs_id=query_prefs_obj.id, hidden_tag_ids_selected=tag_ids_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
 
     if next_question.question:
-        question_tag_names = ", ".join(
+        question_tag_names = \
             sorted([
                 str(
                     qtag.tag.name
                 ) for qtag in next_question.question.questiontag_set.filter(enabled=True)
             ])
-        )
     else:
         question_tag_names = []
 
@@ -401,7 +400,7 @@ def _render_question(request, query_prefs_obj, tags_selected):
             question_tag_names=question_tag_names,
             schedules_recent_count_30=next_question.schedules_recent_count_30,
             schedules_recent_count_60=next_question.schedules_recent_count_60,
-            user_tag_names=next_question.user_tag_names,
+            selected_tag_names=next_question.selected_tag_names,
             num_schedules=next_question.num_schedules
         )
     )
