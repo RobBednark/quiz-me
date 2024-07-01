@@ -113,22 +113,36 @@
           {% endfor %}
           </i>
           </ul>
-
-
           {% if option_limit_to_date_show_next_before_now %}
-            <br/>[{{ count_questions_before_now }}] questions past due for all selected tags
+            [{{ count_questions_before_now }}] questions past due for all selected tags
           {% else %}
-            <br/># questions for all selected tags: {{ count_questions_before_now }} (scheduled before now)
+            # questions for all selected tags: {{ count_questions_before_now }} (scheduled before now)
           {% endif %}
           <br/> # flashcards reviewed in last 30 minutes: {{ schedules_recent_count_30 }}
           <br/> # flashcards reviewed in last 60 minutes: {{ schedules_recent_count_60 }}
           <br/> # flashcards with the selected tags: {{ count_questions_tagged }}
           <br/> # times this flashcard has been seen: {{ num_schedules }}
           <br/> last seen: {{ last_schedule_added.human_datetime_added }} ago
-          <br/> last time this was seen: {{ last_schedule_added.datetime_added }}
-          <br/> next scheduled time: {{ last_schedule_added.date_show_next }}
-          <br> flashcard added: {{ question.datetime_added }}
-          <br> flashcard updated: {{ question.datetime_updated }}
+          <table>
+            <tr>
+              <td> last time this was seen: </td>
+              <td> {{ last_schedule_added.datetime_added }} </td>
+            </tr>
+
+            <tr>
+              <td>next scheduled time: </td>
+              <td>{{ last_schedule_added.date_show_next }} </td>
+            </tr>
+
+            <tr>
+              <td>flashcard added: </td>
+              <td> {{ question.datetime_added }} </td>
+            </tr>
+            <tr>
+              <td>flashcard updated: </td>
+              <td>{{ question.datetime_updated }} </td>
+            </tr>
+          </table>
         {% endif %}
 
           <br><u>tags selected:</u>
