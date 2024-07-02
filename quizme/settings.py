@@ -1,6 +1,5 @@
 import os
 
-from questions import VERSION, VERSION_DATE
 # Django settings for quizme project.
 
 AUTH_USER_MODEL = 'emailusername.User'
