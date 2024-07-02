@@ -1,5 +1,4 @@
-# override "".vscode/launch.json" from the global .gitignore containing ".vscode"
-#!.vscode/launch.json
+# override any global .gitignore containing ".vscode"
 !.vscode/
 
 *.ipynb*
