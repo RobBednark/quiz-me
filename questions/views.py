@@ -544,8 +544,11 @@ def view_select_tags(request):
 @login_required(login_url='/login')
 def view_question(request):
     if request.method == 'GET':
-        tag_ids_selected = request.GET.get('tag_ids_selected', '')
-        tag_ids_selected = tag_ids_selected.split(',')
+        tag_ids_selected_str = request.GET.get('tag_ids_selected', None)
+        if tag_ids_selected_str:
+            tag_ids_selected = tag_ids_selected_str.split(',')
+        else:
+            tag_ids_selected = []
         tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
         tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
         query_prefs_id = request.GET.get('query_prefs_id', None)
