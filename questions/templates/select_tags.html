@@ -6,6 +6,21 @@
 {% endblock %}
 
 {% block content_body %}
+<script type="text/javascript">  
+  function ToggleAllCheckboxes(){  
+      // Set all checkboxes to the opposite value of the first checkbox
+      var checkboxes = document.querySelectorAll('input[type="checkbox"][class*="class_tag_checkboxes"');
+      var newValue;
+      if (checkboxes.length > 0) {
+        newValue = !(checkboxes[0].checked);
+      }
+      for (const checkbox of checkboxes) {
+          checkbox.checked = newValue;
+      }  
+  }  
+</script>  
+
+
     <h1>Select tags</h1>
     <form method="post">
       {% csrf_token %}
@@ -15,14 +30,16 @@
       <p/>
       {{ form_select_tags.query_prefs }}
       <p/>
+      <input type="button" onclick='ToggleAllCheckboxes()' value="Toggle all tags"/>  
       <div class="col-xs-12">
             {% for tag_fields in tag_fields_list %}
               <div class="row">
-                  <div class="col-sm-6">
+                  <div>
                     <input type="checkbox" 
                       id="{{ tag_fields.tag_form_name }}"
                       name="{{ tag_fields.tag_form_name }}" 
                       value="{{ tag_fields.tag_form_label }}"
+                      class="class_tag_checkboxes"
                     />
                     <label for="{{ tag_form_name }}">{{ tag_fields.tag_form_label }}</label>
                   </div>
