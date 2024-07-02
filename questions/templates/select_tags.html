@@ -35,13 +35,15 @@
             {% for tag_fields in tag_fields_list %}
               <div class="row">
                   <div>
-                    <input type="checkbox" 
-                      id="{{ tag_fields.tag_form_name }}"
-                      name="{{ tag_fields.tag_form_name }}" 
-                      value="{{ tag_fields.tag_form_label }}"
-                      class="class_tag_checkboxes"
+                    <label for="{{ tag_fields.tag_form_name }}">
+                      <input type="checkbox" 
+                        id="{{ tag_fields.tag_form_name }}"
+                        name="{{ tag_fields.tag_form_name }}" 
+                        value="{{ tag_fields.tag_form_label }}"
+                        class="class_tag_checkboxes"
                     />
-                    <label for="{{ tag_form_name }}">{{ tag_fields.tag_form_label }}</label>
+                    {{ tag_fields.tag_form_label }}
+                  </label>
                   </div>
               </div>
             {% endfor %}
