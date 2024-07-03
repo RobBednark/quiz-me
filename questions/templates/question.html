@@ -46,7 +46,7 @@
             </div>
             {% if question.answer %}
               <div class="alert alert-success" role="alert">
-                <details>
+                <details open>
                   <summary>Correct Answer</summary>
                   {{ question.answer.answer|markdown:"do-not-escape-html" }}
                 </details>
