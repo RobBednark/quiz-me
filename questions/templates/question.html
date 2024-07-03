@@ -2,6 +2,16 @@
 {% load markdown_deux_tags %}
 {% block content_head %}{{ form_flashcard.media }}{% endblock %}
 {% block content_body %}
+
+<script type="text/javascript">  
+  const onClickPresetButton = (number, unit) => {
+    console.log(`onClickOneDay: number=${number}, unit=${unit}`);
+    document.getElementById('id_interval_unit').value = unit;
+    document.getElementById('id_input_interval_number').value = number;
+    document.getElementById('id_button_submit').click();
+  }
+</script>
+
   <h1>Take a Quiz</h1>
   <form method="post">
     {% csrf_token %}
@@ -51,6 +61,137 @@
       </div>
       <!-- End: Question and Answer section -->
       {% if question %}
+
+      <div/>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(1, 'minutes')"
+        type="button"
+      >
+        <span>1 minute</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(5, 'minutes')"
+        type="button"
+      >
+        <span>2 minutes</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(10, 'minutes')"
+        type="button"
+      >
+        <span>3 minutes</span>
+      </button>
+
+      <div/>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(1, 'hours')"
+        type="button"
+      >
+        <span>1 hour</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(2, 'hours')"
+        type="button"
+      >
+        <span>2 hours</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(3, 'hours')"
+        type="button"
+      >
+        <span>3 hours</span>
+      </button>
+
+      <div/>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(1, 'days')"
+        type="button"
+      >
+        <span>1 day</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(2, 'days')"
+        type="button"
+      >
+        <span>2 days</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(3, 'days')"
+        type="button"
+      >
+        <span>3 days</span>
+      </button>
+
+      <div/>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(1, 'weeks')"
+        type="button"
+      >
+        <span>1 week</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(2, 'weeks')"
+        type="button"
+      >
+        <span>2 weeks</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(3, 'weeks')"
+        type="button"
+      >
+        <span>3 weeks</span>
+      </button>
+
+      <div/>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(1, 'months')"
+        type="button"
+      >
+        <span>1 month</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(2, 'months')"
+        type="button"
+      >
+        <span>2 months</span>
+      </button>
+
+      <button 
+        class="btn btn-primary btn-sm"
+        onclick="onClickPresetButton(3, 'months')"
+        type="button"
+      >
+        <span>3 months</span>
+      </button>
+
         <div class="row">
           <!-- Begin: inputting schedule values -->
           <div class="col-xs-12">
@@ -61,7 +202,7 @@
               <input id="id_percent_importance" placeholder="Percent Importance" name={{ form_flashcard.percent_importance.name }} step="0.01" type="number" value={{ form_flashcard.percent_importance.value }} />
             </div>
             <div class="input-group">
-              <input id="id_interval_num" placeholder="Interval Number" name={{ form_flashcard.interval_num.name }} step="0.01" type="number" value={{ form_flashcard.interval_num.value }} />
+              <input id="id_input_interval_number" placeholder="Interval Number" name={{ form_flashcard.interval_num.name }} step="0.01" type="number" value={{ form_flashcard.interval_num.value }} />
             </div>
             <div class="input-group">
               <select id="id_interval_unit" placeholder="Interval Unit" name={{ form_flashcard.interval_unit.name }} value={{ form_flashcard.interval_unit.value }}>
@@ -78,7 +219,7 @@
         </div>
         <!-- End inputting schedule values -->
       {% endif %}
-      <input class="btn btn-primary btn-lg" type="submit" value="Answer" />
+      <input class="btn btn-primary btn-lg" id="id_button_submit" type="submit" name="submit me" value="Submit" />
       <!-- Add urls to edit the question and answer in the Django admin -->
       <div>
         {% if question %}
