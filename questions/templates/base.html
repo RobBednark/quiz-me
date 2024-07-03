@@ -30,12 +30,6 @@
         Signed in as {{ user }} | <a href="/logout" class="navbar-link">Logout</a>
       </div>
       {% endblock %}
-      <div class="navbar-text">
-        database=[{{ settings.DATABASES.default.NAME }}]
-      </div>
-      <div class="navbar-text">
-        v{{ settings.VERSION }} {{ settings.VERSION_DATE }}
-      </div>
     </div>
   </nav>
 

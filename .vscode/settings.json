@@ -1,0 +1,35 @@
+{
+    // I added the following for the djlint extension, per it's directions.  -Rob 7.2.24
+    "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
+      "editor.defaultFormatter": "monosans.djlint"
+    },
+
+    "peacock.color": "#77fbc1",
+
+    "workbench.colorCustomizations": {
+      "activityBar.activeBackground": "#c345cd",
+      "activityBar.background": "#c345cd",
+      "activityBar.foreground": "#e7e7e7",
+      "activityBar.inactiveForeground": "#e7e7e799",
+      "activityBarBadge.background": "#c9be36",
+      "activityBarBadge.foreground": "#15202b",
+      "commandCenter.border": "#e7e7e799",
+      "panel.border": "#c345cd",
+      "sash.hoverBorder": "#c345cd",
+      "sideBar.border": "#c345cd",
+      "statusBar.background": "#a62fb0",
+      "statusBar.border": "#a62fb0",
+      "statusBar.foreground": "#e7e7e7",
+      "statusBarItem.hoverBackground": "#c345cd",
+      "statusBarItem.remoteBackground": "#a62fb0",
+      "statusBarItem.remoteForeground": "#e7e7e7",
+      "tab.activeBorder": "#c345cd",
+      "titleBar.activeBackground": "#a62fb0",
+      "titleBar.activeForeground": "#e7e7e7",
+      "titleBar.border": "#a62fb0",
+      "titleBar.inactiveBackground": "#a62fb099",
+      "titleBar.inactiveForeground": "#e7e7e799"
+    },
+
+    "peacock.remoteColor": "#a62fb0"
+}

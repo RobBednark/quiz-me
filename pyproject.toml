@@ -28,6 +28,8 @@ urllib3 = "*.*.*"
 [tool.poetry.group.dev.dependencies]
 django-debug-toolbar = "*.*.*"
 django-extensions = "*.*.*"
+djlint = "^1.34.1"
+
 
 [build-system]
 requires = ["poetry-core"]

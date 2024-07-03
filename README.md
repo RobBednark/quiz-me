@@ -133,9 +133,6 @@ docker rm $(docker ps -a -q)
 * **update README.md**
   Update README.md accordingly, including:  
     * TODO section -- remove corresponding item(s) if they have been implemented in this commit
-* **update VERSION**  
-  Update the version values in the questions/__version__.py file
-* **update CHANGELOG**
 
 ## Thoughts about scheduling
 * maybe capture percentage of correctness and time since last seen
