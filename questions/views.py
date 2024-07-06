@@ -355,7 +355,7 @@ def _get_selected_query_prefs_obj(user, query_prefs_id):
     return models.QueryPreferences.objects.get(id=query_prefs_id, user=user)
 
 @login_required(login_url='/login')
-def _render_question(request, query_prefs_obj, tags_selected):
+def _render_question(request, query_prefs_obj, tags_selected, select_tags_url):
     # query_prefs_obj -- a QueryPrefs object
     # tags_selected -- a list of Tag objects -- the tags selected by the user
     
@@ -401,11 +401,12 @@ def _render_question(request, query_prefs_obj, tags_selected):
             schedules_recent_count_30=next_question.schedules_recent_count_30,
             schedules_recent_count_60=next_question.schedules_recent_count_60,
             selected_tag_names=next_question.selected_tag_names,
-            num_schedules=next_question.num_schedules
+            num_schedules=next_question.num_schedules,
+            select_tags_url=select_tags_url,
         )
     )
 
-def get_tag_fields(user):
+def get_tag_fields(user, selected_tag_ids):
     # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag.
     # e.g.,
     #  [
@@ -417,18 +418,34 @@ def get_tag_fields(user):
     tag_fields_list = []
     for tag in models.Tag.objects.filter(user=user):
         tag_form_name = f'id_form_name_{tag.id}'
+        # "checked" is the <select type="checkbox"> boolean attribute for whether the checkbox is checked.
+        if tag.id in selected_tag_ids:
+            checked = 'checked'
+        else:
+            checked = ''
         tag_fields_list.append(dict(
                 tag_form_name=tag_form_name,
                 tag_form_label=tag.name,
-                tag_id=tag.id))
+                tag_id=tag.id,
+                checked=checked
+                ))
     # sort by tag_form_label
     tag_fields_list.sort(key=lambda x: x['tag_form_label'])
     return tag_fields_list
 
 def view_get_select_tags(request):#
     _ensure_one_query_prefs_obj(user=request.user)
-    form_select_tags = FormSelectTags()
-    tag_fields_list = get_tag_fields(user=request.user)
+    tag_ids_selected_str = request.GET.get('tag_ids_selected', None)
+    if tag_ids_selected_str:
+        tag_ids_selected = tag_ids_selected_str.split(',')
+    else:
+        tag_ids_selected = []
+    tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
+    tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
+    query_prefs_id = request.GET.get('query_prefs_id', None)
+
+    form_select_tags = FormSelectTags(initial=dict(query_prefs=query_prefs_id))
+    tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=tag_ids_selected)
     return render(
         request=request,
         template_name='select_tags.html',
@@ -441,13 +458,12 @@ def view_get_select_tags(request):#
 def _post_select_tags(request):
     form_select_tags = FormSelectTags(data=request.POST)
     tag_ids_selected = get_selected_tag_ids(request=request)
-    tag_ids_selected = ','.join(str(tag) for tag in tag_ids_selected)
+    tag_ids_selected_str = ','.join(str(tag) for tag in tag_ids_selected)
     if form_select_tags.is_valid():
         query_prefs_obj = form_select_tags.cleaned_data['query_prefs']
         # redirect to /question/?tag_ids=...&query_prefs=...
-        query_string = ''
         query_string = urlencode(dict(
-            tag_ids_selected=tag_ids_selected,
+            tag_ids_selected=tag_ids_selected_str,
             query_prefs_id=query_prefs_obj.id))
         redirect_url = reverse(viewname='question')
         redirect_url += f'?{query_string}'
@@ -463,7 +479,7 @@ def _post_select_tags(request):
 def get_selected_tag_ids(request):
     # return a list of tag id's that were selected, e.g.,
     # [1, 2]
-    tag_fields_list = get_tag_fields(user=request.user)
+    tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=[])
     tags_selected = []
     for tag_fields in tag_fields_list:
         if request.POST.get(tag_fields['tag_form_name'], None):
@@ -550,10 +566,17 @@ def view_question(request):
         else:
             tag_ids_selected = []
         tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
+        # e.g., tag_ids_selected=[1, 2]
         tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
         query_prefs_id = request.GET.get('query_prefs_id', None)
         query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
-        return _render_question(request=request, tags_selected=tag_objs_selected, query_prefs_obj=query_prefs_obj)
+        
+        select_tags_url = reverse(viewname='select_tags')
+        query_string = urlencode(dict(
+            tag_ids_selected=tag_ids_selected_str,
+            query_prefs_id=query_prefs_obj.id))
+        select_tags_url += f'?{query_string}'
+        return _render_question(request=request, tags_selected=tag_objs_selected, query_prefs_obj=query_prefs_obj, select_tags_url=select_tags_url)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:
