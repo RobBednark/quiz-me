@@ -357,7 +357,20 @@ def _get_selected_query_prefs_obj(user, query_prefs_id):
 @login_required(login_url='/login')
 def _render_question(request, query_prefs_obj, tags_selected, select_tags_url):
     # query_prefs_obj -- a QueryPrefs object
-    # tags_selected -- a list of Tag objects -- the tags selected by the user
+
+    MINUTES = 'minutes'
+    HOURS = 'hours'
+    DAYS = 'days'
+    WEEKS = 'weeks'
+    MONTHS ='months'
+    BUTTONS = [
+        [ dict(number=0, unit=MINUTES), dict(number=1, unit=MINUTES), dict(number=5, unit=MINUTES), dict(number=10, unit=MINUTES)],
+        [ dict(number=1, unit=HOURS), dict(number=2, unit=HOURS), dict(number=3, unit=HOURS), dict(number=4, unit=HOURS)],
+        [ dict(number=1, unit=DAYS), dict(number=2, unit=DAYS), dict(number=3, unit=DAYS), dict(number=4, unit=DAYS)],
+        [ dict(number=1, unit=WEEKS), dict(number=2, unit=WEEKS), dict(number=3, unit=WEEKS), dict(number=4, unit=WEEKS)],
+        [ dict(number=1, unit=MONTHS), dict(number=2, unit=MONTHS), dict(number=3, unit=MONTHS), dict(number=4, unit=MONTHS)],
+    ]
+        # tags_selected -- a list of Tag objects -- the tags selected by the user
     
     next_question = _get_next_question(user=request.user, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
     id_question = next_question.question.id if next_question.question else 0
@@ -391,6 +404,7 @@ def _render_question(request, query_prefs_obj, tags_selected, select_tags_url):
         request=request,
         template_name='question.html',
         context=dict(
+            buttons=BUTTONS,
             count_questions_before_now=next_question.count_questions_before_now,
             count_questions_tagged=next_question.count_questions_tagged,
             form_flashcard=form_flashcard,
