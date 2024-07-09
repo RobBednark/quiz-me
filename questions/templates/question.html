@@ -4,12 +4,16 @@
 {% block content_body %}
 
 <script type="text/javascript">  
-  const onClickPresetButton = (number, unit) => {
-    console.log(`onClickOneDay: number=${number}, unit=${unit}`);
-    document.getElementById('id_interval_unit').value = unit;
-    document.getElementById('id_input_interval_number').value = number;
-    document.getElementById('id_button_submit').click();
-  }
+  document.addEventListener("DOMContentLoaded", (event) => {
+    console.log('adding event listeners');
+    Array.from(document.querySelectorAll('.preset-duration-button')).forEach((button) => {
+      button.addEventListener('click', (event) => {
+        document.getElementById('id_interval_unit').value = button.dataset.unit;
+        document.getElementById('id_input_interval_number').value = button.dataset.number;
+        document.getElementById('id_button_submit').click();
+      });
+  });
+ });
 </script>
 
   <h1>Take a Quiz</h1>
@@ -62,136 +66,25 @@
       <!-- End: Question and Answer section -->
       {% if question %}
 
-      <div/>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(1, 'minutes')"
-        type="button"
-      >
-        <span>1 minute</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(5, 'minutes')"
-        type="button"
-      >
-        <span>2 minutes</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(10, 'minutes')"
-        type="button"
-      >
-        <span>3 minutes</span>
-      </button>
-
-      <div/>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(1, 'hours')"
-        type="button"
-      >
-        <span>1 hour</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(2, 'hours')"
-        type="button"
-      >
-        <span>2 hours</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(3, 'hours')"
-        type="button"
-      >
-        <span>3 hours</span>
-      </button>
-
-      <div/>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(1, 'days')"
-        type="button"
-      >
-        <span>1 day</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(2, 'days')"
-        type="button"
-      >
-        <span>2 days</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(3, 'days')"
-        type="button"
-      >
-        <span>3 days</span>
-      </button>
-
-      <div/>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(1, 'weeks')"
-        type="button"
-      >
-        <span>1 week</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(2, 'weeks')"
-        type="button"
-      >
-        <span>2 weeks</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(3, 'weeks')"
-        type="button"
-      >
-        <span>3 weeks</span>
-      </button>
-
-      <div/>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(1, 'months')"
-        type="button"
-      >
-        <span>1 month</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(2, 'months')"
-        type="button"
-      >
-        <span>2 months</span>
-      </button>
-
-      <button 
-        class="btn btn-primary btn-sm"
-        onclick="onClickPresetButton(3, 'months')"
-        type="button"
-      >
-        <span>3 months</span>
-      </button>
-
+      <table style="border-collapse: separate; border-spacing: 20px">
+        {% for buttons_row in buttons %}
+        <tr>
+          {% for button in buttons_row %}
+          <td>
+            <button 
+              class="btn btn-primary btn-sm preset-duration-button"
+              data-number="{{ button.number }}"
+              data-unit="{{ button.unit }}"
+              style="width: 100%"
+              type="button"
+            >
+              <span>{{ button.number }} {{ button.unit}}</span>
+            </button>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+  </table>
         <div class="row">
           <!-- Begin: inputting schedule values -->
           <div class="col-xs-12">
