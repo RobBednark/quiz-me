@@ -1,12 +1,10 @@
 from datetime import datetime, timedelta
-import os
 
 from django.test import TestCase
 import pytz
 
 from emailusername.models import User
-from questions import forms
-from questions.models import Answer, Attempt, QueryPreferences, Question, QuestionTag, Schedule, Tag
+from questions.models import QueryPreferences, Question, QuestionTag, Schedule, Tag
 from questions.get_next_question import get_next_question
 
 class Tests(TestCase):
@@ -28,10 +26,6 @@ class Tests(TestCase):
 
     def test_get_next_question(self):
         # expected number of queries
-        NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
-        NUM_QUERIES_UNSCHEDULED_QUESTION = 3  # there are no scheduled questions, and an unscheduled question is returned
-        NUM_QUERIES_SCHEDULED_AFTER_NOW = 5   # no scheduled questions before now, no unscheduled questions, and a scheduled question after now is shown
-        NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
 
         # test get_next_question()
         user1 = User.objects.create(email="user1@bednark.com")
