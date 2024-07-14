@@ -8,13 +8,12 @@ from questions.get_next_question import get_next_question, NextQuestion
 NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
 NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
 
-
 class TestGetNextQuestion(TestCase):
 
     def setUp(self):
         # Create a user
-        self.PASSWORD = 'p'
-        self.USERNAME = 'foo@bar.com'
+        self.PASSWORD = 'my_password'
+        self.USERNAME = 'user@mydomain.com'
         self.query_prefs_obj = models.QueryPreferences.objects.create()
         self.user = User(email=self.USERNAME)
         self.user.set_password(self.PASSWORD)
