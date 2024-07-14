@@ -167,21 +167,21 @@ def get_next_question(user, query_prefs_obj, tags_selected):
     count_questions_tagged = questions_tagged.count()
 
     # schedules -- all Schedules for the user for each question, newest first by datetime_added
-    # OuterRef('pk') refers to the question.pk for each question
+    # "schedules" will be used as a subquery of Question (questions_tagged), so OuterRef('pk') will refer to the question.pk for each question in questions_tagged
     schedules = (models.Schedule.objects
                  .filter(user=user, question=OuterRef('pk'))
                  .order_by('-datetime_added'))
     
-    # questions_annotated - questions_tagged, annotated with (schedule).date_show_next
+    # questions_annotated - questions_tagged, annotated with earliest (schedule).date_show_next
     # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
     # add num_schedules field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
     questions_annotated = questions_annotated.annotate(num_schedules=Subquery(
         models.Schedule.objects
-            .filter(question=OuterRef('pk'))
-            .values('question')
+            .filter(question=OuterRef('pk'))  # (OuterRef('pk') refers to the question.pk of the outer query for Question)  TODO: is this correct?  Isn't this a subquery of the Schedule subquery, so it should be OuterRefl(OuterRef()'pk'))?
+            .values('question')  # restrict to only selecting the "question" field, and return a dict with just that field  TODO: where is this used?
             .annotate(count=Count('pk'))
-            .values('count')))
+            .values('count')))  # restrict to just the 'cound' column, and return a dict with just that field  TODO: where is "count" used?  Isn't the annotate() above already doing this?
     # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
     subquery_include_unanswered = None
