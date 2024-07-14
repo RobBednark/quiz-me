@@ -269,3 +269,82 @@ class Tests(TestCase):
         for _ in range(5):
             next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertEqual(next_question.question, question1)
+
+class TestsCreateMany(TestCase):
+    @classmethod
+    def setUp(cls):
+        NUM_QUESTIONS_TAG_GROUPS = 5
+        NUM_TAGS_QUESTIONS = 100
+        NUM_USERS = 100
+        attempts = {}
+        question_tags = {}
+        questions = {}
+        schedules = {}
+        tags = {}
+        users = {}
+        for idx in range(NUM_USERS):
+            idx = idx + 1
+            user_email = f"user_${idx}@my_domain.com"
+            user = User.objects.create(email=user_email)
+            users[user_email] = user
+        for idx in range(NUM_TAGS_QUESTIONS):
+            tag_name = f"tag ${idx}"
+            tag = Tag.objects.create(name=tag_name)
+            tags[tag_name] = tag
+
+            question_name = f"question ${idx}"
+            question = Question.objects.create(question=question_name)
+            questions[question_name] = question
+        # for each questions group, choose n random tags for that group, e.g.,
+        # group 1: 0 tags
+        # group 2: 1 tag
+        # group 3: 2 tags
+        # ...
+        num_per_group = NUM_TAGS_QUESTIONS // NUM_QUESTIONS_TAG_GROUPS
+        # group_num = 1,2,3,...,NUM_QUESTIONS_TAG_GROUPS
+        for group_num in range(NUM_QUESTIONS_TAG_GROUPS):
+            group_num = group_num + 1  # 1-based
+            if group_num == 1:
+                idx_start = 1
+            else:  # assert: group_num >= 2
+                idx_start = ((group_num - 1) * num_per_group) + 1
+            idx_end = idx_start + num_per_group - 1
+
+            num_tags = random.randint(0, NUM_TAGS_QUESTIONS)
+            for idx in range(num_tags):
+                tag_name = random.choice(list(tags.keys()))
+                tag = tags[tag_name]
+                question_name = random.choice(list(questions.keys()))
+                question = questions[question_name]
+                question_tag = QuestionTag.objects.create(
+                    question=question, tag=tag, enabled=True
+                )
+                question_tags[question_name] = question_tag
+
+        for idx in range(NUM_OBJECTS):
+            question_tag = QuestionTag.objects.create(
+                question=question, tag=tag, enabled=True
+            )
+            schedule = Schedule.objects.create(
+                user=user,
+                question=question,
+                interval_num=1,
+                interval_unit='months',
+                date_show_next=datetime.now(tz=pytz.utc) + timedelta(days=i)
+            )
+        # use faker to get a random time, e.g.,
+        # fake.date_time_between(start_date='-30y', end_date='now')
+# datetime.datetime(2007, 2, 28, 11, 28, 16)
+        
+    def tearDownClass(cls):
+        super(TestCase, cls).tearDownClass()
+        tear_down_all()
+def tear_down_all():
+        Answer.objects.all().delete()
+        Attempt.objects.all().delete()
+        Question.objects.all().delete()
+        QuestionTag.objects.all().delete()
+        Schedule.objects.all().delete()
+        Tag.objects.all().delete()
+        User.objects.all().delete()
+
