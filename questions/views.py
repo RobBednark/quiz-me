@@ -134,6 +134,9 @@ def view_get_select_tags(request):#
         tag_ids_selected = []
     tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
     query_prefs_id = request.GET.get('query_prefs_id', None)
+    if not query_prefs_id:
+        # default to the oldest created one
+        query_prefs_id = QueryPreferences.objects.all().order_by('-datetime_added')[0].id
 
     form_select_tags = FormSelectTags(initial=dict(query_prefs=query_prefs_id))
     tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=tag_ids_selected)

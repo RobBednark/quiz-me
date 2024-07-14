@@ -3,8 +3,7 @@ from django.test import TestCase
 from emailusername.models import User
 
 from questions import models, util
-from questions.views import _get_next_question
-from questions.views import NextQuestion
+from questions.get_next_question import get_next_question, NextQuestion
 
 NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
 NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
@@ -22,7 +21,7 @@ class TestGetNextQuestion(TestCase):
         self.user.save()
 
     def test_user_with_no_questions(self):
-        next_question = _get_next_question(user=self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
+        next_question = get_next_question(user=self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
@@ -36,7 +35,7 @@ class TestGetNextQuestion(TestCase):
         # One untagged question that doesn't get returned because it has
         # no tags.
 
-        next_question = _get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
+        next_question = get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNone(next_question.question)
@@ -52,7 +51,7 @@ class TestGetNextQuestion(TestCase):
         tag = util.assign_question_to_user(user=self.user, question=question, tag_name='tag #1')
         util.schedule_question_for_user(self.user, question)
 
-        next_question = _get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
+        next_question = get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)
@@ -69,7 +68,7 @@ class TestGetNextQuestion(TestCase):
             )
             models.QuestionTag.objects.create(tag=tag, question=question, enabled=True)
 
-        next_question = _get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
+        next_question = get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
 
         self.assertIsInstance(next_question, NextQuestion)
         self.assertIsNotNone(next_question.question)

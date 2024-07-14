@@ -44,7 +44,5 @@ class FormSelectTags(forms.Form):
     query_prefs = forms.ModelChoiceField(
         required=True,
         label="Query Preferences",
-        queryset=QueryPreferences.objects.all().order_by('-date_last_used'),
-        # default to the oldest created one
-        initial=QueryPreferences.objects.all().order_by('-datetime_added')[0],
+        queryset=QueryPreferences.objects.all().order_by('-date_last_used')
     )
