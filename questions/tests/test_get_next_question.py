@@ -1,5 +1,3 @@
-import math
-
 from django.test import TestCase
 
 from emailusername.models import User
@@ -85,24 +83,24 @@ class CreateData():
     def __init__(self) -> None:
         pass
     def create_data(self):
-        for user_num in range(1, NUM_USERS+1):
+        for user_num in range(1, self.NUM_USERS+1):
             user_email = f"user_{user_num}@my_domain.com"
             user = User.objects.create(email=user_email)
             self._create_data_for_user(user=user)
-    def _create_data_for_user(user):
+    def _create_data_for_user(self, user):
         for tag_num in range(0, self.NUM_TAGS + 2):
             if tag_num == 0:
                 # create questions without tags
                 tag = None
             else:
                 tag_name = f"tag {tag_num}"
-                tag = Tag.objects.create(name=tag_name, user=user)
+                tag = models.Tag.objects.create(name=tag_name, user=user)
             self._create_data_for_tag(tag=tag, user=user)
     
     def _create_data_for_tag(self, tag, user):
         for question_num in range(1, self.NUM_QUESTIONS_PER_TAG + 1):
             question_name = f"question {question_num}"
-            question = Question.objects.create(question=question_name, user=user)
+            question = models.Question.objects.create(question=question_name, user=user)
             self._create_data_for_question(self, question, tag, user)
     
     def _create_data_for_question(self, question, user):
@@ -116,7 +114,7 @@ class TestsCreateMany(TestCase):
     def setUp(cls):
         NUM_QUESTIONS_TAG_GROUPS = 5
         NUM_QUESTIONS = 100
-        NUM_TAGS = 100
+        # NUM_TAGS = 100
         NUM_USERS = 100
 
         question_tags = {}  # key: "question 1 tag 1" value: QuestionTag object
@@ -138,17 +136,17 @@ class TestsCreateMany(TestCase):
             user_objs.append(user_obj)
         user1 = user_objs[0]
 
-        for idx in range(NUM_QUESTIONS):
-            question_name = f"question {idx}"
-            # question = Question.objects.create(question=question_name, user=)
-            cls.questions[question_name] = question
-            question2tags[question_name] = []
-            
-        for idx in range(NUM_TAGS):
-            tag_name = f"tag {idx}"
-            tag = Tag.objects.create(name=tag_name)
-            tags[tag_name] = tag
-            tag2questions[tag_name] = []
+#        for idx in range(NUM_QUESTIONS):
+#            question_name = f"question {idx}"
+#            # question = Question.objects.create(question=question_name, user=)
+#            cls.questions[question_name] = question
+#            question2tags[question_name] = []
+#            
+#        for idx in range(NUM_TAGS):
+#            tag_name = f"tag {idx}"
+#            tag = Tag.objects.create(name=tag_name)
+#            tags[tag_name] = tag
+#            tag2questions[tag_name] = []
 
         # for each group of n questions , choose n random tags for that group, e.g.,
         # group 1: 0 tags
@@ -164,24 +162,25 @@ class TestsCreateMany(TestCase):
         # group_num = 2,3,...,NUM_QUESTIONS_TAG_GROUPS
         # (skip group 1 because it will have 0 tags)
         # first_n_questions = list(cls.questions.values())[0:NUM_QUESTIONS_TAG_GROUPS-1)]
-        for question_obj in question_objects
-            group_num = math.ceil(question_num / NUM_QUESTIONS_TAG_GROUPS)  # e.g., 6 / 5 = 2
-            num_tags = group_num - 1
-            # use a set to avoid picking same tag more than once
-            tag_num_set = set(list(range(1, NUM_TAGS_QUESTIONS + 1)))
-            for _ in range(num_tags):
-                tag_num = random.randint(1, len(tag_num_set) + 1)
-                tag_num_set.remove(tag_num)
-                tag_name = f"tag {tag_num}"
-                tag = tags[tag_name]
-                question_name = f"question {question_num}"
-                question = cls.questions[question_name]
-                question_tag = QuestionTag.objects.create(
-                    question=question, tag=tag, enabled=True
-                )
-                question_tags[question_name + tag_name] = question_tag
-                question2tags[question_name].append(tag)
-                tag2questions[tag_name].append(question)
+#        for question_obj in question_objects:
+#            group_num = math.ceil(question_num / NUM_QUESTIONS_TAG_GROUPS)  # e.g., 6 / 5 = 2
+#            num_tags = group_num - 1
+#            # use a set to avoid picking same tag more than once
+#            tag_num_set = set(list(range(1, NUM_TAGS_QUESTIONS + 1)))
+#            for _ in range(num_tags):
+#                tag_num = random.randint(1, len(tag_num_set) + 1)
+#                tag_num_set.remove(tag_num)
+#                tag_name = f"tag {tag_num}"
+#                tag = tags[tag_name]
+#                question_name = f"question {question_num}"
+#                question = cls.questions[question_name]
+#                question_tag = QuestionTag.objects.create(
+#                    question=question, tag=tag, enabled=True
+#                )
+#                question_tags[question_name + tag_name] = question_tag
+#                question2tags[question_name].append(tag)
+#                tag2questions[tag_name].append(question)
+
 # for each question
 #   group = ...
 #   num_tags = group - 1
@@ -206,10 +205,16 @@ class TestsCreateMany(TestCase):
     def test_1(self):
         print(f"len(TestsCreateMany.questions) = {len(TestsCreateMany.questions)}")
 def tear_down_all():
-        Answer.objects.all().delete()
-        Attempt.objects.all().delete()
-        Question.objects.all().delete()
-        QuestionTag.objects.all().delete()
-        Schedule.objects.all().delete()
-        Tag.objects.all().delete()
-        User.objects.all().delete()
+        models.Answer.objects.all().delete()
+        models.Attempt.objects.all().delete()
+        models.Question.objects.all().delete()
+        models.QuestionTag.objects.all().delete()
+        models.Schedule.objects.all().delete()
+        models.Tag.objects.all().delete()
+        models.User.objects.all().delete()
+
+
+class TotalCoverage(TestCase):
+    def setUp(self):
+        create_data = CreateData()
+        create_data.create_data()
