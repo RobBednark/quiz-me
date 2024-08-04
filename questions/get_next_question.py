@@ -180,7 +180,7 @@ def get_next_question(user, query_prefs_obj, tags_selected):
         models.Schedule.objects
             .filter(question=OuterRef('pk'))  # (OuterRef('pk') refers to the question.pk of the outer query for Question)  TODO: is this correct?  Isn't this a subquery of the Schedule subquery, so it should be OuterRefl(OuterRef()'pk'))?
             .values('question')  # restrict to only selecting the "question" field, and return a dict with just that field  TODO: where is this used?
-            .annotate(count=Count('pk'))
+            .annotate(count=Count('pk')) # TODO: what is this a count of?
             .values('count')))  # restrict to just the 'cound' column, and return a dict with just that field  TODO: where is "count" used?  Isn't the annotate() above already doing this?
     # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
