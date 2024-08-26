@@ -16,26 +16,8 @@ from questions import models
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
-def _ensure_one_query_prefs_obj(user):
-    # Ensure there's at least one QueryPrefs object for the given :user: when the go to the Select Tags page.
-    # If there's not, create one.
-    try:
-        query_prefs_obj = models.QueryPreferences.objects.filter(user=user)
-    except models.QueryPreferences.DoesNotExist:
-        # No default query_prefs, so create one
-        query_prefs_obj = models.QueryPreferences(
-            name='Default query preferences (auto-created)',
-            user=user,
-            date_last_used=timezone.now())
-        query_prefs_obj.save()
-
-def _get_selected_query_prefs_obj(user, query_prefs_id):
-    return models.QueryPreferences.objects.get(id=query_prefs_id, user=user)
-
 @login_required(login_url='/login')
-def _render_question(request, query_prefs_obj, tags_selected, select_tags_url):
-    # query_prefs_obj -- a QueryPrefs object
-
+def _render_question(request, query_name, tags_selected, select_tags_url):
     MINUTES = 'minutes'
     HOURS = 'hours'
     DAYS = 'days'
@@ -50,11 +32,11 @@ def _render_question(request, query_prefs_obj, tags_selected, select_tags_url):
     ]
         # tags_selected -- a list of Tag objects -- the tags selected by the user
     
-    next_question = get_next_question(user=request.user, query_prefs_obj=query_prefs_obj, tags_selected=tags_selected)
+    next_question = get_next_question(user=request.user, query_name=query_name, tags_selected=tags_selected)
     id_question = next_question.question.id if next_question.question else 0
 
     tag_ids_selected = ",".join([str(tag.id) for tag in tags_selected])
-    form_flashcard = FormFlashcard(data=dict(hidden_query_prefs_id=query_prefs_obj.id, hidden_tag_ids_selected=tag_ids_selected, hidden_question_id=id_question, query_prefs=query_prefs_obj))
+    form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_ids_selected, hidden_question_id=id_question))
 
     if next_question.question:
         question_tag_names = \
@@ -126,19 +108,15 @@ def get_tag_fields(user, selected_tag_ids):
     return tag_fields_list
 
 def view_get_select_tags(request):#
-    _ensure_one_query_prefs_obj(user=request.user)
     tag_ids_selected_str = request.GET.get('tag_ids_selected', None)
     if tag_ids_selected_str:
         tag_ids_selected = tag_ids_selected_str.split(',')
     else:
         tag_ids_selected = []
     tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
-    query_prefs_id = request.GET.get('query_prefs_id', None)
-    if not query_prefs_id:
-        # default to the oldest created one
-        query_prefs_id = QueryPreferences.objects.all().order_by('-datetime_added')[0].id
+    query_name = request.GET.get('query_name', None)
 
-    form_select_tags = FormSelectTags(initial=dict(query_prefs=query_prefs_id))
+    form_select_tags = FormSelectTags(initial=dict(query_name=query_name))
     tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=tag_ids_selected)
     return render(
         request=request,
@@ -154,11 +132,11 @@ def _post_select_tags(request):
     tag_ids_selected = get_selected_tag_ids(request=request)
     tag_ids_selected_str = ','.join(str(tag) for tag in tag_ids_selected)
     if form_select_tags.is_valid():
-        query_prefs_obj = form_select_tags.cleaned_data['query_prefs']
-        # redirect to /question/?tag_ids=...&query_prefs=...
+        # redirect to /question/?tag_ids=...&query_name=...
         query_string = urlencode(dict(
             tag_ids_selected=tag_ids_selected_str,
-            query_prefs_id=query_prefs_obj.id))
+            query_name=form_select_tags.cleaned_data['query_name'],
+        ))
         redirect_url = reverse(viewname='question')
         redirect_url += f'?{query_string}'
         return redirect(to=redirect_url, permanent=True)
@@ -166,9 +144,8 @@ def _post_select_tags(request):
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
-        query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_obj=None)
         # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_ids_selected)
+        return _render_question(request=request, query_name=None, tags_selected=tag_ids_selected)
 
 def get_selected_tag_ids(request):
     # return a list of tag id's that were selected, e.g.,
@@ -186,8 +163,7 @@ def _post_flashcard(request):
     tag_ids_selected = get_selected_tag_ids(request=request)
     if form_flashcard.is_valid():
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
-        query_prefs_id = form_flashcard.cleaned_data["hidden_query_prefs_id"]
-        query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
+        query_name = form_flashcard.cleaned_data["hidden_query_name"]
         tag_ids_selected_str = form_flashcard.cleaned_data["hidden_tag_ids_selected"]
         tag_ids_selected = tag_ids_selected_str.split(',')
         tag_ids_selected = [int(tag) for tag in tag_ids_selected]
@@ -200,7 +176,7 @@ def _post_flashcard(request):
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
             # TODO: print warning to user
             # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-            return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_ids_selected)
+            return _render_question(request=request, query_name=query_name, tags_selected=tag_ids_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -226,11 +202,11 @@ def _post_flashcard(request):
         )
         schedule.save()
 
-        # redirect to /question/?tag_ids=...&query_prefs=...
+        # redirect to /question/?tag_ids=...&query_name=...
         query_string = ''
         query_string = urlencode(dict(
             tag_ids_selected=tag_ids_selected_str,
-            query_prefs_id=query_prefs_id))
+            query_name=query_name))
         redirect_url = reverse(viewname='question')
         redirect_url += f'?{query_string}'
         return redirect(to=redirect_url, permanent=True)
@@ -239,7 +215,7 @@ def _post_flashcard(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         debug_print and print('ERROR: _post_flashcard: form is NOT valid')
-        return _render_question(request=request, query_prefs_obj=query_prefs_obj, tags_selected=tag_objs_selected)
+        return _render_question(request=request, query_name=query_name, tags_selected=tag_objs_selected)
 
 @login_required(login_url='/login')
 def view_select_tags(request):
@@ -261,15 +237,14 @@ def view_question(request):
         tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
         # e.g., tag_ids_selected=[1, 2]
         tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
-        query_prefs_id = request.GET.get('query_prefs_id', None)
-        query_prefs_obj = _get_selected_query_prefs_obj(user=request.user, query_prefs_id=query_prefs_id)
+        query_name = request.GET.get('query_name', None)
         
         select_tags_url = reverse(viewname='select_tags')
         query_string = urlencode(dict(
             tag_ids_selected=tag_ids_selected_str,
-            query_prefs_id=query_prefs_obj.id))
+            query_name=query_name))
         select_tags_url += f'?{query_string}'
-        return _render_question(request=request, tags_selected=tag_objs_selected, query_prefs_obj=query_prefs_obj, select_tags_url=select_tags_url)
+        return _render_question(request=request, tags_selected=tag_objs_selected, query_name=query_name, select_tags_url=select_tags_url)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:
