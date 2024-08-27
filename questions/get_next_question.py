@@ -106,6 +106,7 @@ def _debug_print_n_questions(questions, msg, num_questions):
 
 def get_next_question_unseen(user, tags_selected):
     # Find all questions created by user which have one or more of tags_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
+    # tags_selected -- list of tag IDs
     
     # Find questions created by the user with selected tags
     questions = Question.objects.filter(
