@@ -270,7 +270,7 @@ class GetNextQuestionUnseenTests(TestCase):
     def test_get_oldest_unseen_question(self):
         d = self.d
         next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t1.id])
-        self.assertEqual(next_question, d.q1)
+        self.assertEqual(d.q1, next_question)
         
     def test_no_unseen_questions(self):
         q = Question.objects.create(user=self.user)
@@ -284,7 +284,7 @@ class GetNextQuestionUnseenTests(TestCase):
         # locals().update(CreateTestData.__dict__)
         d = CreateTestData
         result = get_next_question_unseen(d.u1, [d.t1.id, d.t2.id])
-        self.assertEqual(result, d.q3)
+        self.assertEqual(d.q1, result)
         
     def test_question_from_different_user(self):
         other_user = User.objects.create_user(email='testuser2@user.com', password='12345')

@@ -111,9 +111,8 @@ def get_next_question_unseen(user, tag_ids_selected):
     # Find questions created by the user with selected tags
     questions = Question.objects.filter(
         user=user,
-
         questiontag__tag__id__in=tag_ids_selected
-    ).distinct()
+    )
 
     # Filter for unseen questions (no schedules)
     unseen_questions = questions.filter(schedule__isnull=True)
