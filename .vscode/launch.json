@@ -48,7 +48,7 @@
                  "--failfast",
                  "--no-input",
                  "-k",
-                 "test_schedule_date_show_next_less_than_now"
+                 "test_multiple_tags"
             ]
             "justMyCode": true,
             "autoStartBrowser": false

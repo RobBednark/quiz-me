@@ -1,10 +1,13 @@
+from datetime import datetime, timedelta
+
 from django.test import TestCase
 from django.utils import timezone
 
 from emailusername.models import User
 
 from questions import models, util
-from questions.get_next_question import get_next_question, NextQuestion
+from questions.get_next_question import get_next_question_unseen
+from questions.models import Question, QuestionTag, Schedule, Tag
 
 ### NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
 ### NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
@@ -220,50 +223,43 @@ class CreateTestData:
     # | Que | U  | Tags   | Schedules | added |
     # |-----|----|--------|-----------|-------|
     # | q1  | u1 | t1     | None      | -2d   |
-    # | q2  | u1 | t1     | None      | -1d   |
-    # | q3  | u1 | t1, t2 | None      | -1d   |
-    # | q4  | u1 | t1     | None      | -1d   |
+    # | q2  | u1 | t1,t2  | -1d       | -1d   |
+    # | q3  | u1 | t2  | -1d       | -1d   |
+    # | q4  | u1 | t3     | -1d       | -1d   |
     #
     # Notes:
     # Que = Question
     # U = User who created the question (i.e., Question.user field)
     # Tags = tags that are applied to the question via the QuestionTag model
-    # Schedules = schedules associated with the question via the Schedule.question foreign key
+    # Schedules = schedules associated with the question via the Schedule.question foreign key; the column value refers to the Schedule.date_show_next field; e.g., -1d = 1 day before now
     # added = when the question was added (relative to now); i.e., Question.datetime_added field; e.g., -2d = 2 days before now
 
     @classmethod
     def create(cls):
         # Create users
         cls.u1 = User.objects.create_user(email='testuser@test.com', password='12345')
-        cls.u2 = User.objects.create_user(email='testuser2@user.com', password='12345')
 
         # Create tags
-        cls.t1 = Tag.objects.create(name='Python')
-        cls.t2 = Tag.objects.create(name='Django')
+        cls.t1 = Tag.objects.create(name='tag1')
+        cls.t2 = Tag.objects.create(name='tag2')
+        cls.t3 = Tag.objects.create(name='tag3')
 
         # Create questions
         now = timezone.now()
         cls.q1 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=2))
         cls.q2 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1))
-        cls.q3 = Question.objects.create(user=cls.u1, datetime_added=now)
-        cls.q4 = Question.objects.create(user=cls.u2, datetime_added=now)
+        cls.q3 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1))
 
         # Associate tags with questions
         QuestionTag.objects.create(question=cls.q1, tag=cls.t1)
         QuestionTag.objects.create(question=cls.q2, tag=cls.t1)
-        QuestionTag.objects.create(question=cls.q3, tag=cls.t1)
-        QuestionTag.objects.create(question=cls.q3, tag=cls.t2)
-        QuestionTag.objects.create(question=cls.q4, tag=cls.t1)
+        QuestionTag.objects.create(question=cls.q2, tag=cls.t2)
+        QuestionTag.objects.create(question=cls.q3, tag=cls.t3)
+        
+        # Create schedules
+        Schedule.objects.create(question=cls.q2, date_show_next=now - timedelta(days=1))
+        Schedule.objects.create(question=cls.q3, date_show_next=now - timedelta(days=1))
 
-        # No schedules are created as per the table
-
-
-
-
-from django.test import TestCase
-from questions.models import Question, QuestionTag, Tag
-from questions.get_next_question import get_next_question_unseen
-from datetime import datetime, timedelta
 
 class GetNextQuestionUnseenTests(TestCase):
     def setUp(self):
@@ -273,7 +269,7 @@ class GetNextQuestionUnseenTests(TestCase):
         
     def test_get_oldest_unseen_question(self):
         d = self.d
-        next_question = get_next_question_unseen(user=d.u1, tags_selected=[d.t1.id])
+        next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t1.id])
         self.assertEqual(next_question, d.q1)
         
     def test_no_unseen_questions(self):
@@ -285,13 +281,10 @@ class GetNextQuestionUnseenTests(TestCase):
         self.assertIsNone(result)
         
     def test_multiple_tags(self):
-        q1 = Question.objects.create(user=self.user)
-        q1.tags.add(self.tag1, self.tag2)
-        q2 = Question.objects.create(user=self.user)
-        q2.tags.add(self.tag2)
-        
-        result = get_next_question_unseen(self.user, ['Python', 'Django'])
-        self.assertEqual(result, q1)
+        # locals().update(CreateTestData.__dict__)
+        d = CreateTestData
+        result = get_next_question_unseen(d.u1, [d.t1.id, d.t2.id])
+        self.assertEqual(result, d.q3)
         
     def test_question_from_different_user(self):
         other_user = User.objects.create_user(email='testuser2@user.com', password='12345')
