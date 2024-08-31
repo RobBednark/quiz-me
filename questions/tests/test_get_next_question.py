@@ -223,9 +223,12 @@ class CreateTestData:
     # | Que | U  | Tags   | Schedules | added |
     # |-----|----|--------|-----------|-------|
     # | q1  | u1 | t1     | None      | -2d   |
-    # | q2  | u1 | t1,t2  | -1d       | -1d   |
-    # | q3  | u1 | t2  | -1d       | -1d   |
+    # | q2  | u1 | t1,t2  | -1d       | -3d   |
+    # | q3  | u1 | t2     | -1d       | -1d   |
     # | q4  | u1 | t3     | -1d       | -1d   |
+    # | -   | u1 | t4     |           |       |
+    # | q5  | u2 | t5     | None      | -1d   |
+    # | q6  | u1 | t1     | None      | -4d   |
     #
     # Notes:
     # Que = Question
@@ -237,28 +240,38 @@ class CreateTestData:
     @classmethod
     def create(cls):
         # Create users
-        cls.u1 = User.objects.create_user(email='testuser@test.com', password='12345')
+        cls.u1 = User.objects.create_user(email='user1@test.com', password='password1')
+        cls.u2 = User.objects.create_user(email='user2@test.com', password='password2')
 
         # Create tags
-        cls.t1 = Tag.objects.create(name='tag1')
-        cls.t2 = Tag.objects.create(name='tag2')
-        cls.t3 = Tag.objects.create(name='tag3')
+        cls.t1 = Tag.objects.create(name='tag1', user=cls.u1)
+        cls.t2 = Tag.objects.create(name='tag2', user=cls.u1)
+        cls.t3 = Tag.objects.create(name='tag3', user=cls.u1)
+        cls.t4 = Tag.objects.create(name='tag4', user=cls.u1)
+
+        cls.t5 = Tag.objects.create(name='tag5', user=cls.u2)
 
         # Create questions
         now = timezone.now()
-        cls.q1 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=2))
-        cls.q2 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1))
-        cls.q3 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1))
+        cls.q1 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=2), question='q1')
+        cls.q2 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q2')
+        cls.q3 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q3')
+        cls.q4 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q4')
+        cls.q5 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q5')
+        cls.q6 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=4), question='q6')
 
         # Associate tags with questions
-        QuestionTag.objects.create(question=cls.q1, tag=cls.t1)
-        QuestionTag.objects.create(question=cls.q2, tag=cls.t1)
-        QuestionTag.objects.create(question=cls.q2, tag=cls.t2)
-        QuestionTag.objects.create(question=cls.q3, tag=cls.t3)
+        QuestionTag.objects.create(question=cls.q1, tag=cls.t1, user=cls.u1)
+        QuestionTag.objects.create(question=cls.q2, tag=cls.t1, user=cls.u1)
+        QuestionTag.objects.create(question=cls.q2, tag=cls.t2, user=cls.u1)
+        QuestionTag.objects.create(question=cls.q3, tag=cls.t3, user=cls.u1)
+        QuestionTag.objects.create(question=cls.q4, tag=cls.t3, user=cls.u1)
+        QuestionTag.objects.create(question=cls.q5, tag=cls.t5, user=cls.u2)
+        QuestionTag.objects.create(question=cls.q6, tag=cls.t1, user=cls.u1)
         
         # Create schedules
-        Schedule.objects.create(question=cls.q2, date_show_next=now - timedelta(days=1))
-        Schedule.objects.create(question=cls.q3, date_show_next=now - timedelta(days=1))
+        Schedule.objects.create(question=cls.q2, date_show_next=now - timedelta(days=1), user=cls.u1)
+        Schedule.objects.create(question=cls.q3, date_show_next=now - timedelta(days=1), user=cls.u1)
 
 
 class GetNextQuestionUnseenTests(TestCase):
@@ -273,30 +286,21 @@ class GetNextQuestionUnseenTests(TestCase):
         self.assertEqual(d.q1, next_question)
         
     def test_no_unseen_questions(self):
-        q = Question.objects.create(user=self.user)
-        q.tags.add(self.tag1)
-        q.schedules.create()  # This makes the question "seen"
-        
-        result = get_next_question_unseen(self.user, ['Python'])
+        d = CreateTestData
+        result = get_next_question_unseen(d.u1, [d.t2.id])
         self.assertIsNone(result)
         
     def test_multiple_tags(self):
-        # locals().update(CreateTestData.__dict__)
         d = CreateTestData
         result = get_next_question_unseen(d.u1, [d.t1.id, d.t2.id])
         self.assertEqual(d.q1, result)
         
-    def test_question_from_different_user(self):
-        other_user = User.objects.create_user(email='testuser2@user.com', password='12345')
-        q = Question.objects.create(user=other_user)
-        q.tags.add(self.tag1)
+    def test_tag_from_different_user(self):
+        d = self.d
+        next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t5.id])
+        self.assertEqual(None, next_question)
         
-        result = get_next_question_unseen(self.user, ['Python'])
-        self.assertIsNone(result)
-        
-    def test_no_matching_tags(self):
-        q = Question.objects.create(user=self.user)
-        q.tags.add(self.tag1)
-        
-        result = get_next_question_unseen(self.user, ['Java'])
-        self.assertIsNone(result)
+    def test_no_questions_matching_tag(self):
+        d = self.d
+        next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t4.id])
+        self.assertEqual(None, next_question)
