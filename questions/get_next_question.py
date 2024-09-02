@@ -122,82 +122,14 @@ def get_next_question_unseen(user, tag_ids_selected):
 
     return oldest_unseen_question
 def get_next_question(user, query_name, tag_ids_selected):
+    tags_not_owned_by_user = tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
     if query_name == forms.QUERY_UNSEEN:
         question = get_next_question_unseen(user, tag_ids_selected)
     return question
+def tags_not_owned_by_user(user, tag_ids):
+    """
+    Given the list of tag_ids,
+    return a list of tag_ids that are not owned by the user.
+    """
+    return Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
 
-### def OLD_get_next_question(user, query_name, tag_ids_selected):
-###     debug_print and print(f'\nquery_name: [{query_name}]\n')
-### 
-###     datetime_now = datetime.now(tz=pytz.utc)
-### 
-###     # tags -- Tags the user has selected that they want to be quizzed on right now
-###     tags = Tag.objects.filter(id__in=tag_ids_selected)
-###     tag_names = tags.values_list('name', flat=True)
-###     
-###     # question_tags -- QuestionTags matching the tags the user wants to be quizzed on
-###     # (logical OR -- questions that match any (not all) of the tags)
-###     question_tags = QuestionTag.objects.filter(enabled=True, tag__in=tags)
-### 
-###     # questions_tagged -- Questions matching the question_tags
-###     questions_tagged = Question.objects.filter(questiontag__in=question_tags)
-###     count_questions_tagged = questions_tagged.count()
-### 
-###     # schedules -- all Schedules for the user for each question, newest first by datetime_added
-###     # "schedules" will be used as a subquery of Question (questions_tagged), so OuterRef('pk') will refer to the question.pk for each question in questions_tagged
-###     schedules = (Schedule.objects
-###                  .filter(user=user, question=OuterRef('pk'))
-###                  .order_by('-datetime_added'))
-###     
-###     # questions_annotated - questions_tagged, annotated with earliest (schedule).date_show_next
-###     # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
-###     questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
-###     # add num_schedules field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
-###     questions_annotated = questions_annotated.annotate(num_schedules=Subquery(
-###         Schedule.objects
-###             .filter(question=OuterRef('pk'))  # (OuterRef('pk') refers to the question.pk of the outer query for Question)  TODO: is this correct?  Isn't this a subquery of the Schedule subquery, so it should be OuterRefl(OuterRef()'pk'))?
-###             .values('question')  # restrict to only selecting the "question" field, and return a dict with just that field  TODO: where is this used?
-###             .annotate(count=Count('pk')) # TODO: what is this a count of?
-###             .values('count')))  # restrict to just the 'cound' column, and return a dict with just that field  TODO: where is "count" used?  Isn't the annotate() above already doing this?
-###     # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
-###     questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
-###     subquery_include_unanswered = None
-### 
-###     SCHEDULES_SINCE_INTERVAL_30 = { 'minutes': 30 }
-###     SCHEDULES_SINCE_INTERVAL_60 = { 'minutes': 60 }
-###     delta_30 = relativedelta(**SCHEDULES_SINCE_INTERVAL_30)  # e.g., (minutes=30)
-###     delta_60 = relativedelta(**SCHEDULES_SINCE_INTERVAL_60)  # e.g., (minutes=30)
-###     schedules_since_30 = datetime_now - delta_30
-###     schedules_since_60 = datetime_now - delta_60
-###     schedules_recent_count_30 = (
-###         Schedule.objects
-###         .filter(user=user)
-###         .filter(datetime_added__gte=schedules_since_30)
-###         .count())
-###     schedules_recent_count_60 = (
-###         Schedule.objects
-###         .filter(user=user)
-###         .filter(datetime_added__gte=schedules_since_60)
-###         .count())
-### 
-###     count_questions_before_now = 0
-###     
-###     debug_print and _debug_print_questions(questions=questions, msg='query 1')
-### 
-###     num_schedules = Schedule.objects.filter(
-###         user=user,
-###         question=question_to_show
-###     ).count()
-### 
-###     debug_print and print('returning question.id = [%s]' % (question_to_show.id if question_to_show else None))
-###     debug_print and print('')
-###     return NextQuestion(
-###         count_questions_before_now=count_questions_before_now,
-###         count_questions_tagged=count_questions_tagged,
-###         option_limit_to_date_show_next_before_now=query_prefs_obj.limit_to_date_show_next_before_now,
-###         question=question_to_show,
-###         schedules_recent_count_30=schedules_recent_count_30,
-###         schedules_recent_count_60=schedules_recent_count_60,
-###         selected_tag_names=sorted([tag for tag in tag_names]),  # query #5
-###         num_schedules=num_schedules,
-###     )
