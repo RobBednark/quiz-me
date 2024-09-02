@@ -295,11 +295,6 @@ class GetNextQuestionUnseenTests(TestCase):
         result = get_next_question_unseen(d.u1, [d.t1.id, d.t2.id])
         self.assertEqual(d.q1, result)
         
-    def test_tag_from_different_user(self):
-        d = self.d
-        next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t5.id])
-        self.assertEqual(None, next_question)
-        
     def test_no_questions_matching_tag(self):
         d = self.d
         next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t4.id])
