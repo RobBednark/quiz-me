@@ -121,11 +121,14 @@ def get_next_question_unseen(user, tag_ids_selected):
     oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
 
     return oldest_unseen_question
+
 def get_next_question(user, query_name, tag_ids_selected):
-    tags_not_owned_by_user = tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
+    if tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected):
+        raise forms.TagNotOwnedByUserError(tag_ids_selected)
     if query_name == forms.QUERY_UNSEEN:
         question = get_next_question_unseen(user, tag_ids_selected)
     return question
+
 def tags_not_owned_by_user(user, tag_ids):
     """
     Given the list of tag_ids,
