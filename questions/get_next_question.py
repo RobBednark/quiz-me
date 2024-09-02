@@ -135,4 +135,3 @@ def tags_not_owned_by_user(user, tag_ids):
     return a list of tag_ids that are not owned by the user.
     """
     return Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
-

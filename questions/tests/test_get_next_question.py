@@ -6,7 +6,7 @@ from django.utils import timezone
 from emailusername.models import User
 
 from questions import models, util
-from questions.get_next_question import get_next_question_unseen
+from questions.get_next_question import get_next_question_unseen, tags_not_owned_by_user
 from questions.models import Question, QuestionTag, Schedule, Tag
 
 ### NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
@@ -299,3 +299,36 @@ class GetNextQuestionUnseenTests(TestCase):
         d = self.d
         next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t4.id])
         self.assertEqual(None, next_question)
+class TestTagsNotOwnedByUser(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(email='user1@test.com', password='password1')
+        self.user2 = User.objects.create_user(email='user2@test.com', password='password2')
+        
+        self.user1_tag1 = Tag.objects.create(name='user1_tag1', user=self.user1)
+        self.user1_tag2 = Tag.objects.create(name='user1_tag2', user=self.user1)
+        self.user2_tag3 = Tag.objects.create(name='tag3', user=self.user2)
+        self.user2_tag4 = Tag.objects.create(name='tag4', user=self.user2)
+
+    def test_all_tags_owned_by_user(self):
+        result = tags_not_owned_by_user(self.user1, [self.user1_tag1.id, self.user1_tag2.id])
+        self.assertEqual(list(result), [])
+
+    def test_no_tags_owned_by_user(self):
+        result = tags_not_owned_by_user(self.user1, [self.user2_tag3.id, self.user2_tag4.id])
+        self.assertEqual(list(result), [self.user2_tag3.id, self.user2_tag4.id])
+
+    def test_mixed_ownership(self):
+        result = tags_not_owned_by_user(self.user1, [self.user1_tag1.id, self.user2_tag3.id])
+        self.assertEqual(list(result), [self.user2_tag3.id])
+
+    def test_empty_tag_list(self):
+        result = tags_not_owned_by_user(self.user1, [])
+        self.assertEqual(list(result), [])
+
+    def test_nonexistent_tag_ids(self):
+        result = tags_not_owned_by_user(self.user1, [9999, 10000])
+        self.assertEqual(list(result), [])
+
+    def test_duplicate_tag_ids(self):
+        result = tags_not_owned_by_user(self.user1, [self.user2_tag3.id, self.user2_tag3.id, self.user2_tag4.id])
+        self.assertEqual(list(result), [self.user2_tag3.id, self.user2_tag4.id])
