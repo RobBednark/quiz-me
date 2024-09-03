@@ -6,7 +6,7 @@ from django.utils import timezone
 from emailusername.models import User
 
 from questions import models, util
-from questions.get_next_question import get_next_question_unseen, tags_not_owned_by_user
+from questions.get_next_question import get_next_question_unseen, tags_not_owned_by_user, tags_that_dont_exist
 from questions.models import Question, QuestionTag, Schedule, Tag
 
 ### NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
@@ -299,6 +299,7 @@ class GetNextQuestionUnseenTests(TestCase):
         d = self.d
         next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t4.id])
         self.assertEqual(None, next_question)
+
 class TestTagsNotOwnedByUser(TestCase):
     def setUp(self):
         self.user1 = User.objects.create_user(email='user1@test.com', password='password1')
@@ -332,3 +333,33 @@ class TestTagsNotOwnedByUser(TestCase):
     def test_duplicate_tag_ids(self):
         result = tags_not_owned_by_user(self.user1, [self.user2_tag3.id, self.user2_tag3.id, self.user2_tag4.id])
         self.assertEqual(list(result), [self.user2_tag3.id, self.user2_tag4.id])
+
+
+class TestTagsThatDontExist(TestCase):
+    def setUp(self):
+        self.tag1 = Tag.objects.create(name="Existing Tag 1")
+        self.tag2 = Tag.objects.create(name="Existing Tag 2")
+
+    def test_all_tags_exist(self):
+        actual = tags_that_dont_exist([self.tag1.id, self.tag2.id])
+        self.assertEqual([], actual)
+
+    def test_some_tags_dont_exist(self):
+        non_existent_id = 99999
+        actual = tags_that_dont_exist([self.tag1.id, non_existent_id])
+        self.assertEqual([non_existent_id], actual)
+
+    def test_no_tags_exist(self):
+        non_existent_ids = [88888, 99999]
+        actual = tags_that_dont_exist(non_existent_ids)
+        self.assertEqual(non_existent_ids, actual)
+
+    def test_empty_input(self):
+        actual = tags_that_dont_exist([])
+        self.assertEqual([], actual)
+
+    def test_mixed_existing_and_non_existing(self):
+        non_existent_ids = [88888, 99999]
+        input_ids = [self.tag1.id] + non_existent_ids + [self.tag2.id]
+        actual = tags_that_dont_exist(input_ids)
+        self.assertEqual(non_existent_ids, actual)

@@ -6,7 +6,7 @@ import pytz
 
 from dateutil.relativedelta import relativedelta
 from django.db import connection
-from django.db.models import Count, F, OuterRef, Q, Subquery
+from django.db.models import Count, Exists, F, OuterRef, Q, Subquery
 from django.forms.models import model_to_dict
 
 import questions.forms as forms
@@ -123,11 +123,17 @@ def get_next_question_unseen(user, tag_ids_selected):
     return oldest_unseen_question
 
 def get_next_question(user, query_name, tag_ids_selected):
-    if tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected):
-        raise forms.TagNotOwnedByUserError(tag_ids_selected)
+    # TODO: combine the following exceptions into a single exception
+    tags_not_owned = tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
+    if tags_not_owned:
+        raise forms.TagNotOwnedByUserError(tags_not_owned)
+    tags_dont_exist = tags_that_dont_exist(tag_ids=tag_ids_selected)
+    if tags_dont_exist:
+        raise forms.TagDoesNotExistError(tags_dont_exist)
     if query_name == forms.QUERY_UNSEEN:
         question = get_next_question_unseen(user, tag_ids_selected)
     return question
+
 
 def tags_not_owned_by_user(user, tag_ids):
     """
@@ -135,3 +141,11 @@ def tags_not_owned_by_user(user, tag_ids):
     return a list of tag_ids that are not owned by the user.
     """
     return Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
+
+def tags_that_dont_exist(tag_ids):
+    """
+    Given the list of tag_ids,
+    return a list of all tag_ids in that list that do not exist.
+    """
+    existing_tag_ids = set(Tag.objects.filter(id__in=tag_ids).values_list('id', flat=True))
+    return [tag_id for tag_id in tag_ids if tag_id not in existing_tag_ids]
