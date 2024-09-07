@@ -6,7 +6,7 @@ from django.utils import timezone
 from emailusername.models import User
 
 from questions import models, util
-from questions.get_next_question import get_next_question_unseen, tags_not_owned_by_user, tags_that_dont_exist
+from questions.get_next_question import get_next_question_unseen, tags_not_owned_by_user, tag_ids_that_dont_exist
 from questions.models import Question, QuestionTag, Schedule, Tag
 
 ### NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
@@ -341,25 +341,25 @@ class TestTagsThatDontExist(TestCase):
         self.tag2 = Tag.objects.create(name="Existing Tag 2")
 
     def test_all_tags_exist(self):
-        actual = tags_that_dont_exist([self.tag1.id, self.tag2.id])
+        actual = tag_ids_that_dont_exist([self.tag1.id, self.tag2.id])
         self.assertEqual([], actual)
 
     def test_some_tags_dont_exist(self):
         non_existent_id = 99999
-        actual = tags_that_dont_exist([self.tag1.id, non_existent_id])
+        actual = tag_ids_that_dont_exist([self.tag1.id, non_existent_id])
         self.assertEqual([non_existent_id], actual)
 
     def test_no_tags_exist(self):
         non_existent_ids = [88888, 99999]
-        actual = tags_that_dont_exist(non_existent_ids)
+        actual = tag_ids_that_dont_exist(non_existent_ids)
         self.assertEqual(non_existent_ids, actual)
 
     def test_empty_input(self):
-        actual = tags_that_dont_exist([])
+        actual = tag_ids_that_dont_exist([])
         self.assertEqual([], actual)
 
     def test_mixed_existing_and_non_existing(self):
         non_existent_ids = [88888, 99999]
         input_ids = [self.tag1.id] + non_existent_ids + [self.tag2.id]
-        actual = tags_that_dont_exist(input_ids)
+        actual = tag_ids_that_dont_exist(input_ids)
         self.assertEqual(non_existent_ids, actual)

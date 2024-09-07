@@ -15,19 +15,17 @@ from questions.models import Question, QuestionTag, Schedule, Tag
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
-NextQuestion = namedtuple(
-    typename='NextQuestion',
-    field_names=[
-        'count_questions_before_now',
-        'count_questions_tagged',
-        'num_schedules',
-        'option_limit_to_date_show_next_before_now',
-        'question',
-        'schedules_recent_count_30',
-        'schedules_recent_count_60',
-        'selected_tag_names'
-    ]
-)
+class TagNotOwnedByUserError(Exception):
+    def __init__(self, tags):
+        self.tags = tags
+        message = f"The following tags are not owned by the user: {', '.join(tags)}"
+        super().__init__(message)
+
+class TagDoesNotExistError(Exception):
+    def __init__(self, tag_ids):
+        tag_ids_str = ', '.join(tag_ids)
+        message = f"The following tag IDs do not exist: [{tag_ids_str}]"
+        super().__init__(message)
 
 def _debug_print_questions(questions, msg):
     if not debug_print:
@@ -126,10 +124,11 @@ def get_next_question(user, query_name, tag_ids_selected):
     # TODO: combine the following exceptions into a single exception
     tags_not_owned = tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
     if tags_not_owned:
-        raise forms.TagNotOwnedByUserError(tags_not_owned)
-    tags_dont_exist = tags_that_dont_exist(tag_ids=tag_ids_selected)
-    if tags_dont_exist:
-        raise forms.TagDoesNotExistError(tags_dont_exist)
+        raise TagNotOwnedByUserError(tags_not_owned)
+    tag_ids_dont_exist = tag_ids_that_dont_exist(tag_ids=tag_ids_selected)
+    if tag_ids_dont_exist:
+        raise TagDoesNotExistError(tag_ids_dont_exist)
+
     if query_name == forms.QUERY_UNSEEN:
         question = get_next_question_unseen(user, tag_ids_selected)
     return question
@@ -142,10 +141,11 @@ def tags_not_owned_by_user(user, tag_ids):
     """
     return Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
 
-def tags_that_dont_exist(tag_ids):
+def tag_ids_that_dont_exist(tag_ids):
     """
     Given the list of tag_ids,
     return a list of all tag_ids in that list that do not exist.
     """
     existing_tag_ids = set(Tag.objects.filter(id__in=tag_ids).values_list('id', flat=True))
-    return [tag_id for tag_id in tag_ids if tag_id not in existing_tag_ids]
+    non_existent_tag_ids = [tag_id for tag_id in tag_ids if tag_id not in existing_tag_ids]
+    return non_existent_tag_ids

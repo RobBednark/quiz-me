@@ -17,7 +17,7 @@ debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
 @login_required(login_url='/login')
-def _render_question(request, query_name, tags_selected, select_tags_url):
+def _render_question(request, query_name, tag_objs_selected, select_tags_url):
     MINUTES = 'minutes'
     HOURS = 'hours'
     DAYS = 'days'
@@ -30,13 +30,14 @@ def _render_question(request, query_name, tags_selected, select_tags_url):
         [ dict(number=1, unit=WEEKS), dict(number=2, unit=WEEKS), dict(number=3, unit=WEEKS), dict(number=4, unit=WEEKS)],
         [ dict(number=1, unit=MONTHS), dict(number=2, unit=MONTHS), dict(number=3, unit=MONTHS), dict(number=4, unit=MONTHS)],
     ]
-        # tags_selected -- a list of Tag objects -- the tags selected by the user
+        # tag_objs_selected -- a list of Tag objects -- the tags selected by the user
     
-    next_question = get_next_question(user=request.user, query_name=query_name, tags_selected=tags_selected)
+    tag_ids_selected_list = [str(tag.id) for tag in tag_objs_selected]
+    tag_ids_selected_str = ",".join(tag_ids_selected_list)
+    next_question = get_next_question(user=request.user, query_name=query_name, tag_ids_selected=tag_ids_selected_list)
     id_question = next_question.question.id if next_question.question else 0
 
-    tag_ids_selected = ",".join([str(tag.id) for tag in tags_selected])
-    form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_ids_selected, hidden_question_id=id_question))
+    form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_ids_selected_str, hidden_question_id=id_question))
 
     if next_question.question:
         question_tag_names = \
@@ -81,11 +82,12 @@ def _render_question(request, query_name, tags_selected, select_tags_url):
     )
 
 def get_tag_fields(user, selected_tag_ids):
-    # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag.
+    # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag,
+    # with tag_form_name and tag_form_label to be used in the HTML form.
     # e.g.,
     #  [
-    #   { tag_form_name: 'id_form_name_3',
-    #     tag_form_label: 'my tag',
+    #   { tag_form_name: 'id_form_name_3',  # the form name for the checkbox for this tag, where "3" is tag.id
+    #     tag_form_label: 'my tag',  # the label for the checkbox for this tag, corresponding to tag.name
     #     tag_id: 3
     #   }
     #  ]
@@ -110,14 +112,14 @@ def get_tag_fields(user, selected_tag_ids):
 def view_get_select_tags(request):#
     tag_ids_selected_str = request.GET.get('tag_ids_selected', None)
     if tag_ids_selected_str:
-        tag_ids_selected = tag_ids_selected_str.split(',')
+        tag_ids_selected_list = tag_ids_selected_str.split(',')
     else:
-        tag_ids_selected = []
-    tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
+        tag_ids_selected_list = []
+    tag_ids_selected_list = [int(tag_id) for tag_id in tag_ids_selected_list]
     query_name = request.GET.get('query_name', None)
 
     form_select_tags = FormSelectTags(initial=dict(query_name=query_name))
-    tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=tag_ids_selected)
+    tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=tag_ids_selected_list)
     return render(
         request=request,
         template_name='select_tags.html',
@@ -145,17 +147,21 @@ def _post_select_tags(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-        return _render_question(request=request, query_name=None, tags_selected=tag_ids_selected)
+        return _render_question(request=request, query_name=None, tag_ids_selected=tag_ids_selected)
 
 def get_selected_tag_ids(request):
-    # return a list of tag id's that were selected, e.g.,
-    # [1, 2]
+    # return a list of tag id's that were selected in the form, e.g., given and argument of:
+    #    request.POST == { 'id_form_name_2': True }
+    # and a precondition of this tag in the database:
+    #   { id: 2, name: 'my tag', user: <User: user> }
+    # return:
+    #   [2]
     tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=[])
-    tags_selected = []
+    tag_ids_selected = []
     for tag_fields in tag_fields_list:
         if request.POST.get(tag_fields['tag_form_name'], None):
-            tags_selected.append(tag_fields['tag_id'])
-    return tags_selected
+            tag_ids_selected.append(tag_fields['tag_id'])
+    return tag_ids_selected
 
 def _post_flashcard(request):
     # Save the attempt and the schedule.
@@ -176,7 +182,7 @@ def _post_flashcard(request):
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
             # TODO: print warning to user
             # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-            return _render_question(request=request, query_name=query_name, tags_selected=tag_ids_selected)
+            return _render_question(request=request, query_name=query_name, tag_ids_selected=tag_ids_selected)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -215,7 +221,7 @@ def _post_flashcard(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         debug_print and print('ERROR: _post_flashcard: form is NOT valid')
-        return _render_question(request=request, query_name=query_name, tags_selected=tag_objs_selected)
+        return _render_question(request=request, query_name=query_name, tag_ids_selected=tag_objs_selected)
 
 @login_required(login_url='/login')
 def view_select_tags(request):
@@ -244,8 +250,14 @@ def view_question(request):
             tag_ids_selected=tag_ids_selected_str,
             query_name=query_name))
         select_tags_url += f'?{query_string}'
-        return _render_question(request=request, tags_selected=tag_objs_selected, query_name=query_name, select_tags_url=select_tags_url)
+        return _render_question(request=request, tag_objs_selected=tag_objs_selected, query_name=query_name, select_tags_url=select_tags_url)
     elif request.method == 'POST':
         return _post_flashcard(request=request)
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
+
+class TagIds:
+    def __init__(self, tag_objs=None, as_str=None):
+        self.tag_objs = tag_objs
+        self.tag_names = [tag.name for tag in tag_objs]
+        self.tag_names_str = ', '.join(self.tag_names)
