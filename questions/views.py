@@ -17,7 +17,7 @@ debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
 @login_required(login_url='/login')
-def _render_question(request, query_name, tag_objs_selected, select_tags_url):
+def _render_question(request, query_name, select_tags_url, tag_formats):
     MINUTES = 'minutes'
     HOURS = 'hours'
     DAYS = 'days'
@@ -30,14 +30,11 @@ def _render_question(request, query_name, tag_objs_selected, select_tags_url):
         [ dict(number=1, unit=WEEKS), dict(number=2, unit=WEEKS), dict(number=3, unit=WEEKS), dict(number=4, unit=WEEKS)],
         [ dict(number=1, unit=MONTHS), dict(number=2, unit=MONTHS), dict(number=3, unit=MONTHS), dict(number=4, unit=MONTHS)],
     ]
-        # tag_objs_selected -- a list of Tag objects -- the tags selected by the user
     
-    tag_ids_selected_list = [str(tag.id) for tag in tag_objs_selected]
-    tag_ids_selected_str = ",".join(tag_ids_selected_list)
-    next_question = get_next_question(user=request.user, query_name=query_name, tag_ids_selected=tag_ids_selected_list)
+    next_question = get_next_question(user=request.user, query_name=query_name, tag_ids_selected=tag_formats.as_id_int_list)
     id_question = next_question.question.id if next_question.question else 0
 
-    form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_ids_selected_str, hidden_question_id=id_question))
+    form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_formats.as_id_comma_str(), hidden_question_id=id_question))
 
     if next_question.question:
         question_tag_names = \
@@ -81,7 +78,8 @@ def _render_question(request, query_name, tag_objs_selected, select_tags_url):
         )
     )
 
-def get_tag_fields(user, selected_tag_ids):
+def get_tag_fields(user, selected_tag_formats):
+    # selected_tag_formats -- selected tags, as TagFormats instance
     # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag,
     # with tag_form_name and tag_form_label to be used in the HTML form.
     # e.g.,
@@ -95,7 +93,7 @@ def get_tag_fields(user, selected_tag_ids):
     for tag in models.Tag.objects.filter(user=user):
         tag_form_name = f'id_form_name_{tag.id}'
         # "checked" is the <select type="checkbox"> boolean attribute for whether the checkbox is checked.
-        if tag.id in selected_tag_ids:
+        if tag.id in selected_tag_formats.as_int_list():
             checked = 'checked'
         else:
             checked = ''
@@ -109,35 +107,25 @@ def get_tag_fields(user, selected_tag_ids):
     tag_fields_list.sort(key=lambda x: x['tag_form_label'])
     return tag_fields_list
 
-def view_get_select_tags(request):#
-    tag_ids_selected_str = request.GET.get('tag_ids_selected', None)
-    if tag_ids_selected_str:
-        tag_ids_selected_list = tag_ids_selected_str.split(',')
-    else:
-        tag_ids_selected_list = []
-    tag_ids_selected_list = [int(tag_id) for tag_id in tag_ids_selected_list]
+def view_get_select_tags(request, tag_formats):#
     query_name = request.GET.get('query_name', None)
-
     form_select_tags = FormSelectTags(initial=dict(query_name=query_name))
-    tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=tag_ids_selected_list)
     return render(
         request=request,
         template_name='select_tags.html',
         context=dict(
             form_select_tags=form_select_tags,
-            tag_fields_list=tag_fields_list
+            tag_fields_list=tag_formats.as_form_fields_list()
         )
     )
 
-def _post_select_tags(request):
+def _post_select_tags(request, tag_formats):
     form_select_tags = FormSelectTags(data=request.POST)
-    tag_ids_selected = get_selected_tag_ids(request=request)
-    tag_ids_selected_str = ','.join(str(tag) for tag in tag_ids_selected)
     if form_select_tags.is_valid():
         # redirect to /question/?tag_ids=...&query_name=...
         query_string = urlencode(dict(
-            tag_ids_selected=tag_ids_selected_str,
             query_name=form_select_tags.cleaned_data['query_name'],
+            tag_ids_selected=tag_formats.as_id_comma_str()
         ))
         redirect_url = reverse(viewname='question')
         redirect_url += f'?{query_string}'
@@ -147,7 +135,7 @@ def _post_select_tags(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-        return _render_question(request=request, query_name=None, tag_ids_selected=tag_ids_selected)
+        return _render_question(request=request, query_name=None, tag_formats=tag_formats)
 
 def get_selected_tag_ids(request):
     # return a list of tag id's that were selected in the form, e.g., given and argument of:
@@ -225,10 +213,12 @@ def _post_flashcard(request):
 
 @login_required(login_url='/login')
 def view_select_tags(request):
+    tag_formats = TagFormats(id_comma_str=request.GET.get('tag_ids_selected', ''))
+ 
     if request.method == 'GET':
-        return view_get_select_tags(request=request)
+        return view_get_select_tags(request=request, tag_formats=tag_formats)
     elif request.method == 'POST':
-        return _post_select_tags(request=request)
+        return _post_select_tags(request=request, tag_formats=tag_formats)
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 
@@ -256,8 +246,53 @@ def view_question(request):
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 
-class TagIds:
-    def __init__(self, tag_objs=None, as_str=None):
-        self.tag_objs = tag_objs
-        self.tag_names = [tag.name for tag in tag_objs]
-        self.tag_names_str = ', '.join(self.tag_names)
+class TagFormats:
+    def __init__(self, id_comma_str=None):
+        
+        if id_comma_str:
+            self.id_comma_str = id_comma_str
+            if id_comma_str != '':
+                as_str_list = id_comma_str.split(',')
+                self.as_id_int_list = [int(tag_id) for tag_id in tag_ids_selected_list]
+            else:
+                self.as_id_int_list = tag_ids_selected_str.split(',')
+        else:
+            self.id_comma_str = ''
+            self.as_id_int_list = []
+
+    
+    def as_id_comma_str(self):
+        # e.g., "1,2"
+        return self.id_comma_str
+    
+    def as_id_int_list(self):
+        # e.g., [1, 2]
+        return self.as_id_int_list
+    
+    def as_form_fields_list(self, user)
+    # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag,
+    # with tag_form_name and tag_form_label to be used in the HTML form.
+    # e.g.,
+    #  [
+    #   { tag_form_name: 'id_form_name_3',  # the form name for the checkbox for this tag, where "3" is tag.id
+    #     tag_form_label: 'my tag',  # the label for the checkbox for this tag, corresponding to tag.name
+    #     tag_id: 3
+    #   }
+    #  ]
+        tag_fields_list = []
+        for tag in models.Tag.objects.filter(user=user):
+            tag_form_name = f'id_form_name_{tag.id}'
+            # "checked" is the <select type="checkbox"> boolean attribute for whether the checkbox is checked.
+            if tag.id in self.as_int_list():
+                checked = 'checked'
+            else:
+                checked = ''
+            tag_fields_list.append(dict(
+                    tag_form_name=tag_form_name,
+                    tag_form_label=tag.name,
+                    tag_id=tag.id,
+                    checked=checked
+                    ))
+        # sort by tag_form_label
+        tag_fields_list.sort(key=lambda x: x['tag_form_label'])
+        return tag_fields_list
