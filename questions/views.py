@@ -107,7 +107,10 @@ def get_tag_fields(user, selected_tag_formats):
     tag_fields_list.sort(key=lambda x: x['tag_form_label'])
     return tag_fields_list
 
-def view_get_select_tags(request, tag_list):#
+def view_get_select_tags(request):
+    query_name = request.GET.get('query_name', None)
+    form_select_tags = FormSelectTags(initial=dict(query_name=query_name))
+    tag_list = TagList(id_comma_str=request.GET.get('tag_ids_selected', ''))
     query_name = request.GET.get('query_name', None)
     form_select_tags = FormSelectTags(initial=dict(query_name=query_name))
     return render(
@@ -115,12 +118,13 @@ def view_get_select_tags(request, tag_list):#
         template_name='select_tags.html',
         context=dict(
             form_select_tags=form_select_tags,
-            tag_fields_list=tag_list.as_form_fields_list()
+            tag_fields_list=tag_list.as_form_fields_list(user=request.user),
         )
     )
 
-def _post_select_tags(request, tag_list):
+def _post_select_tags(request):
     form_select_tags = FormSelectTags(data=request.POST)
+    tags_list = TagList(id_comma_str=request.POST.get('tag_ids_selected', ''))
     if form_select_tags.is_valid():
         # redirect to /question/?tag_ids=...&query_name=...
         query_string = urlencode(dict(
@@ -213,12 +217,11 @@ def _post_flashcard(request):
 
 @login_required(login_url='/login')
 def view_select_tags(request):
-    tag_list = TagList(id_comma_str=request.GET.get('tag_ids_selected', ''))
  
     if request.method == 'GET':
-        return view_get_select_tags(request=request, tag_list=tag_list)
+        return view_get_select_tags(request=request)
     elif request.method == 'POST':
-        return _post_select_tags(request=request, tag_list=tag_list)
+        return _post_select_tags(request=request)
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 
@@ -269,7 +272,7 @@ class TagList:
         # e.g., [1, 2]
         return self.as_id_int_list
     
-    def as_form_fields_list(self, user)
+    def as_form_fields_list(self, user)  # previously called get_tag_fields()
     # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag,
     # with tag_form_name and tag_form_label to be used in the HTML form.
     # e.g.,
