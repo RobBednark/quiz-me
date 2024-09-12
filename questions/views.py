@@ -1,5 +1,6 @@
 import humanize
 import os
+import re
 import traceback
 
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,8 @@ from questions import models
 
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
+
+FIELD_NAME__TAG_ID_PREFIX = 'field_name__tag_id=' # e.g. field_name__tag_id=5
 
 @login_required(login_url='/login')
 def _render_question(request, query_name, select_tags_url, tag_list):
@@ -250,29 +253,38 @@ def view_question(request):
         raise Exception("Unknown request.method=[%s]" % request.method)
 
 class TagList:
-    def __init__(self, id_comma_str=None):
-        
-        if id_comma_str:
-            self.id_comma_str = id_comma_str
-            if id_comma_str != '':
-                as_str_list = id_comma_str.split(',')
-                self.as_id_int_list = [int(tag_id) for tag_id in tag_ids_selected_list]
-            else:
-                self.as_id_int_list = tag_ids_selected_str.split(',')
-        else:
-            self.id_comma_str = ''
-            self.as_id_int_list = []
+    def __init__(self, id_comma_str=None, form_field_names=None):
+        # Must be called with either id_comma_str or form_field_names, but not both, else an exception is raised.
+        # e.g., id_comma_str: a string of comma-separated int id's, e.g.,
+        #   id_comma_str='1,2,3'
+        # e.g., form_field_names: a list of the form-field names, where each name , e.g.,
+        #   form_field_names=['id_form_name_1', 'id_form_name_2']
+        if id_comma_str and form_field_names:
+            raise Exception("Must be called with either id_comma_str or form_field_names argument, but not both")
+        if (id_comma_str is None) and (form_field_names is None):
+            raise Exception("One of the following two arguments must be specified: id_comma_str, form_field_names")
 
+        self.id_int_list = []
+
+        if id_comma_str:
+            as_str_list = id_comma_str.split(',')
+            self.id_int_list = [int(tag_id) for tag_id in as_str_list]
+        elif form_field_names:
+            for field_name in form_field_names:
+                match = re.search(pattern=f"{FIELD_NAME__TAG_ID_PREFIX}(\d+)$", string=field_name)
+                if match:
+                    tag_id = int(match.group(1))
+                    self.id_int_list.append(tag_id)
     
     def as_id_comma_str(self):
         # e.g., "1,2"
-        return self.id_comma_str
+        return ','.join([ str(id) for id in self.id_int_list])
     
     def as_id_int_list(self):
         # e.g., [1, 2]
-        return self.as_id_int_list
+        return self.id_int_list
     
-    def as_form_fields_list(self, user)  # previously called get_tag_fields()
+    def as_form_fields_list(self, user):  # previously called get_tag_fields()
     # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag,
     # with tag_form_name and tag_form_label to be used in the HTML form.
     # e.g.,
@@ -284,9 +296,9 @@ class TagList:
     #  ]
         tag_fields_list = []
         for tag in models.Tag.objects.filter(user=user):
-            tag_form_name = f'id_form_name_{tag.id}'
+            tag_form_name = f'{FIELD_NAME__TAG_ID_PREFIX}{tag.id}'
             # "checked" is the <select type="checkbox"> boolean attribute for whether the checkbox is checked.
-            if tag.id in self.as_int_list():
+            if tag.id in self.id_int_list:
                 checked = 'checked'
             else:
                 checked = ''
