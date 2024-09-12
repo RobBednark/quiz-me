@@ -27,6 +27,7 @@ class TestTagList(TestCase):
 
     def test_init_with_form_field_names(self):
         tag_list = TagList(form_field_names=[f'{FIELD_NAME__TAG_ID_PREFIX}1', f'{FIELD_NAME__TAG_ID_PREFIX}2'])
+        self.assertEqual(tag_list.as_id_comma_str(), '1,2')
         self.assertEqual(tag_list.as_id_int_list(), [1, 2])
 
     def test_init_with_both_arguments_raises_exception(self):
@@ -43,7 +44,7 @@ class TestTagList(TestCase):
 
     def test_as_form_fields_list(self):
         tag_list = TagList(id_comma_str=f'{self.tag1.id},{self.tag3.id}')
-        result = tag_list.as_form_fields_list(self.user)
+        actual = tag_list.as_form_fields_list(self.user)
         expected = [
             {
                 'tag_form_name': f'{FIELD_NAME__TAG_ID_PREFIX}{self.tag1.id}',
@@ -64,17 +65,19 @@ class TestTagList(TestCase):
                 'checked': 'checked'
             }
         ]
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, actual)
 
     def test_as_form_fields_list_empty(self):
         tag_list = TagList(id_comma_str='')
-        result = tag_list.as_form_fields_list(self.user)
-        self.assertEqual(len(result), 3)
-        for item in result:
+        actual = tag_list.as_form_fields_list(self.user)
+        self.assertEqual(len(actual), 3)
+        for item in actual:
             self.assertEqual(item['checked'], '')
 
     def test_as_form_fields_list_sorting(self):
-        Tag.objects.create(name='A Tag', user=self.user)
+        Tag.objects.create(name='Tag 55', user=self.user)
+        Tag.objects.create(name='Tag 1', user=self.user)
         tag_list = TagList(id_comma_str='')
-        result = tag_list.as_form_fields_list(self.user)
-        self.assertEqual(result[0]['tag_form_label'], 'A Tag')
+        actual = tag_list.as_form_fields_list(self.user)
+        self.assertEqual(actual[0]['tag_form_label'], 'Tag 1')
+        self.assertEqual(actual[1]['tag_form_label'], 'Tag 1')
