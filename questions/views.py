@@ -81,35 +81,6 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         )
     )
 
-def get_tag_fields(user, selected_tag_formats):
-    # selected_tag_formats -- selected tags, as TagList instance
-    # Get all tags for {user}.  Return a list of dicts, sorted by tag name, where each dict has the fields for one tag,
-    # with tag_form_name and tag_form_label to be used in the HTML form.
-    # e.g.,
-    #  [
-    #   { tag_form_name: 'id_form_name_3',  # the form name for the checkbox for this tag, where "3" is tag.id
-    #     tag_form_label: 'my tag',  # the label for the checkbox for this tag, corresponding to tag.name
-    #     tag_id: 3
-    #   }
-    #  ]
-    tag_fields_list = []
-    for tag in models.Tag.objects.filter(user=user):
-        tag_form_name = f'id_form_name_{tag.id}'
-        # "checked" is the <select type="checkbox"> boolean attribute for whether the checkbox is checked.
-        if tag.id in selected_tag_formats.as_int_list():
-            checked = 'checked'
-        else:
-            checked = ''
-        tag_fields_list.append(dict(
-                tag_form_name=tag_form_name,
-                tag_form_label=tag.name,
-                tag_id=tag.id,
-                checked=checked
-                ))
-    # sort by tag_form_label
-    tag_fields_list.sort(key=lambda x: x['tag_form_label'])
-    return tag_fields_list
-
 def view_get_select_tags(request):
     query_name = request.GET.get('query_name', None)
     form_select_tags = FormSelectTags(initial=dict(query_name=query_name))
@@ -127,8 +98,8 @@ def view_get_select_tags(request):
 
 def _post_select_tags(request):
     form_select_tags = FormSelectTags(data=request.POST)
-    tags_list = TagList(id_comma_str=request.POST.get('tag_ids_selected', ''))
     if form_select_tags.is_valid():
+        tag_list = TagList(form_field_names=request.POST)
         # redirect to /question/?tag_ids=...&query_name=...
         query_string = urlencode(dict(
             query_name=form_select_tags.cleaned_data['query_name'],
@@ -142,33 +113,16 @@ def _post_select_tags(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-        return _render_question(request=request, query_name=None, tag_list=tag_list)
-
-def get_selected_tag_ids(request):
-    # return a list of tag id's that were selected in the form, e.g., given and argument of:
-    #    request.POST == { 'id_form_name_2': True }
-    # and a precondition of this tag in the database:
-    #   { id: 2, name: 'my tag', user: <User: user> }
-    # return:
-    #   [2]
-    tag_fields_list = get_tag_fields(user=request.user, selected_tag_ids=[])
-    tag_ids_selected = []
-    for tag_fields in tag_fields_list:
-        if request.POST.get(tag_fields['tag_form_name'], None):
-            tag_ids_selected.append(tag_fields['tag_id'])
-    return tag_ids_selected
+        raise NotImplementedError
 
 def _post_flashcard(request):
     # Save the attempt and the schedule.
     form_flashcard = FormFlashcard(data=request.POST)
-    tag_ids_selected = get_selected_tag_ids(request=request)
     if form_flashcard.is_valid():
         id_question = form_flashcard.cleaned_data["hidden_question_id"]
         query_name = form_flashcard.cleaned_data["hidden_query_name"]
-        tag_ids_selected_str = form_flashcard.cleaned_data["hidden_tag_ids_selected"]
-        tag_ids_selected = tag_ids_selected_str.split(',')
-        tag_ids_selected = [int(tag) for tag in tag_ids_selected]
-        tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
+        tag_ids_str = form_flashcard.cleaned_data["hidden_tag_ids_selected"]
+        tag_list = TagList(id_comma_str=tag_ids_str)
         try:
             question = models.Question.objects.get(id=id_question)
         except models.Question.DoesNotExist:
@@ -177,7 +131,7 @@ def _post_flashcard(request):
             debug_print and print("WARNING: No question exists for question.id=[{id_question}]")
             # TODO: print warning to user
             # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-            return _render_question(request=request, query_name=query_name, tag_ids_selected=tag_ids_selected)
+            return _render_question(request=request, query_name=query_name, tag_list=tag_list)
         data = form_flashcard.cleaned_data
         attempt = models.Attempt(
             attempt=data['attempt'],
@@ -206,7 +160,7 @@ def _post_flashcard(request):
         # redirect to /question/?tag_ids=...&query_name=...
         query_string = ''
         query_string = urlencode(dict(
-            tag_ids_selected=tag_ids_selected_str,
+            tag_ids_selected=tag_list.as_id_comma_str(),
             query_name=query_name))
         redirect_url = reverse(viewname='question')
         redirect_url += f'?{query_string}'
@@ -216,7 +170,9 @@ def _post_flashcard(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         debug_print and print('ERROR: _post_flashcard: form is NOT valid')
-        return _render_question(request=request, query_name=query_name, tag_ids_selected=tag_objs_selected)
+        # TODO: what to do?  
+        raise NotImplementedError
+        # return _render_question(request=request, query_name=query_name, tag_ids_selected=tag_objs_selected)
 
 @login_required(login_url='/login')
 def view_select_tags(request):
