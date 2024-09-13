@@ -1,16 +1,7 @@
-from collections import namedtuple
-from datetime import datetime
 import os
-from pprint import pformat, pprint
-import pytz
-
-from dateutil.relativedelta import relativedelta
-from django.db import connection
-from django.db.models import Count, Exists, F, OuterRef, Q, Subquery
-from django.forms.models import model_to_dict
 
 import questions.forms as forms
-from questions.models import Question, QuestionTag, Schedule, Tag
+from questions.models import Question, Tag
 
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
