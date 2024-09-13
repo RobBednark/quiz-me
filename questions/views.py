@@ -34,7 +34,7 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         [ dict(number=1, unit=MONTHS), dict(number=2, unit=MONTHS), dict(number=3, unit=MONTHS), dict(number=4, unit=MONTHS)],
     ]
     
-    next_question = get_next_question(user=request.user, query_name=query_name, tag_ids_selected=tag_list.as_id_int_list)
+    next_question = get_next_question(user=request.user, query_name=query_name, tag_ids_selected=tag_list.as_id_int_list())
     id_question = next_question.question.id if next_question.question else 0
 
     form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_list.as_id_comma_str(), hidden_question_id=id_question))
@@ -81,7 +81,7 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         )
     )
 
-def view_get_select_tags(request):
+def view_select_tags__get(request):
     query_name = request.GET.get('query_name', None)
     form_select_tags = FormSelectTags(initial=dict(query_name=query_name))
     tag_list = TagList(id_comma_str=request.GET.get('tag_ids_selected', ''))
@@ -96,7 +96,7 @@ def view_get_select_tags(request):
         )
     )
 
-def _post_select_tags(request):
+def view_select_tags__post(request):
     form_select_tags = FormSelectTags(data=request.POST)
     if form_select_tags.is_valid():
         tag_list = TagList(form_field_names=request.POST)
@@ -115,7 +115,7 @@ def _post_select_tags(request):
         # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
         raise NotImplementedError
 
-def _post_flashcard(request):
+def view_flashcard_post(request):
     # Save the attempt and the schedule.
     form_flashcard = FormFlashcard(data=request.POST)
     if form_flashcard.is_valid():
@@ -169,7 +169,7 @@ def _post_flashcard(request):
         # Assert: form is NOT valid
         # Need to return the errors to the template,
         # and have the template show the errors.
-        debug_print and print('ERROR: _post_flashcard: form is NOT valid')
+        debug_print and print('ERROR: view_flashcard_post: form is NOT valid')
         # TODO: what to do?  
         raise NotImplementedError
         # return _render_question(request=request, query_name=query_name, tag_ids_selected=tag_objs_selected)
@@ -178,33 +178,26 @@ def _post_flashcard(request):
 def view_select_tags(request):
  
     if request.method == 'GET':
-        return view_get_select_tags(request=request)
+        return view_select_tags__get(request=request)
     elif request.method == 'POST':
-        return _post_select_tags(request=request)
+        return view_select_tags__post(request=request)
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 
 @login_required(login_url='/login')
 def view_question(request):
     if request.method == 'GET':
-        tag_ids_selected_str = request.GET.get('tag_ids_selected', None)
-        if tag_ids_selected_str:
-            tag_ids_selected = tag_ids_selected_str.split(',')
-        else:
-            tag_ids_selected = []
-        tag_ids_selected = [int(tag_id) for tag_id in tag_ids_selected]
-        # e.g., tag_ids_selected=[1, 2]
-        tag_objs_selected = models.Tag.objects.filter(id__in=tag_ids_selected, user=request.user)
+        tag_list = TagList(id_comma_str=request.GET.get('tag_ids_selected', ''))
         query_name = request.GET.get('query_name', None)
         
         select_tags_url = reverse(viewname='select_tags')
         query_string = urlencode(dict(
-            tag_ids_selected=tag_ids_selected_str,
+            tag_ids_selected=tag_list.as_id_comma_str(),
             query_name=query_name))
         select_tags_url += f'?{query_string}'
-        return _render_question(request=request, tag_objs_selected=tag_objs_selected, query_name=query_name, select_tags_url=select_tags_url)
+        return _render_question(request=request, tag_list=tag_list, query_name=query_name, select_tags_url=select_tags_url)
     elif request.method == 'POST':
-        return _post_flashcard(request=request)
+        return view_flashcard_post(request=request)
     else:
         raise Exception("Unknown request.method=[%s]" % request.method)
 

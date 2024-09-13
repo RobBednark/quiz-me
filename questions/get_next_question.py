@@ -102,7 +102,7 @@ def _debug_print_n_questions(questions, msg, num_questions):
         else:
             print('answer: None')
 
-def get_next_question_unseen(user, tag_ids_selected):
+def _get_next_question_unseen(user, tag_ids_selected):
     # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
     # tag_ids_selected -- list of tag IDs
     
@@ -122,26 +122,26 @@ def get_next_question_unseen(user, tag_ids_selected):
 
 def get_next_question(user, query_name, tag_ids_selected):
     # TODO: combine the following exceptions into a single exception
-    tags_not_owned = tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
+    tags_not_owned = _tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
     if tags_not_owned:
         raise TagNotOwnedByUserError(tags_not_owned)
-    tag_ids_dont_exist = tag_ids_that_dont_exist(tag_ids=tag_ids_selected)
+    tag_ids_dont_exist = _tag_ids_that_dont_exist(tag_ids=tag_ids_selected)
     if tag_ids_dont_exist:
         raise TagDoesNotExistError(tag_ids_dont_exist)
 
     if query_name == forms.QUERY_UNSEEN:
-        question = get_next_question_unseen(user, tag_ids_selected)
+        question = _get_next_question_unseen(user, tag_ids_selected)
     return question
 
 
-def tags_not_owned_by_user(user, tag_ids):
+def _tags_not_owned_by_user(user, tag_ids):
     """
     Given the list of tag_ids,
     return a list of tag_ids that are not owned by the user.
     """
     return Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
 
-def tag_ids_that_dont_exist(tag_ids):
+def _tag_ids_that_dont_exist(tag_ids):
     """
     Given the list of tag_ids,
     return a list of all tag_ids in that list that do not exist.
