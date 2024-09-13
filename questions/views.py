@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.http import urlencode
 
 from .forms import FormFlashcard, FormSelectTags
-from .get_next_question import get_next_question
+from .get_next_question import NextQuestion
 from questions import models
 
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
@@ -34,7 +34,7 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         [ dict(number=1, unit=MONTHS), dict(number=2, unit=MONTHS), dict(number=3, unit=MONTHS), dict(number=4, unit=MONTHS)],
     ]
     
-    next_question = get_next_question(user=request.user, query_name=query_name, tag_ids_selected=tag_list.as_id_int_list())
+    next_question = NextQuestion(user=request.user, query_name=query_name, tag_ids_selected=tag_list.as_id_int_list())
     id_question = next_question.question.id if next_question.question else 0
 
     form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_list.as_id_comma_str(), hidden_question_id=id_question))
@@ -71,7 +71,7 @@ def _render_question(request, query_name, select_tags_url, tag_list):
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,
             option_limit_to_date_show_next_before_now=next_question.option_limit_to_date_show_next_before_now,
-            question=next_question.question,
+            question=next_question.get_question(),
             question_tag_names=question_tag_names,
             schedules_recent_count_30=next_question.schedules_recent_count_30,
             schedules_recent_count_60=next_question.schedules_recent_count_60,

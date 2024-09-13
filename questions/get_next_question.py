@@ -93,37 +93,45 @@ def _debug_print_n_questions(questions, msg, num_questions):
         else:
             print('answer: None')
 
-def _get_next_question_unseen(user, tag_ids_selected):
-    # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
-    # tag_ids_selected -- list of tag IDs
-    
-    # Find questions created by the user with selected tags
-    questions = Question.objects.filter(
-        user=user,
-        questiontag__tag__id__in=tag_ids_selected
-    )
+class NextQuestion:
+    def __init__(self, query_name, tag_ids_selected, user):
+        self._query_name = query_name
+        self._tag_ids_selected = tag_ids_selected
+        self._user = user
 
-    # Filter for unseen questions (no schedules)
-    unseen_questions = questions.filter(schedule__isnull=True)
+        # TODO: combine the following exceptions into a single exception
+        tags_not_owned = _tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
+        if tags_not_owned:
+            raise TagNotOwnedByUserError(tags_not_owned)
+        tag_ids_dont_exist = _tag_ids_that_dont_exist(tag_ids=tag_ids_selected)
+        if tag_ids_dont_exist:
+            raise TagDoesNotExistError(tag_ids_dont_exist)
+        
+        self.question = None
+        self._get_next_question(self)
 
-    # Get the oldest unseen question based on datetime_added
-    oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
+    def _get_next_question_unseen(self):
+        # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
+        # tag_ids_selected -- list of tag IDs
+        
+        # Find questions created by the user with selected tags
+        questions = Question.objects.filter(
+            user=self._user,
+            questiontag__tag__id__in=self._tag_ids_selected
+        )
 
-    return oldest_unseen_question
+        # Filter for unseen questions (no schedules)
+        unseen_questions = questions.filter(schedule__isnull=True)
 
-def get_next_question(user, query_name, tag_ids_selected):
-    # TODO: combine the following exceptions into a single exception
-    tags_not_owned = _tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
-    if tags_not_owned:
-        raise TagNotOwnedByUserError(tags_not_owned)
-    tag_ids_dont_exist = _tag_ids_that_dont_exist(tag_ids=tag_ids_selected)
-    if tag_ids_dont_exist:
-        raise TagDoesNotExistError(tag_ids_dont_exist)
+        # Get the oldest unseen question based on datetime_added
+        oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
+        self.question = oldest_unseen_question
 
-    if query_name == forms.QUERY_UNSEEN:
-        question = _get_next_question_unseen(user, tag_ids_selected)
-    return question
-
+    def _get_question(self):
+        if self._query_name == forms.QUERY_UNSEEN:
+            self._get_next_question_unseen()
+        else:
+            raise ValueError(f'Invalid query_name: {self._query_name}')
 
 def _tags_not_owned_by_user(user, tag_ids):
     """
