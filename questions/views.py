@@ -39,15 +39,6 @@ def _render_question(request, query_name, select_tags_url, tag_list):
 
     form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_list.as_id_comma_str(), hidden_question_id=id_question))
 
-    if next_question.question:
-        question_tag_names = \
-            sorted([
-                str(
-                    qtag.tag.name
-                ) for qtag in next_question.question.questiontag_set.filter(enabled=True)
-            ])
-    else:
-        question_tag_names = []
 
     try:
         last_schedule_added = (
@@ -71,8 +62,8 @@ def _render_question(request, query_name, select_tags_url, tag_list):
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,
             option_limit_to_date_show_next_before_now=next_question.option_limit_to_date_show_next_before_now,
-            question=next_question.get_question(),
-            question_tag_names=question_tag_names,
+            question=next_question.question,
+            question_tag_names=next_question.tag_names,
             schedules_recent_count_30=next_question.schedules_recent_count_30,
             schedules_recent_count_60=next_question.schedules_recent_count_60,
             selected_tag_names=next_question.selected_tag_names,

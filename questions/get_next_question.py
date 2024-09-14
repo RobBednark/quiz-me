@@ -108,6 +108,7 @@ class NextQuestion:
             raise TagDoesNotExistError(tag_ids_dont_exist)
         
         self.question = None
+        self._question_queryset = None
         self._get_next_question(self)
 
     def _get_next_question_unseen(self):
@@ -122,6 +123,7 @@ class NextQuestion:
 
         # Filter for unseen questions (no schedules)
         unseen_questions = questions.filter(schedule__isnull=True)
+        self._question_queryset = unseen_questions
 
         # Get the oldest unseen question based on datetime_added
         oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
@@ -132,6 +134,19 @@ class NextQuestion:
             self._get_next_question_unseen()
         else:
             raise ValueError(f'Invalid query_name: {self._query_name}')
+        self._get_tag_names()
+    
+    def _get_tag_names(self):
+        if self.question:
+            tag_names = \
+                sorted([
+                    str(
+                        qtag.tag.name
+                    ) for qtag in self.question.questiontag_set.filter(enabled=True)
+                ])
+        else:
+            tag_names = []
+        self.tag_names = tag_names
 
 def _tags_not_owned_by_user(user, tag_ids):
     """
