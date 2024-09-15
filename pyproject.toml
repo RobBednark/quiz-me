@@ -24,6 +24,7 @@ six = "*.*.*"
 sqlparse = "*.*.*"
 urllib3 = "*.*.*"
 pytest-django = "^4.9.0"
+coverage = "^7.6.1"
 
 
 [tool.poetry.group.dev.dependencies]
