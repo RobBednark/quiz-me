@@ -41,14 +41,14 @@ class NextQuestion:
         self.tag_names_selected = None
 
         self._question_queryset = None
-        self._get_next_question(self)
+        self._get_question()
         self._get_count_questions_before_now()
 
     def _get_count_questions_before_now(self):
         # Given self._queryset__questions_tagged,
         # count the number of questions that are scheduled before now.
         now = timezone.now()
-        count = self._queryset__questions_tagged.filter(schedule__next_time__lte=now).count()
+        count = self._queryset__questions_tagged.filter(schedule__date_show_next__lte=now).count()
         self.count_questions_before_now = count
 
         
@@ -76,7 +76,7 @@ class NextQuestion:
         if self._query_name == forms.QUERY_UNSEEN:
             self._get_next_question_unseen()
         else:
-            raise ValueError(f'Invalid query_name: {self._query_name}')
+            raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()
     
     def _get_tag_names(self):
@@ -100,7 +100,8 @@ def _tags_not_owned_by_user(user, tag_ids):
     Given the list of tag_ids,
     return a list of tag_ids that are not owned by the user.
     """
-    return Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
+    ids_not_owned_by_user = Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
+    return [str(tag_id) for tag_id in ids_not_owned_by_user]
 
 def _tag_ids_that_dont_exist(tag_ids):
     """
@@ -108,5 +109,5 @@ def _tag_ids_that_dont_exist(tag_ids):
     return a list of all tag_ids in that list that do not exist.
     """
     existing_tag_ids = set(Tag.objects.filter(id__in=tag_ids).values_list('id', flat=True))
-    non_existent_tag_ids = [tag_id for tag_id in tag_ids if tag_id not in existing_tag_ids]
+    non_existent_tag_ids = [str(tag_id) for tag_id in tag_ids if tag_id not in existing_tag_ids]
     return non_existent_tag_ids

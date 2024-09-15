@@ -1,365 +1,67 @@
-from datetime import datetime, timedelta
-
-from django.test import TestCase
+import pytest
 from django.utils import timezone
-
+from questions.forms import QUERY_UNSEEN
+from questions.models import Question, Tag, QuestionTag, Schedule
+from questions.get_next_question import NextQuestion, TagNotOwnedByUserError, TagDoesNotExistError
 from emailusername.models import User
 
-from questions import models, util
-from questions.get_next_question import get_next_question_unseen, tags_not_owned_by_user, tag_ids_that_dont_exist
-from questions.models import Question, QuestionTag, Schedule, Tag
+pytestmark = pytest.mark.django_db
 
-### NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
-### NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
+@pytest.fixture
+def user():
+    return User.objects.create(email="testuser@example.com")
 
-### class TestGetNextQuestion(TestCase):
-### 
-###     def setUp(self):
-###         # Create a user
-###         self.PASSWORD = 'my_password'
-###         self.USERNAME = 'user@mydomain.com'
-###         self.query_prefs_obj = models.QueryPreferences.objects.create()
-###         self.user = User(email=self.USERNAME)
-###         self.user.set_password(self.PASSWORD)
-###         self.user.save()
-### 
-###     def test_user_with_no_questions(self):
-###         next_question = get_next_question(user=self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
-### 
-###         self.assertIsInstance(next_question, NextQuestion)
-###         self.assertIsNone(next_question.question)
-### 
-###     def test_user_with_one_unassociated_question(self):
-### 
-###         models.Question.objects.create(
-###             question='question #1',
-###         )
-### 
-###         # One untagged question that doesn't get returned because it has
-###         # no tags.
-### 
-###         next_question = get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=[])
-### 
-###         self.assertIsInstance(next_question, NextQuestion)
-###         self.assertIsNone(next_question.question)
-### 
-###         questions = models.Question.objects.filter(user=self.user)
-###         self.assertEqual(questions.count(), 0)
-### 
-###     def test_user_with_one_question(self):
-###         question = models.Question.objects.create(
-###             question='question #1',
-###             user=self.user
-###         )
-###         tag = util.assign_question_to_user(user=self.user, question=question, tag_name='tag #1')
-###         util.schedule_question_for_user(self.user, question)
-### 
-###         next_question = get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
-### 
-###         self.assertIsInstance(next_question, NextQuestion)
-###         self.assertIsNotNone(next_question.question)
-### 
-###         questions = models.Question.objects.filter(user=self.user)
-###         self.assertEqual(questions.count(), 1)
-### 
-###     def test_user_with_ten_questions(self):
-###         tag = models.Tag.objects.create(name='tag #1')
-###         for i in range(10):
-###             question = models.Question.objects.create(
-###                 question=f'question {i}',
-###                 user=self.user,
-###             )
-###             models.QuestionTag.objects.create(tag=tag, question=question, enabled=True)
-### 
-###         next_question = get_next_question(self.user, query_prefs_obj=self.query_prefs_obj, tags_selected=models.Tag.objects.filter(pk=tag.pk))
-### 
-###         self.assertIsInstance(next_question, NextQuestion)
-###         self.assertIsNotNone(next_question.question)
-### 
-###         questions = models.Question.objects.filter(user=self.user)
-###         self.assertEqual(questions.count(), 10)
-###         
-### class CreateData():
-###     NUM_QUESTIONS_TAG_GROUPS = 5
-###     NUM_QUESTIONS_PER_TAG = 10
-###     NUM_TAGS = 10
-###     NUM_USERS = 10
-###     def __init__(self) -> None:
-###         pass
-###     def create_data(self):
-###         for user_num in range(1, self.NUM_USERS+1):
-###             user_email = f"user_{user_num}@my_domain.com"
-###             user = User.objects.create(email=user_email)
-###             self._create_data_for_user(user=user)
-###     def _create_data_for_user(self, user):
-###         for tag_num in range(0, self.NUM_TAGS + 2):
-###             if tag_num == 0:
-###                 # create questions without tags
-###                 tag = None
-###             else:
-###                 tag_name = f"tag {tag_num}"
-###                 tag = models.Tag.objects.create(name=tag_name, user=user)
-###             self._create_data_for_tag(tag=tag, user=user)
-###     
-###     def _create_data_for_tag(self, tag, user):
-###         for question_num in range(1, self.NUM_QUESTIONS_PER_TAG + 1):
-###             question_name = f"question {question_num}"
-###             question = models.Question.objects.create(question=question_name, user=user)
-###             self._create_data_for_question(self, question, tag, user)
-###     
-###     def _create_data_for_question(self, question, user):
-###         # Create some questions with no tags           
-###         pass
-### 
-###                 
-###                 
-### class TestsCreateMany(TestCase):
-###     @classmethod
-###     def setUp(cls):
-###         NUM_QUESTIONS_TAG_GROUPS = 5
-###         NUM_QUESTIONS = 100
-###         # NUM_TAGS = 100
-###         NUM_USERS = 100
-### 
-###         question_tags = {}  # key: "question 1 tag 1" value: QuestionTag object
-###         cls.questions = {}  # key: "question 1" value: Question object
-###         schedules = {}
-###         tag2questions = {}  # key: "tag 1"  value: list of Question objects
-###         question2tags = {}  # key: "question 1"  value: list of Tag objects
-###         question_objs = []  # list of Question objects
-###         tags = {}  # key: "tag 1" value: Tag object
-###         user_objs = []  # list of User objects
-###         users = {}  # key: "user_1@my_domain.com" value: User object
-###         user1 = None  # will arbitrarily be the first user
-### 
-###         for idx in range(NUM_USERS):
-###             idx = idx + 1
-###             user_email = f"user_{idx}@my_domain.com"
-###             user_obj = User.objects.create(email=user_email)
-###             users[user_email] = user_obj
-###             user_objs.append(user_obj)
-###         user1 = user_objs[0]
-### 
-### #        for idx in range(NUM_QUESTIONS):
-### #            question_name = f"question {idx}"
-### #            # question = Question.objects.create(question=question_name, user=)
-### #            cls.questions[question_name] = question
-### #            question2tags[question_name] = []
-### #            
-### #        for idx in range(NUM_TAGS):
-### #            tag_name = f"tag {idx}"
-### #            tag = Tag.objects.create(name=tag_name)
-### #            tags[tag_name] = tag
-### #            tag2questions[tag_name] = []
-### 
-###         # for each group of n questions , choose n random tags for that group, e.g.,
-###         # group 1: 0 tags
-###         #   q1: 0 tags
-###         #   q2: 0 tags
-###         #   ...
-###         # group 2: 1 tag
-###         #   q21: 1 tag
-###         #   ...
-###         # group 3: 2 tags
-###         # ...
-###         num_per_group = NUM_QUESTIONS // NUM_QUESTIONS_TAG_GROUPS
-###         # group_num = 2,3,...,NUM_QUESTIONS_TAG_GROUPS
-###         # (skip group 1 because it will have 0 tags)
-###         # first_n_questions = list(cls.questions.values())[0:NUM_QUESTIONS_TAG_GROUPS-1)]
-### #        for question_obj in question_objects:
-### #            group_num = math.ceil(question_num / NUM_QUESTIONS_TAG_GROUPS)  # e.g., 6 / 5 = 2
-### #            num_tags = group_num - 1
-### #            # use a set to avoid picking same tag more than once
-### #            tag_num_set = set(list(range(1, NUM_TAGS_QUESTIONS + 1)))
-### #            for _ in range(num_tags):
-### #                tag_num = random.randint(1, len(tag_num_set) + 1)
-### #                tag_num_set.remove(tag_num)
-### #                tag_name = f"tag {tag_num}"
-### #                tag = tags[tag_name]
-### #                question_name = f"question {question_num}"
-### #                question = cls.questions[question_name]
-### #                question_tag = QuestionTag.objects.create(
-### #                    question=question, tag=tag, enabled=True
-### #                )
-### #                question_tags[question_name + tag_name] = question_tag
-### #                question2tags[question_name].append(tag)
-### #                tag2questions[tag_name].append(question)
-### 
-### # for each question
-### #   group = ...
-### #   num_tags = group - 1
-### #   for tag in num_tags:
-### 
-### #           schedule = Schedule.objects.create(
-### #               user=user,
-### #               question=question,
-### #               interval_num=1,
-### #               interval_unit='months',
-### #               date_show_next=datetime.now(tz=pytz.utc) + timedelta(days=i)
-### #           )
-###         # use faker to get a random time, e.g.,
-###         # fake.date_time_between(start_date='-30y', end_date='now')
-###         # datetime.datetime(2007, 2, 28, 11, 28, 16)
-###         
-###     @classmethod
-###     def tearDownClass(cls):
-###         super(TestCase, cls).tearDownClass()
-###         tear_down_all()
-###     
-###     def test_1(self):
-###         print(f"len(TestsCreateMany.questions) = {len(TestsCreateMany.questions)}")
-### def tear_down_all():
-###         models.Answer.objects.all().delete()
-###         models.Attempt.objects.all().delete()
-###         models.Question.objects.all().delete()
-###         models.QuestionTag.objects.all().delete()
-###         models.Schedule.objects.all().delete()
-###         models.Tag.objects.all().delete()
-###         models.User.objects.all().delete()
-        
-class CreateTestData:
-    # Create the following test data:
-    #
-    # | Que | U  | Tags   | Schedules | added |
-    # |-----|----|--------|-----------|-------|
-    # | q1  | u1 | t1     | None      | -2d   |
-    # | q2  | u1 | t1,t2  | -1d       | -3d   |
-    # | q3  | u1 | t2     | -1d       | -1d   |
-    # | q4  | u1 | t3     | -1d       | -1d   |
-    # | -   | u1 | t4     |           |       |
-    # | q5  | u2 | t5     | None      | -1d   |
-    # | q6  | u1 | t1     | None      | -4d   |
-    #
-    # Notes:
-    # Que = Question
-    # U = User who created the question (i.e., Question.user field)
-    # Tags = tags that are applied to the question via the QuestionTag model
-    # Schedules = schedules associated with the question via the Schedule.question foreign key; the column value refers to the Schedule.date_show_next field; e.g., -1d = 1 day before now
-    # added = when the question was added (relative to now); i.e., Question.datetime_added field; e.g., -2d = 2 days before now
+@pytest.fixture
+def tag(user):
+    return Tag.objects.create(name="tag 1", user=user)
 
-    @classmethod
-    def create(cls):
-        # Create users
-        cls.u1 = User.objects.create_user(email='user1@test.com', password='password1')
-        cls.u2 = User.objects.create_user(email='user2@test.com', password='password2')
+@pytest.fixture
+def question(user):
+    return Question.objects.create(question="Test question", user=user)
 
-        # Create tags
-        cls.t1 = Tag.objects.create(name='tag1', user=cls.u1)
-        cls.t2 = Tag.objects.create(name='tag2', user=cls.u1)
-        cls.t3 = Tag.objects.create(name='tag3', user=cls.u1)
-        cls.t4 = Tag.objects.create(name='tag4', user=cls.u1)
+@pytest.mark.django_db
+def test_next_question_initialization(user, tag):
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    assert next_question._query_name == QUERY_UNSEEN
+    assert next_question._tag_ids_selected == [tag.id]
+    assert next_question._user == user
 
-        cls.t5 = Tag.objects.create(name='tag5', user=cls.u2)
+def test_next_question_tag_not_owned_by_user(user):
+    other_user = User.objects.create(email="otheruser@example.com")
+    other_tag = Tag.objects.create(name="other_tag", user=other_user)
+    
+    with pytest.raises(TagNotOwnedByUserError):
+        NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[other_tag.id], user=user)
 
-        # Create questions
-        now = timezone.now()
-        cls.q1 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=2), question='q1')
-        cls.q2 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q2')
-        cls.q3 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q3')
-        cls.q4 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q4')
-        cls.q5 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=1), question='q5')
-        cls.q6 = Question.objects.create(user=cls.u1, datetime_added=now - timedelta(days=4), question='q6')
+def test_next_question_tag_does_not_exist(user):
+    non_existent_tag_id = 9999
+    
+    with pytest.raises(TagDoesNotExistError):
+        NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[non_existent_tag_id], user=user)
 
-        # Associate tags with questions
-        QuestionTag.objects.create(question=cls.q1, tag=cls.t1, user=cls.u1)
-        QuestionTag.objects.create(question=cls.q2, tag=cls.t1, user=cls.u1)
-        QuestionTag.objects.create(question=cls.q2, tag=cls.t2, user=cls.u1)
-        QuestionTag.objects.create(question=cls.q3, tag=cls.t3, user=cls.u1)
-        QuestionTag.objects.create(question=cls.q4, tag=cls.t3, user=cls.u1)
-        QuestionTag.objects.create(question=cls.q5, tag=cls.t5, user=cls.u2)
-        QuestionTag.objects.create(question=cls.q6, tag=cls.t1, user=cls.u1)
-        
-        # Create schedules
-        Schedule.objects.create(question=cls.q2, date_show_next=now - timedelta(days=1), user=cls.u1)
-        Schedule.objects.create(question=cls.q3, date_show_next=now - timedelta(days=1), user=cls.u1)
+def test_get_next_question_unseen(user, tag, question):
+    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    assert next_question.question == question
+    assert next_question.tag_names_selected == [tag.name]
+    assert next_question.tag_names_for_question == [tag.name]
 
+def test_get_next_question_unseen_with_schedule(user, tag, question):
+    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() + timezone.timedelta(days=1))
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    assert next_question.question is None
 
-class GetNextQuestionUnseenTests(TestCase):
-    def setUp(self):
-        # Create test data using the CreateTestData class
-        CreateTestData.create()
-        self.d = CreateTestData  # "d" stands for "data"; just an alias to the class
-        
-    def test_get_oldest_unseen_question(self):
-        d = self.d
-        next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t1.id])
-        self.assertEqual(d.q1, next_question)
-        
-    def test_no_unseen_questions(self):
-        d = CreateTestData
-        result = get_next_question_unseen(d.u1, [d.t2.id])
-        self.assertIsNone(result)
-        
-    def test_multiple_tags(self):
-        d = CreateTestData
-        result = get_next_question_unseen(d.u1, [d.t1.id, d.t2.id])
-        self.assertEqual(d.q1, result)
-        
-    def test_no_questions_matching_tag(self):
-        d = self.d
-        next_question = get_next_question_unseen(user=d.u1, tag_ids_selected=[d.t4.id])
-        self.assertEqual(None, next_question)
+def test_get_count_questions_before_now(user, tag, question):
+    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    next_question._get_count_questions_before_now()
+    assert next_question.count_questions_before_now == 1
 
-class TestTagsNotOwnedByUser(TestCase):
-    def setUp(self):
-        self.user1 = User.objects.create_user(email='user1@test.com', password='password1')
-        self.user2 = User.objects.create_user(email='user2@test.com', password='password2')
-        
-        self.user1_tag1 = Tag.objects.create(name='user1_tag1', user=self.user1)
-        self.user1_tag2 = Tag.objects.create(name='user1_tag2', user=self.user1)
-        self.user2_tag3 = Tag.objects.create(name='tag3', user=self.user2)
-        self.user2_tag4 = Tag.objects.create(name='tag4', user=self.user2)
-
-    def test_all_tags_owned_by_user(self):
-        result = tags_not_owned_by_user(self.user1, [self.user1_tag1.id, self.user1_tag2.id])
-        self.assertEqual(list(result), [])
-
-    def test_no_tags_owned_by_user(self):
-        result = tags_not_owned_by_user(self.user1, [self.user2_tag3.id, self.user2_tag4.id])
-        self.assertEqual(list(result), [self.user2_tag3.id, self.user2_tag4.id])
-
-    def test_mixed_ownership(self):
-        result = tags_not_owned_by_user(self.user1, [self.user1_tag1.id, self.user2_tag3.id])
-        self.assertEqual(list(result), [self.user2_tag3.id])
-
-    def test_empty_tag_list(self):
-        result = tags_not_owned_by_user(self.user1, [])
-        self.assertEqual(list(result), [])
-
-    def test_nonexistent_tag_ids(self):
-        result = tags_not_owned_by_user(self.user1, [9999, 10000])
-        self.assertEqual(list(result), [])
-
-    def test_duplicate_tag_ids(self):
-        result = tags_not_owned_by_user(self.user1, [self.user2_tag3.id, self.user2_tag3.id, self.user2_tag4.id])
-        self.assertEqual(list(result), [self.user2_tag3.id, self.user2_tag4.id])
-
-
-class TestTagsThatDontExist(TestCase):
-    def setUp(self):
-        self.tag1 = Tag.objects.create(name="Existing Tag 1")
-        self.tag2 = Tag.objects.create(name="Existing Tag 2")
-
-    def test_all_tags_exist(self):
-        actual = tag_ids_that_dont_exist([self.tag1.id, self.tag2.id])
-        self.assertEqual([], actual)
-
-    def test_some_tags_dont_exist(self):
-        non_existent_id = 99999
-        actual = tag_ids_that_dont_exist([self.tag1.id, non_existent_id])
-        self.assertEqual([non_existent_id], actual)
-
-    def test_no_tags_exist(self):
-        non_existent_ids = [88888, 99999]
-        actual = tag_ids_that_dont_exist(non_existent_ids)
-        self.assertEqual(non_existent_ids, actual)
-
-    def test_empty_input(self):
-        actual = tag_ids_that_dont_exist([])
-        self.assertEqual([], actual)
-
-    def test_mixed_existing_and_non_existing(self):
-        non_existent_ids = [88888, 99999]
-        input_ids = [self.tag1.id] + non_existent_ids + [self.tag2.id]
-        actual = tag_ids_that_dont_exist(input_ids)
-        self.assertEqual(non_existent_ids, actual)
+def test_invalid_query_name(user, tag):
+    with pytest.raises(ValueError):
+        NextQuestion(query_name="invalid", tag_ids_selected=[tag.id], user=user)
