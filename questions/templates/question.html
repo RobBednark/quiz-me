@@ -138,11 +138,7 @@
                 {% endfor %}
               </i>
             </ol>
-            {% if option_limit_to_date_show_next_before_now %}
-              [{{ count_questions_before_now }}] questions past due for all selected tags
-            {% else %}
-              # questions for all selected tags: {{ count_questions_before_now }} (scheduled before now)
-            {% endif %}
+            # questions due for all selected tags: {{ count_questions_before_now }} (scheduled before now)
             <br />
             # flashcards reviewed in last 30 minutes: {{ schedules_recent_count_30 }}
             <br />

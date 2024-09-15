@@ -1,5 +1,7 @@
 import os
 
+from django.utils import timezone
+
 import questions.forms as forms
 from questions.models import Question, Tag
 
@@ -33,21 +35,37 @@ class NextQuestion:
             raise TagDoesNotExistError(tag_ids_dont_exist)
         
         self.question = None
+        self.count_questions_before_now = None
+        self.count_questions_tagged = None
+        self.tag_names_for_question = None
+        self.tag_names_selected = None
+
         self._question_queryset = None
         self._get_next_question(self)
+        self._get_count_questions_before_now()
 
+    def _get_count_questions_before_now(self):
+        # Given self._queryset__questions_tagged,
+        # count the number of questions that are scheduled before now.
+        now = timezone.now()
+        count = self._queryset__questions_tagged.filter(schedule__next_time__lte=now).count()
+        self.count_questions_before_now = count
+
+        
     def _get_next_question_unseen(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
         # tag_ids_selected -- list of tag IDs
         
         # Find questions created by the user with selected tags
-        questions = Question.objects.filter(
+        questions_tagged = Question.objects.filter(
             user=self._user,
             questiontag__tag__id__in=self._tag_ids_selected
         )
+        self._queryset__questions_tagged = questions_tagged
+        self.count_questions_tagged = questions_tagged.count()
 
         # Filter for unseen questions (no schedules)
-        unseen_questions = questions.filter(schedule__isnull=True)
+        unseen_questions = questions_tagged.filter(schedule__isnull=True)
         self._question_queryset = unseen_questions
 
         # Get the oldest unseen question based on datetime_added
@@ -62,16 +80,20 @@ class NextQuestion:
         self._get_tag_names()
     
     def _get_tag_names(self):
+        self.tag_names_for_question = []
         if self.question:
-            tag_names = \
+            self.tag_names_for_question = \
                 sorted([
                     str(
                         qtag.tag.name
                     ) for qtag in self.question.questiontag_set.filter(enabled=True)
                 ])
-        else:
-            tag_names = []
-        self.tag_names = tag_names
+        
+        # Get the tag names for the selected tags
+        self.tag_names_selected = [
+            str(tag.name) for tag in Tag.objects.filter(id__in=self._tag_ids_selected)
+        ]
+
 
 def _tags_not_owned_by_user(user, tag_ids):
     """

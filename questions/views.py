@@ -34,8 +34,9 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         [ dict(number=1, unit=MONTHS), dict(number=2, unit=MONTHS), dict(number=3, unit=MONTHS), dict(number=4, unit=MONTHS)],
     ]
     
-    next_question = NextQuestion(user=request.user, query_name=query_name, tag_ids_selected=tag_list.as_id_int_list())
-    id_question = next_question.question.id if next_question.question else 0
+    # nq stands for "next question"
+    nq = NextQuestion(user=request.user, query_name=query_name, tag_ids_selected=tag_list.as_id_int_list())
+    id_question = nq.question.id if nq.question else 0
 
     form_flashcard = FormFlashcard(data=dict(hidden_query_name=query_name, hidden_tag_ids_selected=tag_list.as_id_comma_str(), hidden_question_id=id_question))
 
@@ -44,7 +45,7 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         last_schedule_added = (
             models.Schedule.objects.filter(
                 user=request.user,
-                question=next_question.question
+                question=nq.question
             ).latest('datetime_added')
         )
         last_schedule_added.human_datetime_added = humanize.precisedelta(
@@ -57,17 +58,16 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         template_name='question.html',
         context=dict(
             buttons=BUTTONS,
-            count_questions_before_now=next_question.count_questions_before_now,
-            count_questions_tagged=next_question.count_questions_tagged,
+            count_questions_before_now=nq.count_questions_before_now,
+            count_questions_tagged=nq.count_questions_tagged,
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,
-            option_limit_to_date_show_next_before_now=next_question.option_limit_to_date_show_next_before_now,
-            question=next_question.question,
-            question_tag_names=next_question.tag_names,
-            schedules_recent_count_30=next_question.schedules_recent_count_30,
-            schedules_recent_count_60=next_question.schedules_recent_count_60,
-            selected_tag_names=next_question.selected_tag_names,
-            num_schedules=next_question.num_schedules,
+            question=nq.question,
+            question_tag_names=nq.tag_names_for_question,
+            schedules_recent_count_30=nq.schedules_recent_count_30,
+            schedules_recent_count_60=nq.schedules_recent_count_60,
+            selected_tag_names=nq.tag_names_selected,
+            num_schedules=nq.num_schedules,
             select_tags_url=select_tags_url,
         )
     )
