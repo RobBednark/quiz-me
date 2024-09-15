@@ -5,6 +5,7 @@ from questions.models import Question, Tag, QuestionTag, Schedule
 from questions.get_next_question import NextQuestion, TagNotOwnedByUserError, TagDoesNotExistError
 from emailusername.models import User
 
+# Use the Django database for all the tests
 pytestmark = pytest.mark.django_db
 
 @pytest.fixture
@@ -30,15 +31,15 @@ def test_next_question_tag_not_owned_by_user(user):
     other_user = User.objects.create(email="otheruser@example.com")
     other_tag = Tag.objects.create(name="other_tag", user=other_user)
     
-    with pytest.raises(TagNotOwnedByUserError):
+    with pytest.raises(TagNotOwnedByUserError) as exc_info:
         NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[other_tag.id], user=user)
-
+    assert str(exc_info.value) == f"The following tags are not owned by the user: {other_tag.id}"
 def test_next_question_tag_does_not_exist(user):
     non_existent_tag_id = 9999
     
-    with pytest.raises(TagDoesNotExistError):
+    with pytest.raises(TagDoesNotExistError) as exc_info:
         NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[non_existent_tag_id], user=user)
-
+    assert str(exc_info.value) == f"The following tag IDs do not exist: [{non_existent_tag_id}]"
 def test_get_next_question_unseen(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
     
