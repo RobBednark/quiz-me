@@ -74,3 +74,103 @@ def test_invalid_query_name(user, tag):
     with pytest.raises(ValueError) as exc_info:
         NextQuestion(query_name="invalid", tag_ids_selected=[tag.id], user=user)
     assert str(exc_info.value) == "Invalid query_name: [invalid]"
+
+def test_get_count_recent_schedules(user, question):
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+    
+    # Create schedules within the last 30 minutes
+    for _ in range(3):
+        Schedule.objects.create(
+            user=user,
+            question=question,
+            datetime_added=timezone.now() - timezone.timedelta(minutes=15)
+        )
+    
+    # Create schedules within the last 60 minutes but not in the last 30
+    for _ in range(2):
+        Schedule.objects.create(
+            user=user,
+            question=question,
+            datetime_added=timezone.now() - timezone.timedelta(minutes=45)
+        )
+    
+    # Create a schedule outside the 60-minute window
+    Schedule.objects.create(
+        user=user,
+        question=question,
+        datetime_added=timezone.now() - timezone.timedelta(hours=2)
+    )
+    
+    next_question._get_count_recent_schedules()
+    
+    assert next_question.schedules_recent_count_30 == 3
+    assert next_question.schedules_recent_count_60 == 5
+
+def test_get_count_recent_schedules_empty(user):
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+    next_question._get_count_recent_schedules()
+    
+    assert next_question.schedules_recent_count_30 == 0
+    assert next_question.schedules_recent_count_60 == 0
+
+def test_get_count_recent_schedules_timezone_aware(user, question):
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+    
+    # Create a schedule with a timezone-aware datetime
+    Schedule.objects.create(
+        user=user,
+        question=question,
+        datetime_added=timezone.now() - timezone.timedelta(minutes=15)
+    )
+    
+    next_question._get_count_recent_schedules()
+    
+    assert next_question.schedules_recent_count_30 == 1
+    assert next_question.schedules_recent_count_60 == 1
+
+def test_get_count_recent_schedules_multiple_users(user, question):
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+    
+    # Create schedules for the current user
+    for _ in range(2):
+        Schedule.objects.create(
+            user=user,
+            question=question,
+            datetime_added=timezone.now() - timezone.timedelta(minutes=15)
+        )
+    
+    # Create schedules for another user
+    other_user = User.objects.create(email="otheruser@example.com")
+    for _ in range(3):
+        Schedule.objects.create(
+            user=other_user,
+            question=question,
+            datetime_added=timezone.now() - timezone.timedelta(minutes=15)
+        )
+    
+    next_question._get_count_recent_schedules()
+    
+    assert next_question.schedules_recent_count_30 == 2
+    assert next_question.schedules_recent_count_60 == 2
+
+def test_get_count_recent_schedules_edge_cases(user, question):
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+    
+    # Create a schedule exactly 30 minutes ago
+    Schedule.objects.create(
+        user=user,
+        question=question,
+        datetime_added=timezone.now() - timezone.timedelta(minutes=30)
+    )
+    
+    # Create a schedule exactly 60 minutes ago
+    Schedule.objects.create(
+        user=user,
+        question=question,
+        datetime_added=timezone.now() - timezone.timedelta(minutes=60)
+    )
+    
+    next_question._get_count_recent_schedules()
+    
+    assert next_question.schedules_recent_count_30 == 1
+    assert next_question.schedules_recent_count_60 == 2

@@ -1,9 +1,12 @@
+from datetime import datetime
 import os
 
+from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+import pytz
 
 import questions.forms as forms
-from questions.models import Question, Tag
+from questions.models import Question, Schedule, Tag
 
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
@@ -37,12 +40,15 @@ class NextQuestion:
         self.question = None
         self.count_questions_before_now = None
         self.count_questions_tagged = None
+        self.schedules_recent_count_30 = None
+        self.schedules_recent_count_60 = None
         self.tag_names_for_question = None
         self.tag_names_selected = None
 
         self._question_queryset = None
         self._get_question()
         self._get_count_questions_before_now()
+        self._get_count_recent_schedules()
 
     def _get_count_questions_before_now(self):
         # Given self._queryset__questions_tagged,
@@ -50,7 +56,25 @@ class NextQuestion:
         now = timezone.now()
         count = self._queryset__questions_tagged.filter(schedule__date_show_next__lte=now).count()
         self.count_questions_before_now = count
-
+    
+    def _get_count_recent_schedules(self):
+        SCHEDULES_SINCE_INTERVAL_30 = { 'minutes': 30 }
+        SCHEDULES_SINCE_INTERVAL_60 = { 'minutes': 60 }
+        delta_30 = relativedelta(**SCHEDULES_SINCE_INTERVAL_30)  # e.g., (minutes=30)
+        delta_60 = relativedelta(**SCHEDULES_SINCE_INTERVAL_60)  # e.g., (minutes=30)
+        datetime_now = datetime.now(tz=pytz.utc)
+        schedules_since_30 = datetime_now - delta_30
+        schedules_since_60 = datetime_now - delta_60
+        self.schedules_recent_count_30 = (
+            Schedule.objects
+            .filter(user=self._user)
+            .filter(datetime_added__gte=schedules_since_30)
+            .count())
+        self.schedules_recent_count_60 = (
+            Schedule.objects
+            .filter(user=self._user)
+            .filter(datetime_added__gte=schedules_since_60)
+            .count())
         
     def _get_next_question_unseen(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
