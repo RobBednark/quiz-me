@@ -12,7 +12,7 @@ pytestmark = pytest.mark.django_db
 def user():
     return User.objects.create(email="testuser@example.com")
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def tag(user):
     return Tag.objects.create(name="tag 1", user=user)
 
@@ -20,7 +20,6 @@ def tag(user):
 def question(user):
     return Question.objects.create(question="Test question", user=user)
 
-@pytest.mark.django_db
 def test_next_question_initialization(user, tag):
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
     assert next_question._query_name == QUERY_UNSEEN
@@ -75,9 +74,7 @@ def test_invalid_query_name(user, tag):
         NextQuestion(query_name="invalid", tag_ids_selected=[tag.id], user=user)
     assert str(exc_info.value) == "Invalid query_name: [invalid]"
 
-def test_get_count_recent_schedules(user, question):
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    
+def test_get_count_recent_schedules(question, tag, user):
     # Create schedules within the last 30 minutes
     for _ in range(3):
         Schedule.objects.create(
@@ -101,20 +98,18 @@ def test_get_count_recent_schedules(user, question):
         datetime_added=timezone.now() - timezone.timedelta(hours=2)
     )
     
-    next_question._get_count_recent_schedules()
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
     
     assert next_question.schedules_recent_count_30 == 3
     assert next_question.schedules_recent_count_60 == 5
 
 def test_get_count_recent_schedules_empty(user):
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    next_question._get_count_recent_schedules()
     
     assert next_question.schedules_recent_count_30 == 0
     assert next_question.schedules_recent_count_60 == 0
 
 def test_get_count_recent_schedules_timezone_aware(user, question):
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
     
     # Create a schedule with a timezone-aware datetime
     Schedule.objects.create(
@@ -123,14 +118,11 @@ def test_get_count_recent_schedules_timezone_aware(user, question):
         datetime_added=timezone.now() - timezone.timedelta(minutes=15)
     )
     
-    next_question._get_count_recent_schedules()
-    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
     assert next_question.schedules_recent_count_30 == 1
     assert next_question.schedules_recent_count_60 == 1
 
 def test_get_count_recent_schedules_multiple_users(user, question):
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    
     # Create schedules for the current user
     for _ in range(2):
         Schedule.objects.create(
@@ -148,13 +140,11 @@ def test_get_count_recent_schedules_multiple_users(user, question):
             datetime_added=timezone.now() - timezone.timedelta(minutes=15)
         )
     
-    next_question._get_count_recent_schedules()
-    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
     assert next_question.schedules_recent_count_30 == 2
     assert next_question.schedules_recent_count_60 == 2
 
 def test_get_count_recent_schedules_edge_cases(user, question):
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
     
     # Create a schedule exactly 30 minutes ago
     Schedule.objects.create(
@@ -170,7 +160,6 @@ def test_get_count_recent_schedules_edge_cases(user, question):
         datetime_added=timezone.now() - timezone.timedelta(minutes=60)
     )
     
-    next_question._get_count_recent_schedules()
-    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
     assert next_question.schedules_recent_count_30 == 1
     assert next_question.schedules_recent_count_60 == 2
