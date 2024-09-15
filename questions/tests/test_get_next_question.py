@@ -44,6 +44,9 @@ def test_get_next_question_unseen(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
     
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+
+    assert next_question.count_questions_before_now == 0
+    assert next_question.count_questions_tagged == 1
     assert next_question.question == question
     assert next_question.tag_names_selected == [tag.name]
     assert next_question.tag_names_for_question == [tag.name]
@@ -62,7 +65,12 @@ def test_get_count_questions_before_now(user, tag, question):
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
     next_question._get_count_questions_before_now()
     assert next_question.count_questions_before_now == 1
+    assert next_question.count_questions_tagged == 1
+    assert next_question.question is None
+    assert next_question.tag_names_selected == [tag.name]
+    assert next_question.tag_names_for_question == []
 
 def test_invalid_query_name(user, tag):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
         NextQuestion(query_name="invalid", tag_ids_selected=[tag.id], user=user)
+    assert str(exc_info.value) == "Invalid query_name: [invalid]"
