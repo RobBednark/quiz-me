@@ -23,6 +23,7 @@ pytz = "*.*"
 six = "*.*.*"
 sqlparse = "*.*.*"
 urllib3 = "*.*.*"
+pytest-django = "^4.9.0"
 
 
 [tool.poetry.group.dev.dependencies]
