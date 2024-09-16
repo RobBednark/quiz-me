@@ -1,5 +1,5 @@
 from django import forms
-from questions.models import CHOICES_UNITS, QueryPreferences
+from questions.models import CHOICES_UNITS
 
 from pagedown.widgets import PagedownWidget
 
@@ -56,7 +56,6 @@ class FormFlashcard(forms.Form):
         required=False,
         widget=PagedownWidgetAligned()
     )
-    hidden_query_prefs_id = forms.IntegerField(widget=forms.HiddenInput())
     hidden_question_id = forms.IntegerField(widget=forms.HiddenInput())
     hidden_tag_ids_selected = forms.CharField(widget=forms.HiddenInput())
 
@@ -80,13 +79,6 @@ class FormFlashcard(forms.Form):
         required=False)
 
 class FormSelectTags(forms.Form):
-    # query_prefs is a ModelChoiceField / dropdown for QueryPrefs, where each value shown is a QueryPrefs.name
-    query_prefs = forms.ModelChoiceField(
-        required=True,
-        label="Query Preferences",
-        queryset=QueryPreferences.objects.all().order_by('-date_last_used')
-    )
-    
     query_name = forms.ChoiceField(
         choices=QUERY_CHOICES,
         required=True
