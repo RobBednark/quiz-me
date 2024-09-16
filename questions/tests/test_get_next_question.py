@@ -48,6 +48,7 @@ def test_get_next_question_unseen(user, tag, question):
 
     assert next_question.count_questions_before_now == 0
     assert next_question.count_questions_tagged == 1
+    assert next_question.count_times_question_seen == 0
     assert next_question.question == question
     assert next_question.tag_names_selected == [tag.name]
     assert next_question.tag_names_for_question == [tag.name]
@@ -60,6 +61,7 @@ def test_get_next_question_unseen_with_schedule(user, tag, question):
     assert next_question.question is None
     assert next_question.count_questions_before_now == 0
     assert next_question.count_questions_tagged == 1
+    assert next_question.count_times_question_seen == 0
     assert next_question.tag_names_selected == [tag.name]
     assert next_question.tag_names_for_question == []
 
@@ -71,6 +73,7 @@ def test_get_count_questions_before_now(user, tag, question):
     next_question._get_count_questions_before_now()
     assert next_question.count_questions_before_now == 1
     assert next_question.count_questions_tagged == 1
+    assert next_question.count_times_question_seen == 0
     assert next_question.question is None
     assert next_question.tag_names_selected == [tag.name]
     assert next_question.tag_names_for_question == []
@@ -118,6 +121,7 @@ def test_get_count_recent_schedules_empty(user):
     
     assert next_question.count_recent_seen_mins_30 == 0
     assert next_question.count_recent_seen_mins_60 == 0
+    assert next_question.count_times_question_seen == 0
 
 def test_get_count_recent_schedules_multiple_users(user, question):
     # Create schedules for the current user
@@ -138,5 +142,7 @@ def test_get_count_recent_schedules_multiple_users(user, question):
         )
     
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+    assert next_question.question is None
     assert next_question.count_recent_seen_mins_30 == 2
     assert next_question.count_recent_seen_mins_60 == 2
+    assert next_question.count_times_question_seen == 0

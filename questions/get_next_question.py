@@ -38,6 +38,7 @@ class NextQuestion:
             raise TagDoesNotExistError(tag_ids_dont_exist)
         
         self.question = None
+        self.count_times_question_seen = None
         self.count_questions_before_now = None
         self.count_questions_tagged = None
         self.count_recent_seen_mins_30 = None
@@ -49,6 +50,14 @@ class NextQuestion:
         self._get_question()
         self._get_count_questions_before_now()
         self._get_count_recent_seen()
+
+    def _get_count_times_question_seen(self):
+        # Get the count of schedules for the question
+        # Precondition: self.question has been set
+
+        self.count_times_question_seen = 0
+        if self.question:
+            self.count_times_question_seen = Schedule.objects.filter(question=self.question, user=self._user).count()
 
     def _get_count_questions_before_now(self):
         # Given self._queryset__questions_tagged,
@@ -93,6 +102,7 @@ class NextQuestion:
         else:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()
+        self._get_count_times_question_seen()
     
     def _get_tag_names(self):
         self.tag_names_for_question = []

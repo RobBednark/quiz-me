@@ -67,7 +67,7 @@ def _render_question(request, query_name, select_tags_url, tag_list):
             schedules_recent_count_30=nq.count_recent_seen_mins_30,
             schedules_recent_count_60=nq.count_recent_seen_mins_60,
             selected_tag_names=nq.tag_names_selected,
-            num_schedules=nq.num_schedules,
+            num_schedules=nq.count_times_question_seen,
             select_tags_url=select_tags_url,
         )
     )
