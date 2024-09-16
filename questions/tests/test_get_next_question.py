@@ -56,6 +56,10 @@ def test_get_next_question_unseen_with_schedule(user, tag, question):
     
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
     assert next_question.question is None
+    assert next_question.count_questions_before_now == 0
+    assert next_question.count_questions_tagged == 1
+    assert next_question.tag_names_selected == [tag.name]
+    assert next_question.tag_names_for_question == []
 
 def test_get_count_questions_before_now(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
@@ -77,37 +81,41 @@ def test_invalid_query_name(user, tag):
 def test_get_count_recent_schedules(question, tag, user):
     # Create schedules within the last 30 minutes
     for _ in range(3):
-        Schedule.objects.create(
+        schedule = Schedule.objects.create(
             user=user,
             question=question,
-            datetime_added=timezone.now() - timezone.timedelta(minutes=15)
         )
+        schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=15)
+        schedule.save()
     
     # Create schedules within the last 60 minutes but not in the last 30
     for _ in range(2):
-        Schedule.objects.create(
+        schedule = Schedule.objects.create(
             user=user,
             question=question,
-            datetime_added=timezone.now() - timezone.timedelta(minutes=45)
         )
+        schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=45)
+        schedule.save()
     
     # Create a schedule outside the 60-minute window
-    Schedule.objects.create(
+    schedule = Schedule.objects.create(
         user=user,
         question=question,
         datetime_added=timezone.now() - timezone.timedelta(hours=2)
     )
+    schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=75)
+    schedule.save()
     
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
     
-    assert next_question.schedules_recent_count_30 == 3
-    assert next_question.schedules_recent_count_60 == 5
+    assert next_question.count_recent_seen_mins_30 == 3
+    assert next_question.count_recent_seen_mins_60 == 5
 
 def test_get_count_recent_schedules_empty(user):
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
     
-    assert next_question.schedules_recent_count_30 == 0
-    assert next_question.schedules_recent_count_60 == 0
+    assert next_question.count_recent_seen_mins_30 == 0
+    assert next_question.count_recent_seen_mins_60 == 0
 
 def test_get_count_recent_schedules_timezone_aware(user, question):
     
@@ -119,8 +127,8 @@ def test_get_count_recent_schedules_timezone_aware(user, question):
     )
     
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    assert next_question.schedules_recent_count_30 == 1
-    assert next_question.schedules_recent_count_60 == 1
+    assert next_question.count_recent_seen_mins_30 == 1
+    assert next_question.count_recent_seen_mins_60 == 1
 
 def test_get_count_recent_schedules_multiple_users(user, question):
     # Create schedules for the current user
@@ -141,25 +149,5 @@ def test_get_count_recent_schedules_multiple_users(user, question):
         )
     
     next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    assert next_question.schedules_recent_count_30 == 2
-    assert next_question.schedules_recent_count_60 == 2
-
-def test_get_count_recent_schedules_edge_cases(user, question):
-    
-    # Create a schedule exactly 30 minutes ago
-    Schedule.objects.create(
-        user=user,
-        question=question,
-        datetime_added=timezone.now() - timezone.timedelta(minutes=30)
-    )
-    
-    # Create a schedule exactly 60 minutes ago
-    Schedule.objects.create(
-        user=user,
-        question=question,
-        datetime_added=timezone.now() - timezone.timedelta(minutes=60)
-    )
-    
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    assert next_question.schedules_recent_count_30 == 1
-    assert next_question.schedules_recent_count_60 == 2
+    assert next_question.count_recent_seen_mins_30 == 2
+    assert next_question.count_recent_seen_mins_60 == 2

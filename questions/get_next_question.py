@@ -40,15 +40,15 @@ class NextQuestion:
         self.question = None
         self.count_questions_before_now = None
         self.count_questions_tagged = None
-        self.schedules_recent_count_30 = None
-        self.schedules_recent_count_60 = None
+        self.count_recent_seen_mins_30 = None
+        self.count_recent_seen_mins_60 = None
         self.tag_names_for_question = None
         self.tag_names_selected = None
 
         self._question_queryset = None
         self._get_question()
         self._get_count_questions_before_now()
-        self._get_count_recent_schedules()
+        self._get_count_recent_seen()
 
     def _get_count_questions_before_now(self):
         # Given self._queryset__questions_tagged,
@@ -57,32 +57,14 @@ class NextQuestion:
         count = self._queryset__questions_tagged.filter(schedule__date_show_next__lte=now).count()
         self.count_questions_before_now = count
     
-    def _get_count_recent_schedules(self):
-        #  SCHEDULES_SINCE_INTERVAL_30 = { 'minutes': 30 }
-        #  SCHEDULES_SINCE_INTERVAL_60 = { 'minutes': 60 }
-        #  delta_30 = relativedelta(**SCHEDULES_SINCE_INTERVAL_30)  # e.g., (minutes=30)
-        #  delta_60 = relativedelta(**SCHEDULES_SINCE_INTERVAL_60)  # e.g., (minutes=30)
-        #  now = timezone.now()
-        #  schedules_since_30 = now - delta_30
-        #  schedules_since_60 = now - delta_60
-        #  self.schedules_recent_count_30 = (
-        #      Schedule.objects
-        #      .filter(user=self._user)
-        #      .filter(datetime_added__gte=schedules_since_30)
-        #      .count())
-        #  self.schedules_recent_count_60 = (
-        #      Schedule.objects
-        #      .filter(user=self._user)
-        #      .filter(datetime_added__gte=schedules_since_60)
-        #      .count())
-        
+    def _get_count_recent_seen(self):
         now = timezone.now()
         thirty_minutes_ago = now - timezone.timedelta(minutes=30)
         sixty_minutes_ago = now - timezone.timedelta(minutes=60)
         
-        schedules = Schedule.objects.filter(user=self._user, question=self.question)
-        self.schedules_recent_count_30 = schedules.filter(datetime_added__gte=thirty_minutes_ago).count()
-        self.schedules_recent_count_60 = schedules.filter(datetime_added__gte=sixty_minutes_ago).count()
+        schedules = Schedule.objects.filter(user=self._user)
+        self.count_recent_seen_mins_30 = schedules.filter(datetime_added__gte=thirty_minutes_ago).count()
+        self.count_recent_seen_mins_60 = schedules.filter(datetime_added__gte=sixty_minutes_ago).count()
 
         
     def _get_next_question_unseen(self):
