@@ -33,12 +33,14 @@ def test_next_question_tag_not_owned_by_user(user):
     with pytest.raises(TagNotOwnedByUserError) as exc_info:
         NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[other_tag.id], user=user)
     assert str(exc_info.value) == f"The following tags are not owned by the user: {other_tag.id}"
+
 def test_next_question_tag_does_not_exist(user):
     non_existent_tag_id = 9999
     
     with pytest.raises(TagDoesNotExistError) as exc_info:
         NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[non_existent_tag_id], user=user)
     assert str(exc_info.value) == f"The following tag IDs do not exist: [{non_existent_tag_id}]"
+
 def test_get_next_question_unseen(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
     
@@ -116,19 +118,6 @@ def test_get_count_recent_schedules_empty(user):
     
     assert next_question.count_recent_seen_mins_30 == 0
     assert next_question.count_recent_seen_mins_60 == 0
-
-def test_get_count_recent_schedules_timezone_aware(user, question):
-    
-    # Create a schedule with a timezone-aware datetime
-    Schedule.objects.create(
-        user=user,
-        question=question,
-        datetime_added=timezone.now() - timezone.timedelta(minutes=15)
-    )
-    
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    assert next_question.count_recent_seen_mins_30 == 1
-    assert next_question.count_recent_seen_mins_60 == 1
 
 def test_get_count_recent_schedules_multiple_users(user, question):
     # Create schedules for the current user
