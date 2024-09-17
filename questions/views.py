@@ -104,7 +104,7 @@ def view_select_tags__post(request):
         # Need to return the errors to the template,
         # and have the template show the errors.
         # TODO: redirect instead of _render_question()?  Or will _render_question keep any text that the user inputted?
-        raise NotImplementedError
+        raise Exception(form_select_tags.errors)
 
 def view_flashcard_post(request):
     # Save the attempt and the schedule.
@@ -136,7 +136,7 @@ def view_flashcard_post(request):
             # e.g., log it, show it to the user
             print('EXCEPTION: attempt.save():')
             print(traceback.format_exc())
-            raise
+            raise Exception(form_flashcard.errors)
 
         schedule = models.Schedule(
             percent_correct=data['percent_correct'],
@@ -158,12 +158,11 @@ def view_flashcard_post(request):
         return redirect(to=redirect_url, permanent=True)
     else:
         # Assert: form is NOT valid
-        # Need to return the errors to the template,
+        # TODO: Need to return the errors to the template,
         # and have the template show the errors.
         debug_print and print('ERROR: view_flashcard_post: form is NOT valid')
         # TODO: what to do?  
-        raise NotImplementedError
-        # return _render_question(request=request, query_name=query_name, tag_ids_selected=tag_objs_selected)
+        raise Exception(form_flashcard.errors)
 
 @login_required(login_url='/login')
 def view_select_tags(request):

@@ -19,6 +19,7 @@
   <h1>Take a Quiz</h1>
   <form method="post">
     {% csrf_token %}
+    {{ form_flashcard.hidden_query_name }}
     {{ form_flashcard.hidden_question_id }}
     {{ form_flashcard.hidden_tag_ids_selected }}
     <div class="row">
