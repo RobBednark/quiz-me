@@ -75,8 +75,8 @@ def test_get_count_questions_before_now(user, tag, question):
     assert next_question.count_questions_tagged == 1
     assert next_question.count_times_question_seen == 0
     assert next_question.question is None
-    assert next_question.tag_names_selected == [tag.name]
     assert next_question.tag_names_for_question == []
+    assert next_question.tag_names_selected == [tag.name]
 
 def test_invalid_query_name(user, tag):
     with pytest.raises(ValueError) as exc_info:
@@ -145,4 +145,75 @@ def test_get_count_recent_schedules_multiple_users(user, question):
     assert next_question.question is None
     assert next_question.count_recent_seen_mins_30 == 2
     assert next_question.count_recent_seen_mins_60 == 2
+
+def test_get_next_question_due(user, tag, question):
+    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    
+    assert next_question.question == question
+    assert next_question.count_questions_tagged == 1
+    assert next_question.tag_names_for_question == [tag.name]
+    assert next_question.tag_names_selected == [tag.name]
+
+def test_get_next_question_due_multiple_questions(user, tag):
+    question1 = Question.objects.create(question="Question 1", user=user)
+    question2 = Question.objects.create(question="Question 2", user=user)
+    question3 = Question.objects.create(question="Question 3", user=user)
+    
+    QuestionTag.objects.create(question=question1, tag=tag, enabled=True)
+    QuestionTag.objects.create(question=question2, tag=tag, enabled=True)
+    QuestionTag.objects.create(question=question3, tag=tag, enabled=True)
+    
+    Schedule.objects.create(user=user, question=question1, date_show_next=timezone.now() - timezone.timedelta(hours=3))
+    Schedule.objects.create(user=user, question=question2, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+    Schedule.objects.create(user=user, question=question3, date_show_next=timezone.now() - timezone.timedelta(hours=2))
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    
+    assert next_question.question == question3
+    assert next_question.count_questions_tagged == 3
+    assert next_question.tag_names_for_question == [tag.name]
+    assert next_question.tag_names_selected == [tag.name]
+
+def test_get_next_question_due_no_due_questions(user, tag, question):
+    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() + timezone.timedelta(hours=1))
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    
+    assert next_question.question is None
+    assert next_question.count_questions_tagged == 1
+    assert next_question.tag_names_for_question == [tag.name]
+    assert next_question.tag_names_selected == [tag.name]
+
+def test_get_next_question_due_multiple_tags(user):
+    tag1 = Tag.objects.create(name="tag 1", user=user)
+    tag2 = Tag.objects.create(name="tag 2", user=user)
+    question1 = Question.objects.create(question="Question 1", user=user)
+    question2 = Question.objects.create(question="Question 2", user=user)
+    
+    QuestionTag.objects.create(question=question1, tag=tag1, enabled=True)
+    QuestionTag.objects.create(question=question2, tag=tag2, enabled=True)
+    
+    Schedule.objects.create(user=user, question=question1, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+    Schedule.objects.create(user=user, question=question2, date_show_next=timezone.now() - timezone.timedelta(hours=2))
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag1.id, tag2.id], user=user)
+    
+    assert next_question.question == question1
+    assert next_question.count_questions_tagged == 2
+    assert next_question.tag_names_for_question == [tag1.name]
+    assert next_question.tag_names_selected == [tag1.name, tag2.name]
+
+def test_get_next_question_due_disabled_tag(user, tag, question):
+    QuestionTag.objects.create(question=question, tag=tag, enabled=False)
+    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+    
+    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    next_question._get_next_question_due()
+    
+    assert next_question.question is None
+    assert next_question.count_questions_tagged == 0
     assert next_question.count_times_question_seen == 0

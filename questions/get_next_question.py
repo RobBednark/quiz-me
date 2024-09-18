@@ -40,13 +40,13 @@ class NextQuestion:
         self.question = None
         self.count_times_question_seen = None
         self.count_questions_before_now = None
+        self.count_questions_matching = None
         self.count_questions_tagged = None
         self.count_recent_seen_mins_30 = None
         self.count_recent_seen_mins_60 = None
         self.tag_names_for_question = None
         self.tag_names_selected = None
 
-        self._question_queryset = None
         self._get_question()
         self._get_count_questions_before_now()
         self._get_count_recent_seen()
@@ -75,30 +75,157 @@ class NextQuestion:
         self.count_recent_seen_mins_30 = schedules.filter(datetime_added__gte=thirty_minutes_ago).count()
         self.count_recent_seen_mins_60 = schedules.filter(datetime_added__gte=sixty_minutes_ago).count()
 
+    def _get_next_question_due(self):
+        # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., have a schedule with a date_show_next in the past.  For each of those questions, find the oldest Schedule.  Of those, return the question with the oldest Schedule.date_show_next.
+        # Side effects: set the following attributes:
+        #   self.question
+        #   self.count_questions_tagged
+        #   self.count_questions_matching
+
+        # Find questions created by the user with selected tags
+        # Get "tagged_questions" (questions that have one or more tag_ids).
+        questions_tagged = Question.objects.filter(
+            user=self._user,
+            questiontag__tag__id__in=self._tag_ids_selected
+        )
+
+        # Get "scheduled_questions" (tagged_questions that have at least one schedule).
+        scheduled_questions = questions_tagged.filter(schedule__isnull=False)
         
+        # Get the newest schedule.date_added for each of the scheduled_questions ("newest_schedules").
+        newest_schedules = scheduled_questions.
+
+        newest_schedules = Schedule.objects.filter(
+            question__in=questions_with_schedules
+        ).values('question').Max('datetime_added')
+        
+
+
+        latest_schedules = Schedule.objects.filter(
+            question__in=questions_with_schedules
+        ).values('question').annotate(
+            latest_datetime_added=Max('datetime_added')
+        )
+
+        
+        # For questions_tagged, annotate each one with the most recently-added Schedule
+        questions_tagged = questions_tagged.annotate(
+            newest_added_schedule=Subquery(
+                Schedule.objects.filter(
+                    question=OuterRef('pk'),
+                    user=self._user
+                ).order_by('-datetime_added')[0:1].values('id')
+            )
+        )
+        
+        # Of those schedules, look at the newest Schedule.datetime_added for each
+        # question.  Of those newest Schedules,  find the oldest Schedule.date_show_next.
+        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
+        
+        # Find the question with the oldest date_show_next among the latest schedules
+        next_question = questions_with_schedules.annotate(
+            latest_schedule_date=Subquery(
+                latest_schedules.filter(question=OuterRef('pk')).values('latest_datetime_added')[:1]
+            )
+        ).filter(
+            schedule__datetime_added=F('latest_schedule_date')
+        ).order_by('schedule__date_show_next').first()
+        
+        self.question = next_question
+
+
+
+
+
+        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
+        questions_with_schedules = questions_tagged.filter(schedule__isnull=False)
+
+        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
+
+        # Filter for questions that are due (schedules with date_show_next in the past)
+        questions_due = questions_tagged.filter(schedule__date_show_next__lte=timezone.now())
+
+        # Get the question with the newest schedule.datetime_added
+        oldest_due_question = questions_due.order_by('-schedule__datetime_added').first()
+        self.question = oldest_due_question
+        self.count_questions_tagged = questions_tagged.count()
+        
+    def _2_get_next_question_due(self):
+        # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., have a schedule with a date_show_next in the past.  For each of those questions, find the oldest Schedule.  Of those, return the question with the oldest Schedule.date_show_next.
+        # Side effects: set the following attributes:
+        #   self.question
+        #   self.count_questions_tagged
+        #   self.count_questions_matching
+        
+        # Find questions created by the user with selected tags
+        # Get "tagged_questions" (questions that have one or more tag_ids).
+        questions_tagged = Question.objects.filter(
+            user=self._user,
+            questiontag__tag__id__in=self._tag_ids_selected
+        )
+
+        # Get "scheduled_questions" (tagged_questions that have at least one schedule).
+        scheduled_questions = questions_tagged.filter(schedule__isnull=False)
+        
+        # schedules -- all Schedules for the user for each question, newest first by datetime_added
+        # OuterRef('pk') refers to the question.pk for each question
+        schedules = (models.Schedule.objects
+                     .filter(user=user, question=OuterRef('pk'))
+                     .order_by('-datetime_added'))
+        
+        # questions_annotated - questions_tagged, annotated with (schedule).date_show_next
+        # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
+        questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
+        # add num_schedules field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
+        questions_annotated = questions_annotated.annotate(num_schedules=Subquery(
+            models.Schedule.objects
+                .filter(question=OuterRef('pk'))
+                .values('question')
+                .annotate(count=Count('pk'))
+                .values('count')))
+        # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
+        questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
+        subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
+        questions = questions.filter(subquery_by_date_show_next)
+        order_by = []
+        
+        if query_prefs_obj.sort_by_newest_answered_first:
+            # Order by the time when the user last answered the question, newest first
+            order_by.append(F('schedule_datetime_added').desc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
+        else:
+            # Order by when the question should be shown again
+            order_by.append(F('date_show_next').asc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
+        questions = questions.order_by(*order_by)
+            
+
     def _get_next_question_unseen(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
-        # tag_ids_selected -- list of tag IDs
+        # Side effects: set the following attributes:
+        #   self.question
+        #   self.count_questions_tagged
+        #   self.count_questions_matching
         
         # Find questions created by the user with selected tags
         questions_tagged = Question.objects.filter(
             user=self._user,
             questiontag__tag__id__in=self._tag_ids_selected
         )
-        self._queryset__questions_tagged = questions_tagged
-        self.count_questions_tagged = questions_tagged.count()
 
         # Filter for unseen questions (no schedules)
         unseen_questions = questions_tagged.filter(schedule__isnull=True)
-        self._question_queryset = unseen_questions
 
         # Get the oldest unseen question based on datetime_added
         oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
         self.question = oldest_unseen_question
+        
+        self.count_questions_tagged = questions_tagged.count()
+        self.count_questions_matching = unseen_questions.count()
 
     def _get_question(self):
         if self._query_name == forms.QUERY_UNSEEN:
             self._get_next_question_unseen()
+        elif self._query_name == forms.QUERY_DUE:
+            self._get_next_question_due()
         else:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()
