@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 
 from dateutil.relativedelta import relativedelta
+from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 import pytz
 
@@ -50,10 +51,13 @@ class NextQuestion:
         self._get_question()
         self._get_count_questions_before_now()
         self._get_count_recent_seen()
+        self._get_count_times_question_seen()
 
     def _get_count_times_question_seen(self):
         # Get the count of schedules for the question
         # Precondition: self.question has been set
+        # Side effects: set this attribute:
+        #   self.count_times_question_seen
 
         self.count_times_question_seen = 0
         if self.question:
@@ -62,11 +66,17 @@ class NextQuestion:
     def _get_count_questions_before_now(self):
         # Given self._queryset__questions_tagged,
         # count the number of questions that are scheduled before now.
+        # Returns: None
+        # Side effects: set this attribute:
+        #   self.count_questions_before_now
         now = timezone.now()
         count = self._queryset__questions_tagged.filter(schedule__date_show_next__lte=now).count()
         self.count_questions_before_now = count
     
     def _get_count_recent_seen(self):
+        # Side effects: set these attributes:
+        #   self.count_recent_seen_mins_30
+        #   self.count_recent_seen_mins_60
         now = timezone.now()
         thirty_minutes_ago = now - timezone.timedelta(minutes=30)
         sixty_minutes_ago = now - timezone.timedelta(minutes=60)
@@ -75,7 +85,7 @@ class NextQuestion:
         self.count_recent_seen_mins_30 = schedules.filter(datetime_added__gte=thirty_minutes_ago).count()
         self.count_recent_seen_mins_60 = schedules.filter(datetime_added__gte=sixty_minutes_ago).count()
 
-    def _get_next_question_due(self):
+    def OLD_UNUSED_get_next_question_due(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., have a schedule with a date_show_next in the past.  For each of those questions, find the oldest Schedule.  Of those, return the question with the oldest Schedule.date_show_next.
         # Side effects: set the following attributes:
         #   self.question
@@ -93,7 +103,6 @@ class NextQuestion:
         scheduled_questions = questions_tagged.filter(schedule__isnull=False)
         
         # Get the newest schedule.date_added for each of the scheduled_questions ("newest_schedules").
-        newest_schedules = scheduled_questions.
 
         newest_schedules = Schedule.objects.filter(
             question__in=questions_with_schedules
@@ -150,8 +159,8 @@ class NextQuestion:
         self.question = oldest_due_question
         self.count_questions_tagged = questions_tagged.count()
         
-    def _2_get_next_question_due(self):
-        # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., have a schedule with a date_show_next in the past.  For each of those questions, find the oldest Schedule.  Of those, return the question with the oldest Schedule.date_show_next.
+    def _get_next_question_due(self):
+        # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., with the newest schedule with a date_show_next in the past.  Of those, find the question with the oldest Schedule.date_show_next.
         # Side effects: set the following attributes:
         #   self.question
         #   self.count_questions_tagged
@@ -163,39 +172,38 @@ class NextQuestion:
             user=self._user,
             questiontag__tag__id__in=self._tag_ids_selected
         )
+        self._queryset__questions_tagged = questions_tagged
 
         # Get "scheduled_questions" (tagged_questions that have at least one schedule).
         scheduled_questions = questions_tagged.filter(schedule__isnull=False)
         
         # schedules -- all Schedules for the user for each question, newest first by datetime_added
         # OuterRef('pk') refers to the question.pk for each question
-        schedules = (models.Schedule.objects
-                     .filter(user=user, question=OuterRef('pk'))
+        schedules_for_question = (Schedule.objects
+                     .filter(user=self._user, question=OuterRef('pk'))
                      .order_by('-datetime_added'))
         
         # questions_annotated - questions_tagged, annotated with (schedule).date_show_next
         # questions_annotated.date_show_next -- the Schedule.date_show_next for the most recent Schedule for each question
-        questions_annotated = questions_tagged.annotate(date_show_next=Subquery(schedules[:1].values('date_show_next')))
-        # add num_schedules field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
-        questions_annotated = questions_annotated.annotate(num_schedules=Subquery(
-            models.Schedule.objects
-                .filter(question=OuterRef('pk'))
-                .values('question')
-                .annotate(count=Count('pk'))
-                .values('count')))
+        scheduled_questions = scheduled_questions.annotate(date_show_next=Subquery(schedules_for_question[:1].values('date_show_next')))
+
+        #  # add num_schedules_for_question field  [reference: https://stackoverflow.com/questions/43770118/simple-subquery-with-outerref/43771738]
+        #  scheduled_questions = questions_annotated.annotate(num_schedules_for_question=Subquery(
+        #      models.Schedule.objects
+        #          .filter(question=OuterRef('pk'))
+        #          .values('question')
+        #          .annotate(count=Count('pk'))
+        #          .values('count')))
+
         # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
-        questions = questions_annotated.annotate(schedule_datetime_added=Subquery(schedules[:1].values('datetime_added')))
-        subquery_by_date_show_next = Q(date_show_next__lte=datetime_now)
-        questions = questions.filter(subquery_by_date_show_next)
-        order_by = []
-        
-        if query_prefs_obj.sort_by_newest_answered_first:
-            # Order by the time when the user last answered the question, newest first
-            order_by.append(F('schedule_datetime_added').desc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
-        else:
-            # Order by when the question should be shown again
-            order_by.append(F('date_show_next').asc(nulls_first=query_prefs_obj.sort_by_nulls_first if query_prefs_obj.sort_by_nulls_first else None))
-        questions = questions.order_by(*order_by)
+        scheduled_questions = scheduled_questions.annotate(schedule_datetime_added=Subquery(schedules_for_question[:1].values('datetime_added')))
+        subquery_by_date_show_next = Q(date_show_next__lte=datetime.now)
+        scheduled_questions = scheduled_questions.filter(subquery_by_date_show_next)
+        scheduled_questions = scheduled_questions.order_by('date_show_next')
+
+        self.question = scheduled_questions.first()
+        self.count_questions_tagged = questions_tagged.count()
+        self.count_questions_matching = scheduled_questions.count()
             
 
     def _get_next_question_unseen(self):
@@ -210,6 +218,7 @@ class NextQuestion:
             user=self._user,
             questiontag__tag__id__in=self._tag_ids_selected
         )
+        self._queryset__questions_tagged = questions_tagged
 
         # Filter for unseen questions (no schedules)
         unseen_questions = questions_tagged.filter(schedule__isnull=True)

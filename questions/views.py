@@ -210,7 +210,7 @@ class TagList:
             self.id_int_list = [int(tag_id) for tag_id in as_str_list]
         elif form_field_names:
             for field_name in form_field_names:
-                match = re.search(pattern=f"{FIELD_NAME__TAG_ID_PREFIX}(\d+)$", string=field_name)
+                match = re.search(pattern=f"{FIELD_NAME__TAG_ID_PREFIX}(\\d+)$", string=field_name)
                 if match:
                     tag_id = int(match.group(1))
                     self.id_int_list.append(tag_id)

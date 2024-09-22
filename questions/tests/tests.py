@@ -6,7 +6,7 @@ from django.test import TestCase
 import pytz
 
 from emailusername.models import User
-from questions.models import Answer, Attempt, QueryPreferences, Question, QuestionTag, Schedule, Tag
+from questions.models import Answer, Attempt,  Question, QuestionTag, Schedule, Tag
 from questions.get_next_question import get_next_question
 
 class Tests(TestCase):
