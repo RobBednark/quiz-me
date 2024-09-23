@@ -59,6 +59,16 @@
 2. Install geckodriver: `brew install geckodriver`
 3. Install Firefox
 
+## Migrations
+
+###### Q: How to run makemigrations?
+A:
+```shell
+./manage.py makemigrations questions
+```
+
+
+
 ### Docker Test Environment
 I got some docker containers setup for with the intent of making local testing easier. In order to use it, you need to install docker and docker-compose, which is a util for managing sets of docker containers.
 
