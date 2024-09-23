@@ -1,4 +1,3 @@
-from datetime import datetime
 import os
 
 from dateutil.relativedelta import relativedelta
@@ -197,7 +196,7 @@ class NextQuestion:
 
         # question.schedule_datetime_added -- the datetime_added for the most recent Schedule for that question
         scheduled_questions = scheduled_questions.annotate(schedule_datetime_added=Subquery(schedules_for_question[:1].values('datetime_added')))
-        subquery_by_date_show_next = Q(date_show_next__lte=datetime.now)
+        subquery_by_date_show_next = Q(date_show_next__lte=timezone.now())
         scheduled_questions = scheduled_questions.filter(subquery_by_date_show_next)
         scheduled_questions = scheduled_questions.order_by('date_show_next')
 
