@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 
 from dateutil.relativedelta import relativedelta
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Q, Subquery
 from django.utils import timezone
 import pytz
 

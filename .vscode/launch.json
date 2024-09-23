@@ -4,6 +4,23 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
+        {
+            "name": "0) pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "python",
+            "args": [
+                "-m",
+                "pytest"
+            ],
+            "env": {
+                "QM_ENGINE": "sqlite"
+            },
+            "justMyCode": true,
+            "autoStartBrowser": false
+            
+        },
 
         {
             "name": "1) runserver",
@@ -18,8 +35,25 @@
             "justMyCode": true,
             "autoStartBrowser": false
         },
+
         {
-            "name": "2) tests --failfast",
+            "name": "2) pytest --failfast",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "pytest",
+            "env": {
+                "QM_ENGINE": "sqlite"
+            },
+            "args": [
+                 "--maxfail=1"
+            ],
+            "django": true,
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+
+        {
+            "name": "3) manage.py test --failfast",
             "type": "debugpy",
             "request": "launch",
             "program": "./manage.py",
@@ -29,17 +63,18 @@
             "args": [
                  "test",
                  "--failfast"
-            ]
+            ],
             "justMyCode": true,
             "autoStartBrowser": false
         },
+
         {
-            "name": "3) tests test_user_with_one_question",
+            "name": "4) manage.py test test_user_with_one_question",
             "type": "debugpy",
             "request": "launch",
             "program": "./manage.py",
             "env": {
-                "QM_DEBUG_PRINT": True,
+                "QM_DEBUG_PRINT": "True",
                 "QM_ENGINE": "sqlite",
                 "QM_TEST_DB": "sqlite.db"
             },
@@ -49,9 +84,51 @@
                  "--no-input",
                  "-k",
                  "test_multiple_tags"
-            ]
+            ],
             "justMyCode": true,
             "autoStartBrowser": false
-        }
+        },
+
+        {
+            "name": "5) env",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "env",
+            "env": {
+                "QM_DEBUG_PRINT": "True",
+                "QM_ENGINE": "sqlite",
+                "QM_TEST_DB": "sqlite.db"
+            },
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+
+        {
+            "name": "6) bin/run_pytest.sh (DOES NOT WORK)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "bin/run_pytest.sh",
+            "env": {
+                "QM_DEBUG_PRINT": "True",
+                "QM_ENGINE": "sqlite",
+                "QM_TEST_DB": "sqlite.db"
+                DB_QUIZME=':memory:' QM_ENGINE=sqlite
+            },
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+
+        {
+          "name": "7) Python Debugger: Module",
+          "type": "debugpy",
+          "request": "launch",
+          "module": "pytest",
+          "localRoot": "${workspaceRoot}",
+          "env": {
+                "QM_DEBUG_PRINT": "True",
+                "QM_ENGINE": "sqlite",
+                "QM_TEST_DB": "sqlite.db",
+                "DB_QUIZME": ":memory:"
+          }
     ]
 }
