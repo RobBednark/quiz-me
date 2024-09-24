@@ -1,6 +1,6 @@
 import pytest
 from django.utils import timezone
-from questions.forms import QUERY_UNSEEN
+from questions.forms import QUERY_DUE, QUERY_UNSEEN
 from questions.models import Question, Tag, QuestionTag, Schedule
 from questions.get_next_question import NextQuestion, TagNotOwnedByUserError, TagDoesNotExistError
 from emailusername.models import User
@@ -146,11 +146,11 @@ def test_get_count_recent_schedules_multiple_users(user, question):
     assert next_question.count_recent_seen_mins_30 == 2
     assert next_question.count_recent_seen_mins_60 == 2
 
-def test_get_next_question_due(user, tag, question):
+def test_get_next_question_due_one_question(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
     Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
     
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
     
     assert next_question.question == question
     assert next_question.count_questions_tagged == 1
@@ -170,7 +170,7 @@ def test_get_next_question_due_multiple_questions(user, tag):
     Schedule.objects.create(user=user, question=question2, date_show_next=timezone.now() - timezone.timedelta(hours=1))
     Schedule.objects.create(user=user, question=question3, date_show_next=timezone.now() - timezone.timedelta(hours=2))
     
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
     
     assert next_question.question == question3
     assert next_question.count_questions_tagged == 3
@@ -181,7 +181,7 @@ def test_get_next_question_due_no_due_questions(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
     Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() + timezone.timedelta(hours=1))
     
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
     
     assert next_question.question is None
     assert next_question.count_questions_tagged == 1
@@ -200,7 +200,7 @@ def test_get_next_question_due_multiple_tags(user):
     Schedule.objects.create(user=user, question=question1, date_show_next=timezone.now() - timezone.timedelta(hours=1))
     Schedule.objects.create(user=user, question=question2, date_show_next=timezone.now() - timezone.timedelta(hours=2))
     
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag1.id, tag2.id], user=user)
+    next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag1.id, tag2.id], user=user)
     
     assert next_question.question == question1
     assert next_question.count_questions_tagged == 2
@@ -211,7 +211,7 @@ def test_get_next_question_due_disabled_tag(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=False)
     Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
     
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+    next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
     next_question._get_next_question_due()
     
     assert next_question.question is None
