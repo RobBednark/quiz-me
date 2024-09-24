@@ -112,7 +112,6 @@
                 "QM_DEBUG_PRINT": "True",
                 "QM_ENGINE": "sqlite",
                 "QM_TEST_DB": "sqlite.db"
-                DB_QUIZME=':memory:' QM_ENGINE=sqlite
             },
             "justMyCode": true,
             "autoStartBrowser": false
@@ -129,6 +128,25 @@
                 "QM_ENGINE": "sqlite",
                 "QM_TEST_DB": "sqlite.db",
                 "DB_QUIZME": ":memory:"
+          },
+        },
+
+          {
+            "name": "8) Python Debugger: specific test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "localRoot": "${workspaceRoot}",
+            "args": [
+                "-k",
+                "test_get_next_question_due_one_question"
+            ],
+            "env": {
+                  "QM_DEBUG_PRINT": "True",
+                  "QM_ENGINE": "sqlite",
+                  "QM_TEST_DB": "sqlite.db",
+                  "DB_QUIZME": ":memory:"
+            }
           }
     ]
 }
