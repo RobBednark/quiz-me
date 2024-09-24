@@ -139,7 +139,7 @@
             "localRoot": "${workspaceRoot}",
             "args": [
                 "-k",
-                "test_get_next_question_due_one_question"
+                "test_get_next_question_due_multiple_questions"
             ],
             "env": {
                   "QM_DEBUG_PRINT": "True",
