@@ -193,13 +193,13 @@ def test_get_next_question_due_multiple_tags(user):
     tag1 = Tag.objects.create(name="tag 1", user=user)
     tag2 = Tag.objects.create(name="tag 2", user=user)
     question1 = Question.objects.create(question="Question 1 - tag 1, -1h", user=user)
-    question2 = Question.objects.create(question="Question 2 - tag 2, -2h", user=user)
+    question2 = Question.objects.create(question="Question 2 - tag 2, -2h, EXPECTED", user=user)
     
     QuestionTag.objects.create(question=question1, tag=tag1, enabled=True)
     QuestionTag.objects.create(question=question2, tag=tag2, enabled=True)
     
-    Schedule.objects.create(user=user, question=question1, date_show_next=timezone.now() - timezone.timedelta(hours=-1))
-    Schedule.objects.create(user=user, question=question2, date_show_next=timezone.now() - timezone.timedelta(hours=-2))
+    Schedule.objects.create(user=user, question=question1, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+    Schedule.objects.create(user=user, question=question2, date_show_next=timezone.now() - timezone.timedelta(hours=2))
     
     next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag1.id, tag2.id], user=user)
     

@@ -36,6 +36,9 @@ class NextQuestion:
         tag_ids_dont_exist = _tag_ids_that_dont_exist(tag_ids=tag_ids_selected)
         if tag_ids_dont_exist:
             raise TagDoesNotExistError(tag_ids_dont_exist)
+        tag_ids_are_disabled = _tag_ids_that_are_disabled(tag_ids=tag_ids_selected)
+        if tag_ids_are_disabled:
+            raise Exception(tag_ids_are_disabled)
         
         self.question = None
         self.count_times_question_seen = None
