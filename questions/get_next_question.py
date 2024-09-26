@@ -31,7 +31,6 @@ class NextQuestion:
         self._get_question()
         self._get_count_questions_before_now()
         self._get_count_recent_seen()
-        self._get_count_times_question_seen()
 
     def _get_count_times_question_seen(self):
         # Get the count of schedules for the question
