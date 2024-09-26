@@ -1,12 +1,11 @@
 import os
 
-from dateutil.relativedelta import relativedelta
 from django.db.models import OuterRef, Q, Subquery
 from django.utils import timezone
-import pytz
 
 import questions.forms as forms
-from questions.models import Question, QuestionTag, Schedule, Tag
+from questions.models import Question, Schedule, Tag
+from questions.VerifyTagIds import VerifyTagIds
 
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
@@ -66,79 +65,79 @@ class NextQuestion:
         self.count_recent_seen_mins_30 = schedules.filter(datetime_added__gte=thirty_minutes_ago).count()
         self.count_recent_seen_mins_60 = schedules.filter(datetime_added__gte=sixty_minutes_ago).count()
 
-    def OLD_UNUSED_get_next_question_due(self):
-        # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., have a schedule with a date_show_next in the past.  For each of those questions, find the oldest Schedule.  Of those, return the question with the oldest Schedule.date_show_next.
-        # Side effects: set the following attributes:
-        #   self.question
-        #   self.count_questions_tagged
-        #   self.count_questions_matching
-
-        # Find questions created by the user with selected tags
-        # Get "tagged_questions" (questions that have one or more tag_ids).
-        questions_tagged = Question.objects.filter(
-            user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected
-        )
-
-        # Get "scheduled_questions" (tagged_questions that have at least one schedule).
-        scheduled_questions = questions_tagged.filter(schedule__isnull=False)
-        
-        # Get the newest schedule.date_added for each of the scheduled_questions ("newest_schedules").
-
-        newest_schedules = Schedule.objects.filter(
-            question__in=questions_with_schedules
-        ).values('question').Max('datetime_added')
-        
-
-
-        latest_schedules = Schedule.objects.filter(
-            question__in=questions_with_schedules
-        ).values('question').annotate(
-            latest_datetime_added=Max('datetime_added')
-        )
-
-        
-        # For questions_tagged, annotate each one with the most recently-added Schedule
-        questions_tagged = questions_tagged.annotate(
-            newest_added_schedule=Subquery(
-                Schedule.objects.filter(
-                    question=OuterRef('pk'),
-                    user=self._user
-                ).order_by('-datetime_added')[0:1].values('id')
-            )
-        )
-        
-        # Of those schedules, look at the newest Schedule.datetime_added for each
-        # question.  Of those newest Schedules,  find the oldest Schedule.date_show_next.
-        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
-        
-        # Find the question with the oldest date_show_next among the latest schedules
-        next_question = questions_with_schedules.annotate(
-            latest_schedule_date=Subquery(
-                latest_schedules.filter(question=OuterRef('pk')).values('latest_datetime_added')[:1]
-            )
-        ).filter(
-            schedule__datetime_added=F('latest_schedule_date')
-        ).order_by('schedule__date_show_next').first()
-        
-        self.question = next_question
-
-
-
-
-
-        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
-        questions_with_schedules = questions_tagged.filter(schedule__isnull=False)
-
-        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
-
-        # Filter for questions that are due (schedules with date_show_next in the past)
-        questions_due = questions_tagged.filter(schedule__date_show_next__lte=timezone.now())
-
-        # Get the question with the newest schedule.datetime_added
-        oldest_due_question = questions_due.order_by('-schedule__datetime_added').first()
-        self.question = oldest_due_question
-        self.count_questions_tagged = questions_tagged.count()
+#    def OLD_UNUSED_get_next_question_due(self):
+#        # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., have a schedule with a date_show_next in the past.  For each of those questions, find the oldest Schedule.  Of those, return the question with the oldest Schedule.date_show_next.
+#        # Side effects: set the following attributes:
+#        #   self.question
+#        #   self.count_questions_tagged
+#        #   self.count_questions_matching
+#
+#        # Find questions created by the user with selected tags
+#        # Get "tagged_questions" (questions that have one or more tag_ids).
+#        questions_tagged = Question.objects.filter(
+#            user=self._user,
+#            questiontag__tag__id__in=self._tag_ids_selected
+#        )
+#
+#        # Get "scheduled_questions" (tagged_questions that have at least one schedule).
+#        scheduled_questions = questions_tagged.filter(schedule__isnull=False)
+#        
+#        # Get the newest schedule.date_added for each of the scheduled_questions ("newest_schedules").
+#
+#        newest_schedules = Schedule.objects.filter(
+#            question__in=questions_with_schedules
+#        ).values('question').Max('datetime_added')
+#        
+#
+#
+#        latest_schedules = Schedule.objects.filter(
+#            question__in=questions_with_schedules
+#        ).values('question').annotate(
+#            latest_datetime_added=Max('datetime_added')
+#        )
+#
+#        
+#        # For questions_tagged, annotate each one with the most recently-added Schedule
+#        questions_tagged = questions_tagged.annotate(
+#            newest_added_schedule=Subquery(
+#                Schedule.objects.filter(
+#                    question=OuterRef('pk'),
+#                    user=self._user
+#                ).order_by('-datetime_added')[0:1].values('id')
+#            )
+#        )
+#        
+#        # Of those schedules, look at the newest Schedule.datetime_added for each
+#        # question.  Of those newest Schedules,  find the oldest Schedule.date_show_next.
+#        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
+#        
+#        # Find the question with the oldest date_show_next among the latest schedules
+#        next_question = questions_with_schedules.annotate(
+#            latest_schedule_date=Subquery(
+#                latest_schedules.filter(question=OuterRef('pk')).values('latest_datetime_added')[:1]
+#            )
+#        ).filter(
+#            schedule__datetime_added=F('latest_schedule_date')
+#        ).order_by('schedule__date_show_next').first()
+#        
+#        self.question = next_question
+#
+#
+#
+#
+#
+#        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
+#        questions_with_schedules = questions_tagged.filter(schedule__isnull=False)
+#
+#        # For each of the questions_with_schedules, find the newest Schedule.datetime_added for each question
+#
+#        # Filter for questions that are due (schedules with date_show_next in the past)
+#        questions_due = questions_tagged.filter(schedule__date_show_next__lte=timezone.now())
+#
+#        # Get the question with the newest schedule.datetime_added
+#        oldest_due_question = questions_due.order_by('-schedule__datetime_added').first()
+#        self.question = oldest_due_question
+#        self.count_questions_tagged = questions_tagged.count()
         
     def _get_next_question_due(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., with the newest schedule with a date_show_next in the past.  Of those, find the question with the oldest Schedule.date_show_next.
@@ -235,41 +234,3 @@ class NextQuestion:
         self.tag_names_selected = [
             str(tag.name) for tag in Tag.objects.filter(id__in=self._tag_ids_selected)
         ]
-
-
-class VerifyTagIds:
-    """
-    Verify that the tag_ids are valid:
-        - The tag_ids are owned by the user
-        - The tag_ids are enabled
-        - The tag_ids exist
-    """
-    def __init__(self, tag_ids, user):
-        self.tag_ids = tag_ids
-        self.user = user
-        error = ''
-
-        tags_not_owned = self._tags_not_owned_by_user()
-        if tags_not_owned:
-            error += f'Tag ids are not owned by user: {tags_not_owned}.'
-
-        tag_ids_dont_exist = self._tag_ids_that_dont_exist()
-        if tag_ids_dont_exist:
-            error += f'Tag ids do not exist: {tag_ids_dont_exist}.'
-
-        if error:
-            raise ValueError(error)
-    def _tags_not_owned_by_user(self):
-        """
-        Return a list of all self.tag_ids that are not owned by self.user.
-        """
-        ids_not_owned_by_user = Tag.objects.filter(id__in=self.tag_ids).exclude(user=self.user).values_list('id', flat=True)
-        return [int(tag_id) for tag_id in ids_not_owned_by_user]
-
-    def _tag_ids_that_dont_exist(self):
-        """
-        Return a list of all self.tag_ids that do not exist.
-        """
-        existing_tag_ids = set(Tag.objects.filter(id__in=self.tag_ids).values_list('id', flat=True))
-        non_existent_tag_ids = [int(tag_id) for tag_id in self.tag_ids if tag_id not in existing_tag_ids]
-        return non_existent_tag_ids

@@ -2,7 +2,8 @@ import pytest
 from django.utils import timezone
 from questions.forms import QUERY_DUE, QUERY_UNSEEN
 from questions.models import Question, Tag, QuestionTag, Schedule
-from questions.get_next_question import NextQuestion, VerifyTagIds
+from questions.get_next_question import NextQuestion
+from questions.VerifyTagIds import VerifyTagIds
 from emailusername.models import User
 
 # Use the Django database for all the tests
