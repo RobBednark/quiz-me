@@ -218,57 +218,62 @@ class Test__QUERY_DUE:
         def test_different_results_for_query_seen_and_due(self, user, tag):
             # Create the following test data:
             #
-            # | Que | U  | Tags   | Schedules | added |
-            # |-----|----|--------|-----------|-------|
-            # | q1  | u1 | t1     | None      | -2d   |
-            # | q2  | u1 | t1,t2  | -1d       | -3d   |
-            # | q3  | u1 | t2     | -1d       | -1d   |
-            # | q4  | u1 | t3     | -1d       | -1d   |
-            # | -   | u1 | t4     |           |       |
-            # | q5  | u2 | t5     | None      | -1d   |
-            # | q6  | u1 | t1     | None      | -4d   |
+            # | Question   | U  | Tags| Q added| S next  |Sched added|
+            # |------------|----|-----|--------|-------- |-----------|
+            # | q1_not_due | u1 | tag |        | -3y,+2y |-4y, -1y   |
+            # | q2_due     | u1 | tag |        | -1y     |-2y        |
+            # | q3_unseen  | u1 | tag |        | (none)  | (none)    |
             #
             # Notes:
-            # Que = Question
             # U = User who created the question (i.e., Question.user field)
             # Tags = tags that are applied to the question via the QuestionTag model
             # Schedules = schedules associated with the question via the Schedule.question foreign key; the column value refers to the Schedule.date_show_next field; e.g., -1d = 1 day before now
-            # added = when the question was added (relative to now); i.e., Question.datetime_added field; e.g., -2d = 2 days before now
+            # Q added = when the question was added (relative to now); i.e., Question.datetime_added field; e.g., -2d = 2 days before now
+            # S next = Schedule.date_show_next field; e.g., -1d = 1 day before now
+            # Sched added = when the schedule was added (relative to now); i.e., Schedule.datetime_added field; e.g., -2d = 2 days before now
 
             # Create questions
-            question_not_due = Question.objects.create(question="Question 1: not due", user=user)
-            question_due = Question.objects.create(question="Question 2: due", user=user)
-            question_unseen = Question.objects.create(question="Question 3: unseen", user=user)
+            q1_not_due = Question.objects.create(question="Question 1: not due", user=user)
+            q2_due = Question.objects.create(question="Question 2: due", user=user)
+            q3_unseen = Question.objects.create(question="Question 3: unseen", user=user)
         
             # Create QuestionTags
-            QuestionTag.objects.create(question=question_not_due, tag=tag, enabled=True)
-            QuestionTag.objects.create(question=question_due, tag=tag, enabled=True)
-            QuestionTag.objects.create(question=question_unseen, tag=tag, enabled=True)
+            QuestionTag.objects.create(question=q1_not_due, tag=tag, enabled=True)
+            QuestionTag.objects.create(question=q2_due, tag=tag, enabled=True)
+            QuestionTag.objects.create(question=q3_unseen, tag=tag, enabled=True)
         
             # Create Schedules
-            sched_future = Schedule.objects.create(
+            sched_q1_past = Schedule.objects.create(
                 user=user,
-                question=question_not_due,
-                date_show_next=timezone.now() + timezone.timedelta(minutes=20), # future
+                question=q1_not_due,
+                date_show_next=timezone.now() - timezone.timedelta(weeks=3*53), # past
             )
-            sched_future.datetime_added = timezone.now() - timezone.timedelta(minutes=20)
-            sched_future.save()
-            sched_past = Schedule.objects.create(
+            sched_q1_past.datetime_added = timezone.now() - timezone.timedelta(weeks=4*53)
+            sched_q1_past.save()
+            
+            sched_q1_future = Schedule.objects.create(
                 user=user,
-                question=question_due,
-                date_show_next=timezone.now() - timezone.timedelta(minutes=20), # past
-                datetime_added=timezone.now() - timezone.timedelta(minutes=40)
+                question=q1_not_due,
+                date_show_next=timezone.now() + timezone.timedelta(weeks=2*53), # future
             )
-            sched_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
-            sched_past.save()
-            # question_unseen: no schedule
+            sched_q1_future.datetime_added = timezone.now() - timezone.timedelta(weeks=1*53)
+            sched_q1_future.save()
+
+            sched_q2_due = Schedule.objects.create(
+                user=user,
+                question=q2_due,
+                date_show_next=timezone.now() - timezone.timedelta(weeks=1*53), # past
+            )
+            sched_q2_due.datetime_added = timezone.now() - timezone.timedelta(weeks=2*53)
+            sched_q2_due.save()
+            # q3_unseen: no schedule
         
             # Test QUERY_UNSEEN
             next_question_unseen = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-            assert next_question_unseen.question == question_unseen
+            assert next_question_unseen.question == q3_unseen
             assert next_question_unseen.count_times_question_seen == 0
             assert next_question_unseen.count_questions_before_now == 1
-            assert next_question_unseen.count_questions_matching == 1
+            assert next_question_unseen.count_questions_matched_criteria == 1
             assert next_question_unseen.count_questions_tagged == 3
             assert next_question_unseen.count_recent_seen_mins_30 == 1
             assert next_question_unseen.count_recent_seen_mins_60 == 2
@@ -278,10 +283,10 @@ class Test__QUERY_DUE:
         
             # Test QUERY_DUE
             next_question_due = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
-            assert next_question_due.question == question_due
+            assert next_question_due.question == q2_due
             assert next_question_unseen.count_times_question_seen == 2
             assert next_question_unseen.count_questions_before_now == 1
-            assert next_question_unseen.count_questions_matching == 1
+            assert next_question_unseen.count_questions_matched_criteria == 1
             assert next_question_unseen.count_questions_tagged == 3
             assert next_question_unseen.count_recent_seen_mins_30 == 1
             assert next_question_unseen.count_recent_seen_mins_60 == 2

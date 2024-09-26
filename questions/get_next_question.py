@@ -20,13 +20,13 @@ class NextQuestion:
         
         self.question = None
         self.count_times_question_seen = None
-        self.count_questions_before_now = None
-        self.count_questions_matching = None
+        self.count_questions_before_now = None  # questions due (date_show_next < now)
+        self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
         self.count_questions_tagged = None
-        self.count_recent_seen_mins_30 = None
-        self.count_recent_seen_mins_60 = None
-        self.tag_names_for_question = None
-        self.tag_names_selected = None
+        self.count_recent_seen_mins_30 = None  # questions seen in the last 30 minutes
+        self.count_recent_seen_mins_60 = None  # questions seen in the last 60 minutes
+        self.tag_names_for_question = None  # list of tag names for the question
+        self.tag_names_selected = None  # list of tag names for the tags selected for the query
 
         self._get_question()
         self._get_count_questions_before_now()
@@ -69,7 +69,7 @@ class NextQuestion:
 #        # Side effects: set the following attributes:
 #        #   self.question
 #        #   self.count_questions_tagged
-#        #   self.count_questions_matching
+#        #   self.count_questions_matched_criteria
 #
 #        # Find questions created by the user with selected tags
 #        # Get "tagged_questions" (questions that have one or more tag_ids).
@@ -143,7 +143,7 @@ class NextQuestion:
         # Side effects: set the following attributes:
         #   self.question
         #   self.count_questions_tagged
-        #   self.count_questions_matching
+        #   self.count_questions_matched_criteria
         
         # Find questions created by the user with selected tags
         # Get "tagged_questions" (questions that have one or more tag_ids).
@@ -182,7 +182,7 @@ class NextQuestion:
 
         self.question = scheduled_questions.first()
         self.count_questions_tagged = questions_tagged.count()
-        self.count_questions_matching = scheduled_questions.count()
+        self.count_questions_matched_criteria = scheduled_questions.count()
             
 
     def _get_next_question_unseen(self):
@@ -190,7 +190,7 @@ class NextQuestion:
         # Side effects: set the following attributes:
         #   self.question
         #   self.count_questions_tagged
-        #   self.count_questions_matching
+        #   self.count_questions_matched_criteria
         
         # Find questions created by the user with selected tags
         questions_tagged = Question.objects.filter(
@@ -207,7 +207,7 @@ class NextQuestion:
         self.question = oldest_unseen_question
         
         self.count_questions_tagged = questions_tagged.count()
-        self.count_questions_matching = unseen_questions.count()
+        self.count_questions_matched_criteria = unseen_questions.count()
 
     def _get_question(self):
         if self._query_name == forms.QUERY_UNSEEN:
