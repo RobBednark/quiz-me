@@ -20,50 +20,52 @@ def tag(user):
 def question(user):
     return Question.objects.create(question="Test question", user=user)
 
-def test_next_question_initialization(user, tag):
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-    assert next_question._query_name == QUERY_UNSEEN
-    assert next_question._tag_ids_selected == [tag.id]
-    assert next_question._user == user
+class TestInit:
+    def test_next_question_initialization(self, user, tag):
+        next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+        assert next_question._query_name == QUERY_UNSEEN
+        assert next_question._tag_ids_selected == [tag.id]
+        assert next_question._user == user
 
-def test_next_question_tag_not_owned_by_user(user):
-    other_user = User.objects.create(email="otheruser@example.com")
-    other_tag = Tag.objects.create(name="other_tag", user=other_user)
-    
-    with pytest.raises(ValueError) as exc_info:
-        NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[other_tag.id], user=user)
-    assert str(exc_info.value) == f"Tag ids are not owned by user: [{other_tag.id}]."
+    def test_next_question_tag_not_owned_by_user(self, user):
+        other_user = User.objects.create(email="otheruser@example.com")
+        other_tag = Tag.objects.create(name="other_tag", user=other_user)
+        
+        with pytest.raises(ValueError) as exc_info:
+            NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[other_tag.id], user=user)
+        assert str(exc_info.value) == f"Tag ids are not owned by user: [{other_tag.id}]."
 
-def test_next_question_tag_does_not_exist(user):
-    non_existent_tag_id = 9999
-    
-    with pytest.raises(ValueError) as exc_info:
-        NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[non_existent_tag_id], user=user)
-    assert str(exc_info.value) == f"Tag ids do not exist: [{non_existent_tag_id}]."
+    def test_next_question_tag_does_not_exist(self, user):
+        non_existent_tag_id = 9999
+        
+        with pytest.raises(ValueError) as exc_info:
+            NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[non_existent_tag_id], user=user)
+        assert str(exc_info.value) == f"Tag ids do not exist: [{non_existent_tag_id}]."
 
-def test_get_next_question_unseen(user, tag, question):
-    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
-    
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+class TestQueryUnseen:
+    def test_get_next_question_unseen(self, user, tag, question):
+        QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+        
+        next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
 
-    assert next_question.count_questions_before_now == 0
-    assert next_question.count_questions_tagged == 1
-    assert next_question.count_times_question_seen == 0
-    assert next_question.question == question
-    assert next_question.tag_names_selected == [tag.name]
-    assert next_question.tag_names_for_question == [tag.name]
+        assert next_question.count_questions_before_now == 0
+        assert next_question.count_questions_tagged == 1
+        assert next_question.count_times_question_seen == 0
+        assert next_question.question == question
+        assert next_question.tag_names_selected == [tag.name]
+        assert next_question.tag_names_for_question == [tag.name]
 
-def test_get_next_question_unseen_with_schedule(user, tag, question):
-    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
-    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() + timezone.timedelta(days=1))
-    
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-    assert next_question.question is None
-    assert next_question.count_questions_before_now == 0
-    assert next_question.count_questions_tagged == 1
-    assert next_question.count_times_question_seen == 0
-    assert next_question.tag_names_selected == [tag.name]
-    assert next_question.tag_names_for_question == []
+    def test_get_next_question_unseen_with_schedule(self, user, tag, question):
+        QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+        Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() + timezone.timedelta(days=1))
+        
+        next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+        assert next_question.question is None
+        assert next_question.count_questions_before_now == 0
+        assert next_question.count_questions_tagged == 1
+        assert next_question.count_times_question_seen == 0
+        assert next_question.tag_names_selected == [tag.name]
+        assert next_question.tag_names_for_question == []
 
 def test_get_count_questions_before_now(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
@@ -83,68 +85,69 @@ def test_invalid_query_name(user, tag):
         NextQuestion(query_name="invalid", tag_ids_selected=[tag.id], user=user)
     assert str(exc_info.value) == "Invalid query_name: [invalid]"
 
-def test_get_count_recent_schedules(question, tag, user):
-    # Create schedules within the last 30 minutes
-    for _ in range(3):
+class TestCountRecentSchedules:
+    def test_get_count_recent_schedules(self, question, tag, user):
+        # Create schedules within the last 30 minutes
+        for _ in range(3):
+            schedule = Schedule.objects.create(
+                user=user,
+                question=question,
+            )
+            schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=15)
+            schedule.save()
+        
+        # Create schedules within the last 60 minutes but not in the last 30
+        for _ in range(2):
+            schedule = Schedule.objects.create(
+                user=user,
+                question=question,
+            )
+            schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=45)
+            schedule.save()
+        
+        # Create a schedule outside the 60-minute window
         schedule = Schedule.objects.create(
             user=user,
             question=question,
+            datetime_added=timezone.now() - timezone.timedelta(hours=2)
         )
-        schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=15)
+        schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=75)
         schedule.save()
-    
-    # Create schedules within the last 60 minutes but not in the last 30
-    for _ in range(2):
-        schedule = Schedule.objects.create(
-            user=user,
-            question=question,
-        )
-        schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=45)
-        schedule.save()
-    
-    # Create a schedule outside the 60-minute window
-    schedule = Schedule.objects.create(
-        user=user,
-        question=question,
-        datetime_added=timezone.now() - timezone.timedelta(hours=2)
-    )
-    schedule.datetime_added = timezone.now() - timezone.timedelta(minutes=75)
-    schedule.save()
-    
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-    
-    assert next_question.count_recent_seen_mins_30 == 3
-    assert next_question.count_recent_seen_mins_60 == 5
+        
+        next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+        
+        assert next_question.count_recent_seen_mins_30 == 3
+        assert next_question.count_recent_seen_mins_60 == 5
 
-def test_get_count_recent_schedules_empty(user):
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    
-    assert next_question.count_recent_seen_mins_30 == 0
-    assert next_question.count_recent_seen_mins_60 == 0
-    assert next_question.count_times_question_seen == 0
+    def test_get_count_recent_schedules_empty(self, user):
+        next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+        
+        assert next_question.count_recent_seen_mins_30 == 0
+        assert next_question.count_recent_seen_mins_60 == 0
+        assert next_question.count_times_question_seen == 0
 
-def test_get_count_recent_schedules_multiple_users(user, question):
-    # Create schedules for the current user
-    for _ in range(2):
-        Schedule.objects.create(
-            user=user,
-            question=question,
-            datetime_added=timezone.now() - timezone.timedelta(minutes=15)
-        )
-    
-    # Create schedules for another user
-    other_user = User.objects.create(email="otheruser@example.com")
-    for _ in range(3):
-        Schedule.objects.create(
-            user=other_user,
-            question=question,
-            datetime_added=timezone.now() - timezone.timedelta(minutes=15)
-        )
-    
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
-    assert next_question.question is None
-    assert next_question.count_recent_seen_mins_30 == 2
-    assert next_question.count_recent_seen_mins_60 == 2
+    def test_get_count_recent_schedules_multiple_users(self, user, question):
+        # Create schedules for the current user
+        for _ in range(2):
+            Schedule.objects.create(
+                user=user,
+                question=question,
+                datetime_added=timezone.now() - timezone.timedelta(minutes=15)
+            )
+        
+        # Create schedules for another user
+        other_user = User.objects.create(email="otheruser@example.com")
+        for _ in range(3):
+            Schedule.objects.create(
+                user=other_user,
+                question=question,
+                datetime_added=timezone.now() - timezone.timedelta(minutes=15)
+            )
+        
+        next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[], user=user)
+        assert next_question.question is None
+        assert next_question.count_recent_seen_mins_30 == 2
+        assert next_question.count_recent_seen_mins_60 == 2
 
 def test_get_next_question_due_one_question(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
