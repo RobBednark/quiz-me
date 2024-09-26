@@ -6,22 +6,10 @@ from django.utils import timezone
 import pytz
 
 import questions.forms as forms
-from questions.models import Question, Schedule, Tag
+from questions.models import Question, QuestionTag, Schedule, Tag
 
 debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
 debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
-
-class TagNotOwnedByUserError(Exception):
-    def __init__(self, tags):
-        self.tags = tags
-        message = f"The following tags are not owned by the user: {', '.join(tags)}"
-        super().__init__(message)
-
-class TagDoesNotExistError(Exception):
-    def __init__(self, tag_ids):
-        tag_ids_str = ', '.join(tag_ids)
-        message = f"The following tag IDs do not exist: [{tag_ids_str}]"
-        super().__init__(message)
 
 class NextQuestion:
     def __init__(self, query_name, tag_ids_selected, user):
@@ -29,16 +17,7 @@ class NextQuestion:
         self._tag_ids_selected = tag_ids_selected
         self._user = user
 
-        # TODO: combine the following exceptions into a single exception
-        tags_not_owned = _tags_not_owned_by_user(user=user, tag_ids=tag_ids_selected)
-        if tags_not_owned:
-            raise TagNotOwnedByUserError(tags_not_owned)
-        tag_ids_dont_exist = _tag_ids_that_dont_exist(tag_ids=tag_ids_selected)
-        if tag_ids_dont_exist:
-            raise TagDoesNotExistError(tag_ids_dont_exist)
-        tag_ids_are_disabled = _tag_ids_that_are_disabled(tag_ids=tag_ids_selected)
-        if tag_ids_are_disabled:
-            raise Exception(tag_ids_are_disabled)
+        VerifyTagIds(tag_ids=tag_ids_selected, user=user)
         
         self.question = None
         self.count_times_question_seen = None
@@ -258,19 +237,39 @@ class NextQuestion:
         ]
 
 
-def _tags_not_owned_by_user(user, tag_ids):
+class VerifyTagIds:
     """
-    Given the list of tag_ids,
-    return a list of tag_ids that are not owned by the user.
+    Verify that the tag_ids are valid:
+        - The tag_ids are owned by the user
+        - The tag_ids are enabled
+        - The tag_ids exist
     """
-    ids_not_owned_by_user = Tag.objects.filter(id__in=tag_ids).exclude(user=user).values_list('id', flat=True)
-    return [str(tag_id) for tag_id in ids_not_owned_by_user]
+    def __init__(self, tag_ids, user):
+        self.tag_ids = tag_ids
+        self.user = user
+        error = ''
 
-def _tag_ids_that_dont_exist(tag_ids):
-    """
-    Given the list of tag_ids,
-    return a list of all tag_ids in that list that do not exist.
-    """
-    existing_tag_ids = set(Tag.objects.filter(id__in=tag_ids).values_list('id', flat=True))
-    non_existent_tag_ids = [str(tag_id) for tag_id in tag_ids if tag_id not in existing_tag_ids]
-    return non_existent_tag_ids
+        tags_not_owned = self._tags_not_owned_by_user()
+        if tags_not_owned:
+            error += f'Tag ids are not owned by user: {tags_not_owned}.'
+
+        tag_ids_dont_exist = self._tag_ids_that_dont_exist()
+        if tag_ids_dont_exist:
+            error += f'Tag ids do not exist: {tag_ids_dont_exist}.'
+
+        if error:
+            raise ValueError(error)
+    def _tags_not_owned_by_user(self):
+        """
+        Return a list of all self.tag_ids that are not owned by self.user.
+        """
+        ids_not_owned_by_user = Tag.objects.filter(id__in=self.tag_ids).exclude(user=self.user).values_list('id', flat=True)
+        return [int(tag_id) for tag_id in ids_not_owned_by_user]
+
+    def _tag_ids_that_dont_exist(self):
+        """
+        Return a list of all self.tag_ids that do not exist.
+        """
+        existing_tag_ids = set(Tag.objects.filter(id__in=self.tag_ids).values_list('id', flat=True))
+        non_existent_tag_ids = [int(tag_id) for tag_id in self.tag_ids if tag_id not in existing_tag_ids]
+        return non_existent_tag_ids

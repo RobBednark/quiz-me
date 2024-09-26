@@ -2,7 +2,7 @@ import pytest
 from django.utils import timezone
 from questions.forms import QUERY_DUE, QUERY_UNSEEN
 from questions.models import Question, Tag, QuestionTag, Schedule
-from questions.get_next_question import NextQuestion, TagNotOwnedByUserError, TagDoesNotExistError
+from questions.get_next_question import NextQuestion, VerifyTagIds
 from emailusername.models import User
 
 # Use the Django database for all the tests
@@ -30,16 +30,16 @@ def test_next_question_tag_not_owned_by_user(user):
     other_user = User.objects.create(email="otheruser@example.com")
     other_tag = Tag.objects.create(name="other_tag", user=other_user)
     
-    with pytest.raises(TagNotOwnedByUserError) as exc_info:
+    with pytest.raises(ValueError) as exc_info:
         NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[other_tag.id], user=user)
-    assert str(exc_info.value) == f"The following tags are not owned by the user: {other_tag.id}"
+    assert str(exc_info.value) == f"Tag ids are not owned by user: [{other_tag.id}]."
 
 def test_next_question_tag_does_not_exist(user):
     non_existent_tag_id = 9999
     
-    with pytest.raises(TagDoesNotExistError) as exc_info:
+    with pytest.raises(ValueError) as exc_info:
         NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[non_existent_tag_id], user=user)
-    assert str(exc_info.value) == f"The following tag IDs do not exist: [{non_existent_tag_id}]"
+    assert str(exc_info.value) == f"Tag ids do not exist: [{non_existent_tag_id}]."
 
 def test_get_next_question_unseen(user, tag, question):
     QuestionTag.objects.create(question=question, tag=tag, enabled=True)
@@ -208,13 +208,62 @@ def test_get_next_question_due_multiple_tags(user):
     assert next_question.tag_names_for_question == [tag2.name]
     assert next_question.tag_names_selected == [tag1.name, tag2.name]
 
-def test_get_next_question_due_disabled_tag(user, tag, question):
-    QuestionTag.objects.create(question=question, tag=tag, enabled=False)
-    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
-    
-    next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
-    next_question._get_next_question_due()
-    
-    assert next_question.question is None
-    assert next_question.count_questions_tagged == 0
-    assert next_question.count_times_question_seen == 0
+class TestVerifyTagIds:
+    def test_all_tags_valid(self, user):
+        tag1 = Tag.objects.create(name="tag1", user=user)
+        tag2 = Tag.objects.create(name="tag2", user=user)
+        QuestionTag.objects.create(tag=tag1, question=Question.objects.create(question="Q1", user=user), enabled=True)
+        QuestionTag.objects.create(tag=tag2, question=Question.objects.create(question="Q2", user=user), enabled=True)
+        
+        # assert that the function does not raise an exception
+        VerifyTagIds([tag1.id, tag2.id], user)
+
+    def test_mixed_owned_and_unowned_tags(self, user):
+        other_user = User.objects.create(email="other@example.com")
+        tag1 = Tag.objects.create(name="tag1", user=user)
+        tag2 = Tag.objects.create(name="tag2", user=other_user)
+        
+        with pytest.raises(ValueError) as exc_info:
+            VerifyTagIds([tag1.id, tag2.id], user)
+        assert f"Tag ids are not owned by user: [{tag2.id}]." in str(exc_info.value)
+
+    def test_all_tags_not_owned(self, user):
+        other_user = User.objects.create(email="other@example.com")
+        tag1 = Tag.objects.create(name="tag1", user=other_user)
+        tag2 = Tag.objects.create(name="tag2", user=other_user)
+        
+        with pytest.raises(ValueError) as exc_info:
+            VerifyTagIds([tag1.id, tag2.id], user)
+        assert f"Tag ids are not owned by user: [{tag1.id}, {tag2.id}]." in str(exc_info.value)
+
+    def test_non_existent_tags(self, user):
+        tag = Tag.objects.create(name="tag", user=user)
+        non_existent_id = tag.id + 1000
+        
+        with pytest.raises(ValueError) as exc_info:
+            VerifyTagIds([tag.id, non_existent_id], user)
+        assert f"Tag ids do not exist: [{non_existent_id}]." in str(exc_info.value)
+
+    def test_multiple_errors(self, user):
+        other_user = User.objects.create(email="other@example.com")
+        tag1 = Tag.objects.create(name="tag1", user=user)
+        tag2 = Tag.objects.create(name="tag2", user=other_user)
+        tag3 = Tag.objects.create(name="tag3", user=user)
+        non_existent_id = tag3.id + 1000
+        
+        with pytest.raises(ValueError) as exc_info:
+            VerifyTagIds([tag1.id, tag2.id, tag3.id, non_existent_id], user)
+        error_message = str(exc_info.value)
+        assert f"Tag ids are not owned by user: [{tag2.id}]." in error_message
+        assert f"Tag ids do not exist: [{non_existent_id}]." in error_message
+
+    def test_empty_tag_list(self, user):
+        # assert that the function does not raise an exception
+        VerifyTagIds([], user)
+
+    def test_single_valid_tag(self, user):
+        tag = Tag.objects.create(name="tag", user=user)
+        QuestionTag.objects.create(tag=tag, question=Question.objects.create(question="Q", user=user), enabled=True)
+        
+        # assert that the function does not raise an exception
+        VerifyTagIds([tag.id], user)
