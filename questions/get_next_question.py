@@ -18,13 +18,15 @@ class NextQuestion:
 
         VerifyTagIds(tag_ids=tag_ids_selected, user=user)
         
-        self.question = None
-        self.count_times_question_seen = None
         self.count_questions_due = None  # questions due (date_show_next < now); does NOT include unseen questions
         self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
         self.count_questions_tagged = None
         self.count_recent_seen_mins_30 = None  # questions seen in the last 30 minutes
         self.count_recent_seen_mins_60 = None  # questions seen in the last 60 minutes
+        self.count_times_question_seen = None
+        
+        self.question = None
+
         self.tag_names_for_question = None  # list of tag names for the question
         self.tag_names_selected = None  # list of tag names for the tags selected for the query
 
