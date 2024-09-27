@@ -58,7 +58,7 @@ def _render_question(request, query_name, select_tags_url, tag_list):
         template_name='question.html',
         context=dict(
             buttons=BUTTONS,
-            count_questions_before_now=nq.count_questions_before_now,
+            count_questions_due=nq.count_questions_due,
             count_questions_tagged=nq.count_questions_tagged,
             form_flashcard=form_flashcard,
             last_schedule_added=last_schedule_added,

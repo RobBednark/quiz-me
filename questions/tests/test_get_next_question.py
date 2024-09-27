@@ -49,7 +49,7 @@ class Test__QUERY_UNSEEN:
         
         next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
 
-        assert next_question.count_questions_before_now == 0
+        assert next_question.count_questions_due == 0
         assert next_question.count_questions_tagged == 1
         assert next_question.count_times_question_seen == 0
         assert next_question.question == question
@@ -62,20 +62,20 @@ class Test__QUERY_UNSEEN:
         
         next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
         assert next_question.question is None
-        assert next_question.count_questions_before_now == 0
+        assert next_question.count_questions_due == 0
         assert next_question.count_questions_tagged == 1
         assert next_question.count_times_question_seen == 0
         assert next_question.tag_names_selected == [tag.name]
         assert next_question.tag_names_for_question == []
 
-class Test__get_count_questions_before_now:
-    def test_get_count_questions_before_now(self, user, tag, question):
+class Test__get_count_questions_due:
+    def test_get_count_questions_due(self, user, tag, question):
         QuestionTag.objects.create(enabled=True, question=question, tag=tag, user=user)
         Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
         
         next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-        next_question._get_count_questions_before_now()
-        assert next_question.count_questions_before_now == 1
+        next_question._get_count_questions_due()
+        assert next_question.count_questions_due == 1
         assert next_question.count_questions_tagged == 1
         assert next_question.count_times_question_seen == 0
         assert next_question.question is None
@@ -126,7 +126,7 @@ class Test__get_count_questions_before_now:
         
         assert next_question.question == q2_due
         assert next_question.count_questions_tagged == 2
-        assert next_question.count_questions_before_now == 1
+        assert next_question.count_questions_due == 1
         assert next_question.tag_names_for_question == [tag.name]
         assert next_question.tag_names_selected == [tag.name]
 
@@ -321,7 +321,7 @@ class Test__QUERY_DUE:
             next_question_unseen = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
             assert next_question_unseen.question == q3_unseen
             assert next_question_unseen.count_times_question_seen == 0
-            assert next_question_unseen.count_questions_before_now == 1
+            assert next_question_unseen.count_questions_due == 1
             assert next_question_unseen.count_questions_matched_criteria == 1
             assert next_question_unseen.count_questions_tagged == 3
             assert next_question_unseen.count_recent_seen_mins_30 == 1
@@ -334,7 +334,7 @@ class Test__QUERY_DUE:
             next_question_due = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
             assert next_question_due.question == q2_due
             assert next_question_unseen.count_times_question_seen == 2
-            assert next_question_unseen.count_questions_before_now == 1
+            assert next_question_unseen.count_questions_due == 1
             assert next_question_unseen.count_questions_matched_criteria == 1
             assert next_question_unseen.count_questions_tagged == 3
             assert next_question_unseen.count_recent_seen_mins_30 == 1
