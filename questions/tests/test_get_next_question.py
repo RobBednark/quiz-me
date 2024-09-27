@@ -68,18 +68,67 @@ class Test__QUERY_UNSEEN:
         assert next_question.tag_names_selected == [tag.name]
         assert next_question.tag_names_for_question == []
 
-def test_get_count_questions_before_now(user, tag, question):
-    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
-    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
-    
-    next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-    next_question._get_count_questions_before_now()
-    assert next_question.count_questions_before_now == 1
-    assert next_question.count_questions_tagged == 1
-    assert next_question.count_times_question_seen == 0
-    assert next_question.question is None
-    assert next_question.tag_names_for_question == []
-    assert next_question.tag_names_selected == [tag.name]
+class Test__get_count_questions_before_now:
+    def test_get_count_questions_before_now(self, user, tag, question):
+        QuestionTag.objects.create(enabled=True, question=question, tag=tag, user=user)
+        Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+        
+        next_question = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+        next_question._get_count_questions_before_now()
+        assert next_question.count_questions_before_now == 1
+        assert next_question.count_questions_tagged == 1
+        assert next_question.count_times_question_seen == 0
+        assert next_question.question is None
+        assert next_question.tag_names_for_question == []
+        assert next_question.tag_names_selected == [tag.name]
+
+    def test_count_questions_due_using_only_recent_schedule(self, tag, user):
+        q1_not_due = Question.objects.create(question="Question 1", user=user)
+        q2_due = Question.objects.create(question="Question 2", user=user)
+        QuestionTag.objects.create(question=q1_not_due, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q2_due, tag=tag, enabled=True)
+        
+        # Question 1: Old schedule due, newer schedule not due
+        old_sched_due = Schedule.objects.create(
+            user=user,
+            question=q1_not_due,
+            date_show_next=timezone.now() - timezone.timedelta(hours=2) # past
+        )
+        old_sched_due.datetime_added = timezone.now() - timezone.timedelta(weeks=10) # older
+        old_sched_due.save()
+        
+        new_sched_not_due = Schedule.objects.create(
+            user=user,
+            question=q1_not_due,
+            date_show_next=timezone.now() + timezone.timedelta(hours=1) # future
+        )
+        new_sched_not_due.datetime_added = timezone.now() - timezone.timedelta(days=1) # newer
+        new_sched_not_due.save()
+        
+        # Question 2: Old schedule not due, newer schedule due
+        old_sched_not_due = Schedule.objects.create(
+            user=user,
+            question=q2_due,
+            date_show_next=timezone.now() + timezone.timedelta(hours=2) # future
+        )
+        old_sched_not_due.datetime_added = timezone.now() - timezone.timedelta(weeks=10) # older
+        old_sched_not_due.save()
+        
+        new_sched_due = Schedule.objects.create(
+            user=user,
+            question=q2_due,
+            date_show_next=timezone.now() - timezone.timedelta(hours=1) # newer
+        )
+        new_sched_due.datetime_added = timezone.now() - timezone.timedelta(days=1) # past
+        new_sched_due.save()
+        
+        next_question = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
+        
+        assert next_question.question == q2_due
+        assert next_question.count_questions_tagged == 2
+        assert next_question.count_questions_before_now == 1
+        assert next_question.tag_names_for_question == [tag.name]
+        assert next_question.tag_names_selected == [tag.name]
 
 def test_invalid_query_name(user, tag):
     with pytest.raises(ValueError) as exc_info:

@@ -20,7 +20,7 @@ class NextQuestion:
         
         self.question = None
         self.count_times_question_seen = None
-        self.count_questions_before_now = None  # questions due (date_show_next < now)
+        self.count_questions_before_now = None  # questions due (date_show_next < now); does NOT include unseen questions
         self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
         self.count_questions_tagged = None
         self.count_recent_seen_mins_30 = None  # questions seen in the last 30 minutes
@@ -49,8 +49,22 @@ class NextQuestion:
         # Side effects: set this attribute:
         #   self.count_questions_before_now
         now = timezone.now()
-        count = self._queryset__questions_tagged.filter(schedule__date_show_next__lte=now).count()
-        self.count_questions_before_now = count
+        
+         # Subquery to get the most recent schedule for each question
+        question_latest_schedule = Schedule.objects.filter(
+            question=OuterRef('pk'),
+            user=self._user
+        ).order_by('-datetime_added')
+
+        # Annotate questions with their latest schedule's date_show_next
+        questions_with_latest_schedule = self._queryset__questions_tagged.annotate(
+            latest_date_show_next=Subquery(question_latest_schedule.values('date_show_next')[:1])
+        )
+    
+        # Count questions where the latest schedule's date_show_next is less than or equal to now
+        self.count_questions_before_now = questions_with_latest_schedule.filter(
+            latest_date_show_next__lte=now
+        ).count()
     
     def _get_count_recent_seen(self):
         # Side effects: set these attributes:
