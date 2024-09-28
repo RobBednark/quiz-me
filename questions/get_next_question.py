@@ -34,16 +34,6 @@ class NextQuestion:
         self._get_count_questions_due()
         self._get_count_recent_seen()
 
-    def _get_count_times_question_seen(self):
-        # Get the count of schedules for the question
-        # Precondition: self.question has been set
-        # Side effects: set this attribute:
-        #   self.count_times_question_seen
-
-        self.count_times_question_seen = 0
-        if self.question:
-            self.count_times_question_seen = Schedule.objects.filter(question=self.question, user=self._user).count()
-
     def _get_count_questions_due(self):
         # Given self._queryset__questions_tagged,
         # count the number of questions that are scheduled before now.
@@ -79,6 +69,16 @@ class NextQuestion:
         schedules = Schedule.objects.filter(user=self._user)
         self.count_recent_seen_mins_30 = schedules.filter(datetime_added__gte=thirty_minutes_ago).count()
         self.count_recent_seen_mins_60 = schedules.filter(datetime_added__gte=sixty_minutes_ago).count()
+
+    def _get_count_times_question_seen(self):
+        # Get the count of schedules for the question
+        # Precondition: self.question has been set
+        # Side effects: set this attribute:
+        #   self.count_times_question_seen
+
+        self.count_times_question_seen = 0
+        if self.question:
+            self.count_times_question_seen = Schedule.objects.filter(question=self.question, user=self._user).count()
 
     def _get_next_question_due(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., with the newest schedule with a date_show_next in the past.  Of those, find the question with the oldest Schedule.date_show_next.
@@ -160,7 +160,8 @@ class NextQuestion:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()
         self._get_count_times_question_seen()
-    
+   
+  
     def _get_tag_names(self):
         self.tag_names_for_question = []
         if self.question:
