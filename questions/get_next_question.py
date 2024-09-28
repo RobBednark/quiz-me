@@ -32,6 +32,7 @@ class NextQuestion:
 
         self._get_question()
         self._get_count_questions_due()
+        self._get_count_questions_matched_criteria()
         self._get_count_recent_seen()
 
     def _get_count_questions_due(self):
@@ -62,9 +63,10 @@ class NextQuestion:
         if self._query_name == forms.QUERY_DUE:
             # assert: it was already set in _get_count_questions_due()
             pass
-        if self._query_name == forms.QUERY_UNSEEN:
-            self._get_count_questions_matched_criteria_unseen()
-        if self._query_name == forms.QUERY_UNSEEN_THEN_DUE:
+        elif self._query_name == forms.QUERY_UNSEEN:
+            # assert: it was already set in _get_count_questions_unseen()
+            pass
+        elif self._query_name == forms.QUERY_UNSEEN_THEN_DUE:
             self._get_count_questions_matched_criteria_unseen_then_due()
 
     def _get_count_questions_matched_criteria_unseen_then_due(self):
@@ -139,15 +141,6 @@ class NextQuestion:
         self.count_questions_tagged = questions_tagged.count()
         self.count_questions_matched_criteria = scheduled_questions.count()
             
-    def _get_next_question_unseen_then_due(self):
-        # First, try to get an unseen question
-        self._get_next_question_unseen()
-        
-        # If no unseen question is found, try to get a due question
-        if not self.question:
-            self._get_next_question_due()
-        
-
     def _get_next_question_unseen(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
         # Side effects: set the following attributes:
@@ -172,11 +165,20 @@ class NextQuestion:
         self.count_questions_tagged = questions_tagged.count()
         self.count_questions_matched_criteria = unseen_questions.count()
 
-    def _get_question(self):
-        if self._query_name == forms.QUERY_UNSEEN:
-            self._get_next_question_unseen()
-        elif self._query_name == forms.QUERY_DUE:
+    def _get_next_question_unseen_then_due(self):
+        # First, try to get an unseen question
+        self._get_next_question_unseen()
+        if not self.question:
             self._get_next_question_due()
+        
+
+    def _get_question(self):
+        if self._query_name == forms.QUERY_DUE:
+            self._get_next_question_due()
+        elif self._query_name == forms.QUERY_UNSEEN:
+            self._get_next_question_unseen()
+        elif self._query_name == forms.QUERY_UNSEEN_THEN_DUE:
+            self._get_next_question_unseen_then_due()
         else:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()
