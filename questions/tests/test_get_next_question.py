@@ -305,11 +305,11 @@ class TestAllQueryTypesSameData:
         # Sched added = when the schedule was added (relative to now); i.e., Schedule.datetime_added field; e.g., -2d = 2 days before now
 
         # Create questions
-        q1_unseen_older= Question.objects.create(question="Question 3: unseen", user=user)
-        q2_unseen_newer= Question.objects.create(question="Question 3: unseen", user=user)
-        q3_oldest_due = Question.objects.create(question="Question 2: oldest due", user=user)
+        q1_unseen_older= Question.objects.create(question="Question 1: unseen older", user=user)
+        q2_unseen_newer= Question.objects.create(question="Question 2: unseen newer", user=user)
+        q3_oldest_due = Question.objects.create(question="Question 3: oldest due", user=user)
         q4_reinforce = Question.objects.create(question="Question 4: reinforce", user=user)
-        q5_future = Question.objects.create(question="Question 1: not due", user=user)
+        q5_future = Question.objects.create(question="Question 5: future", user=user)
     
         # Create QuestionTags
         QuestionTag.objects.create(question=q1_unseen_older, tag=tag, enabled=True)
@@ -324,13 +324,13 @@ class TestAllQueryTypesSameData:
         COUNT_QUESTIONS_FUTURE = 1
     
         # Create Schedules
-        sched_q1_past = Schedule.objects.create(
+        sched_q5_past = Schedule.objects.create(
             user=user,
             question=q5_future,
             date_show_next=timezone.now() - timezone.timedelta(minutes=3), # past
         )
-        sched_q1_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
-        sched_q1_past.save()
+        sched_q5_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
+        sched_q5_past.save()
         
         sched_q5_future = Schedule.objects.create(
             user=user,
@@ -349,6 +349,7 @@ class TestAllQueryTypesSameData:
         sched_q3_oldest_due.save()
 
         # q1_unseen_older no schedule
+        # q1_unseen_newer no schedule
 
         # q4_reinforce
         sched_q4_reinforce = Schedule.objects.create(
