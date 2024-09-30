@@ -218,20 +218,20 @@ class TestCountRecentSchedules:
         assert nq.count_recent_seen_mins_30 == 2
         assert nq.count_recent_seen_mins_60 == 2
 
-def test_get_nq_due_one_question(user, tag, question):
-    QuestionTag.objects.create(question=question, tag=tag, enabled=True)
-    Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
-    
-    nq = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
-    
-    assert nq.question == question
-    assert nq.count_questions_tagged == 1
-    assert nq.count_times_question_seen == 1
-
-    assert nq.tag_names_for_question == [tag.name]
-    assert nq.tag_names_selected == [tag.name]
-
 class Test__QUERY_DUE:
+    def test_get_nq_due_one_question(self, user, tag, question):
+        QuestionTag.objects.create(question=question, tag=tag, enabled=True)
+        Schedule.objects.create(user=user, question=question, date_show_next=timezone.now() - timezone.timedelta(hours=1))
+        
+        nq = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
+        
+        assert nq.question == question
+        assert nq.count_questions_tagged == 1
+        assert nq.count_times_question_seen == 1
+
+        assert nq.tag_names_for_question == [tag.name]
+        assert nq.tag_names_selected == [tag.name]
+
     def test_get_nq_due_multiple_questions(self, user, tag):
         question1 = Question.objects.create(question="Question 1 : -1h", user=user)
         question2 = Question.objects.create(question="Question 2 : -3h", user=user)
@@ -283,113 +283,113 @@ class Test__QUERY_DUE:
         assert nq.tag_names_for_question == [tag2.name]
         assert nq.tag_names_selected == [tag1.name, tag2.name]
     
-    class TestAllQueryTypesSameData:
+class TestAllQueryTypesSameData:
 
-        def test_different_results_for_query_seen_and_due(self, user, tag):
-            # Create the following test data:
-            #
-            # | Question   | U  | Tags| Q added| S next  |Sched added|
-            # |------------|----|-----|--------|-------- |-----------|
-            # | q1_future  | u1 | tag |        | -3m,+20m|-40m, -10m   |
-            # | q2_due     | u1 | tag |        | -10m    |-20m        |
-            # | q3_unseen  | u1 | tag |        | (none)  | (none)    |
-            #
-            # Notes:
-            # U = User who created the question (i.e., Question.user field)
-            # Tags = tags that are applied to the question via the QuestionTag model
-            # Schedules = schedules associated with the question via the Schedule.question foreign key; the column value refers to the Schedule.date_show_next field; e.g., -1d = 1 day before now
-            # Q added = when the question was added (relative to now); i.e., Question.datetime_added field; e.g., -2d = 2 days before now
-            # S next = Schedule.date_show_next field; e.g., -1d = 1 day before now
-            # Sched added = when the schedule was added (relative to now); i.e., Schedule.datetime_added field; e.g., -2d = 2 days before now
+    def test_different_results_for_query_seen_and_due(self, user, tag):
+        # Create the following test data:
+        #
+        # | Question   | U  | Tags| Q added| S next  |Sched added|
+        # |------------|----|-----|--------|-------- |-----------|
+        # | q1_future  | u1 | tag |        | -3m,+20m|-40m, -10m   |
+        # | q2_due     | u1 | tag |        | -10m    |-20m        |
+        # | q3_unseen  | u1 | tag |        | (none)  | (none)    |
+        #
+        # Notes:
+        # U = User who created the question (i.e., Question.user field)
+        # Tags = tags that are applied to the question via the QuestionTag model
+        # Schedules = schedules associated with the question via the Schedule.question foreign key; the column value refers to the Schedule.date_show_next field; e.g., -1d = 1 day before now
+        # Q added = when the question was added (relative to now); i.e., Question.datetime_added field; e.g., -2d = 2 days before now
+        # S next = Schedule.date_show_next field; e.g., -1d = 1 day before now
+        # Sched added = when the schedule was added (relative to now); i.e., Schedule.datetime_added field; e.g., -2d = 2 days before now
 
-            # Create questions
-            q1_future = Question.objects.create(question="Question 1: not due", user=user)
-            q2_due = Question.objects.create(question="Question 2: due", user=user)
-            q3_unseen = Question.objects.create(question="Question 3: unseen", user=user)
+        # Create questions
+        q1_future = Question.objects.create(question="Question 1: not due", user=user)
+        q2_due = Question.objects.create(question="Question 2: due", user=user)
+        q3_unseen = Question.objects.create(question="Question 3: unseen", user=user)
+    
+        # Create QuestionTags
+        QuestionTag.objects.create(question=q1_future, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q2_due, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q3_unseen, tag=tag, enabled=True)
+    
+        # Create Schedules
+        sched_q1_past = Schedule.objects.create(
+            user=user,
+            question=q1_future,
+            date_show_next=timezone.now() - timezone.timedelta(minutes=3), # past
+        )
+        sched_q1_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
+        sched_q1_past.save()
         
-            # Create QuestionTags
-            QuestionTag.objects.create(question=q1_future, tag=tag, enabled=True)
-            QuestionTag.objects.create(question=q2_due, tag=tag, enabled=True)
-            QuestionTag.objects.create(question=q3_unseen, tag=tag, enabled=True)
-        
-            # Create Schedules
-            sched_q1_past = Schedule.objects.create(
-                user=user,
-                question=q1_future,
-                date_show_next=timezone.now() - timezone.timedelta(minutes=3), # past
-            )
-            sched_q1_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
-            sched_q1_past.save()
-            
-            sched_q1_future = Schedule.objects.create(
-                user=user,
-                question=q1_future,
-                date_show_next=timezone.now() + timezone.timedelta(minutes=20), # future
-            )
-            sched_q1_future.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
-            sched_q1_future.save()
+        sched_q1_future = Schedule.objects.create(
+            user=user,
+            question=q1_future,
+            date_show_next=timezone.now() + timezone.timedelta(minutes=20), # future
+        )
+        sched_q1_future.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
+        sched_q1_future.save()
 
-            sched_q2_due = Schedule.objects.create(
-                user=user,
-                question=q2_due,
-                date_show_next=timezone.now() - timezone.timedelta(minutes=10), # past
-            )
-            sched_q2_due.datetime_added = timezone.now() - timezone.timedelta(minutes=20)
-            sched_q2_due.save()
+        sched_q2_due = Schedule.objects.create(
+            user=user,
+            question=q2_due,
+            date_show_next=timezone.now() - timezone.timedelta(minutes=10), # past
+        )
+        sched_q2_due.datetime_added = timezone.now() - timezone.timedelta(minutes=20)
+        sched_q2_due.save()
 
-            # q3_unseen: no schedule
-        
-            # nq = "next question"
-            # Test QUERY_DUE
-            nq_due = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
-            assert nq_due.question == q2_due
-            assert nq_due.count_times_question_seen == 1
-            assert nq_due.count_questions_due == 1
-            assert nq_due.count_questions_matched_criteria == 1
-            assert nq_due.count_questions_tagged == 3
-            assert nq_due.count_recent_seen_mins_30 == 2
-            assert nq_due.count_recent_seen_mins_60 == 3
-            assert nq_due.tag_names_for_question == [TAG_NAME]
-            assert nq_due.tag_names_selected == [TAG_NAME]
-        
-            # Test QUERY_UNSEEN
-            nq_unseen = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-            assert nq_unseen.question == q3_unseen
-            assert nq_unseen.count_times_question_seen == 0
-            assert nq_unseen.count_questions_due == 1
-            assert nq_unseen.count_questions_matched_criteria == 1
-            assert nq_unseen.count_questions_tagged == 3
-            assert nq_unseen.count_recent_seen_mins_30 == 2
-            assert nq_unseen.count_recent_seen_mins_60 == 3
-            assert nq_unseen.tag_names_for_question == [TAG_NAME]
-            assert nq_unseen.tag_names_selected == [TAG_NAME]
+        # q3_unseen: no schedule
+    
+        # nq = "next question"
+        # Test QUERY_DUE
+        nq_due = NextQuestion(query_name=QUERY_DUE, tag_ids_selected=[tag.id], user=user)
+        assert nq_due.question == q2_due
+        assert nq_due.count_times_question_seen == 1
+        assert nq_due.count_questions_due == 1
+        assert nq_due.count_questions_matched_criteria == 1
+        assert nq_due.count_questions_tagged == 3
+        assert nq_due.count_recent_seen_mins_30 == 2
+        assert nq_due.count_recent_seen_mins_60 == 3
+        assert nq_due.tag_names_for_question == [TAG_NAME]
+        assert nq_due.tag_names_selected == [TAG_NAME]
+    
+        # Test QUERY_UNSEEN
+        nq_unseen = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
+        assert nq_unseen.question == q3_unseen
+        assert nq_unseen.count_times_question_seen == 0
+        assert nq_unseen.count_questions_due == 1
+        assert nq_unseen.count_questions_matched_criteria == 1
+        assert nq_unseen.count_questions_tagged == 3
+        assert nq_unseen.count_recent_seen_mins_30 == 2
+        assert nq_unseen.count_recent_seen_mins_60 == 3
+        assert nq_unseen.tag_names_for_question == [TAG_NAME]
+        assert nq_unseen.tag_names_selected == [TAG_NAME]
 
-            # Test QUERY_UNSEEN_THEN_DUE
-            nq_unseen_then_due = NextQuestion(query_name=QUERY_UNSEEN_THEN_DUE, tag_ids_selected=[tag.id], user=user)
-            assert nq_unseen_then_due.question == q3_unseen
-            assert nq_unseen_then_due.count_times_question_seen == 0
-            assert nq_unseen_then_due.count_questions_due == 1
-            assert nq_unseen_then_due.count_questions_matched_criteria == 2
-            assert nq_unseen_then_due.count_questions_tagged == 3
-            assert nq_unseen_then_due.count_recent_seen_mins_30 == 2
-            assert nq_unseen_then_due.count_recent_seen_mins_60 == 3
-            assert nq_unseen_then_due.tag_names_for_question == [TAG_NAME]
-            assert nq_unseen_then_due.tag_names_selected == [TAG_NAME]
-            
-            # Test QUERY_FUTURE
-            nq_future = NextQuestion(query_name=QUERY_FUTURE, tag_ids_selected=[tag.id], user=user)
-            assert nq_future.question == q1_future
-            assert nq_future.count_times_question_seen == 2
-            assert nq_future.count_questions_due == 1
-            assert nq_future.count_questions_matched_criteria == 1
-            assert nq_future.count_questions_tagged == 3
-            assert nq_future.count_recent_seen_mins_30 == 2
-            assert nq_future.count_recent_seen_mins_60 == 3
-            assert nq_future.tag_names_for_question == [TAG_NAME]
-            assert nq_future.tag_names_selected == [TAG_NAME]
-            
-            # Verify different results
-            assert nq_unseen.question != nq_due.question
-            assert nq_unseen.question == nq_unseen_then_due.question
-            assert nq_future.question != nq_unseen_then_due.question
-            assert nq_future.question != nq_due.question
+        # Test QUERY_UNSEEN_THEN_DUE
+        nq_unseen_then_due = NextQuestion(query_name=QUERY_UNSEEN_THEN_DUE, tag_ids_selected=[tag.id], user=user)
+        assert nq_unseen_then_due.question == q3_unseen
+        assert nq_unseen_then_due.count_times_question_seen == 0
+        assert nq_unseen_then_due.count_questions_due == 1
+        assert nq_unseen_then_due.count_questions_matched_criteria == 2
+        assert nq_unseen_then_due.count_questions_tagged == 3
+        assert nq_unseen_then_due.count_recent_seen_mins_30 == 2
+        assert nq_unseen_then_due.count_recent_seen_mins_60 == 3
+        assert nq_unseen_then_due.tag_names_for_question == [TAG_NAME]
+        assert nq_unseen_then_due.tag_names_selected == [TAG_NAME]
+        
+        # Test QUERY_FUTURE
+        nq_future = NextQuestion(query_name=QUERY_FUTURE, tag_ids_selected=[tag.id], user=user)
+        assert nq_future.question == q1_future
+        assert nq_future.count_times_question_seen == 2
+        assert nq_future.count_questions_due == 1
+        assert nq_future.count_questions_matched_criteria == 1
+        assert nq_future.count_questions_tagged == 3
+        assert nq_future.count_recent_seen_mins_30 == 2
+        assert nq_future.count_recent_seen_mins_60 == 3
+        assert nq_future.tag_names_for_question == [TAG_NAME]
+        assert nq_future.tag_names_selected == [TAG_NAME]
+        
+        # Verify different results
+        assert nq_unseen.question != nq_due.question
+        assert nq_unseen.question == nq_unseen_then_due.question
+        assert nq_future.question != nq_unseen_then_due.question
+        assert nq_future.question != nq_due.question
