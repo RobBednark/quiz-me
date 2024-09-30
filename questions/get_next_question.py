@@ -3,7 +3,7 @@ import os
 from django.db.models import OuterRef, Q, Subquery
 from django.utils import timezone
 
-from questions.forms import QUERY_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_UNSEEN_THEN_DUE
+from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_UNSEEN_THEN_OLDEST_DUE
 from questions.models import Question, Schedule, Tag
 from questions.VerifyTagIds import VerifyTagIds
 
@@ -60,18 +60,18 @@ class NextQuestion:
         ).count()
     
     def _get_count_questions_matched_criteria(self):
-        if self._query_name in [QUERY_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
+        if self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
             # assert: it was already set in _get_count_questions_due()
             pass
         elif self._query_name == QUERY_UNSEEN:
             # assert: it was already set in _get_count_questions_unseen()
             pass
-        elif self._query_name == QUERY_UNSEEN_THEN_DUE:
-            self._get_count_questions_matched_criteria_unseen_then_due()
+        elif self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE:
+            self._get_count_questions_matched_criteria_unseen_then_oldest_due()
         else:
             raise ValueError(f'Invalid query name in _get_count_questions_matched_criteria: [{self._query_name}]')
 
-    def _get_count_questions_matched_criteria_unseen_then_due(self):
+    def _get_count_questions_matched_criteria_unseen_then_oldest_due(self):
         now = timezone.now()
         
         # Subquery to get the most recent schedule for each question
@@ -135,7 +135,7 @@ class NextQuestion:
                      .order_by('-datetime_added'))
         # Only use the newest schedule for each question
         scheduled_questions = scheduled_questions.annotate(date_show_next=Subquery(schedules_for_question[:1].values('date_show_next')))
-        if self._query_name in [QUERY_DUE, QUERY_REINFORCE]:
+        if self._query_name in [QUERY_OLDEST_DUE, QUERY_REINFORCE]:
             subquery_by_date_show_next = Q(date_show_next__lte=timezone.now())
         elif self._query_name == QUERY_FUTURE:
             subquery_by_date_show_next = Q(date_show_next__gt=timezone.now())
@@ -176,7 +176,7 @@ class NextQuestion:
         self.count_questions_tagged = questions_tagged.count()
         self.count_questions_matched_criteria = unseen_questions.count()
 
-    def _get_next_question_unseen_then_due(self):
+    def _get_next_question_unseen_then_oldest_due(self):
         # First, try to get an unseen question
         self._get_next_question_unseen()
         if not self.question:
@@ -184,12 +184,12 @@ class NextQuestion:
         
 
     def _get_question(self):
-        if self._query_name in [QUERY_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
+        if self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
             self._get_next_question_due()
         elif self._query_name == QUERY_UNSEEN:
             self._get_next_question_unseen()
-        elif self._query_name == QUERY_UNSEEN_THEN_DUE:
-            self._get_next_question_unseen_then_due()
+        elif self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE:
+            self._get_next_question_unseen_then_oldest_due()
         else:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()
