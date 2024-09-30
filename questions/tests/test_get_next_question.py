@@ -288,12 +288,13 @@ class TestAllQueryTypesSameData:
     def test_different_results_for_query_seen_and_due(self, user, tag):
         # Create the following test data:
         #
-        # | Question    | U  | Tags| Q added| S next  |Sched added|
-        # |-------------|----|-----|--------|-------- |-----------|
-        # | q1_future   | u1 | tag |        | -3m,+20m|-40m, -10m |
-        # | q2_oldest_due      | u1 | tag |        | -10m    |-20m       |
-        # | q3_unseen   | u1 | tag |        | (none)  | (none)    |
-        # | q4_reinforce| u1 | tag |        | -5m     |-2h        |
+        # | Question       | U  | Tags| Q added| S next  |Sched added|
+        # |----------------|----|-----|--------|-------- |-----------|
+        # | q1_unseen_older| u1 | tag |        | (none)  | (none)    |
+        # | q2_unseen_newer| u1 | tag |        | (none)  | (none)    |
+        # | q3_oldest_due  | u1 | tag |        | -10m    |-20m       |
+        # | q4_reinforce   | u1 | tag |        | -5m     |-2h        |
+        # | q5_future      | u1 | tag |        | -3m,+20m|-40m, -10m |
         #
         # Notes:
         # U = User who created the question (i.e., Question.user field)
@@ -304,43 +305,43 @@ class TestAllQueryTypesSameData:
         # Sched added = when the schedule was added (relative to now); i.e., Schedule.datetime_added field; e.g., -2d = 2 days before now
 
         # Create questions
-        q1_future = Question.objects.create(question="Question 1: not due", user=user)
-        q2_oldest_due = Question.objects.create(question="Question 2: oldest due", user=user)
-        q3_unseen = Question.objects.create(question="Question 3: unseen", user=user)
+        q5_future = Question.objects.create(question="Question 1: not due", user=user)
+        q3_oldest_due = Question.objects.create(question="Question 2: oldest due", user=user)
+        q1_unseen_older= Question.objects.create(question="Question 3: unseen", user=user)
         q4_reinforce = Question.objects.create(question="Question 4: reinforce", user=user)
     
         # Create QuestionTags
-        QuestionTag.objects.create(question=q1_future, tag=tag, enabled=True)
-        QuestionTag.objects.create(question=q2_oldest_due, tag=tag, enabled=True)
-        QuestionTag.objects.create(question=q3_unseen, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q5_future, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q3_oldest_due, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q1_unseen_older, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q4_reinforce, tag=tag, enabled=True)
     
         # Create Schedules
         sched_q1_past = Schedule.objects.create(
             user=user,
-            question=q1_future,
+            question=q5_future,
             date_show_next=timezone.now() - timezone.timedelta(minutes=3), # past
         )
         sched_q1_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
         sched_q1_past.save()
         
-        sched_q1_future = Schedule.objects.create(
+        sched_q5_future = Schedule.objects.create(
             user=user,
-            question=q1_future,
+            question=q5_future,
             date_show_next=timezone.now() + timezone.timedelta(minutes=20), # future
         )
-        sched_q1_future.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
-        sched_q1_future.save()
+        sched_q5_future.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
+        sched_q5_future.save()
 
-        sched_q2_oldest_due = Schedule.objects.create(
+        sched_q3_oldest_due = Schedule.objects.create(
             user=user,
-            question=q2_oldest_due,
+            question=q3_oldest_due,
             date_show_next=timezone.now() - timezone.timedelta(minutes=10), # past
         )
-        sched_q2_oldest_due.datetime_added = timezone.now() - timezone.timedelta(minutes=20)
-        sched_q2_oldest_due.save()
+        sched_q3_oldest_due.datetime_added = timezone.now() - timezone.timedelta(minutes=20)
+        sched_q3_oldest_due.save()
 
-        # q3_unseen: no schedule
+        # q1_unseen_older no schedule
 
         # q4_reinforce
         sched_q4_reinforce = Schedule.objects.create(
@@ -355,7 +356,7 @@ class TestAllQueryTypesSameData:
         # nq = "next question"
         # Test QUERY_OLDEST_DUE
         nq_oldest_due = NextQuestion(query_name=QUERY_OLDEST_DUE, tag_ids_selected=[tag.id], user=user)
-        assert nq_oldest_due.question == q2_oldest_due
+        assert nq_oldest_due.question == q3_oldest_due
         assert nq_oldest_due.count_times_question_seen == 1
         assert nq_oldest_due.count_questions_due == 2
         assert nq_oldest_due.count_questions_matched_criteria == 2
@@ -367,7 +368,7 @@ class TestAllQueryTypesSameData:
     
         # Test QUERY_UNSEEN
         nq_unseen = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
-        assert nq_unseen.question == q3_unseen
+        assert nq_unseen.question == q1_unseen_older
         assert nq_unseen.count_times_question_seen == 0
         assert nq_unseen.count_questions_due == 2
         assert nq_unseen.count_questions_matched_criteria == 1
@@ -379,7 +380,7 @@ class TestAllQueryTypesSameData:
 
         # Test QUERY_UNSEEN_THEN_OLDEST_DUE
         nq_unseen_then_oldest_due = NextQuestion(query_name=QUERY_UNSEEN_THEN_OLDEST_DUE, tag_ids_selected=[tag.id], user=user)
-        assert nq_unseen_then_oldest_due.question == q3_unseen
+        assert nq_unseen_then_oldest_due.question == q1_unseen_older
         assert nq_unseen_then_oldest_due.count_times_question_seen == 0
         assert nq_unseen_then_oldest_due.count_questions_due == 2
         assert nq_unseen_then_oldest_due.count_questions_matched_criteria == 3
@@ -391,7 +392,7 @@ class TestAllQueryTypesSameData:
         
         # Test QUERY_FUTURE
         nq_future = NextQuestion(query_name=QUERY_FUTURE, tag_ids_selected=[tag.id], user=user)
-        assert nq_future.question == q1_future
+        assert nq_future.question == q5_future
         assert nq_future.count_times_question_seen == 2
         assert nq_future.count_questions_due == 2
         assert nq_future.count_questions_matched_criteria == 1
