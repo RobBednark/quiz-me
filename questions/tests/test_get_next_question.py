@@ -1,6 +1,6 @@
 import pytest
 from django.utils import timezone
-from questions.forms import QUERY_DUE, QUERY_UNSEEN, QUERY_UNSEEN_THEN_DUE
+from questions.forms import QUERY_DUE, QUERY_FUTURE, QUERY_UNSEEN, QUERY_UNSEEN_THEN_DUE
 from questions.models import Question, Tag, QuestionTag, Schedule
 from questions.get_next_question import NextQuestion
 from emailusername.models import User
@@ -290,7 +290,7 @@ class Test__QUERY_DUE:
             #
             # | Question   | U  | Tags| Q added| S next  |Sched added|
             # |------------|----|-----|--------|-------- |-----------|
-            # | q1_not_due | u1 | tag |        | -3m,+20m|-40m, -10m   |
+            # | q1_future  | u1 | tag |        | -3m,+20m|-40m, -10m   |
             # | q2_due     | u1 | tag |        | -10m    |-20m        |
             # | q3_unseen  | u1 | tag |        | (none)  | (none)    |
             #
@@ -303,19 +303,19 @@ class Test__QUERY_DUE:
             # Sched added = when the schedule was added (relative to now); i.e., Schedule.datetime_added field; e.g., -2d = 2 days before now
 
             # Create questions
-            q1_not_due = Question.objects.create(question="Question 1: not due", user=user)
+            q1_future = Question.objects.create(question="Question 1: not due", user=user)
             q2_due = Question.objects.create(question="Question 2: due", user=user)
             q3_unseen = Question.objects.create(question="Question 3: unseen", user=user)
         
             # Create QuestionTags
-            QuestionTag.objects.create(question=q1_not_due, tag=tag, enabled=True)
+            QuestionTag.objects.create(question=q1_future, tag=tag, enabled=True)
             QuestionTag.objects.create(question=q2_due, tag=tag, enabled=True)
             QuestionTag.objects.create(question=q3_unseen, tag=tag, enabled=True)
         
             # Create Schedules
             sched_q1_past = Schedule.objects.create(
                 user=user,
-                question=q1_not_due,
+                question=q1_future,
                 date_show_next=timezone.now() - timezone.timedelta(minutes=3), # past
             )
             sched_q1_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
@@ -323,7 +323,7 @@ class Test__QUERY_DUE:
             
             sched_q1_future = Schedule.objects.create(
                 user=user,
-                question=q1_not_due,
+                question=q1_future,
                 date_show_next=timezone.now() + timezone.timedelta(minutes=20), # future
             )
             sched_q1_future.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
@@ -376,6 +376,20 @@ class Test__QUERY_DUE:
             assert nq_unseen_then_due.tag_names_for_question == [TAG_NAME]
             assert nq_unseen_then_due.tag_names_selected == [TAG_NAME]
             
+            # Test QUERY_FUTURE
+            nq_future = NextQuestion(query_name=QUERY_FUTURE, tag_ids_selected=[tag.id], user=user)
+            assert nq_future.question == q1_future
+            assert nq_future.count_times_question_seen == 2
+            assert nq_future.count_questions_due == 1
+            assert nq_future.count_questions_matched_criteria == 1
+            assert nq_future.count_questions_tagged == 3
+            assert nq_future.count_recent_seen_mins_30 == 2
+            assert nq_future.count_recent_seen_mins_60 == 3
+            assert nq_future.tag_names_for_question == [TAG_NAME]
+            assert nq_future.tag_names_selected == [TAG_NAME]
+            
             # Verify different results
             assert nq_unseen.question != nq_due.question
             assert nq_unseen.question == nq_unseen_then_due.question
+            assert nq_future.question != nq_unseen_then_due.question
+            assert nq_future.question != nq_due.question
