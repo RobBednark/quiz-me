@@ -17,7 +17,7 @@ QUERY_UNSEEN_THEN_DUE_THEN_FUTURE = 'UNSEEN, DUE, FUTURE'
 
 QUERY_CHOICES = (
     (QUERY_UNSEEN, f'{QUERY_UNSEEN}: ordered by date created ascending'),
-    # (QUERY_REINFORCE, f'{QUERY_REINFORCE}: notes due before now, ordered by date seen descending'),
+    (QUERY_REINFORCE, f'{QUERY_REINFORCE}: notes due before now, ordered by date seen descending'),
     (QUERY_DUE, f'{QUERY_DUE}: notes due before now, ordered by due date ascending'),
     (QUERY_FUTURE, f'{QUERY_FUTURE}: notes due after now, ordered by due date ascending'),
     # (QUERY_ANSWERED_COUNT, f'{QUERY_ANSWERED_COUNT}: ordered by # times seen, ascending (NOTE: this will see all notes)'),
@@ -25,7 +25,7 @@ QUERY_CHOICES = (
     # (QUERY_UNSEEN_BY_TAG, f'{QUERY_UNSEEN_BY_TAG}: get the oldest last_seen date for each tag; show the unseen note for the tag with the oldest last_seen date (tags with notes but no schedules are shown first, ordered by date created ascending)'),
     # (QUERY_REINFORCE_THEN_UNSEEN, f'{QUERY_REINFORCE_THEN_UNSEEN}: REINFORCE, then UNSEEN'),
     # (QUERY_REINFORCE_THEN_UNSEEN_THEN_FUTURE, f'{QUERY_REINFORCE_THEN_UNSEEN_THEN_FUTURE}: REINFORCE, then UNSEEN, then FUTURE'),
-    # (QUERY_UNSEEN_THEN_DUE, f'{QUERY_UNSEEN_THEN_DUE}: UNSEEN, then DUE'),
+    (QUERY_UNSEEN_THEN_DUE, f'{QUERY_UNSEEN_THEN_DUE}: UNSEEN, then DUE'),
     # (QUERY_UNSEEN_THEN_DUE_THEN_FUTURE, f'{QUERY_UNSEEN_THEN_DUE_THEN_FUTURE}: UNSEEN, then DUE, then FUTURE'),
 )
 

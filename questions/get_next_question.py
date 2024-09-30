@@ -3,7 +3,7 @@ import os
 from django.db.models import OuterRef, Q, Subquery
 from django.utils import timezone
 
-from questions.forms import QUERY_DUE, QUERY_FUTURE, QUERY_UNSEEN, QUERY_UNSEEN_THEN_DUE
+from questions.forms import QUERY_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_UNSEEN_THEN_DUE
 from questions.models import Question, Schedule, Tag
 from questions.VerifyTagIds import VerifyTagIds
 
@@ -60,7 +60,7 @@ class NextQuestion:
         ).count()
     
     def _get_count_questions_matched_criteria(self):
-        if self._query_name in [QUERY_DUE, QUERY_FUTURE]:
+        if self._query_name in [QUERY_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
             # assert: it was already set in _get_count_questions_due()
             pass
         elif self._query_name == QUERY_UNSEEN:
@@ -135,7 +135,7 @@ class NextQuestion:
                      .order_by('-datetime_added'))
         # Only use the newest schedule for each question
         scheduled_questions = scheduled_questions.annotate(date_show_next=Subquery(schedules_for_question[:1].values('date_show_next')))
-        if self._query_name == QUERY_DUE:
+        if self._query_name in [QUERY_DUE, QUERY_REINFORCE]:
             subquery_by_date_show_next = Q(date_show_next__lte=timezone.now())
         elif self._query_name == QUERY_FUTURE:
             subquery_by_date_show_next = Q(date_show_next__gt=timezone.now())
@@ -143,7 +143,10 @@ class NextQuestion:
             raise ValueError(f"Unknown query name for get_next_question_due: [{self._query_name}]")
         scheduled_questions = scheduled_questions.filter(subquery_by_date_show_next)
         scheduled_questions = scheduled_questions.distinct()
-        scheduled_questions = scheduled_questions.order_by('date_show_next')
+        if self._query_name == QUERY_REINFORCE:
+            scheduled_questions = scheduled_questions.order_by('-date_show_next')
+        else:
+            scheduled_questions = scheduled_questions.order_by('date_show_next')
 
         self.question = scheduled_questions.first()
         self.count_questions_tagged = questions_tagged.count()
@@ -181,8 +184,7 @@ class NextQuestion:
         
 
     def _get_question(self):
-        if (self._query_name == QUERY_DUE) or \
-           (self._query_name == QUERY_FUTURE):
+        if self._query_name in [QUERY_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
             self._get_next_question_due()
         elif self._query_name == QUERY_UNSEEN:
             self._get_next_question_unseen()
