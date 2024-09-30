@@ -310,7 +310,8 @@ class TestAllQueryTypesSameData:
         q2_unseen_newer= Question.objects.create(question="Question 2: unseen newer", user=user)
         q3_oldest_due = Question.objects.create(question="Question 3: oldest due", user=user)
         q4_reinforce = Question.objects.create(question="Question 4: reinforce", user=user)
-        q5_future_oldest_due = Question.objects.create(question="Question 5: future", user=user)
+        q5_future_oldest_due = Question.objects.create(question="Question 5: future oldest", user=user)
+        q6_future_newest_due = Question.objects.create(question="Question 6: future newest", user=user)
     
         # Create QuestionTags
         QuestionTag.objects.create(question=q1_unseen_older, tag=tag, enabled=True)
@@ -318,11 +319,14 @@ class TestAllQueryTypesSameData:
         QuestionTag.objects.create(question=q3_oldest_due, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q4_reinforce, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q5_future_oldest_due, tag=tag, enabled=True)
-        COUNT_QUESTIONS_WITH_TAG = 5
+        QuestionTag.objects.create(question=q6_future_newest_due, tag=tag, enabled=True)
+        COUNT_QUESTIONS_WITH_TAG = 6
         COUNT_QUESTIONS_UNSEEN = 2
         COUNT_QUESTIONS_DUE = 2
         COUNT_QUESTIONS_UNSEEN_AND_DUE = COUNT_QUESTIONS_DUE + COUNT_QUESTIONS_UNSEEN
-        COUNT_QUESTIONS_FUTURE = 1
+        COUNT_QUESTIONS_FUTURE = 2
+        COUNT_RECENT_SEEN_MINS_30 = 3
+        COUNT_RECENT_SEEN_MINS_60 = 4
     
         # Create Schedules
         sched_q5_past = Schedule.objects.create(
@@ -340,6 +344,14 @@ class TestAllQueryTypesSameData:
         )
         sched_q5_future_oldest_due.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
         sched_q5_future_oldest_due.save()
+
+        sched_q6_future_newest_due = Schedule.objects.create(
+            user=user,
+            question=q6_future_newest_due,
+            date_show_next=timezone.now() + timezone.timedelta(weeks=20), # future
+        )
+        sched_q6_future_newest_due.datetime_added = timezone.now() - timezone.timedelta(seconds=1)
+        sched_q6_future_newest_due.save()
 
         sched_q3_oldest_due = Schedule.objects.create(
             user=user,
@@ -367,11 +379,11 @@ class TestAllQueryTypesSameData:
         nq_oldest_due = NextQuestion(query_name=QUERY_OLDEST_DUE, tag_ids_selected=[tag.id], user=user)
         assert nq_oldest_due.question == q3_oldest_due
         assert nq_oldest_due.count_times_question_seen == 1
-        assert nq_oldest_due.count_questions_due == 2
+        assert nq_oldest_due.count_questions_due == COUNT_QUESTIONS_DUE
         assert nq_oldest_due.count_questions_matched_criteria == COUNT_QUESTIONS_DUE
         assert nq_oldest_due.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
-        assert nq_oldest_due.count_recent_seen_mins_30 == 2
-        assert nq_oldest_due.count_recent_seen_mins_60 == 3
+        assert nq_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_oldest_due.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
         assert nq_oldest_due.tag_names_for_question == [TAG_NAME]
         assert nq_oldest_due.tag_names_selected == [TAG_NAME]
     
@@ -379,11 +391,11 @@ class TestAllQueryTypesSameData:
         nq_unseen = NextQuestion(query_name=QUERY_UNSEEN, tag_ids_selected=[tag.id], user=user)
         assert nq_unseen.question == q1_unseen_older
         assert nq_unseen.count_times_question_seen == 0
-        assert nq_unseen.count_questions_due == 2
+        assert nq_unseen.count_questions_due == COUNT_QUESTIONS_DUE
         assert nq_unseen.count_questions_matched_criteria == COUNT_QUESTIONS_UNSEEN
         assert nq_unseen.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
-        assert nq_unseen.count_recent_seen_mins_30 == 2
-        assert nq_unseen.count_recent_seen_mins_60 == 3
+        assert nq_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_unseen.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
         assert nq_unseen.tag_names_for_question == [TAG_NAME]
         assert nq_unseen.tag_names_selected == [TAG_NAME]
 
@@ -391,11 +403,11 @@ class TestAllQueryTypesSameData:
         nq_unseen_then_oldest_due = NextQuestion(query_name=QUERY_UNSEEN_THEN_OLDEST_DUE, tag_ids_selected=[tag.id], user=user)
         assert nq_unseen_then_oldest_due.question == q1_unseen_older
         assert nq_unseen_then_oldest_due.count_times_question_seen == 0
-        assert nq_unseen_then_oldest_due.count_questions_due == 2
+        assert nq_unseen_then_oldest_due.count_questions_due == COUNT_QUESTIONS_DUE
         assert nq_unseen_then_oldest_due.count_questions_matched_criteria == COUNT_QUESTIONS_UNSEEN_AND_DUE
         assert nq_unseen_then_oldest_due.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
-        assert nq_unseen_then_oldest_due.count_recent_seen_mins_30 == 2
-        assert nq_unseen_then_oldest_due.count_recent_seen_mins_60 == 3
+        assert nq_unseen_then_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_unseen_then_oldest_due.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
         assert nq_unseen_then_oldest_due.tag_names_for_question == [TAG_NAME]
         assert nq_unseen_then_oldest_due.tag_names_selected == [TAG_NAME]
         
@@ -403,11 +415,11 @@ class TestAllQueryTypesSameData:
         nq_future = NextQuestion(query_name=QUERY_FUTURE, tag_ids_selected=[tag.id], user=user)
         assert nq_future.question == q5_future_oldest_due
         assert nq_future.count_times_question_seen == 2
-        assert nq_future.count_questions_due == 2
+        assert nq_future.count_questions_due == COUNT_QUESTIONS_DUE
         assert nq_future.count_questions_matched_criteria == COUNT_QUESTIONS_FUTURE
         assert nq_future.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
-        assert nq_future.count_recent_seen_mins_30 == 2
-        assert nq_future.count_recent_seen_mins_60 == 3
+        assert nq_future.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_future.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
         assert nq_future.tag_names_for_question == [TAG_NAME]
         assert nq_future.tag_names_selected == [TAG_NAME]
         
@@ -415,11 +427,11 @@ class TestAllQueryTypesSameData:
         nq_reinforce = NextQuestion(query_name=QUERY_REINFORCE, tag_ids_selected=[tag.id], user=user)
         assert nq_reinforce.question == q4_reinforce
         assert nq_reinforce.count_times_question_seen == 1
-        assert nq_reinforce.count_questions_due == 2
+        assert nq_reinforce.count_questions_due == COUNT_QUESTIONS_DUE
         assert nq_reinforce.count_questions_matched_criteria == COUNT_QUESTIONS_DUE
         assert nq_reinforce.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
-        assert nq_reinforce.count_recent_seen_mins_30 == 2
-        assert nq_reinforce.count_recent_seen_mins_60 == 3
+        assert nq_reinforce.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_reinforce.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
         assert nq_reinforce.tag_names_for_question == [TAG_NAME]
         assert nq_reinforce.tag_names_selected == [TAG_NAME]
         
