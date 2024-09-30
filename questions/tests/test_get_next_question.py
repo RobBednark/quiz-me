@@ -288,13 +288,14 @@ class TestAllQueryTypesSameData:
     def test_different_results_for_query_seen_and_due(self, user, tag):
         # Create the following test data:
         #
-        # | Question       | U  | Tags| Q added| S next  |Sched added|
-        # |----------------|----|-----|--------|-------- |-----------|
-        # | q1_unseen_older| u1 | tag | -2s    | (none)  | (none)    |
-        # | q2_unseen_newer| u1 | tag | -1s    | (none)  | (none)    |
-        # | q3_oldest_due  | u1 | tag |        | -10m    |-20m       |
-        # | q4_reinforce   | u1 | tag |        | -5m     |-2h        |
-        # | q5_future      | u1 | tag |        | -3m,+20m|-40m, -10m |
+        # | Question            | U  | Tags| Q added| S next  |Sched added|
+        # |---------------------|----|-----|--------|-------- |-----------|
+        # | q1_unseen_older     | u1 | tag | -2s    | (none)  | (none)    |
+        # | q2_unseen_newer     | u1 | tag | -1s    | (none)  | (none)    |
+        # | q3_oldest_due       | u1 | tag |        | -10m    |-20m       |
+        # | q4_reinforce        | u1 | tag |        | -5m     |-2h        |
+        # | q5_future_oldest_due| u1 | tag | -2s    | -3m,+20m|-40m, -10m |
+        # | q6_future_newest_due| u1 | tag | -1s    | +1w     |-1s        |
         #
         # Notes:
         # U = User who created the question (i.e., Question.user field)
@@ -309,14 +310,14 @@ class TestAllQueryTypesSameData:
         q2_unseen_newer= Question.objects.create(question="Question 2: unseen newer", user=user)
         q3_oldest_due = Question.objects.create(question="Question 3: oldest due", user=user)
         q4_reinforce = Question.objects.create(question="Question 4: reinforce", user=user)
-        q5_future = Question.objects.create(question="Question 5: future", user=user)
+        q5_future_oldest_due = Question.objects.create(question="Question 5: future", user=user)
     
         # Create QuestionTags
         QuestionTag.objects.create(question=q1_unseen_older, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q2_unseen_newer, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q3_oldest_due, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q4_reinforce, tag=tag, enabled=True)
-        QuestionTag.objects.create(question=q5_future, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q5_future_oldest_due, tag=tag, enabled=True)
         COUNT_QUESTIONS_WITH_TAG = 5
         COUNT_QUESTIONS_UNSEEN = 2
         COUNT_QUESTIONS_DUE = 2
@@ -326,19 +327,19 @@ class TestAllQueryTypesSameData:
         # Create Schedules
         sched_q5_past = Schedule.objects.create(
             user=user,
-            question=q5_future,
+            question=q5_future_oldest_due,
             date_show_next=timezone.now() - timezone.timedelta(minutes=3), # past
         )
         sched_q5_past.datetime_added = timezone.now() - timezone.timedelta(minutes=40)
         sched_q5_past.save()
         
-        sched_q5_future = Schedule.objects.create(
+        sched_q5_future_oldest_due = Schedule.objects.create(
             user=user,
-            question=q5_future,
+            question=q5_future_oldest_due,
             date_show_next=timezone.now() + timezone.timedelta(minutes=20), # future
         )
-        sched_q5_future.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
-        sched_q5_future.save()
+        sched_q5_future_oldest_due.datetime_added = timezone.now() - timezone.timedelta(minutes=10)
+        sched_q5_future_oldest_due.save()
 
         sched_q3_oldest_due = Schedule.objects.create(
             user=user,
@@ -400,7 +401,7 @@ class TestAllQueryTypesSameData:
         
         # Test QUERY_FUTURE
         nq_future = NextQuestion(query_name=QUERY_FUTURE, tag_ids_selected=[tag.id], user=user)
-        assert nq_future.question == q5_future
+        assert nq_future.question == q5_future_oldest_due
         assert nq_future.count_times_question_seen == 2
         assert nq_future.count_questions_due == 2
         assert nq_future.count_questions_matched_criteria == COUNT_QUESTIONS_FUTURE
