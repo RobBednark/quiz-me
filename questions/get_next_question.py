@@ -133,22 +133,33 @@ class NextQuestion:
         schedules_for_question = (Schedule.objects
                      .filter(user=self._user, question=OuterRef('pk'))
                      .order_by('-datetime_added'))
+
         # Only use the newest schedule for each question
         scheduled_questions = scheduled_questions.annotate(date_show_next=Subquery(schedules_for_question[:1].values('date_show_next')))
+
+        scheduled_questions = scheduled_questions.annotate(sched_date_added=Subquery(schedules_for_question[:1].values('datetime_added')))
+
+
         if self._query_name in [QUERY_OLDEST_DUE, QUERY_REINFORCE]:
             subquery_by_date_show_next = Q(date_show_next__lte=timezone.now())
         elif self._query_name == QUERY_FUTURE:
             subquery_by_date_show_next = Q(date_show_next__gt=timezone.now())
         else:
             raise ValueError(f"Unknown query name for get_next_question_due: [{self._query_name}]")
+
         scheduled_questions = scheduled_questions.filter(subquery_by_date_show_next)
         scheduled_questions = scheduled_questions.distinct()
-        if self._query_name == QUERY_REINFORCE:
-            scheduled_questions = scheduled_questions.order_by('-date_show_next')
-        else:
-            scheduled_questions = scheduled_questions.order_by('date_show_next')
 
-        self.question = scheduled_questions.first()
+        if self._query_name == QUERY_REINFORCE:
+            order_by_sched_added = Q(date_show_next__gt=timezone.now())
+            scheduled_questions = scheduled_questions.order_by('-sched_date_added')
+            self.question = scheduled_questions.first()
+        elif self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE]:
+            scheduled_questions = scheduled_questions.order_by('date_show_next')
+            self.question = scheduled_questions.first()
+        else: 
+            raise ValueError(f"Unknown query name for get_next_question_due: [{self._query_name}]")
+
         self.count_questions_tagged = questions_tagged.count()
         self.count_questions_matched_criteria = scheduled_questions.count()
             
