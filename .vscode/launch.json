@@ -32,6 +32,10 @@
                 "0.0.0.0:80"
             ],
             "django": true,
+            "env": {
+                "QM_ENGINE": "postgres",
+                "DB_QUIZME": "quizme"
+            },
             "justMyCode": true,
             "autoStartBrowser": false
         },
