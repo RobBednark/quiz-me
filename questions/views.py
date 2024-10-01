@@ -145,8 +145,8 @@ def view_flashcard_post(request):
         # redirect to /question/?tag_ids=...&query_name=...
         query_string = ''
         query_string = urlencode(dict(
-            tag_ids_selected=tag_list.as_id_comma_str(),
-            query_name=query_name))
+            query_name=query_name,
+            tag_ids_selected=tag_list.as_id_comma_str()))
         redirect_url = reverse(viewname='question')
         redirect_url += f'?{query_string}'
         return redirect(to=redirect_url, permanent=True)
