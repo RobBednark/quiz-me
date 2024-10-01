@@ -53,23 +53,17 @@ def _render_question(request, query_name, select_tags_url, tag_list):
     except ObjectDoesNotExist:
         last_schedule_added = None
 
+    context = dict(
+            buttons=BUTTONS,
+            next_question=nq,
+            form_flashcard=form_flashcard,
+            last_schedule_added=last_schedule_added,
+            select_tags_url=select_tags_url,
+        )
     return render(
         request=request,
         template_name='question.html',
-        context=dict(
-            buttons=BUTTONS,
-            count_questions_due=nq.count_questions_due,
-            count_questions_tagged=nq.count_questions_tagged,
-            form_flashcard=form_flashcard,
-            last_schedule_added=last_schedule_added,
-            question=nq.question,
-            question_tag_names=nq.tag_names_for_question,
-            schedules_recent_count_30=nq.count_recent_seen_mins_30,
-            schedules_recent_count_60=nq.count_recent_seen_mins_60,
-            selected_tag_names=nq.tag_names_selected,
-            num_schedules=nq.count_times_question_seen,
-            select_tags_url=select_tags_url,
-        )
+        context=context
     )
 
 def view_select_tags__get(request):
