@@ -139,6 +139,8 @@
             </ol>
             # questions due for all selected tags: {{ next_question.count_questions_due }} (scheduled before now)
             <br />
+            # questions matching the query-type criteria: {{ next_question.count_questions_matched_criteria }}
+            <br />
             # flashcards reviewed in last 30 minutes: {{ next_question.count_recent_seen_mins_30 }}
             <br />
             # flashcards reviewed in last 60 minutes: {{ next_question.count_recent_seen_mins_60 }}
@@ -156,6 +158,10 @@
               <tr>
                 <td>next scheduled time:</td>
                 <td>{{ last_schedule_added.date_show_next }}</td>
+              </tr>
+              <tr>
+                <td>last scheduled interval:</td>
+                <td>{{ last_schedule_added.interval_num }} {{ last_schedule_added.interval_unit }}</td>
               </tr>
               <tr>
                 <td>flashcard added:</td>
