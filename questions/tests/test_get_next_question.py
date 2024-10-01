@@ -290,12 +290,13 @@ class TestAllQueryTypesSameData:
         #
         # | Question            | U  | Tags| Q added| S next  |Sched added|
         # |---------------------|----|-----|--------|-------- |-----------|
-        # | q1_unseen_older     | u1 | tag | -2s    | (none)  | (none)    |
-        # | q2_unseen_newer     | u1 | tag | -1s    | (none)  | (none)    |
+        # | q1_unseen_older     | u1 | tag | 0      | (none)  | (none)    |
+        # | q2_unseen_newer     | u1 | tag | 0+1    | (none)  | (none)    |
         # | q3_oldest_due       | u1 | tag |        | -10m    |-20m       |
-        # | q4_reinforce        | u1 | tag |        | -5m     |-2h        |
-        # | q5_future_oldest_due| u1 | tag | -2s    | -3m,+20m|-40m, -10m |
-        # | q6_future_newest_due| u1 | tag | -1s    | +1w     |-1s        |
+        # | q4_reinforce_newer  | u1 | tag | 0      | -8m     |-1m        |
+        # | q5_reinforce_older  | u1 | tag | 0+1    | -5m     |-5m        |
+        # | q5_future_oldest_due| u1 | tag | 0      | -3m,+20m|-40m, -10m |
+        # | q6_future_newest_due| u1 | tag | 0+1    | +1w     |-1s        |
         #
         # Notes:
         # U = User who created the question (i.e., Question.user field)
@@ -309,7 +310,8 @@ class TestAllQueryTypesSameData:
         q1_unseen_older= Question.objects.create(question="Question 1: unseen older", user=user)
         q2_unseen_newer= Question.objects.create(question="Question 2: unseen newer", user=user)
         q3_oldest_due = Question.objects.create(question="Question 3: oldest due", user=user)
-        q4_reinforce = Question.objects.create(question="Question 4: reinforce", user=user)
+        q4_reinforce_newer = Question.objects.create(question="Question 4: reinforce newer", user=user)
+        q5_reinforce_older = Question.objects.create(question="Question 5: reinforce older", user=user)
         q5_future_oldest_due = Question.objects.create(question="Question 5: future oldest", user=user)
         q6_future_newest_due = Question.objects.create(question="Question 6: future newest", user=user)
     
@@ -317,16 +319,18 @@ class TestAllQueryTypesSameData:
         QuestionTag.objects.create(question=q1_unseen_older, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q2_unseen_newer, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q3_oldest_due, tag=tag, enabled=True)
-        QuestionTag.objects.create(question=q4_reinforce, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q4_reinforce_newer, tag=tag, enabled=True)
+        QuestionTag.objects.create(question=q5_reinforce_older, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q5_future_oldest_due, tag=tag, enabled=True)
         QuestionTag.objects.create(question=q6_future_newest_due, tag=tag, enabled=True)
-        COUNT_QUESTIONS_WITH_TAG = 6
+        COUNT_QUESTIONS_WITH_TAG = 7
         COUNT_QUESTIONS_UNSEEN = 2
-        COUNT_QUESTIONS_DUE = 2
+        COUNT_QUESTIONS_DUE = 3
+        COUNT_QUESTIONS_REINFORCE = COUNT_QUESTIONS_DUE
         COUNT_QUESTIONS_UNSEEN_AND_DUE = COUNT_QUESTIONS_DUE + COUNT_QUESTIONS_UNSEEN
         COUNT_QUESTIONS_FUTURE = 2
-        COUNT_RECENT_SEEN_MINS_30 = 3
-        COUNT_RECENT_SEEN_MINS_60 = 4
+        COUNT_RECENT_SEEN_MINS_30 = 5
+        COUNT_RECENT_SEEN_MINS_60 = 6
     
         # Create Schedules
         sched_q5_past = Schedule.objects.create(
@@ -364,14 +368,23 @@ class TestAllQueryTypesSameData:
         # q1_unseen_older no schedule
         # q1_unseen_newer no schedule
 
-        # q4_reinforce
-        sched_q4_reinforce = Schedule.objects.create(
+        # q4_reinforce_newer
+        sched_q4_reinforce_newer = Schedule.objects.create(
             user=user,
-            question=q4_reinforce,
+            question=q4_reinforce_newer,
+            date_show_next=timezone.now() - timezone.timedelta(minutes=8), # past
+        )
+        sched_q4_reinforce_newer.datetime_added = timezone.now() - timezone.timedelta(minutes=1)
+        sched_q4_reinforce_newer.save()
+        
+        # q5_reinforce_older
+        sched_q5_reinforce_older = Schedule.objects.create(
+            user=user,
+            question=q5_reinforce_older,
             date_show_next=timezone.now() - timezone.timedelta(minutes=5), # past
         )
-        sched_q4_reinforce.datetime_added = timezone.now() - timezone.timedelta(hours=2)
-        sched_q4_reinforce.save()
+        sched_q5_reinforce_older.datetime_added = timezone.now() - timezone.timedelta(minutes=5)
+        sched_q5_reinforce_older.save()
     
 
         # nq = "next question"
@@ -425,10 +438,10 @@ class TestAllQueryTypesSameData:
         
         # Test QUERY_REINFORCE
         nq_reinforce = NextQuestion(query_name=QUERY_REINFORCE, tag_ids_selected=[tag.id], user=user)
-        assert nq_reinforce.question == q4_reinforce
+        assert nq_reinforce.question == q4_reinforce_newer
         assert nq_reinforce.count_times_question_seen == 1
         assert nq_reinforce.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_reinforce.count_questions_matched_criteria == COUNT_QUESTIONS_DUE
+        assert nq_reinforce.count_questions_matched_criteria == COUNT_QUESTIONS_REINFORCE
         assert nq_reinforce.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_reinforce.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
         assert nq_reinforce.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
