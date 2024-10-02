@@ -20,6 +20,7 @@ class NextQuestion:
         
         self.count_questions_due = None  # questions due (date_show_next < now); does NOT include unseen questions
         self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
+        self.count_questions_unseen = None  
         self.count_questions_tagged = None
         self.count_recent_seen_mins_30 = None  # questions seen in the last 30 minutes
         self.count_recent_seen_mins_60 = None  # questions seen in the last 60 minutes
@@ -31,10 +32,31 @@ class NextQuestion:
         self.tag_names_selected = None  # list of tag names for the tags selected for the query
 
         self._get_question()
-        self._get_count_questions_due()
-        self._get_count_questions_matched_criteria()
-        self._get_count_recent_seen()
+        self._get_all_counts()
 
+    def _get_all_counts(self):
+        # Returns: None
+        # Side effects: set the following attributes:
+        #   self.count_questions_due
+        #   self.count_questions_matched_criteria
+        #   self.count_questions_unseen
+        #   self.count_questions_tagged
+        #   self.count_recent_seen_mins_30
+        #   self.count_recent_seen_mins_60
+        #   self.count_times_question_seen
+        
+        if self.count_questions_due is None:
+            self._get_count_questions_due()
+        if (self.count_questions_matched_criteria is None) or \
+           (self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE):
+            self._get_count_questions_matched_criteria()
+        if self.count_questions_unseen is None:
+            self._get_count_questions_unseen()
+        if self.count_recent_seen_mins_30 is None:
+            self._get_count_recent_seen()
+        if self.count_times_question_seen is None:
+            self._get_count_times_question_seen()
+        
     def _get_count_questions_due(self):
         # Given self._queryset__questions_tagged,
         # count the number of questions that are scheduled before now (not including unseen questions).
@@ -88,6 +110,16 @@ class NextQuestion:
             Q(latest_date_show_next__lte=now)  # Due questions
         ).distinct().count()
     
+    def _get_count_questions_unseen(self):
+        # Given self._queryset__questions_tagged,
+        # count the number of questions that are unseen.
+        # Returns: None
+        # Side effects: set this attribute:
+        #   self.count_questions_unseen
+        self.count_questions_unseen = self._queryset__questions_tagged.filter(
+            schedule__isnull=True
+        ).distinct().count()
+        
     def _get_count_recent_seen(self):
         # Side effects: set these attributes:
         #   self.count_recent_seen_mins_30
@@ -162,6 +194,8 @@ class NextQuestion:
 
         self.count_questions_tagged = questions_tagged.distinct().count()
         self.count_questions_matched_criteria = scheduled_questions.distinct().count()
+        if self._query_name != QUERY_FUTURE:
+            self.count_questions_due = self.count_questions_matched_criteria
             
     def _get_next_question_unseen(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
@@ -186,6 +220,7 @@ class NextQuestion:
         
         self.count_questions_tagged = questions_tagged.distinct().count()
         self.count_questions_matched_criteria = unseen_questions.distinct().count()
+        self.count_questions_unseen = self.count_questions_matched_criteria
 
     def _get_next_question_unseen_then_oldest_due(self):
         # First, try to get an unseen question
@@ -204,7 +239,6 @@ class NextQuestion:
         else:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()
-        self._get_count_times_question_seen()
    
   
     def _get_tag_names(self):
