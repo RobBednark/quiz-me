@@ -141,7 +141,9 @@
             "request": "launch",
             "module": "pytest",
             "localRoot": "${workspaceRoot}",
+            // --capture=no  ==> don't capture stdout/stderr (e.g., show print() statements in the output)
             "args": [
+                "--capture=no",
                 "-k",
                 "test_different_results_for_query_seen_and_due"
             ],
