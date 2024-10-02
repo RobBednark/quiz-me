@@ -37,7 +37,7 @@ class NextQuestion:
 
     def _get_count_questions_due(self):
         # Given self._queryset__questions_tagged,
-        # count the number of questions that are scheduled before now.
+        # count the number of questions that are scheduled before now (not including unseen questions).
         # Returns: None
         # Side effects: set this attribute:
         #   self.count_questions_due
@@ -57,7 +57,7 @@ class NextQuestion:
         # Count questions where the latest schedule's date_show_next is less than or equal to now
         self.count_questions_due = questions_with_latest_schedule.filter(
             latest_date_show_next__lte=now
-        ).count()
+        ).distinct().count()
     
     def _get_count_questions_matched_criteria(self):
         if self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
@@ -160,8 +160,8 @@ class NextQuestion:
         else: 
             raise ValueError(f"Unknown query name for get_next_question_due: [{self._query_name}]")
 
-        self.count_questions_tagged = questions_tagged.count()
-        self.count_questions_matched_criteria = scheduled_questions.count()
+        self.count_questions_tagged = questions_tagged.distinct().count()
+        self.count_questions_matched_criteria = scheduled_questions.distinct().count()
             
     def _get_next_question_unseen(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
@@ -184,8 +184,8 @@ class NextQuestion:
         oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
         self.question = oldest_unseen_question
         
-        self.count_questions_tagged = questions_tagged.count()
-        self.count_questions_matched_criteria = unseen_questions.count()
+        self.count_questions_tagged = questions_tagged.distinct().count()
+        self.count_questions_matched_criteria = unseen_questions.distinct().count()
 
     def _get_next_question_unseen_then_oldest_due(self):
         # First, try to get an unseen question
