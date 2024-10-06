@@ -1,6 +1,7 @@
 import os
 
 from django.db.models import F, Max, Min, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
@@ -245,40 +246,39 @@ class NextQuestion:
         # Choose the tag with the oldest of those dates, and use the oldest unseen Question.datetime_added for that tag.
         # Note: do not want to got by unseen_question.datetime_added, because I don't want to see multiple questions from the same tag in a row.  That would be the same as QUERY_UNSEEN.
 
-        
-        # Subquery to get the newest schedule date for each tag
-        subquery_newest_schedule_date_for_question = Schedule.objects.filter(
+        subquery_newest_schedule_dateadded_for_tag = Schedule.objects.filter(
             question__questiontag__tag=OuterRef('pk'),
             user=self._user
         ).order_by('-datetime_added').values('datetime_added')[:1]
 
-        # Subquery to get the oldest question date for each tag
-        oldest_question_date = Question.objects.filter(
+        subquery_oldest_question_dateadded_for_tag = Question.objects.filter(
             questiontag__tag=OuterRef('pk'),
             user=self._user,
             schedule__isnull=True
         ).order_by('datetime_added').values('datetime_added')[:1]
 
-        # Get all tags with at least one unseen question, annotated with relevant dates
-        tags_with_unseen = Tag.objects.filter(
+        oldest_tags = Tag.objects.filter(
             questiontag__question__user=self._user,
             questiontag__question__schedule__isnull=True,
             id__in=self._tag_ids_selected
         ).annotate(
-            subquery_newest_schedule_date_for_question=Subquery(subquery_newest_schedule_date_for_question),
-            oldest_question_date=Subquery(oldest_question_date),
-            relevant_date=Min(
-                Q(subquery_newest_schedule_date_for_question=F('subquery_newest_schedule_date_for_question')) | 
-                Q(oldest_question_date=F('oldest_question_date'))
+            newest_schedule_dateadded_for_tag=Subquery(subquery_newest_schedule_dateadded_for_tag),
+            oldest_question_dateadded_for_tag=Subquery(subquery_oldest_question_dateadded_for_tag),
+            relevant_date=Coalesce( # use the first non-null value (the newest schedule date if it exists, otherwise the oldest question date)
+                F('newest_schedule_dateadded_for_tag'),
+                F('oldest_question_dateadded_for_tag')
             )
-        ).order_by('relevant_date').first()
+        ).order_by('relevant_date')
+        oldest_tag = oldest_tags.first()
+
 
         # Get the oldest unseen question for the chosen tag
         self.question = Question.objects.filter(
-            questiontag__tag=tags_with_unseen,
+            questiontag__tag=oldest_tag,
             user=self._user,
             schedule__isnull=True
         ).order_by('datetime_added').first()
+
 
         # Set counts
         self.count_questions_tagged = Question.objects.filter(
