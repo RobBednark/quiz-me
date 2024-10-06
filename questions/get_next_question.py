@@ -132,9 +132,9 @@ class NextQuestion:
         # Returns: None
         # Side effects: set this attribute:
         #   self.count_questions_unseen
-        self.count_questions_unseen = self._queryset__questions_tagged.filter(
-            schedule__isnull=True
-        ).distinct().count()
+        if self.count_questions_unseen is None:
+            self.count_questions_unseen = self._queryset__questions_tagged.filter(
+                schedule__isnull=True).distinct().count()
         
     def _get_count_recent_seen(self):
         # Side effects: set these attributes:
@@ -285,12 +285,8 @@ class NextQuestion:
             user=self._user,
             questiontag__tag__id__in=self._tag_ids_selected
         ).distinct().count()
-        self.count_questions_matched_criteria = Question.objects.filter(
-            user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected,
-            schedule__isnull=True
-        ).distinct().count()
-        self.count_questions_unseen = self.count_questions_matched_criteria
+        # Count the number of tags that have at least one unseen question
+        self.count_questions_matched_criteria = oldest_tags.distinct().count()
 
     def _get_next_question_unseen_then_oldest_due(self):
         # First, try to get an unseen question

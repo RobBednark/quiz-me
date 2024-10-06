@@ -578,7 +578,7 @@ class TestQueryUnseenByOldestViewedTag:
 
         assert nq.question == q2
         assert nq.count_questions_tagged == 4
-        assert nq.count_questions_matched_criteria == 3
+        assert nq.count_questions_matched_criteria == 2
         assert nq.count_questions_unseen == 3
         assert nq.tag_names_for_question == [tag2.name]
         assert set(nq.tag_names_selected) == set([tag1.name, tag2.name, tag3.name])
