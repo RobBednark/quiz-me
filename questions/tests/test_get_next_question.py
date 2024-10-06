@@ -350,6 +350,7 @@ class TestAllQueryTypesSameData:
         tag1 = tag
         tag2 = Tag.objects.create(name="tag 2", user=user)
         tag3 = Tag.objects.create(name="tag 3", user=user)
+        tag4_no_questions = Tag.objects.create(name="tag 4 no questions", user=user)
 
         # Create QuestionTags
         QuestionTag.objects.create(question=q1_unseen_older, tag=tag1, enabled=True)
@@ -375,9 +376,9 @@ class TestAllQueryTypesSameData:
         COUNT_RECENT_SEEN_MINS_30 = 4  # Sched.added q5, q6.a, q7, q8
         COUNT_RECENT_SEEN_MINS_60 = COUNT_RECENT_SEEN_MINS_30 + 1  # Sched.added q6.b
 
-        TAG_IDS_ALL = [tag1.id, tag2.id, tag3.id]
+        TAG_IDS_ALL = [tag1.id, tag2.id, tag3.id, tag4_no_questions.id]
         TAG3_NAME = tag3.name
-        TAG_NAMES_ALL = [tag1.name, tag2.name, tag3.name]
+        TAG_NAMES_ALL = [tag1.name, tag2.name, tag3.name, tag4_no_questions.name]
         TAG_NAMES_SELECTED = TAG_NAMES_ALL
         TAG_IDS_SELECTED = TAG_IDS_ALL
         TAG_NAMES_Q6_FUTURE_OLDEST_DUE = [tag1.name, tag2.name]
@@ -491,7 +492,7 @@ class TestAllQueryTypesSameData:
         # Test QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG
         nq_unseen_by_tag = NextQuestion(query_name=QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, tag_ids_selected=TAG_IDS_SELECTED, user=user)
         assert nq_unseen_by_tag.question == q9_unseen_by_tag3
-        assert nq_unseen_by_tag.count_times_question_seen == 1
+        assert nq_unseen_by_tag.count_times_question_seen == 0
         assert nq_unseen_by_tag.count_questions_due == COUNT_QUESTIONS_DUE
         assert nq_unseen_by_tag.count_questions_matched_criteria == COUNT_QUESTIONS_UNSEEN_BY_OLDEST_VIEWED_TAG
         assert nq_unseen_by_tag.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
