@@ -91,6 +91,7 @@ class NextQuestion:
         #       latest_date_show_next__lte=now
         #   ).distinct().count()
         
+        # TODO: FIX: this should be using the latest schedule__datetime_added instead of date_show_next, then use latest_schedule_date__lt=now
         self.count_questions_due = self._queryset__questions_tagged.annotate(
             latest_schedule_date=Max('schedule__date_show_next')
         ).filter(
@@ -273,11 +274,13 @@ class NextQuestion:
 
 
         # Get the oldest unseen question for the chosen tag
-        self.question = Question.objects.filter(
-            questiontag__tag=oldest_tag,
-            user=self._user,
-            schedule__isnull=True
-        ).order_by('datetime_added').first()
+        self.question = None
+        if oldest_tag or True:
+            self.question = Question.objects.filter(
+                questiontag__tag=oldest_tag,
+                user=self._user,
+                schedule__isnull=True
+            ).order_by('datetime_added').first()
 
 
         # Set counts
