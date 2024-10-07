@@ -300,6 +300,10 @@ class TestAllQueryTypesSameData:
         # | q8_due_by_tag3_nm       | u1 | tag3      | -3s    | -10w,-9w   | -5s,+9w   | oldest Sched.added; q8.Sched.next > q1-7; no match, but this triggers q9 to be picked
         # | q9_unseen_by_tag3       | u1 | tag3      | -2s    | (none)     | (none)    | q10 > q9.Ques.added > q1-q8
         # | q10_unseen_by_tag3_nm   | u1 | tag3      | -1s    | (none)     | (none)    | no matches; oldest Ques.added
+        # | q11_untag_unseen_old_nm | u1 | (none)    | -99w   | (none)     | (none)    | no matches; untagged; oldest Ques.added
+        # | q12_untag_unseen_new_nm | u1 | (none)    | 0      | (none)     | (none)    | no matches; untagged; newest Ques.added
+        # | q13_untag_due_before_nm | u1 | (none)    | -99w   | -99w       | -1h       | no matches; untagged
+        # | q14_untag_due_after_nm  | u1 | (none)    | 0      | 0          | +1m       | no matches; untagged
         
         # for by oldest-viewed tag, create questions such that:
         #   instead of selecting q1, it selects an unseen question with a different tag that has a newer Question.added, but that tag has a question with an older Schedule.datetime_added than Q1.Schedule.datetime_added
@@ -324,6 +328,10 @@ class TestAllQueryTypesSameData:
         q8_due_by_tag3_nm = Question.objects.create(question="Question 8: seen by tag3 nm", user=user)
         q9_unseen_by_tag3 = Question.objects.create(question="Question 9: unseen by tag3", user=user)
         q10_unseen_by_tag3_nm = Question.objects.create(question="Question 10: unseen by tag3 nm", user=user)
+        q11_untag_unseen_old_nm = Question.objects.create(question="Question 11: untagged unseen older nm", user=user)
+        q12_untag_unseen_new_nm = Question.objects.create(question="Question 12: untagged unseen newer nm", user=user)
+        q13_untag_due_before_nm = Question.objects.create(question="Question 13: untagged due before now nm", user=user)
+        q14_untag_due_after_nm = Question.objects.create(question="Question 14: untagged due after now nm", user=user)
         
         q1_unseen_older.datetime_added = timezone.now() - timezone.timedelta(weeks=9)
         q2_unseen_newer.datetime_added = timezone.now() - timezone.timedelta(weeks=8)
@@ -335,6 +343,10 @@ class TestAllQueryTypesSameData:
         q8_due_by_tag3_nm.datetime_added = timezone.now() - timezone.timedelta(seconds=3)
         q9_unseen_by_tag3.datetime_added = timezone.now() - timezone.timedelta(seconds=2)
         q10_unseen_by_tag3_nm.datetime_added = timezone.now() - timezone.timedelta(seconds=1)
+        q11_untag_unseen_old_nm.datetime_added = timezone.now() - timezone.timedelta(weeks=99)
+        q12_untag_unseen_new_nm.datetime_added = timezone.now()
+        q13_untag_due_before_nm.datetime_added = timezone.now() - timezone.timedelta(weeks=99)
+        q14_untag_due_after_nm.datetime_added = timezone.now()
         
         q1_unseen_older.save()
         q2_unseen_newer.save()
@@ -346,6 +358,10 @@ class TestAllQueryTypesSameData:
         q8_due_by_tag3_nm.save()
         q9_unseen_by_tag3.save()
         q10_unseen_by_tag3_nm.save()
+        q11_untag_unseen_old_nm.save()
+        q12_untag_unseen_new_nm.save()
+        q13_untag_due_before_nm.save()
+        q14_untag_due_after_nm.save()
     
         tag1 = tag
         tag2 = Tag.objects.create(name="tag 2", user=user)
@@ -373,7 +389,7 @@ class TestAllQueryTypesSameData:
         COUNT_QUESTIONS_REINFORCE = COUNT_QUESTIONS_DUE
         COUNT_QUESTIONS_UNSEEN_AND_DUE = COUNT_QUESTIONS_DUE + COUNT_QUESTIONS_UNSEEN
         COUNT_QUESTIONS_FUTURE = 3
-        COUNT_RECENT_SEEN_MINS_30 = 4  # Sched.added q5, q6.a, q7, q8
+        COUNT_RECENT_SEEN_MINS_30 = 5  # Sched.added q5, q6.a, q7, q8
         COUNT_RECENT_SEEN_MINS_60 = COUNT_RECENT_SEEN_MINS_30 + 1  # Sched.added q6.b
 
         TAG_IDS_ALL = [tag1.id, tag2.id, tag3.id, tag4_no_questions.id]
@@ -422,6 +438,16 @@ class TestAllQueryTypesSameData:
             question=q8_due_by_tag3_nm, date_show_next=timezone.now() + timezone.timedelta(weeks=9)) # future
         sched_q8_due_by_tag3_nm_2.datetime_added = timezone.now() - timezone.timedelta(weeks=9)
         sched_q8_due_by_tag3_nm_2.save()
+        
+        sched_13_untag_due_before_nm = Schedule.objects.create(user=user,
+           question=q13_untag_due_before_nm, date_show_next=timezone.now() - timezone.timedelta(weeks=99))
+        sched_13_untag_due_before_nm.datetime_added = timezone.now() - timezone.timedelta(weeks=99)
+        sched_13_untag_due_before_nm.save()
+
+        sched_14_untag_due_after_nm = Schedule.objects.create(user=user,
+           question=q14_untag_due_after_nm, date_show_next=timezone.now() + timezone.timedelta(minutes=1))
+        sched_14_untag_due_after_nm.datetime_added = timezone.now()
+        sched_14_untag_due_after_nm.save()
 
         # nq = "next question"
         # Test QUERY_OLDEST_DUE
