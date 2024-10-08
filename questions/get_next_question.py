@@ -66,37 +66,20 @@ class NextQuestion:
         # Returns: None
         # Side effects: set this attribute:
         #   self.count_questions_due
-        now = timezone.now()
-        
-        # TODO: Remove this commented-out code.
-        #   # Subquery to get the most recent schedule for each question
-        #   question_latest_schedule = Schedule.objects.filter(
-        #       question=OuterRef('pk'),
-        #       user=self._user
-        #   ).order_by('-datetime_added')
-
-        # Annotate questions with their latest schedule's date_show_next
         if self._queryset__questions_tagged is None:
             self._queryset__questions_tagged = Question.objects.filter(
                 user=self._user,
                 questiontag__tag__id__in=self._tag_ids_selected)
-        # TODO: Remove this commented-out code.
-        #   
-        #   questions_with_latest_schedule = self._queryset__questions_tagged.annotate(
-        #       latest_date_show_next=Subquery(question_latest_schedule.values('date_show_next')[:1])
-        #   )
-    
-        #   # Count questions where the latest schedule's date_show_next is less than or equal to now
-        #   self.count_questions_due = questions_with_latest_schedule.filter(
-        #       latest_date_show_next__lte=now
-        #   ).distinct().count()
-        
-        # TODO: FIX: this should be using the latest schedule__datetime_added instead of date_show_next, then use latest_schedule_date__lt=now
+
+        subquery_latest_dateshownext_for_question = Schedule.objects.filter(
+            question=OuterRef('pk'),
+            user=self._user
+        ).order_by('-datetime_added')
+
         self.count_questions_due = self._queryset__questions_tagged.annotate(
-            latest_schedule_date=Max('schedule__date_show_next')
-        ).filter(
-            latest_schedule_date__lt=timezone.now()
-        ).count()
+            latest_date_show_next=Subquery(subquery_latest_dateshownext_for_question.values('date_show_next')[:1])
+        ).filter(Q(latest_date_show_next__lte=timezone.now())
+        ).distinct().count()
     
     def _get_count_questions_matched_criteria(self):
         if self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
@@ -114,14 +97,14 @@ class NextQuestion:
         now = timezone.now()
         
         # Subquery to get the most recent schedule for each question
-        latest_schedule = Schedule.objects.filter(
+        subquery_latest_schedule_for_question = Schedule.objects.filter(
             question=OuterRef('pk'),
             user=self._user
         ).order_by('-datetime_added')
 
         # Count of questions that are either unseen or due based on their latest schedule
         self.count_questions_matched_criteria = self._queryset__questions_tagged.annotate(
-            latest_date_show_next=Subquery(latest_schedule.values('date_show_next')[:1])
+            latest_date_show_next=Subquery(subquery_latest_schedule_for_question.values('date_show_next')[:1])
         ).filter(
             Q(schedule__isnull=True) |  # Unseen questions
             Q(latest_date_show_next__lte=now)  # Due questions
@@ -292,7 +275,6 @@ class NextQuestion:
         self.count_questions_matched_criteria = oldest_tags.distinct().count()
 
     def _get_next_question_unseen_then_oldest_due(self):
-        # First, try to get an unseen question
         self._get_next_question_unseen()
         if not self.question:
             self._get_next_question_due()
