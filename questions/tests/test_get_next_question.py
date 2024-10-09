@@ -652,7 +652,7 @@ class TestAllQueryTypesSameData:
         assert nq_future.tag_names_for_question == []
         assert nq_future.tag_names_selected == tag_names_selected
         
-        # Test QUERY_REINFORCE
+        # Test QUERY_REINFORCE picks None
         tag_ids_selected = [tag4_no_questions.id, tag6_unseen.id, tag7_due_future.id]
         tag_names_selected = sorted([tag4_no_questions.name, tag6_unseen.name, tag7_due_future.name])
         nq_reinforce = NextQuestion(query_name=QUERY_REINFORCE, tag_ids_selected=tag_ids_selected, user=user)
@@ -667,7 +667,7 @@ class TestAllQueryTypesSameData:
         assert nq_reinforce.tag_names_for_question == []
         assert nq_reinforce.tag_names_selected == tag_names_selected
 
-        # Test QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG
+        # Test QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG picks None
         tag_ids_selected = [tag4_no_questions.id, tag5_due.id, tag7_due_future.id]
         tag_names_selected = sorted([tag4_no_questions.name, tag5_due.name, tag7_due_future.name])
         nq_unseen_by_tag = NextQuestion(query_name=QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, tag_ids_selected=tag_ids_selected, user=user)
