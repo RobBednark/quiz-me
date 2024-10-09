@@ -168,11 +168,9 @@ class NextQuestion:
 
         # Only use the newest schedule for each question
         scheduled_questions = scheduled_questions.annotate(date_show_next=Subquery(schedules_for_question[:1].values('date_show_next')))
-
         scheduled_questions = scheduled_questions.annotate(sched_date_added=Subquery(schedules_for_question[:1].values('datetime_added')))
 
-
-        if self._query_name in [QUERY_OLDEST_DUE, QUERY_REINFORCE]:
+        if self._query_name in [QUERY_OLDEST_DUE, QUERY_REINFORCE, QUERY_UNSEEN_THEN_OLDEST_DUE]:
             subquery_by_date_show_next = Q(date_show_next__lte=timezone.now())
         elif self._query_name == QUERY_FUTURE:
             subquery_by_date_show_next = Q(date_show_next__gt=timezone.now())
@@ -183,10 +181,11 @@ class NextQuestion:
         scheduled_questions = scheduled_questions.distinct()
 
         if self._query_name == QUERY_REINFORCE:
-            order_by_sched_added = Q(date_show_next__gt=timezone.now())
+            # Pick the question with the newest Schedule.date_added
             scheduled_questions = scheduled_questions.order_by('-sched_date_added')
             self.question = scheduled_questions.first()
-        elif self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE]:
+        elif self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_UNSEEN_THEN_OLDEST_DUE]:
+            # Pick the question with the oldest Schedule.date_show_next
             scheduled_questions = scheduled_questions.order_by('date_show_next')
             self.question = scheduled_questions.first()
         else: 

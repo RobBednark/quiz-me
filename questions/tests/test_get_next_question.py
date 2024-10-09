@@ -575,6 +575,21 @@ class TestAllQueryTypesSameData:
         assert nq_unseen.question != nq_oldest_due.question != nq_future.question != nq_reinforce.question != nq_unseen_by_tag.question
 
         ############################################################
+        # # Test QUERY_UNSEEN_THEN_OLDEST_DUE, no unseen
+        ############################################################
+        nq_unseen_then_oldest_due = NextQuestion(query_name=QUERY_UNSEEN_THEN_OLDEST_DUE, tag_ids_selected=[TAG5_DUE_ONLY.id], user=user)
+        assert nq_unseen_then_oldest_due.question == q15_tag5_due_nm
+        assert nq_unseen_then_oldest_due.count_times_question_seen == 1
+        assert nq_unseen_then_oldest_due.count_questions_due == 1
+        assert nq_unseen_then_oldest_due.count_questions_matched_criteria == 1
+        assert nq_unseen_then_oldest_due.count_questions_tagged == 1
+        assert nq_unseen_then_oldest_due.count_questions_unseen == 0
+        assert nq_unseen_then_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_unseen_then_oldest_due.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
+        assert nq_unseen_then_oldest_due.tag_names_for_question == [TAG5_DUE_ONLY.name]
+        assert nq_unseen_then_oldest_due.tag_names_selected == [TAG5_DUE_ONLY.name]
+
+        ############################################################
         # NextQuestion queries with the different tag_ids_selected, where each should return a None question
         ############################################################
 
