@@ -55,9 +55,14 @@
 
 ## How to run tests
 
-1. Install phantomjs: `brew cask install phantomjs`
-2. Install geckodriver: `brew install geckodriver`
-3. Install Firefox
+```shell
+DB_QUIZME=':memory:' QM_ENGINE=sqlite  python -m pytest -v --maxfail=1
+```
+
+## How to run the server
+```python
+./manage.py runserver 0.0.0.0:80
+```
 
 ## Migrations
 
