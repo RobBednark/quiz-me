@@ -12,7 +12,7 @@ class Command(BaseCommand):
         # tags = models.Tag.objects.all()
         # question_tags = models.QuestionTag.objects.all()
         # user = models.User.objects.all()[0]
-        # question_tags = models.QuestionTag.objects.filter(tag__in=user_tags, enabled=True)
+        # question_tags = models.QuestionTag.objects.filter(tag__in=user_tags)
         for num, question in enumerate(questions.order_by('id')):
             question_ = question.question.replace(CHAR_CR, '')
             print(f'\n=== [{num + 1}] ============================= id=[{question.id}] ==')

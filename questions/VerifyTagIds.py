@@ -4,7 +4,6 @@ class VerifyTagIds:
     """
     Verify that the tag_ids are valid:
         - The tag_ids are owned by the user
-        - The tag_ids are enabled
         - The tag_ids exist
     """
     def __init__(self, tag_ids, user):

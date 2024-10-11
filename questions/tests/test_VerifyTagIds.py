@@ -22,8 +22,8 @@ class TestVerifyTagIds:
     def test_all_tags_valid(self, user):
         tag1 = Tag.objects.create(name="tag1", user=user)
         tag2 = Tag.objects.create(name="tag2", user=user)
-        QuestionTag.objects.create(tag=tag1, question=Question.objects.create(question="Q1", user=user), enabled=True)
-        QuestionTag.objects.create(tag=tag2, question=Question.objects.create(question="Q2", user=user), enabled=True)
+        QuestionTag.objects.create(tag=tag1, question=Question.objects.create(question="Q1", user=user))
+        QuestionTag.objects.create(tag=tag2, question=Question.objects.create(question="Q2", user=user))
         
         # assert that the function does not raise an exception
         VerifyTagIds([tag1.id, tag2.id], user)
@@ -73,7 +73,7 @@ class TestVerifyTagIds:
 
     def test_single_valid_tag(self, user):
         tag = Tag.objects.create(name="tag", user=user)
-        QuestionTag.objects.create(tag=tag, question=Question.objects.create(question="Q", user=user), enabled=True)
+        QuestionTag.objects.create(tag=tag, question=Question.objects.create(question="Q", user=user))
         
         # assert that the function does not raise an exception
         VerifyTagIds([tag.id], user)

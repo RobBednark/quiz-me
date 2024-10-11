@@ -74,44 +74,22 @@ class Tests(TestCase):
         #    d) question1.datetime_added < question2.datetime_added
         # Assert: user1 gets question1 because it was added before question2
         question1_tag1 = QuestionTag.objects.create(
-            question=question1, tag=tag1, enabled=True
+            question=question1, tag=tag1
         )
         question2_tag1 = QuestionTag.objects.create(
-            question=question2, tag=tag1, enabled=True
+            question=question2, tag=tag1
         )
         self.assertTrue(question1.datetime_added < question2.datetime_added)
         self.assertTrue(Question.objects.all().count() == 2)
         self.assertTrue(QuestionTag.objects.all().count() == 2)
         self.assertTrue(
-            QuestionTag.objects.filter(tag=tag1, enabled=True).count() == 2
+            QuestionTag.objects.filter(tag=tag1).count() == 2
         )
         self.assertTrue(Schedule.objects.filter(user=user1).count() == 0)
 
         for n in range(4):
             next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertTrue(next_question.question == question1)
-
-        # Test: No question returned when tag.enabled == False
-        # Given:
-        #    a) user1 with tag1
-        #    b) question1 and question2 with tag1
-        #    c) tag1.enabled == False
-        #    d) user has 0 schedules
-        # Assert: no question is returned because tag1.enabled == False
-        question1_tag1.enabled = False
-        question2_tag1.enabled = False
-        question1_tag1.save()
-        question2_tag1.save()
-        tag1_tag2_queryset = QuestionTag.objects.filter(id__in=[question1_tag1.pk, question2_tag1.pk])
-        self.assertEqual(
-            QuestionTag.objects.filter(tag=tag1, enabled=True).count(), 0
-        )
-        self.assertEqual(
-            QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 2
-        )
-        for _ in range(4):
-            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
-            self.assertTrue(next_question.question is None)
 
         # Bucket 2: question with no schedules
         # Test: question with no schedules returned (when another question with schedule.date_show_next > now)
@@ -121,17 +99,13 @@ class Tests(TestCase):
         #       c) question2 has 0 schedules
         # Assert: question2 is returned because question1 is not ready to be shown yet,
         #         and question2 has no schedules
-        question1_tag1.enabled = True
-        question1_tag1.save()
-        question2_tag1.enabled = True
-        question2_tag1.save()
         q1_sched1 = Schedule.objects.create(
             user=user1,
             question=question1,
             interval_num=1,
             interval_unit='weeks')
         self.assertTrue(q1_sched1.date_show_next > datetime.now(tz=pytz.utc))
-        self.assertTrue(QuestionTag.objects.filter(tag=tag1, enabled=True).count() == 2)
+        self.assertTrue(QuestionTag.objects.filter(tag=tag1).count() == 2)
         self.assertTrue(Schedule.objects.all().count() == 1)
         self.assertTrue(Schedule.objects.filter(question=question1).count() == 1)
         self.assertTrue(Schedule.objects.filter(question=question2).count() == 0)
@@ -227,10 +201,10 @@ class Tests(TestCase):
         question1 = Question.objects.create(question="question1")
         question2 = Question.objects.create(question="question2")
         question1_tag1 = QuestionTag.objects.create(
-            question=question1, tag=tag1, enabled=True
+            question=question1, tag=tag1
         )
         question2_tag1 = QuestionTag.objects.create(
-            question=question2, tag=tag1, enabled=True
+            question=question2, tag=tag1
         )
         tag1_queryset = QuestionTag.objects.filter(tag=tag1)
  

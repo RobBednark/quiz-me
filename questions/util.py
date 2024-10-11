@@ -6,8 +6,7 @@ def assign_question_to_user(user, question, tag_name):
 
     models.QuestionTag.objects.create(
         tag=tag,
-        question=question,
-        enabled=True
+        question=question
     )
 
     return tag
