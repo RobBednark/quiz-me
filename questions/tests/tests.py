@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
-import os
+import math
+import random
 
 from django.test import TestCase
 import pytz
 
 from emailusername.models import User
-from questions import forms
-from questions.models import Answer, Attempt, QueryPreferences, Question, QuestionTag, Schedule, Tag
-from questions.views import _get_next_question
+from questions.models import Answer, Attempt,  Question, QuestionTag, Schedule, Tag
+from questions.get_next_question import get_next_question
 
 class Tests(TestCase):
     @classmethod
@@ -28,12 +28,8 @@ class Tests(TestCase):
 
     def test_get_next_question(self):
         # expected number of queries
-        NUM_QUERIES_SCHEDULED_BEFORE_NOW = 3  # scheduled question is due to be shown before now
-        NUM_QUERIES_UNSCHEDULED_QUESTION = 3  # there are no scheduled questions, and an unscheduled question is returned
-        NUM_QUERIES_SCHEDULED_AFTER_NOW = 5   # no scheduled questions before now, no unscheduled questions, and a scheduled question after now is shown
-        NUM_QUERIES_NO_QUESTIONS = 5  # number of queries expected when no questions are found
 
-        # test _get_next_question()
+        # test get_next_question()
         user1 = User.objects.create(email="user1@bednark.com")
         user2 = User.objects.create(email="user2@bednark.com")
 
@@ -54,7 +50,7 @@ class Tests(TestCase):
         self.assertTrue(QuestionTag.objects.all().count() == 0)
         self.assertTrue(Schedule.objects.all().count() == 0)
         self.assertTrue(Tag.objects.all().count() == 2)
-        next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=[])
+        next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=[])
         self.assertTrue(next_question.question is None)
 
         # Test: no question when tags_selected but no questions with that tag
@@ -66,7 +62,7 @@ class Tests(TestCase):
 
         tag1_queryset = QuestionTag.objects.filter(tag=tag1)
         for _ in range(5):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertTrue(next_question.question is None)
 
         # Bucket 2: question with no schedules
@@ -92,7 +88,7 @@ class Tests(TestCase):
         self.assertTrue(Schedule.objects.filter(user=user1).count() == 0)
 
         for n in range(4):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertTrue(next_question.question == question1)
 
         # Test: No question returned when tag.enabled == False
@@ -114,7 +110,7 @@ class Tests(TestCase):
             QuestionTag.objects.filter(tag=tag1, enabled=False).count(), 2
         )
         for _ in range(4):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertTrue(next_question.question is None)
 
         # Bucket 2: question with no schedules
@@ -141,7 +137,7 @@ class Tests(TestCase):
         self.assertTrue(Schedule.objects.filter(question=question2).count() == 0)
         self.assertTrue(Question.objects.get(id=question1.id).schedule_set.count() == 1)
         for _ in range(5):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertTrue(next_question.question == question2)
 
         # Bucket 3: question.schedule_date_show_next > now
@@ -189,14 +185,14 @@ class Tests(TestCase):
             if True:
                 # trigger the debugger
                 pytz.show = False
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertEqual(next_question.question, question2)
 
         # Add a new question with a different tag, and assert that it
         # doesn't affect the question returned
         Question.objects.create(question="question3")
         for _ in range(5):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj,
+            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj,
                     tags_selected=tag1_queryset)
             self.assertEqual(next_question.question, question2)
 
@@ -273,5 +269,6 @@ class Tests(TestCase):
         self.assertTrue(q2_sched1.date_show_next < datetime.now(tz=pytz.utc))
         self.assertTrue(Schedule.objects.all().count() == 3)
         for _ in range(5):
-            next_question = _get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
+            next_question = get_next_question(user=user1, query_prefs_obj=query_prefs_obj, tags_selected=tag1_queryset)
             self.assertEqual(next_question.question, question1)
+

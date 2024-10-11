@@ -19,22 +19,22 @@
   <h1>Take a Quiz</h1>
   <form method="post">
     {% csrf_token %}
-    {{ form_flashcard.hidden_query_prefs_id }}
+    {{ form_flashcard.hidden_query_name }}
     {{ form_flashcard.hidden_question_id }}
     {{ form_flashcard.hidden_tag_ids_selected }}
     <div class="row">
       <div class="col-xs-12">
         <div class="alert alert-info" role="alert">
           <!-- Show the question -->
-          {% if question %}
-            {{ question.question|markdown:"do-not-escape-html" }}
+          {% if next_question.question %}
+            {{ next_question.question.question|markdown:"do-not-escape-html" }}
           {% else %}
             (There are no questions. Add a question, and/or select a tag that has a question.)
           {% endif %}
         </div>
-        {% if question %}
+        {% if next_question.question %}
           <div class="alert alert-warning" role="alert">
-            {% if question.answer %}
+            {% if next_question.question.answer %}
               <details>
               {% else %}
                 <details>
@@ -48,11 +48,11 @@
                 </div>
               </details>
             </div>
-            {% if question.answer %}
+            {% if next_question.question.answer %}
               <div class="alert alert-success" role="alert">
                 <details open>
                   <summary>Correct Answer</summary>
-                  {{ question.answer.answer|markdown:"do-not-escape-html" }}
+                  {{ next_question.question.answer.answer|markdown:"do-not-escape-html" }}
                 </details>
               </div>
             {% endif %}
@@ -64,7 +64,7 @@
         </div>
       </div>
       <!-- End: Question and Answer section -->
-      {% if question %}
+      {% if next_question.question %}
 
       <table style="border-collapse: separate; border-spacing: 20px">
         {% for buttons_row in buttons %}
@@ -115,42 +115,41 @@
       <input class="btn btn-primary btn-lg" id="id_button_submit" type="submit" name="submit me" value="Submit" />
       <!-- Add urls to edit the question and answer in the Django admin -->
       <div>
-        {% if question %}
-          <a href="{% url 'admin:questions_question_change' question.id %}">Edit question</a>
-          {% if question.answer %}
-            <a href="{% url 'admin:questions_answer_change' question.answer.id %}">| Edit answer</a>
+        {% if next_question.question %}
+          <a href="{% url 'admin:questions_question_change' next_question.question.id %}">Edit question</a>
+          {% if next_question.question.answer %}
+            <a href="{% url 'admin:questions_answer_change' next_question.question.answer.id %}">| Edit answer</a>
           {% endif %}
         {% endif %}
       </div>
       <div>
         <a href="{{ select_tags_url }}">Select Tags</a>
       </div>
-      {{ form_flashcard.query_prefs }}
       <div class="col-xs-12">
-        {% if question %}
+        {% if next_question.question %}
           <br>
           <u>tags for this question:</u>
           <ol>
             <i>
-              {% for tag in question_tag_names %}
+              {% for tag in next_question.tag_names_for_question %}
                 <li>
                   {{ tag }}
                 {% endfor %}
               </i>
             </ol>
-            {% if option_limit_to_date_show_next_before_now %}
-              [{{ count_questions_before_now }}] questions past due for all selected tags
-            {% else %}
-              # questions for all selected tags: {{ count_questions_before_now }} (scheduled before now)
-            {% endif %}
+            # questions due for all selected tags: {{ next_question.count_questions_due }} (scheduled before now)
             <br />
-            # flashcards reviewed in last 30 minutes: {{ schedules_recent_count_30 }}
+            # questions unseen for all selected tags: {{ next_question.count_questions_unseen }}
             <br />
-            # flashcards reviewed in last 60 minutes: {{ schedules_recent_count_60 }}
+            # questions matching the query-type criteria: {{ next_question.count_questions_matched_criteria }}
             <br />
-            # flashcards with the selected tags: {{ count_questions_tagged }}
+            # flashcards reviewed in last 30 minutes: {{ next_question.count_recent_seen_mins_30 }}
             <br />
-            # times this flashcard has been seen: {{ num_schedules }}
+            # flashcards reviewed in last 60 minutes: {{ next_question.count_recent_seen_mins_60 }}
+            <br />
+            # flashcards with the selected tags: {{ next_question.count_questions_tagged }}
+            <br />
+            # times this flashcard has been seen: {{ next_question.count_times_question_seen }}
             <br />
             last seen: {{ last_schedule_added.human_datetime_added }} ago
             <table>
@@ -163,12 +162,16 @@
                 <td>{{ last_schedule_added.date_show_next }}</td>
               </tr>
               <tr>
+                <td>last scheduled interval:</td>
+                <td>{{ last_schedule_added.interval_num }} {{ last_schedule_added.interval_unit }}</td>
+              </tr>
+              <tr>
                 <td>flashcard added:</td>
-                <td>{{ question.datetime_added }}</td>
+                <td>{{ next_question.question.datetime_added }}</td>
               </tr>
               <tr>
                 <td>flashcard updated:</td>
-                <td>{{ question.datetime_updated }}</td>
+                <td>{{ next_question.question.datetime_updated }}</td>
               </tr>
             </table>
           {% endif %}
@@ -176,7 +179,7 @@
           <u>tags selected:</u>
           <ol>
             <i>
-              {% for selected_tag in selected_tag_names %}
+              {% for selected_tag in next_question.tag_names_selected %}
                 <li>
                   {{ selected_tag }}
                 {% endfor %}

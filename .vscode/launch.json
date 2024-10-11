@@ -4,6 +4,23 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
+        {
+            "name": "0) pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "python",
+            "args": [
+                "-m",
+                "pytest"
+            ],
+            "env": {
+                "QM_ENGINE": "sqlite"
+            },
+            "justMyCode": true,
+            "autoStartBrowser": false
+            
+        },
 
         {
             "name": "1) runserver",
@@ -15,11 +32,32 @@
                 "0.0.0.0:80"
             ],
             "django": true,
+            "env": {
+                "QM_ENGINE": "postgres",
+                "DB_QUIZME": "quizme"
+            },
             "justMyCode": true,
             "autoStartBrowser": false
         },
+
         {
-            "name": "2) tests --failfast",
+            "name": "2) pytest --failfast",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "pytest",
+            "env": {
+                "QM_ENGINE": "sqlite"
+            },
+            "args": [
+                 "--maxfail=1"
+            ],
+            "django": true,
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+
+        {
+            "name": "3) manage.py test --failfast",
             "type": "debugpy",
             "request": "launch",
             "program": "./manage.py",
@@ -29,17 +67,18 @@
             "args": [
                  "test",
                  "--failfast"
-            ]
+            ],
             "justMyCode": true,
             "autoStartBrowser": false
         },
+
         {
-            "name": "3) tests test_user_with_one_question",
+            "name": "4) manage.py test test_user_with_one_question",
             "type": "debugpy",
             "request": "launch",
             "program": "./manage.py",
             "env": {
-                "QM_DEBUG_PRINT": True,
+                "QM_DEBUG_PRINT": "True",
                 "QM_ENGINE": "sqlite",
                 "QM_TEST_DB": "sqlite.db"
             },
@@ -48,10 +87,72 @@
                  "--failfast",
                  "--no-input",
                  "-k",
-                 "test_schedule_date_show_next_less_than_now"
-            ]
+                 "test_multiple_tags"
+            ],
             "justMyCode": true,
             "autoStartBrowser": false
-        }
+        },
+
+        {
+            "name": "5) env",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "env",
+            "env": {
+                "QM_DEBUG_PRINT": "True",
+                "QM_ENGINE": "sqlite",
+                "QM_TEST_DB": "sqlite.db"
+            },
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+
+        {
+            "name": "6) bin/run_pytest.sh (DOES NOT WORK)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "bin/run_pytest.sh",
+            "env": {
+                "QM_DEBUG_PRINT": "True",
+                "QM_ENGINE": "sqlite",
+                "QM_TEST_DB": "sqlite.db"
+            },
+            "justMyCode": true,
+            "autoStartBrowser": false
+        },
+
+        {
+          "name": "7) Python Debugger: Module",
+          "type": "debugpy",
+          "request": "launch",
+          "module": "pytest",
+          "localRoot": "${workspaceRoot}",
+          "env": {
+                "QM_DEBUG_PRINT": "True",
+                "QM_ENGINE": "sqlite",
+                "QM_TEST_DB": "sqlite.db",
+                "DB_QUIZME": ":memory:"
+          },
+        },
+
+          {
+            "name": "8) Python Debugger: specific test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "localRoot": "${workspaceRoot}",
+            // --capture=no  ==> don't capture stdout/stderr (e.g., show print() statements in the output)
+            "args": [
+                "--capture=no",
+                "-k",
+                "test_different_results_for_query_seen_and_due"
+            ],
+            "env": {
+                  "QM_DEBUG_PRINT": "True",
+                  "QM_ENGINE": "sqlite",
+                  "QM_TEST_DB": "sqlite.db",
+                  "DB_QUIZME": ":memory:"
+            }
+          }
     ]
 }

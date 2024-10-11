@@ -55,9 +55,24 @@
 
 ## How to run tests
 
-1. Install phantomjs: `brew cask install phantomjs`
-2. Install geckodriver: `brew install geckodriver`
-3. Install Firefox
+```shell
+DB_QUIZME=':memory:' QM_ENGINE=sqlite  python -m pytest -v --maxfail=1
+```
+
+## How to run the server
+```python
+./manage.py runserver 0.0.0.0:80
+```
+
+## Migrations
+
+###### Q: How to run makemigrations?
+A:
+```shell
+./manage.py makemigrations questions
+```
+
+
 
 ### Docker Test Environment
 I got some docker containers setup for with the intent of making local testing easier. In order to use it, you need to install docker and docker-compose, which is a util for managing sets of docker containers.

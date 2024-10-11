@@ -1,6 +1,7 @@
 # override any global .gitignore containing ".vscode"
 !.vscode/
 
+.coverage
 *.ipynb*
 *.log
 *.pyc
