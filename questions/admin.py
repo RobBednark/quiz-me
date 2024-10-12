@@ -56,7 +56,7 @@ class QuestionTagAdmin(admin.ModelAdmin):
         # Note that this must be present in the list_display, otherwise it will not be shown.
         # https://stackoverflow.com/a/48950925/875915
         # https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#admin-reverse-urls
-        link = reverse("admin:questions_question_change", args=[obj.tag_id])
+        link = reverse("admin:questions_question_change", args=[obj.question_id])
         return format_html('<a href="{}">question</a>', link)
 
     link_to_question.short_description = 'Edit question'  # the column heading
