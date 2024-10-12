@@ -1,9 +1,11 @@
-from django.contrib import admin
 from django.db import models
+from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 
 from pagedown.widgets import AdminPagedownWidget
 
-from .models import Answer, Attempt, Tag, Question, Schedule
+from .models import Answer, Attempt, Tag, Question, QuestionTag, Schedule
 
 
 class AnswerQuestionRelationshipInline(admin.TabularInline):
@@ -41,6 +43,33 @@ class AttemptAdmin(admin.ModelAdmin):
         ])
     tags_display.short_description = "Tags"
 
+
+class QuestionTagAdmin(admin.ModelAdmin):
+    # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
+    list_display = ['datetime_added', 'datetime_updated', 'enabled', 'tag', 'link_to_tag', 'link_to_question', 'question']
+    list_per_page = 999  # how many items to show per page
+    ordering = ('tag', 'question')
+    search_fields = ['enabled', 'tag__name', 'question__question']
+
+    def link_to_question(self, obj):
+        # Add a column with a link to the question
+        # Note that this must be present in the list_display, otherwise it will not be shown.
+        # https://stackoverflow.com/a/48950925/875915
+        # https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#admin-reverse-urls
+        link = reverse("admin:questions_question_change", args=[obj.tag_id])
+        return format_html('<a href="{}">question</a>', link)
+
+    link_to_question.short_description = 'Edit question'  # the column heading
+    
+    def link_to_tag(self, obj):
+        # Add a column with a link to the tag.
+        # Note that this must be present in the list_display, otherwise it will not be shown.
+        # https://stackoverflow.com/a/48950925/875915
+        # https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#admin-reverse-urls
+        link = reverse("admin:questions_tag_change", args=[obj.tag_id])
+        return format_html('<a href="{}">{}</a>', link, obj.tag.name)
+
+    link_to_tag.short_description = 'Edit tag'  # the column heading
 
 class TagAdmin(admin.ModelAdmin):
     # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
@@ -87,4 +116,5 @@ admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Attempt, AttemptAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Question, QuestionAdmin)
+admin.site.register(QuestionTag, QuestionTagAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
