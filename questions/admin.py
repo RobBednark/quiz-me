@@ -46,10 +46,15 @@ class AttemptAdmin(admin.ModelAdmin):
 
 class QuestionTagAdmin(admin.ModelAdmin):
     # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
-    list_display = ['datetime_added', 'datetime_updated', 'tag', 'link_to_tag', 'link_to_question', 'question']
+    list_display = ['datetime_added', 'datetime_updated', 'tag_name', 'link_to_tag', 'link_to_question', 'question']
     list_per_page = 999  # how many items to show per page
-    ordering = ('tag', 'question')
+    ordering = ('tag__name', 'question')
     search_fields = ['tag__name', 'question__question']
+
+    def tag_name(self, obj):
+        return obj.tag.name
+    tag_name.admin_order_field = 'tag__name'
+    tag_name.short_description = 'Tag'
 
     def link_to_question(self, obj):
         # Add a column with a link to the question
