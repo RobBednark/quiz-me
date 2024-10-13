@@ -86,10 +86,9 @@ class QuestionTag(CreatedBy):
     # This is a tag applied to a question.
     # e.g., question = Question(text="1 + 1 = ??")
     #       tag_math = Tag(name="math")
-    #       QuestionTag(question=question, tag=tag_math, enabled=True)
+    #       QuestionTag(question=question, tag=tag_math)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    enabled = models.BooleanField(default=False)
     # questions_set
     # user
     # user_set

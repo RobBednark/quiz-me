@@ -298,7 +298,7 @@ class NextQuestion:
                 sorted([
                     str(
                         qtag.tag.name
-                    ) for qtag in self.question.questiontag_set.filter(enabled=True)
+                    ) for qtag in self.question.questiontag_set.all()
                 ])
         
         # Get the tag names for the selected tags
