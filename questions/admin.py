@@ -52,9 +52,10 @@ class QuestionTagAdmin(admin.ModelAdmin):
     search_fields = ['tag__name', 'question__question']
 
     def tag_name(self, obj):
+        # obj is a QuestionTag object
         return obj.tag.name
-    tag_name.admin_order_field = 'tag__name'
-    tag_name.short_description = 'Tag'
+    tag_name.admin_order_field = 'tag__name'  # Sort by tag.name rather than default of tag.id
+    tag_name.short_description = 'Tag'  # column heading
 
     def link_to_question(self, obj):
         # Add a column with a link to the question
