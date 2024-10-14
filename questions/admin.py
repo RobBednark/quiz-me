@@ -14,6 +14,12 @@ class AnswerQuestionRelationshipInline(admin.TabularInline):
 
 class TagQuestionRelationshipInline(admin.TabularInline):
     model = Tag.questions.through
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # Only show tags owned by the user
+        if db_field.name == "tag":
+            kwargs["queryset"] = Tag.objects.filter(user=request.user)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class AnswerAdmin(admin.ModelAdmin):
@@ -25,6 +31,14 @@ class AnswerAdmin(admin.ModelAdmin):
     }
     # enable searching for Answer's on these two fields
     search_fields = ['answer', 'question__question']
+
+    def get_form(self, request, obj=None, **kwargs):
+        '''Default the user field to the current user.'''
+        form = super().get_form(request, obj, **kwargs)
+        if obj is None:
+            form.base_fields['user'].initial = request.user
+        return form
+
 
 
 class AttemptAdmin(admin.ModelAdmin):
@@ -86,6 +100,13 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ['name']
 
+    def get_form(self, request, obj=None, **kwargs):
+        '''Default the user field to the current user.'''
+        form = super().get_form(request, obj, **kwargs)
+        if obj is None:
+            form.base_fields['user'].initial = request.user
+        return form
+
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [TagQuestionRelationshipInline]
     list_display = ['pk', 'datetime_added', 'datetime_updated', 'tags_display', 'question', 'answer']
@@ -95,6 +116,13 @@ class QuestionAdmin(admin.ModelAdmin):
     }
     # enable searching for Question's on these two fields
     search_fields = ['answer__answer', 'pk', 'question', 'tag__name']
+
+    def get_form(self, request, obj=None, **kwargs):
+        '''Default the user field to the current user.'''
+        form = super().get_form(request, obj, **kwargs)
+        if obj is None:
+            form.base_fields['user'].initial = request.user
+        return form
 
     def tags_display(self, obj):
         # Use for list_display to show the names of all the tags (a many-to-many field)
