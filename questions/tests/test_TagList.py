@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from questions.models import Tag
-from questions.views import TagList, FIELD_NAME__TAG_ID_PREFIX
+from questions.TagList import TagList, FIELD_NAME__TAG_ID_PREFIX
 
 User = get_user_model()
 
