@@ -121,4 +121,50 @@ class TestGetTagHierarchy:
         assert len(user1_hierarchy) == 1
         assert len(user2_hierarchy) == 1
         assert list(user1_hierarchy.values())[0]['tag_name'] == "user1_tag"
+<<<<<<< HEAD
         assert list(user2_hierarchy.values())[0]['tag_name'] == "user2_tag"
+=======
+
+        assert list(user2_hierarchy.values())[0]['tag_name'] == "user2_tag"
+
+
+class TestExpandAllTagIds:
+
+    @pytest.fixture
+    def sample_hierarchy(self):
+        return {
+            1: {'descendants_and_self': {1, 2, 3}},
+            2: {'descendants_and_self': {2, 3}},
+            3: {'descendants_and_self': {3}},
+            4: {'descendants_and_self': {4, 5}},
+            5: {'descendants_and_self': {5}},
+        }
+    
+    def test_expand_single_tag(self, sample_hierarchy):
+        result = expand_all_tag_ids(sample_hierarchy, [1])
+        assert result == {1, 2, 3}
+    
+    def test_expand_multiple_tags(self, sample_hierarchy):
+        result = expand_all_tag_ids(sample_hierarchy, [1, 4])
+        assert result == {1, 2, 3, 4, 5}
+    
+    def test_expand_leaf_tag(self, sample_hierarchy):
+        result = expand_all_tag_ids(sample_hierarchy, [3])
+        assert result == {3}
+    
+    def test_expand_empty_list(self, sample_hierarchy):
+        result = expand_all_tag_ids(sample_hierarchy, [])
+        assert result == set()
+    
+    def test_expand_all_tags(self, sample_hierarchy):
+        result = expand_all_tag_ids(sample_hierarchy, [1, 2, 3, 4, 5])
+        assert result == {1, 2, 3, 4, 5}
+    
+    def test_expand_duplicate_tags(self, sample_hierarchy):
+        result = expand_all_tag_ids(sample_hierarchy, [1, 1, 2, 2])
+        assert result == {1, 2, 3}
+    
+    def test_expand_nonexistent_tag(self, sample_hierarchy):
+        with pytest.raises(KeyError):
+            expand_all_tag_ids(sample_hierarchy, [6])
+>>>>>>> a8e56b2 (Use tag descendants in NextQuestion (see below))

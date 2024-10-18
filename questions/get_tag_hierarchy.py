@@ -93,3 +93,15 @@ def get_tag_hierarchy(user):
         hierarchy[tag.id]['count_questions_tag'] = tag.questions.distinct().count()
 
     return hierarchy
+
+def expand_all_tag_ids(hierarchy, tag_ids):
+    '''
+    Given a hierarchy dict, expand all tag id's in tag_ids.
+    Parameters:
+        hierarchy (dict) - the hierarchy dict, per the structure above
+        tag_ids (iterable) - an iterable of Tag.id's (list, set, ...), e.g., [1, 2]
+    '''
+    expanded_tag_id_list = set()
+    for tag_id in tag_ids:
+        expanded_tag_id_list.update(hierarchy[tag_id]['descendants_and_self'])
+    return expanded_tag_id_list
