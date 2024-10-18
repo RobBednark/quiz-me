@@ -61,16 +61,18 @@ class Attempt(CreatedBy):
     # user
     # user_set
 
-
 @python_2_unicode_compatible
 class Tag(CreatedBy):
     '''
         Each tag can be applied to each question for a given user.
 
-        Each user can have many tags applied to many questions, e.g.,
+        Each user can have 0..n tags, with each tag applied to 0..n questions, e.g.,
             user_rob
                 tag1: question1, question2
                 tag2: question1, question3
+        
+        Tag.children.all()  (TagLineage's, via TagLineage)
+        Tag.parents.all()   (TagLineage's, via TagLineage)
     '''
     name = models.CharField(max_length=1000)
     questions = models.ManyToManyField('Question', blank=True, through='QuestionTag')
@@ -79,6 +81,24 @@ class Tag(CreatedBy):
 
     def __str__(self):
         return self.name
+
+
+@python_2_unicode_compatible
+class TagLineage(CreatedBy):
+    # A tag can have 0..n tags as children
+    # related_name is the name for the reverse relationship.  
+    # In this case, the reverse relationship is Tag referring to TagLineage's (as opposed to TagLineage referring to Tag)
+    # e.g., 
+    #   my_tag.children.all() returns the TagLineage's for my_tag (parent_tag=my_tag), representing the children of my_tag (where each child_tag is the child)
+    parent_tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='children')
+    child_tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='parents')
+
+    class Meta:
+        # Disallow duplicate TagLineage entries.
+        unique_together = ('user', 'parent_tag', 'child_tag')
+
+    def __str__(self):
+        return f'TagLineage: parent_tag=[{self.parent_tag.name}] child_tag=[{self.child_tag.name}]'
 
 
 @python_2_unicode_compatible
