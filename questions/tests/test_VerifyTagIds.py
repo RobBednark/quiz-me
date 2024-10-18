@@ -14,10 +14,6 @@ def user():
 def tag(user):
     return Tag.objects.create(name="tag 1", user=user)
 
-@pytest.fixture
-def question(user):
-    return Question.objects.create(question="Test question", user=user)
-
 class TestVerifyTagIds:
     def test_all_tags_valid(self, user):
         tag1 = Tag.objects.create(name="tag1", user=user)
