@@ -175,6 +175,7 @@
               </tr>
             </table>
           {% endif %}
+
           <br>
           <u>tags selected:</u>
           <ol>
@@ -185,6 +186,18 @@
                 {% endfor %}
               </i>
             </ol>
+
+          <br>
+          <u>tags implicitly selected:</u>
+          <ol>
+            <i>
+              {% for implicit_tag in next_question.tag_names_selected_implicit_descendants %}
+                <li>
+                  {{ implicit_tag }}
+                {% endfor %}
+              </i>
+            </ol>
+
           </div>
           <input class="btn btn-primary btn-lg" type="submit" value="Answer" />
         </div>

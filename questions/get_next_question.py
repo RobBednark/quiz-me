@@ -22,7 +22,7 @@ class NextQuestion:
         
         self._tag_hierarchy = get_tag_hierarchy(user=user)
         self._tag_ids_selected_expanded = expand_all_tag_ids(hierarchy=self._tag_hierarchy, tag_ids=self._tag_ids_selected)
-
+        self._tag_ids_selected_implicit_descendants = self._tag_ids_selected_expanded - set(self._tag_ids_selected)
         
         self.count_questions_due = None  # questions due (date_show_next < now); does NOT include unseen questions
         self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
@@ -36,6 +36,7 @@ class NextQuestion:
 
         self.tag_names_for_question = None  # list of tag names for the question
         self.tag_names_selected = None  # list of tag names for the tags selected for the query
+        self.tag_names_selected_implicit_descendants = None  # list of tag names for the tags selected for the query
         
         self._queryset__questions_tagged = None
 
@@ -306,7 +307,11 @@ class NextQuestion:
                     ) for qtag in self.question.questiontag_set.all()
                 ])
         
-        # Get the tag names for the selected tags
         self.tag_names_selected = [
-            str(tag.name) for tag in Tag.objects.filter(id__in=self._tag_ids_selected_expanded)
+            # Note: _tag_ids_selected, not _tag_ids_selected_expanded
+            str(tag.name) for tag in Tag.objects.filter(id__in=self._tag_ids_selected)
+        ]
+        
+        self.tag_names_selected_implicit_descendants = [
+            str(tag.name) for tag in Tag.objects.filter(id__in=self._tag_ids_selected_implicit_descendants)
         ]
