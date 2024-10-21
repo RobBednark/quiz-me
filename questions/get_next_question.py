@@ -5,6 +5,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
+from questions.get_tag_hierarchy import expand_all_tag_ids, get_tag_hierarchy
 from questions.models import Question, Schedule, Tag
 from questions.VerifyTagIds import VerifyTagIds
 
@@ -19,6 +20,10 @@ class NextQuestion:
 
         VerifyTagIds(tag_ids=tag_ids_selected, user=user)
         
+        self._tag_hierarchy = get_tag_hierarchy(user=user)
+        self._tag_ids_selected_expanded = expand_all_tag_ids(hierarchy=self._tag_hierarchy, tag_ids=self._tag_ids_selected)
+        self._tag_ids_selected_implicit_descendants = self._tag_ids_selected_expanded - set(self._tag_ids_selected)
+        
         self.count_questions_due = None  # questions due (date_show_next < now); does NOT include unseen questions
         self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
         self.count_questions_unseen = None  
@@ -31,6 +36,7 @@ class NextQuestion:
 
         self.tag_names_for_question = None  # list of tag names for the question
         self.tag_names_selected = None  # list of tag names for the tags selected for the query
+        self.tag_names_selected_implicit_descendants = None  # list of tag names for the tags selected for the query
         
         self._queryset__questions_tagged = None
 
@@ -69,7 +75,7 @@ class NextQuestion:
         if self._queryset__questions_tagged is None:
             self._queryset__questions_tagged = Question.objects.filter(
                 user=self._user,
-                questiontag__tag__id__in=self._tag_ids_selected)
+                questiontag__tag__id__in=self._tag_ids_selected_expanded)
 
         subquery_latest_dateshownext_for_question = Schedule.objects.filter(
             question=OuterRef('pk'),
@@ -153,7 +159,7 @@ class NextQuestion:
         # Get "tagged_questions" (questions that have one or more tag_ids).
         questions_tagged = Question.objects.filter(
             user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected
+            questiontag__tag__id__in=self._tag_ids_selected_expanded
         )
         self._queryset__questions_tagged = questions_tagged
 
@@ -206,7 +212,7 @@ class NextQuestion:
         # Find questions created by the user with selected tags
         questions_tagged = Question.objects.filter(
             user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected
+            questiontag__tag__id__in=self._tag_ids_selected_expanded
         )
         self._queryset__questions_tagged = questions_tagged
 
@@ -243,7 +249,7 @@ class NextQuestion:
         oldest_tags = Tag.objects.filter(
             questiontag__question__user=self._user,
             questiontag__question__schedule__isnull=True,
-            id__in=self._tag_ids_selected
+            id__in=self._tag_ids_selected_expanded
         ).annotate(
             newest_schedule_dateadded_for_tag=Subquery(subquery_newest_schedule_dateadded_for_tag),
             oldest_unseen_question_dateadded_for_tag=Subquery(subquery_oldest_unseen_question_dateadded_for_tag),
@@ -266,7 +272,7 @@ class NextQuestion:
         # Set counts
         self.count_questions_tagged = Question.objects.filter(
             user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected
+            questiontag__tag__id__in=self._tag_ids_selected_expanded
         ).distinct().count()
         # Count the number of tags that have at least one unseen question
         self.count_questions_matched_criteria = oldest_tags.distinct().count()
@@ -301,7 +307,11 @@ class NextQuestion:
                     ) for qtag in self.question.questiontag_set.all()
                 ])
         
-        # Get the tag names for the selected tags
         self.tag_names_selected = [
+            # Note: _tag_ids_selected, not _tag_ids_selected_expanded
             str(tag.name) for tag in Tag.objects.filter(id__in=self._tag_ids_selected)
+        ]
+        
+        self.tag_names_selected_implicit_descendants = [
+            str(tag.name) for tag in Tag.objects.filter(id__in=self._tag_ids_selected_implicit_descendants)
         ]
