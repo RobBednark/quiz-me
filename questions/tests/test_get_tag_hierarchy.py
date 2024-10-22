@@ -121,12 +121,7 @@ class TestGetTagHierarchy:
         assert len(user1_hierarchy) == 1
         assert len(user2_hierarchy) == 1
         assert list(user1_hierarchy.values())[0]['tag_name'] == "user1_tag"
-<<<<<<< HEAD
         assert list(user2_hierarchy.values())[0]['tag_name'] == "user2_tag"
-=======
-
-        assert list(user2_hierarchy.values())[0]['tag_name'] == "user2_tag"
-
 
 class TestExpandAllTagIds:
 
@@ -167,4 +162,3 @@ class TestExpandAllTagIds:
     def test_expand_nonexistent_tag(self, sample_hierarchy):
         with pytest.raises(KeyError):
             expand_all_tag_ids(sample_hierarchy, [6])
->>>>>>> a8e56b2 (Use tag descendants in NextQuestion (see below))
