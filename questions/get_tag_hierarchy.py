@@ -78,6 +78,7 @@ def get_tag_hierarchy(user):
             raise ValueError(f'type_=[{type_}] but must be either "ancestors" or "descendants"')
 
     tags = Tag.objects.filter(user=user)
+    tags = tags.prefetch_related('parents', 'children')
     hierarchy = {}
 
     for type_ in ['ancestors', 'descendants']:
