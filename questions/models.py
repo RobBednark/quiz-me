@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from six import python_2_unicode_compatible
 
 from dateutil.relativedelta import relativedelta
 
@@ -29,7 +28,6 @@ class CreatedBy(models.Model):
     class Meta:
         abstract = True
 
-@python_2_unicode_compatible
 class Question(CreatedBy):
     question = models.TextField()
     answer = models.ForeignKey('Answer', on_delete=models.SET_NULL, null=True, blank=True)
@@ -44,7 +42,6 @@ class Question(CreatedBy):
         return '<Question id=[%s] question=[%s] datetime_added=[%s]>' % (self.id, self.question, self.datetime_added)
 
 
-@python_2_unicode_compatible
 class Answer(CreatedBy):
     answer = models.TextField()
     # question_set
@@ -61,7 +58,6 @@ class Attempt(CreatedBy):
     # user
     # user_set
 
-@python_2_unicode_compatible
 class Tag(CreatedBy):
     '''
         Each tag can be applied to each question for a given user.
@@ -83,7 +79,6 @@ class Tag(CreatedBy):
         return self.name
 
 
-@python_2_unicode_compatible
 class TagLineage(CreatedBy):
     # A tag can have 0..n tags as children
     # related_name is the name for the reverse relationship.  
@@ -101,7 +96,6 @@ class TagLineage(CreatedBy):
         return f'TagLineage: parent_tag=[{self.parent_tag.name}] child_tag=[{self.child_tag.name}]'
 
 
-@python_2_unicode_compatible
 class QuestionTag(CreatedBy):
     # This is a tag applied to a question.
     # e.g., question = Question(text="1 + 1 = ??")

@@ -1,5 +1,9 @@
 import pytest
+
 from django.contrib.auth import get_user_model
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+
 from questions.models import Question, Tag, TagLineage
 from questions.get_tag_hierarchy import expand_all_tag_ids, get_tag_hierarchy
 
@@ -39,7 +43,10 @@ class TestGetTagHierarchy:
 
     def test_tag_hierarchy_structure(self, user, setup_tags):
         parent, child1, child2, grandchild = setup_tags
-        hierarchy = get_tag_hierarchy(user)
+        with CaptureQueriesContext(connection) as context:
+            assert len(context) == 0, "Should be 0 queries before the call to get_tag_hierarchy()"
+            hierarchy = get_tag_hierarchy(user)
+            assert len(context) == 27
 
         assert len(hierarchy) == 4
         assert all(tag_id in hierarchy for tag_id in [parent.id, child1.id, child2.id, grandchild.id])
@@ -121,12 +128,7 @@ class TestGetTagHierarchy:
         assert len(user1_hierarchy) == 1
         assert len(user2_hierarchy) == 1
         assert list(user1_hierarchy.values())[0]['tag_name'] == "user1_tag"
-<<<<<<< HEAD
         assert list(user2_hierarchy.values())[0]['tag_name'] == "user2_tag"
-=======
-
-        assert list(user2_hierarchy.values())[0]['tag_name'] == "user2_tag"
-
 
 class TestExpandAllTagIds:
 
@@ -167,4 +169,3 @@ class TestExpandAllTagIds:
     def test_expand_nonexistent_tag(self, sample_hierarchy):
         with pytest.raises(KeyError):
             expand_all_tag_ids(sample_hierarchy, [6])
->>>>>>> a8e56b2 (Use tag descendants in NextQuestion (see below))

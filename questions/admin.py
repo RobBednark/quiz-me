@@ -17,7 +17,7 @@ class TagQuestionRelationshipInline(admin.TabularInline):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         # Only show tags owned by the user
         if db_field.name == "tag":
-            kwargs["queryset"] = Tag.objects.filter(user=request.user)
+            kwargs["queryset"] = Tag.objects.filter(user=request.user).order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
@@ -172,7 +172,7 @@ class QuestionAdmin(admin.ModelAdmin):
     def tags_display(self, obj):
         # Use for list_display to show the names of all the tags (a many-to-many field)
         return ", ".join([
-            tag.name for tag in obj.tag_set.all()
+            tag.name for tag in obj.tag_set.all().order_by('name')
         ])
     tags_display.short_description = "Tags"
 
