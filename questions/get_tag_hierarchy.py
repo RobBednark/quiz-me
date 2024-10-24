@@ -77,7 +77,6 @@ def get_tag_hierarchy(user):
                 if child_tag.id not in visited:
                     build_hierarchy(hierarchy=hierarchy, tag=child_tag, type_=type_, visited=visited)
                     hierarchy[tag.id]['children'].add(child_tag.id)
-                    # hierarchy[tag.id]['descendants'].add(child_tag.id)
                     hierarchy[tag.id]['descendants'].update(hierarchy[child_tag.id]['descendants_and_self'])
                     hierarchy[tag.id]['descendants_and_self'].update(hierarchy[child_tag.id]['descendants_and_self'])
             hierarchy[tag.id]['descendants_and_self'].add(tag.id)  # add self
