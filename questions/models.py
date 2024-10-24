@@ -23,7 +23,7 @@ CHOICES_UNITS = (
 class CreatedBy(models.Model):
     datetime_added = models.DateTimeField(auto_now_add=True)
     datetime_updated = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=False)
 
     class Meta:
         abstract = True
