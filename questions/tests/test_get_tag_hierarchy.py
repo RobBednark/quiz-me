@@ -47,7 +47,7 @@ class TestGetTagHierarchy:
         with CaptureQueriesContext(connection) as context:
             assert len(context) == 0, "Should be 0 queries before the call to get_tag_hierarchy()"
             hierarchy = get_tag_hierarchy(user)
-            assert len(context) == 20
+            assert len(context) == 3 # query count
 
         assert len(hierarchy) == 4
         assert all(tag_id in hierarchy for tag_id in [parent.id, child1.id, child2.id, grandchild.id])

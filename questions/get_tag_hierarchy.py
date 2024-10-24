@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from questions.models import Tag, Question, QuestionTag
+from questions.models import QuestionTag, Tag, TagLineage
 
 '''
 The "hierarchy" data structure looks like this:
@@ -28,68 +28,71 @@ def get_tag_hierarchy(user):
     count_questions_all must be careful not to double-count questions with multiple descendant tags.  e.g., use .filter(tag__in=[descendants+tag])
     '''
     
-    def build_hierarchy(hierarchy, tag, type_, visited):
+    def build_hierarchy(hierarchy, tag_id, tag_id_children, tag_id_parents, type_, visited):
         '''
-        Recursive function to build either the ancestors or descendants for tag.
+        Recursive function to build either the ancestors or descendants for tag_id.
 
         Parameters:
         hierarchy (dict) - the hierarchy dict, per the structure above
-        tag (Tag) - the tag to build the ancestors or descendants for
+        tag_id (Tag) - the tag id to build the ancestors or descendants for
         type_ (string) - 'ancestors' or 'descendants' (which ones to build)
-        visited (set) - set of tag.id's that have been visited; the initial call passes in an empty set, and recursive calls add on to this set
+        visited (set) - set of tag id's that have been visited; the initial call passes in an empty set, and recursive calls add on to this set
 
         Algorithm:
 
-        visited.add(tag.id)
-        Create hierarchy[tag.id] entry if not already created
+        visited.add(tag_id)
+        Create hierarchy[tag_id] entry if not already created
         foreach parent of tag:
             if parent not in visited:
                 recursively call build_hierarchy(parent, type_)
-                add parent to: hierarchy[tag.id]['parents']
-                add parent to: hierarchy[tag.id]['ancestors']
-                add parent's ancestors to hierarchy[tag.id]['ancestors']
+                add parent to: hierarchy[tag_id]['parents']
+                add parent to: hierarchy[tag_id]['ancestors']
+                add parent's ancestors to hierarchy[tag_id]['ancestors']
 
         Do the same for children/descendants
         '''
         
-        visited.add(tag.id)
-        if tag.id not in hierarchy:
-            hierarchy[tag.id] = {
+        visited.add(tag_id)
+        if tag_id not in hierarchy:
+            hierarchy[tag_id] = {
                 'children': set(),
                 'parents': set(),
                 'ancestors': set(),
                 'descendants': set(),
                 'descendants_and_self': set(),
             }
-        hierarchy[tag.id]['tag_name'] = tag.name
 
         if type_ == 'ancestors':
-            for parent_tag_2_child in tag.parents.all():
-                parent_tag = parent_tag_2_child.parent_tag
-                if parent_tag.id not in visited:
-                    build_hierarchy(hierarchy=hierarchy, tag=parent_tag, type_=type_, visited=visited)
-                    hierarchy[tag.id]['parents'].add(parent_tag.id)
-                    hierarchy[tag.id]['ancestors'].add(parent_tag.id)
-                    hierarchy[tag.id]['ancestors'].update(hierarchy[parent_tag.id]['ancestors'])
+            for parent_tag_id in tag_id_parents[tag_id]:
+                if parent_tag_id not in visited:
+                    build_hierarchy(hierarchy=hierarchy, tag_id=parent_tag_id, tag_id_children=tag_id_children, tag_id_parents=tag_id_parents, type_=type_, visited=visited)
+                    hierarchy[tag_id]['parents'].add(parent_tag_id)
+                    hierarchy[tag_id]['ancestors'].add(parent_tag_id)
+                    hierarchy[tag_id]['ancestors'].update(hierarchy[parent_tag_id]['ancestors'])
         elif type_ == 'descendants':
-            for child_tag_2_parent in tag.children.all():
-                child_tag = child_tag_2_parent.child_tag
-                if child_tag.id not in visited:
-                    build_hierarchy(hierarchy=hierarchy, tag=child_tag, type_=type_, visited=visited)
-                    hierarchy[tag.id]['children'].add(child_tag.id)
-                    hierarchy[tag.id]['descendants'].update(hierarchy[child_tag.id]['descendants_and_self'])
-                    hierarchy[tag.id]['descendants_and_self'].update(hierarchy[child_tag.id]['descendants_and_self'])
-            hierarchy[tag.id]['descendants_and_self'].add(tag.id)  # add self
+            for child_tag_id in tag_id_children[tag_id]:
+                if child_tag_id not in visited:
+                    build_hierarchy(hierarchy=hierarchy, tag_id=child_tag_id, tag_id_children=tag_id_children, tag_id_parents=tag_id_parents, type_=type_, visited=visited)
+                    hierarchy[tag_id]['children'].add(child_tag_id)
+                    hierarchy[tag_id]['descendants'].update(hierarchy[child_tag_id]['descendants_and_self'])
+                    hierarchy[tag_id]['descendants_and_self'].update(hierarchy[child_tag_id]['descendants_and_self'])
+            hierarchy[tag_id]['descendants_and_self'].add(tag_id)  # add self
         else:
             raise ValueError(f'type_=[{type_}] but must be either "ancestors" or "descendants"')
 
     tags = Tag.objects.filter(user=user)
-    tags = tags.prefetch_related('parents', 'children')
+    tag_lineages = TagLineage.objects.filter(user=user).values('child_tag_id', 'parent_tag_id')
+    tag_id_children = defaultdict(set)
+    tag_id_parents = defaultdict(set)
+    for tag_lineage in tag_lineages:
+        tag_id_children[tag_lineage['parent_tag_id']].add(tag_lineage['child_tag_id'])
+        tag_id_parents[tag_lineage['child_tag_id']].add(tag_lineage['parent_tag_id'])
+
     hierarchy = {}
 
     for type_ in ['ancestors', 'descendants']:
         for tag in tags:
-            build_hierarchy(hierarchy=hierarchy, tag=tag, type_=type_, visited=set())
+            build_hierarchy(hierarchy=hierarchy, tag_id=tag.id, tag_id_children=tag_id_children, tag_id_parents=tag_id_parents, type_=type_, visited=set())
 
     question_tags = get_question_tags(user=user)
 
@@ -100,6 +103,7 @@ def get_tag_hierarchy(user):
             hierarchy[tag.id]['question_ids_for_all'] |= question_tags[desc_tag_id]
         hierarchy[tag.id]['count_questions_tag'] = len(hierarchy[tag.id]['question_ids_for_tag'])
         hierarchy[tag.id]['count_questions_all'] = len(hierarchy[tag.id]['question_ids_for_all'])
+        hierarchy[tag.id]['tag_name'] = tag.name
 
     return hierarchy
 
