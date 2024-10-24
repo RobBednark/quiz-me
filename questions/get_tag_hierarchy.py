@@ -1,8 +1,9 @@
-from questions.models import Tag, Question, TagLineage
+from collections import defaultdict
 
-def get_tag_hierarchy(user):
-    '''
-    Return a dict of tag hierarchies for a given user of the form:
+from questions.models import Tag, Question, QuestionTag
+
+'''
+The "hierarchy" data structure looks like this:
     {
         <tag_id>: {
             'children': set([<tag_id>, ...]),  # only immediate children
@@ -12,11 +13,17 @@ def get_tag_hierarchy(user):
             'descendants_and_self': set([<tag_id>, ...]), # all descendants plus <tag_id>
             'count_questions_all': <count>  # count of questions tagged with any tag in this tag's descendants (or this tag itself)
             'count_questions_tag': <count>  # count of questions with this tag
+            'question_ids_for_all': set([<question_id>, ...]), # set of question ids tagged with this tag and/or any of its descendants
+            'question_ids_for_tag': set([<question_id>, ...]), # set of question ids tagged with this tag
             'tag_name': <tag_name>,
         },
         ...
     }
-    
+'''
+
+def get_tag_hierarchy(user):
+    '''
+    Return a "hierarchy" dict per the description at the top of this file.
     The graph can be cyclical (e.g., tag1 has child tag2, and tag2 has child tag1).
     count_questions_all must be careful not to double-count questions with multiple descendant tags.  e.g., use .filter(tag__in=[descendants+tag])
     '''
@@ -85,24 +92,65 @@ def get_tag_hierarchy(user):
         for tag in tags:
             build_hierarchy(hierarchy=hierarchy, tag=tag, type_=type_, visited=set())
 
-    # Add count_questions_all and count_questions_tag
-    for tag in tags:
-        hierarchy[tag.id]['count_questions_all'] = Question.objects.filter(
-            tag__id__in=hierarchy[tag.id]['descendants_and_self']
-            ).distinct().count()
+    question_tags = get_question_tags(user=user)
 
-        hierarchy[tag.id]['count_questions_tag'] = tag.questions.distinct().count()
+    for tag in tags:
+        hierarchy[tag.id]['question_ids_for_tag'] = question_tags[tag.id]
+        hierarchy[tag.id]['question_ids_for_all'] = set()
+        for desc_tag_id in hierarchy[tag.id]['descendants_and_self']:
+            hierarchy[tag.id]['question_ids_for_all'] |= question_tags[desc_tag_id]
+        hierarchy[tag.id]['count_questions_tag'] = len(hierarchy[tag.id]['question_ids_for_tag'])
+        hierarchy[tag.id]['count_questions_all'] = len(hierarchy[tag.id]['question_ids_for_all'])
 
     return hierarchy
 
+def get_question_tags(user):
+    '''
+    Return a dict of all question_id's for each tag_id.
+    Use a single query, getting all QuestionTag's for <user>, and return them in a data structure like this:
+    {
+      <tag_id>: {<question_id>, <question_id>, ...},
+      ...
+    }
+    If a tag has no questions, it will not be in the dict.
+
+    Parameters:
+      user (User Object) - the user to get the QuestionTag's for
+    Returns:
+      Data structure per above
+    '''
+    
+    ret = defaultdict(set)
+    for qt in QuestionTag.objects.filter(user=user).values('tag_id', 'question_id'):
+        tag_id = qt['tag_id']
+        ret[tag_id].add(qt['question_id'])
+    return ret
+
 def expand_all_tag_ids(hierarchy, tag_ids):
     '''
-    Given a hierarchy dict, expand all tag id's in tag_ids.
+    Return a set of all tag id's consisting of tag_ids and their descendants.
     Parameters:
         hierarchy (dict) - the hierarchy dict, per the structure above
         tag_ids (iterable) - an iterable of Tag.id's (list, set, ...), e.g., [1, 2]
+    Returns:
+        expanded_tag_id_list (set) - a set of all tag id's consisting of tag_ids and their descendants
     '''
     expanded_tag_id_list = set()
     for tag_id in tag_ids:
         expanded_tag_id_list.update(hierarchy[tag_id]['descendants_and_self'])
     return expanded_tag_id_list
+
+def get_all_questions_for_tag_ids(hierarchy, tag_ids):
+    '''
+    Return a set of all question id's consisting of questions for tag_ids and their descendants.
+    Parameters:
+        hierarchy (dict) - the hierarchy dict, per the structure above
+        tag_ids (iterable) - an iterable of Tag.id's (list, set, ...), e.g., [1, 2]
+    Returns:
+        question_ids (set) - a set of all question id's consisting of questions for tag_ids and their descendants
+    '''
+    expanded_tag_id_list = expand_all_tag_ids(hierarchy, tag_ids)
+    question_ids = set()
+    for tag_id in expanded_tag_id_list:
+        question_ids.update(hierarchy[tag_id]['question_ids_tag'])
+    return question_ids

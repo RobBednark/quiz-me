@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
-from questions.models import Question, Tag, TagLineage
-from questions.get_tag_hierarchy import expand_all_tag_ids, get_tag_hierarchy
+from questions.models import Question, QuestionTag, Tag, TagLineage
+from questions.get_tag_hierarchy import expand_all_tag_ids, get_question_tags, get_tag_hierarchy
 
 User = get_user_model()
 
@@ -35,9 +35,10 @@ class TestGetTagHierarchy:
         q2 = Question.objects.create(question="Q2", user=user)
         q3 = Question.objects.create(question="Q3", user=user)
 
-        parent.questions.add(q1)
-        child1.questions.add(q2)
-        grandchild.questions.add(q3)
+        # Use QuestionTag.create(), not parent.add(), because the latter doesn't save a user
+        QuestionTag.objects.create(tag=parent, question=q1, user=user)
+        QuestionTag.objects.create(tag=child1, question=q2, user=user)
+        QuestionTag.objects.create(tag=grandchild, question=q3, user=user)
 
         return q1, q2, q3
 
@@ -46,7 +47,7 @@ class TestGetTagHierarchy:
         with CaptureQueriesContext(connection) as context:
             assert len(context) == 0, "Should be 0 queries before the call to get_tag_hierarchy()"
             hierarchy = get_tag_hierarchy(user)
-            assert len(context) == 27
+            assert len(context) == 20
 
         assert len(hierarchy) == 4
         assert all(tag_id in hierarchy for tag_id in [parent.id, child1.id, child2.id, grandchild.id])
@@ -169,3 +170,66 @@ class TestExpandAllTagIds:
     def test_expand_nonexistent_tag(self, sample_hierarchy):
         with pytest.raises(KeyError):
             expand_all_tag_ids(sample_hierarchy, [6])
+
+@pytest.mark.django_db
+class TestGetQuestionTags:
+    @pytest.fixture
+    def user(self):
+        return User.objects.create(email="testuser@example.com")
+
+    @pytest.fixture
+    def setup_question_tags(self, user):
+        tag1 = Tag.objects.create(name="tag1", user=user)
+        tag2 = Tag.objects.create(name="tag2", user=user)
+        q1 = Question.objects.create(question="Q1", user=user)
+        q2 = Question.objects.create(question="Q2", user=user)
+        q3 = Question.objects.create(question="Q3", user=user)
+        
+        QuestionTag.objects.create(question=q1, tag=tag1, user=user)
+        QuestionTag.objects.create(question=q2, tag=tag1, user=user)
+        QuestionTag.objects.create(question=q2, tag=tag2, user=user)
+        QuestionTag.objects.create(question=q3, tag=tag2, user=user)
+        
+        return tag1, tag2, q1, q2, q3
+
+    def test_get_question_tags_basic(self, user, setup_question_tags):
+        tag1, tag2, q1, q2, q3 = setup_question_tags
+        result = get_question_tags(user)
+        
+        assert result == {tag1.id: {q1.id, q2.id}, tag2.id: {q2.id, q3.id}}
+
+    def test_get_question_tags_empty(self, user):
+        result = get_question_tags(user)
+        assert result == {}
+
+    def test_get_question_tags_single_question(self, user):
+        tag = Tag.objects.create(name="tag", user=user)
+        question = Question.objects.create(question="Q", user=user)
+        QuestionTag.objects.create(question=question, tag=tag, user=user)
+        
+        result = get_question_tags(user)
+        assert result == {tag.id: {question.id}}
+
+    def test_get_question_tags_multiple_users(self, user):
+        user1 = user
+        user2 = User.objects.create(email="user2@user2.com")
+        user1_tag = Tag.objects.create(name="user1 tag", user=user1)
+        user2_tag = Tag.objects.create(name="user2 tag", user=user2)
+        user1_q = Question.objects.create(question="Q1", user=user1)
+        user2_q = Question.objects.create(question="Q2", user=user2)
+        
+        QuestionTag.objects.create(question=user1_q, tag=user1_tag, user=user1)
+        QuestionTag.objects.create(question=user2_q, tag=user2_tag, user=user2)
+        
+        result = get_question_tags(user=user1)
+        assert result == {user1_tag.id: {user1_q.id}}
+
+    def test_get_question_tags_query_count(self, user, setup_question_tags):
+        with CaptureQueriesContext(connection) as context:
+            get_question_tags(user)
+            assert len(context) == 1, "Should only make one database query"
+    
+    def test_tag_with_no_questions(self, user):
+        tag = Tag.objects.create(name="tag", user=user)
+        result = get_question_tags(user)
+        assert result == {}
