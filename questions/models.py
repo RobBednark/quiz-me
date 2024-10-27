@@ -84,13 +84,22 @@ class TagLineage(CreatedBy):
     # related_name is the name for the reverse relationship.  
     # In this case, the reverse relationship is Tag referring to TagLineage's (as opposed to TagLineage referring to Tag)
     # e.g., 
-    #   my_tag.children.all() returns the TagLineage's for my_tag (parent_tag=my_tag), representing the children of my_tag (where each child_tag is the child)
+    #   my_tag.children.all() returns the TagLineage's for my_tag (parent_tag=my_tag), representing the children of my_tag (where each child_tag is the child), so accessing the child_tag looks like:
+    #           child_tag = my_tag.children.all()[0].child_tag
     parent_tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='children')
     child_tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='parents')
 
     class Meta:
         # Disallow duplicate TagLineage entries.
         unique_together = ('user', 'parent_tag', 'child_tag')
+    
+    def clean(self):
+        if self.user is None:
+            raise ValueError("User field cannot be null for TagLineage")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'TagLineage: parent_tag=[{self.parent_tag.name}] child_tag=[{self.child_tag.name}]'
