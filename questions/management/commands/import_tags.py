@@ -136,12 +136,12 @@ class Command(BaseCommand):
                 self.stdout.write(f"Processing row [{row_num+1}]: {row}")
                 child_tags_to_add = row.get(COLUMN_NAME_CHILD_TAG_IDS_TO_ADD)
                 child_tags_to_remove = row.get(COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE)
-                tag_id = int(row.get(COLUMN_NAME_TAG_ID).strip())
+                tag_id = int(row.get(COLUMN_NAME_TAG_ID))
                 tag_rename = row.get(COLUMN_NAME_TAG_RENAME)
 
                 if parent_tags_to_add := row.get(COLUMN_NAME_PARENT_TAG_IDS_TO_ADD):
                     # Add the parent tags
-                    parent_tag_ids = [int(id.strip()) for id in parent_tags_to_add.split(',') if id.strip()]
+                    parent_tag_ids = [int(id) for id in parent_tags_to_add.split(',') if id]
                     
                     for new_parent_tag_id in parent_tag_ids:
                         if self._errors_found(parent_tag_id=new_parent_tag_id, child_tag_id=tag_id, tag_hierarchy=tag_hierachy, _type='add_parent', row_num=row_num):
@@ -160,7 +160,7 @@ class Command(BaseCommand):
                 
                 if parent_tags_to_remove := row.get(COLUMN_NAME_PARENT_TAG_IDS_TO_REMOVE):
                     # Remove the parent tags
-                    parent_tag_ids = [int(id.strip()) for id in parent_tags_to_remove.split(',') if id.strip()]
+                    parent_tag_ids = [int(id) for id in parent_tags_to_remove.split(',') if id]
                     
                     for old_parent_tag_id in parent_tag_ids:
                         if self._errors_found(parent_tag_id=old_parent_tag_id, child_tag_id=tag_id, tag_hierarchy=tag_hierachy, _type='remove_parent', row_num=row_num):
@@ -177,7 +177,7 @@ class Command(BaseCommand):
 
                 if child_tags_to_add:
                     # Add the COLUMN_NAME_CHILD_TAG_IDS_TO_ADD to the COLUMN_NAME_TAG_ID
-                    child_tag_ids = [int(id.strip()) for id in child_tags_to_add.split(',') if id.strip()]
+                    child_tag_ids = [int(id) for id in child_tags_to_add.split(',') if id]
 
                     for child_tag_id in child_tag_ids:
                         if self._errors_found(parent_tag_id=tag_id, child_tag_id=child_tag_id, tag_hierarchy=tag_hierachy, _type='add_child', row_num=row_num):
@@ -197,7 +197,7 @@ class Command(BaseCommand):
 
                 if child_tags_to_remove:
                     # Remove the COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE from the COLUMN_NAME_TAG_ID
-                    child_tag_ids = [int(id.strip()) for id in child_tags_to_remove.split(',') if id.strip()]
+                    child_tag_ids = [int(id) for id in child_tags_to_remove.split(',') if id]
                     
                     for child_tag_id in child_tag_ids:
                         if self._errors_found(parent_tag_id=tag_id, child_tag_id=child_tag_id, tag_hierarchy=tag_hierachy, _type='remove_child', row_num=row_num):
@@ -205,6 +205,8 @@ class Command(BaseCommand):
                         if dry_run:
                             self.stdout.write(self.style.WARNING(f'DRY RUN: no changes made.\n'))
                             continue
+                        tag = Tag.objects.get(id=tag_id)
+                        child_tag = Tag.objects.get(id=child_tag_id)
                         TagLineage.objects.filter(user=user, parent_tag=tag, child_tag=child_tag).delete()
                         # A change was made, so update the tag hierarchy
                         tag_hierachy = get_tag_hierarchy(user=user)
