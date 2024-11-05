@@ -5,12 +5,12 @@ from questions.models import Tag
 
 COLUMN_NAME_TAG_ID = "Tag ID"
 COLUMN_NAME_TAG_NAME = "Tag Name"
-COLUMN_NAME_TAG_RENAME = "Tag Rename"
+COLUMN_NAME_TAG_RENAME = "ACTION: Tag Rename"
 COLUMN_NAME_CHILD_TAG_NAMES = "Child Tag Names"
-COLUMN_NAME_CHILD_TAG_IDS_TO_ADD = "Child Tag IDs to Add"
-COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE = "Child Tag IDs to Remove"
-COLUMN_NAME_PARENT_TAG_IDS_TO_ADD = "Parent Tag IDs to Add"
-COLUMN_NAME_PARENT_TAG_IDS_TO_REMOVE = "Parent Tag IDs to Remove"
+COLUMN_NAME_CHILD_TAG_IDS_TO_ADD = "ACTION: Child Tag IDs to Add"
+COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE = "ACTION: Child Tag IDs to Remove"
+COLUMN_NAME_PARENT_TAG_IDS_TO_ADD = "ACTION: Parent Tag IDs to Add"
+COLUMN_NAME_PARENT_TAG_IDS_TO_REMOVE = "ACTION: Parent Tag IDs to Remove"
 class Command(BaseCommand):
     help = 'Export tags (including their child relationships) to a CSV'
 
