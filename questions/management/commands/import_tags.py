@@ -90,11 +90,9 @@ class Command(BaseCommand):
                 if col_name in (COLUMN_NAME_CHILD_TAG_IDS_TO_ADD, COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE):
                     child_tag = Tag.objects.get(id=tag_id)
                     parent_tag = self._main_tag
-                elif col_name in (COLUMN_NAME_PARENT_TAG_IDS_TO_ADD, COLUMN_NAME_PARENT_TAG_IDS_TO_REMOVE):
+                else:  # COLUMN_NAME_PARENT_TAG_IDS_TO_ADD, COLUMN_NAME_PARENT_TAG_IDS_TO_REMOVE
                     parent_tag = Tag.objects.get(id=tag_id)
                     child_tag = self._main_tag
-                else:
-                    raise ValueError(f'Invalid column name: [{col_name}]')
                 if col_name in (COLUMN_NAME_CHILD_TAG_IDS_TO_ADD, COLUMN_NAME_PARENT_TAG_IDS_TO_ADD):
                     # verify that the lineage doesn't already exist
                     if parent_tag.id in self._tag_hierarchy[child_tag.id]['parents']:
