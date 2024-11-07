@@ -24,7 +24,7 @@ class TagQuestionRelationshipInline(admin.TabularInline):
 class AnswerAdmin(admin.ModelAdmin):
     # Show questions that are linked with this answer
     inlines = [AnswerQuestionRelationshipInline]
-    list_display = ['id', 'datetime_added', 'answer', 'datetime_updated']
+    list_display = ['id', 'datetime_added', 'datetime_updated', 'user', 'answer']
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
@@ -41,7 +41,7 @@ class AnswerAdmin(admin.ModelAdmin):
 
 
 class AttemptAdmin(admin.ModelAdmin):
-    list_display = ['id', 'datetime_added', 'tags_display', 'attempt', 'question']
+    list_display = ['id', 'datetime_added', 'tags_display', 'attempt', 'user', 'question']
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
@@ -59,7 +59,7 @@ class AttemptAdmin(admin.ModelAdmin):
 
 class QuestionTagAdmin(admin.ModelAdmin):
     # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
-    list_display = ['datetime_added', 'datetime_updated', 'tag_name', 'link_to_tag', 'link_to_question', 'question']
+    list_display = ['datetime_added', 'datetime_updated', 'tag_name', 'link_to_tag', 'link_to_question', 'user', 'question']
     list_per_page = 5000  # how many items to show per page
     ordering = ('tag__name', 'question')
     search_fields = ['tag__name', 'question__question']
@@ -94,9 +94,9 @@ class TagAdmin(admin.ModelAdmin):
     # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
     exclude = ('questions',)
     inlines = [TagQuestionRelationshipInline]
-    list_display = ['datetime_added', 'datetime_updated', 'name', 'pk']
+    list_display = ['datetime_added', 'datetime_updated', 'name', 'pk', 'user']
     list_per_page = 999  # how many items to show per page
-    ordering = ('name',)
+    ordering = ('name', 'pk')
     search_fields = ['name']
 
     def get_form(self, request, obj=None, **kwargs):
@@ -108,7 +108,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class TagLineageAdmin(admin.ModelAdmin):
     # I have not found a way to include the links in the ordering, hence two columns each for the parent and the child.
-    list_display = ['datetime_added', 'datetime_updated', 'parent_name', 'child_name', 'parent_link', 'child_link']
+    list_display = ['datetime_added', 'datetime_updated', 'parent_name', 'child_name', 'parent_link', 'child_link', 'user']
     list_per_page = 5000  # how many items to show per page
     ordering = ('parent_tag__name', 'child_tag__name')
     search_fields = ['parent_tag__name', 'child_tag__name']
@@ -154,7 +154,7 @@ class TagLineageAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [TagQuestionRelationshipInline]
-    list_display = ['pk', 'datetime_added', 'datetime_updated', 'tags_display', 'question', 'answer']
+    list_display = ['pk', 'datetime_added', 'datetime_updated', 'tags_display', 'user', 'question', 'answer']
     # list_filter = ['',]
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
@@ -187,8 +187,8 @@ class ScheduleAdmin(admin.ModelAdmin):
         'interval_num',
         'interval_unit',
         'interval_secs',
-        'question',
         'user',
+        'question',
     ]
 
 admin.site.register(Answer, AnswerAdmin)
