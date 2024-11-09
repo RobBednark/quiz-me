@@ -13,11 +13,15 @@ COLUMN_NAME_CHILD_TAG_IDS_TO_ADD = "ACTION: Child Tag IDs to Add"
 COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE = "ACTION: Child Tag IDs to Remove"
 COLUMN_NAME_PARENT_TAG_IDS_TO_ADD = "ACTION: Parent Tag IDs to Add"
 COLUMN_NAME_PARENT_TAG_IDS_TO_REMOVE = "ACTION: Parent Tag IDs to Remove"
-fieldnames = [
+COLUMN_NAME_COUNT_QUESTIONS_ALL = "Count of Questions for Tag and Descendants"
+COLUMN_NAME_COUNT_QUESTIONS_TAG = "Count of Questions for Tag Only"
+FIELDNAMES = [
     COLUMN_NAME_TAG_ID,
     COLUMN_NAME_TAG_NAME,
     COLUMN_NAME_CHILD_TAG_NAMES,
     COLUMN_NAME_PARENT_TAG_NAMES,
+    COLUMN_NAME_COUNT_QUESTIONS_TAG,
+    COLUMN_NAME_COUNT_QUESTIONS_ALL,
     COLUMN_NAME_TAG_RENAME,
     COLUMN_NAME_CHILD_TAG_IDS_TO_ADD,
     COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE,
@@ -30,7 +34,7 @@ class Command(BaseCommand):
         parser.add_argument('--user-id', type=int, help='User ID', required=True)
 
     def handle(self, *args, **options):
-        writer = csv.DictWriter(self.stdout, fieldnames=fieldnames)
+        writer = csv.DictWriter(self.stdout, fieldnames=FIELDNAMES)
         writer.writeheader()
         self.tag_hierarchy = get_tag_hierarchy(user=User.objects.get(id=options['user_id']))
         
@@ -44,6 +48,8 @@ class Command(BaseCommand):
                 COLUMN_NAME_TAG_NAME: tag.name,
                 COLUMN_NAME_PARENT_TAG_NAMES: self._get_names_and_ids(tag_id=tag.id, type_='parents'),
                 COLUMN_NAME_CHILD_TAG_NAMES: self._get_names_and_ids(tag_id=tag.id, type_='children'),
+                COLUMN_NAME_COUNT_QUESTIONS_ALL: self.tag_hierarchy[tag.id]['count_questions_all'],
+                COLUMN_NAME_COUNT_QUESTIONS_TAG: self.tag_hierarchy[tag.id]['count_questions_tag'],
             })
 
     def _get_names_and_ids(self, tag_id, type_):
