@@ -208,7 +208,48 @@ class NextQuestion:
             
 
     def _get_next_question_oldest_viewed(self):
-        pass
+        ####### TODO: naming - what to call this?  
+        #######     oldest_due_or_unseen
+        #######     due_or_unseen
+        #######     due_or_added
+        #######     last_seen  (no; misleading; it might be due a year from now)
+        #######  It's not really "latest" due or unseen date.  It's just due or unseen date.  
+
+
+        # Return the "oldest-viewed" question for the given self._tag_ids_selected and self._user .
+        # "oldest-viewed" means the question with the older of:
+        #   a) the oldest Schedule.date_show_next
+        #   -or-, if no Schedules for a question (unseen), then:
+        #   b) the oldest Question.datetime_added.
+
+        # Get questions with selected tags
+        questions_tagged = Question.objects.filter(
+            user=self._user,
+            questiontag__tag__id__in=self._tag_ids_selected_expanded
+        )
+        self._queryset__questions_tagged = questions_tagged
+    
+        # Get the latest schedule for each question
+        subquery_latest_schedule = Schedule.objects.filter(
+            question=OuterRef('pk'),
+            user=self._user
+        ).order_by('-datetime_added')
+    
+        # Annotate questions with either their latest schedule's date_show_next or their creation date
+        # Coalesce() takes the first non-null value from the list of arguments.
+        questions = questions_tagged.annotate(
+            due_or_unseen_date=Coalesce(
+                Subquery(subquery_latest_schedule.values('date_show_next')[:1]),  # due date
+                F('datetime_added')  # date the unseen question was added
+            )
+        ).distinct()
+    
+        # Order by the oldest due/created date and get the first one
+        self.question = questions.order_by('due_or_unseen_date').first()
+        
+        # Set counts
+        self.count_questions_tagged = questions_tagged.distinct().count()
+        self.count_questions_matched_criteria = questions.count()
 
     def _get_next_question_oldest_viewed_due_by_oldest_viewed_tag(self):
         pass
