@@ -4,7 +4,7 @@ from django.db.models import F, Max, Min, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
-from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_OLDEST_VIEWED, QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
+from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_OLDEST_DUE_OR_UNSEEN, QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
 from questions.get_tag_hierarchy import expand_all_tag_ids, get_tag_hierarchy
 from questions.models import Question, Schedule, Tag
 from questions.VerifyTagIds import VerifyTagIds
@@ -96,7 +96,7 @@ class NextQuestion:
             pass
         elif self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE:
             self._get_count_questions_matched_criteria_unseen_then_oldest_due()
-        elif self._query_name == QUERY_OLDEST_VIEWED:
+        elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN:
             pass
         elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG:
             pass
@@ -207,7 +207,7 @@ class NextQuestion:
             self.count_questions_due = self.count_questions_matched_criteria
             
 
-    def _get_next_question_oldest_viewed(self):
+    def _get_next_question_oldest_due_or_unseen(self):
         ####### TODO: naming - what to call this?  
         #######     oldest_due_or_unseen
         #######     due_or_unseen
@@ -216,8 +216,8 @@ class NextQuestion:
         #######  It's not really "latest" due or unseen date.  It's just due or unseen date.  
 
 
-        # Return the "oldest-viewed" question for the given self._tag_ids_selected and self._user .
-        # "oldest-viewed" means the question with the older of:
+        # Return the question that is the oldest due or unseen for the given self._tag_ids_selected and self._user .
+        # This means the question with the older of:
         #   a) the oldest Schedule.date_show_next
         #   -or-, if no Schedules for a question (unseen), then:
         #   b) the oldest Question.datetime_added.
@@ -346,8 +346,8 @@ class NextQuestion:
             self._get_next_question_unseen_by_oldest_viewed_tag()
         elif self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE:
             self._get_next_question_unseen_then_oldest_due()
-        elif self._query_name == QUERY_OLDEST_VIEWED:
-            self._get_next_question_oldest_viewed()
+        elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN:
+            self._get_next_question_oldest_due_or_unseen()
         elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG:
             self._get_next_question_oldest_due_or_unseen_by_tag()
         else:

@@ -4,7 +4,7 @@ from questions.forms import (
    QUERY_FUTURE,
    QUERY_OLDEST_DUE,
    QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG,
-   QUERY_OLDEST_VIEWED,
+   QUERY_OLDEST_DUE_OR_UNSEEN,
    QUERY_REINFORCE,
    QUERY_UNSEEN,
    QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG,
@@ -298,7 +298,7 @@ class TestAllQueryTypesSameData:
         # Ideally, we want to submit different QUERY_*'s with the same data (shown in the table below) and same tags
         # (TAG_IDS_SELECTED), and show that each query returns a different question.  The exception to this is the following
         # combination, which will always return the same question for given tag(s):
-        #   QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_VIEWED
+        #   QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_DUE_OR_UNSEEN
 
         # Test data:
         # ----------
@@ -343,7 +343,7 @@ class TestAllQueryTypesSameData:
         # Tags matching queries:
         # ----------------------
         # q1_unseen_older      (QUERY_UNSEEN)     (QUERY_UNSEEN_THEN_OLDEST_DUE)
-        # q3_oldest_due        (QUERY_OLDEST_DUE) (QUERY_OLDEST_VIEWED)
+        # q3_oldest_due        (QUERY_OLDEST_DUE) (QUERY_OLDEST_DUE_OR_UNSEEN)
         # q4_reinforce_newer   (QUERY_REINFORCE)
         # q6_future_oldest_due (QUERY_FUTURE)
         # q9_unseen_by_tag3    (QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG)
@@ -351,12 +351,12 @@ class TestAllQueryTypesSameData:
         
         # Overlapping queries:
         # --------------------
-        #  QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_VIEWED
+        #  QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_DUE_OR_UNSEEN
 
         
         # For by oldest-viewed tag (QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG), create questions such that:
         #   Instead of selecting q1, it selects an unseen question with a different tag that has a newer Question.added, but that tag has a question with an older Schedule.datetime_added than Q1.Schedule.datetime_added
-        # For QUERY_OLDEST_VIEWED, create questions such that:
+        # For QUERY_OLDEST_DUE_OR_UNSEEN, create questions such that:
         #   Instead of selecting qx, it selects qy, a question that has been seen, where qy.Schedule.datetime_added is older than
         #   qx.dateetime_added (which will be equivalent to QUERY_OLDEST_DUE)
         
@@ -616,18 +616,18 @@ class TestAllQueryTypesSameData:
         assert nq_reinforce.tag_names_for_question == [TAG_NAME]
         assert nq_reinforce.tag_names_selected == TAG_NAMES_SELECTED
 
-        # Test QUERY_OLDEST_VIEWED  (same results as QUERY_UNSEEN)
-        nq_oldest_viewed = NextQuestion(query_name=QUERY_OLDEST_VIEWED, tag_ids_selected=TAG_IDS_SELECTED, user=user)
-        assert nq_oldest_viewed.question == q1_unseen_older
-        assert nq_oldest_viewed.count_times_question_seen == 0
-        assert nq_oldest_viewed.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_oldest_viewed.count_questions_matched_criteria == COUNT_QUESTIONS_WITH_TAG
-        assert nq_oldest_viewed.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
-        assert nq_oldest_viewed.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
-        assert nq_oldest_viewed.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
-        assert nq_oldest_viewed.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-        assert nq_oldest_viewed.tag_names_for_question == [tag1.name]
-        assert nq_oldest_viewed.tag_names_selected == TAG_NAMES_SELECTED
+        # Test QUERY_OLDEST_DUE_OR_UNSEEN  (same results as QUERY_UNSEEN)
+        nq_oldest_due_or_unseen = NextQuestion(query_name=QUERY_OLDEST_DUE_OR_UNSEEN, tag_ids_selected=TAG_IDS_SELECTED, user=user)
+        assert nq_oldest_due_or_unseen.question == q1_unseen_older
+        assert nq_oldest_due_or_unseen.count_times_question_seen == 0
+        assert nq_oldest_due_or_unseen.count_questions_due == COUNT_QUESTIONS_DUE
+        assert nq_oldest_due_or_unseen.count_questions_matched_criteria == COUNT_QUESTIONS_WITH_TAG
+        assert nq_oldest_due_or_unseen.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
+        assert nq_oldest_due_or_unseen.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
+        assert nq_oldest_due_or_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_oldest_due_or_unseen.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
+        assert nq_oldest_due_or_unseen.tag_names_for_question == [tag1.name]
+        assert nq_oldest_due_or_unseen.tag_names_selected == TAG_NAMES_SELECTED
         
         # Test QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG (odoubt)
 #####        nq_odoubt = NextQuestion(query_name=QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, tag_ids_selected=TAG_IDS_SELECTED, user=user)
@@ -658,7 +658,7 @@ class TestAllQueryTypesSameData:
         # Verify different results
         assert nq_unseen.question != nq_oldest_due.question
         assert nq_unseen.question == nq_unseen_then_oldest_due.question
-        assert nq_unseen.question == nq_unseen_then_oldest_due.question == nq_oldest_viewed.question
+        assert nq_unseen.question == nq_unseen_then_oldest_due.question == nq_oldest_due_or_unseen.question
         assert nq_future.question != nq_unseen_then_oldest_due.question
         assert nq_future.question != nq_oldest_due.question
 ####        assert q9_unseen_by_tag3 ...
@@ -668,7 +668,7 @@ class TestAllQueryTypesSameData:
                 != nq_reinforce.question
                 != nq_unseen_by_tag.question
 ####                != nq_odoubt.question
-                != nq_oldest_viewed.question
+                != nq_oldest_due_or_unseen.question
         )
 
 
@@ -688,21 +688,21 @@ class TestAllQueryTypesSameData:
         assert nq_unseen_then_oldest_due.tag_names_selected == [TAG5_DUE_ONLY.name]
         
         ############################################################
-        # Test QUERY_OLDEST_VIEWED picks oldest due when unseen.Question.added > oldest_due.Schedule.next
+        # Test QUERY_OLDEST_DUE_OR_UNSEEN picks oldest due when unseen.Question.added > oldest_due.Schedule.next
         ############################################################
         tag_ids_selected = [tag5_due.id, tag6_unseen.id]
         tag_names_selected = sorted([tag5_due.name, tag6_unseen.name])
-        nq_oldest_viewed = NextQuestion(query_name=QUERY_OLDEST_VIEWED, tag_ids_selected=tag_ids_selected, user=user)
-        assert nq_oldest_viewed.question == q15_tag5_due_nm
-        assert nq_oldest_viewed.count_times_question_seen == 1
-        assert nq_oldest_viewed.count_questions_due == 1
-        assert nq_oldest_viewed.count_questions_matched_criteria == 2
-        assert nq_oldest_viewed.count_questions_tagged == 2
-        assert nq_oldest_viewed.count_questions_unseen == 1
-        assert nq_oldest_viewed.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
-        assert nq_oldest_viewed.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-        assert nq_oldest_viewed.tag_names_for_question == [tag5_due.name]
-        assert nq_oldest_viewed.tag_names_selected == tag_names_selected
+        nq_oldest_due_or_unseen = NextQuestion(query_name=QUERY_OLDEST_DUE_OR_UNSEEN, tag_ids_selected=tag_ids_selected, user=user)
+        assert nq_oldest_due_or_unseen.question == q15_tag5_due_nm
+        assert nq_oldest_due_or_unseen.count_times_question_seen == 1
+        assert nq_oldest_due_or_unseen.count_questions_due == 1
+        assert nq_oldest_due_or_unseen.count_questions_matched_criteria == 2
+        assert nq_oldest_due_or_unseen.count_questions_tagged == 2
+        assert nq_oldest_due_or_unseen.count_questions_unseen == 1
+        assert nq_oldest_due_or_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_oldest_due_or_unseen.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
+        assert nq_oldest_due_or_unseen.tag_names_for_question == [tag5_due.name]
+        assert nq_oldest_due_or_unseen.tag_names_selected == tag_names_selected
 
 
         ############################################################
@@ -778,20 +778,20 @@ class TestAllQueryTypesSameData:
         assert nq_reinforce.tag_names_for_question == []
         assert nq_reinforce.tag_names_selected == tag_names_selected
 
-        # Test QUERY_BY_OLDEST_VIEWED picks None
+        # Test QUERY_OLDEST_DUE_OR_UNSEEN picks None
         tag_ids_selected = [tag4_no_questions.id]
         tag_names_selected = sorted([tag4_no_questions.name])
-        nq_oldest_viewed = NextQuestion(query_name=QUERY_OLDEST_VIEWED, tag_ids_selected=tag_ids_selected, user=user)
-        assert nq_oldest_viewed.question is None
-        assert nq_oldest_viewed.count_times_question_seen == 0
-        assert nq_oldest_viewed.count_questions_due == 0
-        assert nq_oldest_viewed.count_questions_matched_criteria == 0
-        assert nq_oldest_viewed.count_questions_tagged == 0
-        assert nq_oldest_viewed.count_questions_unseen == 0
-        assert nq_oldest_viewed.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
-        assert nq_oldest_viewed.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-        assert nq_oldest_viewed.tag_names_for_question == []
-        assert nq_oldest_viewed.tag_names_selected == tag_names_selected
+        nq_oldest_due_or_unseen = NextQuestion(query_name=QUERY_OLDEST_DUE_OR_UNSEEN, tag_ids_selected=tag_ids_selected, user=user)
+        assert nq_oldest_due_or_unseen.question is None
+        assert nq_oldest_due_or_unseen.count_times_question_seen == 0
+        assert nq_oldest_due_or_unseen.count_questions_due == 0
+        assert nq_oldest_due_or_unseen.count_questions_matched_criteria == 0
+        assert nq_oldest_due_or_unseen.count_questions_tagged == 0
+        assert nq_oldest_due_or_unseen.count_questions_unseen == 0
+        assert nq_oldest_due_or_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+        assert nq_oldest_due_or_unseen.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
+        assert nq_oldest_due_or_unseen.tag_names_for_question == []
+        assert nq_oldest_due_or_unseen.tag_names_selected == tag_names_selected
 
         # Test QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG picks None
 ####        tag_ids_selected = [tag4_no_questions.id]

@@ -9,7 +9,7 @@ QUERY_OLDEST_DUE = 'OLDEST DUE'
 QUERY_FUTURE = 'FUTURE'
 QUERY_ANSWERED_COUNT = 'ANSWERED COUNT'
 QUERY_LAST_SEEN_BY_TAG = 'LAST-SEEN BY TAG'
-QUERY_OLDEST_VIEWED= 'OLDEST DUE OR UNSEEN'
+QUERY_OLDEST_DUE_OR_UNSEEN= 'OLDEST DUE OR UNSEEN'
 QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG = 'OLDEST DUE OR UNSEEN BY TAG'
 QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG = 'UNSEEN BY OLDEST-VIEWED TAG'
 QUERY_REINFORCE_THEN_UNSEEN = 'REINFORCE, UNSEEN'
@@ -24,8 +24,8 @@ QUERY_CHOICES = (
     (QUERY_FUTURE, f'{QUERY_FUTURE}: notes due after now, ordered by due date ascending'),
     # (QUERY_ANSWERED_COUNT, f'{QUERY_ANSWERED_COUNT}: ordered by # times seen, ascending (NOTE: this will see all notes)'),
     # (QUERY_LAST_SEEN_BY_TAG, f'{QUERY_LAST_SEEN_BY_TAG}: find the oldest last_seen date for each tag; show note from the oldest tag (tags with notes but no schedules should be shown first)'),
-    (QUERY_OLDEST_VIEWED, f'{QUERY_OLDEST_VIEWED}: for each question, Schedule.date_show_next, or if no Schedules, then Question.datetime_added'),
-    # (QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, f'{QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG}: "oldest-viewed" is the older of the oldest Schedule.datetime_added, or if no Schedules, then the oldest Question.datetime_added.'),
+    (QUERY_OLDEST_DUE_OR_UNSEEN, f'{QUERY_OLDEST_DUE_OR_UNSEEN}: for each question, Schedule.date_show_next, or if no Schedules, then Question.datetime_added'),
+    # (QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, f'{QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG}: For each question, look at Schedule.datetime_added, or if no Schedules (unseen), then the Question.datetime_added.'),
     (QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, f'{QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG}: "oldest-viewed tag" is the tag with the oldest Schedule.datetime_added.  Or, if no Schedules, then the oldest Question.datetime_added.'),
     # (QUERY_REINFORCE_THEN_UNSEEN, f'{QUERY_REINFORCE_THEN_UNSEEN}: REINFORCE, then UNSEEN'),
     # (QUERY_REINFORCE_THEN_UNSEEN_THEN_FUTURE, f'{QUERY_REINFORCE_THEN_UNSEEN_THEN_FUTURE}: REINFORCE, then UNSEEN, then FUTURE'),
@@ -40,7 +40,7 @@ ALL_QUERY_NAMES = (
     QUERY_FUTURE,
     QUERY_ANSWERED_COUNT,
     QUERY_LAST_SEEN_BY_TAG,
-    QUERY_OLDEST_VIEWED,
+    QUERY_OLDEST_DUE_OR_UNSEEN,
     QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG,
     QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG,
     QUERY_REINFORCE_THEN_UNSEEN,
