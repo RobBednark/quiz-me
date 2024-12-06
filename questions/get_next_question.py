@@ -4,7 +4,7 @@ from django.db.models import F, Max, Min, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
-from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_OLDEST_VIEWED, QUERY_OLDEST_VIEWED_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
+from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_OLDEST_VIEWED, QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
 from questions.get_tag_hierarchy import expand_all_tag_ids, get_tag_hierarchy
 from questions.models import Question, Schedule, Tag
 from questions.VerifyTagIds import VerifyTagIds
@@ -98,7 +98,7 @@ class NextQuestion:
             self._get_count_questions_matched_criteria_unseen_then_oldest_due()
         elif self._query_name == QUERY_OLDEST_VIEWED:
             pass
-        elif self._query_name == QUERY_OLDEST_VIEWED_DUE_BY_OLDEST_VIEWED_TAG:
+        elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG:
             pass
         else:
             raise ValueError(f'Invalid query name in _get_count_questions_matched_criteria: [{self._query_name}]')
@@ -251,7 +251,7 @@ class NextQuestion:
         self.count_questions_tagged = questions_tagged.distinct().count()
         self.count_questions_matched_criteria = questions.count()
 
-    def _get_next_question_oldest_viewed_due_by_oldest_viewed_tag(self):
+    def _get_next_question_oldest_due_or_unseen_by_tag(self):
         pass
 
     def _get_next_question_unseen(self):
@@ -348,8 +348,8 @@ class NextQuestion:
             self._get_next_question_unseen_then_oldest_due()
         elif self._query_name == QUERY_OLDEST_VIEWED:
             self._get_next_question_oldest_viewed()
-        elif self._query_name == QUERY_OLDEST_VIEWED_BY_OLDEST_VIEWED_TAG:
-            self._get_next_question_oldest_viewed_by_oldest_viewed_tag()
+        elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG:
+            self._get_next_question_oldest_due_or_unseen_by_tag()
         else:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()

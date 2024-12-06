@@ -3,8 +3,8 @@ from django.utils import timezone
 from questions.forms import (
    QUERY_FUTURE,
    QUERY_OLDEST_DUE,
+   QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG,
    QUERY_OLDEST_VIEWED,
-####   QUERY_OLDEST_VIEWED_BY_OLDEST_VIEWED_TAG,
    QUERY_REINFORCE,
    QUERY_UNSEEN,
    QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG,
@@ -437,9 +437,9 @@ class TestAllQueryTypesSameData:
         tag5_due = Tag.objects.create(name="tag 5 due", user=user)
         tag6_unseen = Tag.objects.create(name="tag 6 unseen", user=user)
         tag7_due_future = Tag.objects.create(name="tag 7 due future", user=user)
-####        tag8_ovdbovt = Tag.objects.create(name="tag 8 ovdbovt", user=user)
+####        tag8_odoubt = Tag.objects.create(name="tag 8 odoubt", user=user)
         
-####        TagLineage.objects.create(parent_tag=tag4_no_questions, child_tag=tag8_ovdbovt, user=user)
+####        TagLineage.objects.create(parent_tag=tag4_no_questions, child_tag=tag8_odoubt, user=user)
 
         # Create QuestionTags
         QuestionTag.objects.create(question=q1_unseen_older, tag=tag1)
@@ -457,8 +457,8 @@ class TestAllQueryTypesSameData:
         QuestionTag.objects.create(question=q15_tag5_due_nm, tag=tag5_due)
         QuestionTag.objects.create(question=q16_tag6_unseen_nm, tag=tag6_unseen)
         QuestionTag.objects.create(question=q17_tag7_due_future_nm, tag=tag7_due_future)
-####        QuestionTag.objects.create(question=q18_tag8_oldest_viewed, tag=tag8_ovdbovt)
-####        QuestionTag.objects.create(question=q19_tag8_newer_unseen, tag=tag8_ovdbovt)
+####        QuestionTag.objects.create(question=q18_tag8_oldest_viewed, tag=tag8_odoubt)
+####        QuestionTag.objects.create(question=q19_tag8_newer_unseen, tag=tag8_odoubt)
 
         COUNT_QUESTIONS_WITH_TAG = 10
         COUNT_QUESTIONS_UNSEEN = 4
@@ -466,7 +466,7 @@ class TestAllQueryTypesSameData:
         COUNT_QUESTIONS_UNSEEN_BY_OLDEST_VIEWED_TAG = 3 # (1 each for tag1, tag2, tag3)
 ####        COUNT_QUESTIONS_DUE = 4 # q3, q4, q5, q18 (not q8)
         COUNT_QUESTIONS_DUE = 3 # q3, q4, q5 (not q8)
-        COUNT_QUESTIONS_OLDEST_VIEWED_DUE_BY_OLDEST_VIEWED_TAG = COUNT_QUESTIONS_DUE
+        COUNT_QUESTIONS_OLDEST_DUE_OR_UNSEEN_BY_TAG = COUNT_QUESTIONS_DUE
         COUNT_QUESTIONS_REINFORCE = COUNT_QUESTIONS_DUE
         COUNT_QUESTIONS_UNSEEN_AND_DUE = COUNT_QUESTIONS_DUE + COUNT_QUESTIONS_UNSEEN
         COUNT_QUESTIONS_FUTURE = 3
@@ -474,7 +474,7 @@ class TestAllQueryTypesSameData:
         COUNT_RECENT_SEEN_MINS_60 = COUNT_RECENT_SEEN_MINS_30 + 2  # Sched.added q6, q15
 
         TAG_IDS_ALL = [tag1.id, tag2.id, tag3.id, tag4_no_questions.id]
-####        TAG_IDS_ALL = [tag1.id, tag2.id, tag3.id, tag4_no_questions.id, tag8_ovdbovt.id]
+####        TAG_IDS_ALL = [tag1.id, tag2.id, tag3.id, tag4_no_questions.id, tag8_odoubt.id]
         TAG3_NAME = tag3.name
         TAG_NAMES_ALL = [tag1.name, tag2.name, tag3.name, tag4_no_questions.name]
         TAG_NAMES_SELECTED = TAG_NAMES_ALL
@@ -483,7 +483,7 @@ class TestAllQueryTypesSameData:
         TAG5_DUE_ONLY = tag5_due
         TAG6_UNSEEN_ONLY = tag6_unseen
         TAG7_DUE_FUTURE_ONLY = tag7_due_future
-####        TAG_NAMES_Q18_TAG8_OLDEST_VIEWED = [tag8_ovdbovt.name]
+####        TAG_NAMES_Q18_TAG8_OLDEST_VIEWED = [tag8_odoubt.name]
     
         sched_q3_oldest_due = Schedule.objects.create(user=user,
             question=q3_oldest_due, date_show_next=timezone.now() - timezone.timedelta(weeks=9)) # past
@@ -629,18 +629,18 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_viewed.tag_names_for_question == [tag1.name]
         assert nq_oldest_viewed.tag_names_selected == TAG_NAMES_SELECTED
         
-        # Test QUERY_OLDEST_VIEWED_DUE_BY_OLDEST_VIEWED_TAG (ovdbovt)
-#####        nq_ovdbovt = NextQuestion(query_name=QUERY_OLDEST_VIEWED_BY_OLDEST_VIEWED_TAG, tag_ids_selected=TAG_IDS_SELECTED, user=user)
-#####        assert nq_odvbovt.question == q18_tag8_oldest_viewed
-#####        assert nq_odvbovt.count_times_question_seen == 1
-#####        assert nq_odvbovt.count_questions_due == COUNT_QUESTIONS_DUE
-#####        assert nq_odvbovt.count_questions_matched_criteria == COUNT_QUESTIONS_OLDEST_VIEWED_DUE_BY_OLDEST_VIEWED_TAG
-#####        assert nq_odvbovt.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
-#####        assert nq_odvbovt.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
-#####        assert nq_odvbovt.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
-#####        assert nq_odvbovt.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-#####        assert nq_odvbovt.tag_names_for_question == TAG_NAMES_Q18_TAG8_OLDEST_VIEWED
-#####        assert nq_odvbovt.tag_names_selected == TAG_NAMES_SELECTED
+        # Test QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG (odoubt)
+#####        nq_odoubt = NextQuestion(query_name=QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, tag_ids_selected=TAG_IDS_SELECTED, user=user)
+#####        assert nq_odoubt.question == q18_tag8_oldest_viewed
+#####        assert nq_odoubt.count_times_question_seen == 1
+#####        assert nq_odoubt.count_questions_due == COUNT_QUESTIONS_DUE
+#####        assert nq_odoubt.count_questions_matched_criteria == COUNT_QUESTIONS_OLDEST_DUE_OR_UNSEEN_BY_TAG
+#####        assert nq_odoubt.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
+#####        assert nq_odoubt.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
+#####        assert nq_odoubt.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
+#####        assert nq_odoubt.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
+#####        assert nq_odoubt.tag_names_for_question == TAG_NAMES_Q18_TAG8_OLDEST_VIEWED
+#####        assert nq_odoubt.tag_names_selected == TAG_NAMES_SELECTED
         
         # Test QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG
         nq_unseen_by_tag = NextQuestion(query_name=QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, tag_ids_selected=TAG_IDS_SELECTED, user=user)
@@ -667,7 +667,7 @@ class TestAllQueryTypesSameData:
                 != nq_future.question
                 != nq_reinforce.question
                 != nq_unseen_by_tag.question
-####                != nq_odvbovt.question
+####                != nq_odoubt.question
                 != nq_oldest_viewed.question
         )
 
