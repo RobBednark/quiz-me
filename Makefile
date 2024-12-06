@@ -45,7 +45,6 @@ FILE_DUMP_PLAIN_ALL:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.all
 FILE_DUMP_PLAIN_DATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.data-only
 FILE_DUMP_PLAIN_SCHEMA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.schema-only
 FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.txt
-SYMLINK_LATEST_TEXT:=${DIR_DUMPS}/latest.dump.txt
 USER_ID_EXPORT_TAGS=
 
 first_target:
@@ -78,8 +77,6 @@ dumpdb:
 	DB_QUIZME=${DB_NAME_TO_DUMP} poetry run python ./manage.py export_tags --user-id=${USER_ID_EXPORT_TAGS} > ${FILE_DUMP_EXPORT_TAGS} 2>&1
 	DB_QUIZME=${DB_NAME_TO_DUMP} poetry run python ./manage.py dumpdata --all --indent=2 > ${FILE_DUMP_DUMPDATA} 2>&1
 	gzip ${FILE_DUMP_DUMPDATA}
-	rm -f ${SYMLINK_LATEST_TEXT}
-	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
 	ls -hltr db_dumps/. |tail -8
 
 flake8:
