@@ -4,7 +4,7 @@ from django.db.models import F, Max, Min, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
-from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
+from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_OLDEST_VIEWED, QUERY_OLDEST_VIEWED_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
 from questions.get_tag_hierarchy import expand_all_tag_ids, get_tag_hierarchy
 from questions.models import Question, Schedule, Tag
 from questions.VerifyTagIds import VerifyTagIds
@@ -96,6 +96,10 @@ class NextQuestion:
             pass
         elif self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE:
             self._get_count_questions_matched_criteria_unseen_then_oldest_due()
+        elif self._query_name == QUERY_OLDEST_VIEWED:
+            pass
+        elif self._query_name == QUERY_OLDEST_VIEWED_DUE_BY_OLDEST_VIEWED_TAG:
+            pass
         else:
             raise ValueError(f'Invalid query name in _get_count_questions_matched_criteria: [{self._query_name}]')
 
@@ -202,6 +206,54 @@ class NextQuestion:
         if self._query_name != QUERY_FUTURE:
             self.count_questions_due = self.count_questions_matched_criteria
             
+
+    def _get_next_question_oldest_viewed(self):
+        ####### TODO: naming - what to call this?  
+        #######     oldest_due_or_unseen
+        #######     due_or_unseen
+        #######     due_or_added
+        #######     last_seen  (no; misleading; it might be due a year from now)
+        #######  It's not really "latest" due or unseen date.  It's just due or unseen date.  
+
+
+        # Return the "oldest-viewed" question for the given self._tag_ids_selected and self._user .
+        # "oldest-viewed" means the question with the older of:
+        #   a) the oldest Schedule.date_show_next
+        #   -or-, if no Schedules for a question (unseen), then:
+        #   b) the oldest Question.datetime_added.
+
+        # Get questions with selected tags
+        questions_tagged = Question.objects.filter(
+            user=self._user,
+            questiontag__tag__id__in=self._tag_ids_selected_expanded
+        )
+        self._queryset__questions_tagged = questions_tagged
+    
+        # Get the latest schedule for each question
+        subquery_latest_schedule = Schedule.objects.filter(
+            question=OuterRef('pk'),
+            user=self._user
+        ).order_by('-datetime_added')
+    
+        # Annotate questions with either their latest schedule's date_show_next or their creation date
+        # Coalesce() takes the first non-null value from the list of arguments.
+        questions = questions_tagged.annotate(
+            due_or_unseen_date=Coalesce(
+                Subquery(subquery_latest_schedule.values('date_show_next')[:1]),  # due date
+                F('datetime_added')  # date the unseen question was added
+            )
+        ).distinct()
+    
+        # Order by the oldest due/created date and get the first one
+        self.question = questions.order_by('due_or_unseen_date').first()
+        
+        # Set counts
+        self.count_questions_tagged = questions_tagged.distinct().count()
+        self.count_questions_matched_criteria = questions.count()
+
+    def _get_next_question_oldest_viewed_due_by_oldest_viewed_tag(self):
+        pass
+
     def _get_next_question_unseen(self):
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
         # Side effects: set the following attributes:
@@ -228,12 +280,12 @@ class NextQuestion:
         self.count_questions_unseen = self.count_questions_matched_criteria
         
     def _get_next_question_unseen_by_oldest_viewed_tag(self):
-        # "oldest-viewed tag" means the tag with the oldest Schedule.datetime_viewed.  Or, if no Schedules, then the oldest Question.datetime_added.
+        # "oldest-viewed tag" means the tag with the older of the oldest Schedule.datetime_viewed,  or if no Schedules, then the oldest Question.datetime_added.
         # Find all tags that have at least one unseen question.
         # For those tags, get the newest Schedule.datetime_added.  
         # If there are no schedules for a tag, then get the oldest Question.datetime_added.
         # Choose the tag with the oldest of those dates, and use the oldest unseen Question.datetime_added for that tag.
-        # Note: do not want to got by unseen_question.datetime_added, because I don't want to see multiple questions from the same tag in a row.  That would be the same as QUERY_UNSEEN.
+        # Note: do not want to go by unseen_question.datetime_added, because I don't want to see multiple questions from the same tag in a row.  That would be the same as QUERY_UNSEEN.
 
         subquery_newest_schedule_dateadded_for_tag = Schedule.objects.filter(
             question__questiontag__tag=OuterRef('pk'),
@@ -246,9 +298,11 @@ class NextQuestion:
             schedule__isnull=True
         ).order_by('datetime_added').values('datetime_added')[:1]
 
+        # oldest_tags may result in multiple matches per tag (multiple unseen questions), with each one of those for the same tag having the same relevant_date.
+        # That won't matter, since we're ordering my relevant_date, selecting only the first (oldest) one.
         oldest_tags = Tag.objects.filter(
             questiontag__question__user=self._user,
-            questiontag__question__schedule__isnull=True,
+            questiontag__question__schedule__isnull=True,  # only select tags with unseen questions
             id__in=self._tag_ids_selected_expanded
         ).annotate(
             newest_schedule_dateadded_for_tag=Subquery(subquery_newest_schedule_dateadded_for_tag),
@@ -292,6 +346,10 @@ class NextQuestion:
             self._get_next_question_unseen_by_oldest_viewed_tag()
         elif self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE:
             self._get_next_question_unseen_then_oldest_due()
+        elif self._query_name == QUERY_OLDEST_VIEWED:
+            self._get_next_question_oldest_viewed()
+        elif self._query_name == QUERY_OLDEST_VIEWED_BY_OLDEST_VIEWED_TAG:
+            self._get_next_question_oldest_viewed_by_oldest_viewed_tag()
         else:
             raise ValueError(f'Invalid query_name: [{self._query_name}]')
         self._get_tag_names()

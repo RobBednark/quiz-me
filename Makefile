@@ -23,6 +23,9 @@
 #   PGDATABASE=template1 make loaddb
 
 SHELL := /bin/bash -xv
+
+# The following variables that are not set to anything need to be set when calling make.
+#    e.g., DB_NAME_TO_DUMP='my-db' make dumpdb
 # DB_NAME_TO_DUMP = name of the db to dump
 DB_NAME_TO_DUMP=
 DB_NAME_TO_RESTORE_CUSTOM=restore_quizme_custom
@@ -37,11 +40,12 @@ DB_CONNECTION_STRING:=postgres://${DB_USER}:${DB_PASSWORD}@${DB_SERVER}:${DB_POR
 DIR_DUMPS=db_dumps
 FILE_DUMP_CUSTOM:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.custom.all
 FILE_DUMP_DUMPDATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.dumpdata.json
+FILE_DUMP_EXPORT_TAGS:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.export_tags.csv
 FILE_DUMP_PLAIN_ALL:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.all
 FILE_DUMP_PLAIN_DATA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.data-only
 FILE_DUMP_PLAIN_SCHEMA:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.plain.schema-only
 FILE_DUMP_TEXT:=${DIR_DUMPS}/dump.${DB_NAME_TO_DUMP}.txt
-SYMLINK_LATEST_TEXT:=${DIR_DUMPS}/latest.dump.txt
+USER_ID_EXPORT_TAGS=
 
 first_target:
 	echo "This is the default target and it does nothing.  Specify a target."
@@ -70,10 +74,9 @@ dumpdb:
 	gzip ${FILE_DUMP_PLAIN_DATA}
 	time pg_dump --schema-only --format=plain ${DB_CONNECTION_STRING} > ${FILE_DUMP_PLAIN_SCHEMA}
 	DB_QUIZME=${DB_NAME_TO_DUMP} PYTHONIOENCODING=utf-8 poetry run python ./manage.py dump > ${FILE_DUMP_TEXT} 2>&1
+	DB_QUIZME=${DB_NAME_TO_DUMP} poetry run python ./manage.py export_tags --user-id=${USER_ID_EXPORT_TAGS} > ${FILE_DUMP_EXPORT_TAGS} 2>&1
 	DB_QUIZME=${DB_NAME_TO_DUMP} poetry run python ./manage.py dumpdata --all --indent=2 > ${FILE_DUMP_DUMPDATA} 2>&1
 	gzip ${FILE_DUMP_DUMPDATA}
-	rm -f ${SYMLINK_LATEST_TEXT}
-	ln -s `basename ${FILE_DUMP_TEXT}` ${SYMLINK_LATEST_TEXT}
 	ls -hltr db_dumps/. |tail -8
 
 flake8:
