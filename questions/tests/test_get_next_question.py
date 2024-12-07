@@ -295,10 +295,18 @@ class Test__QUERY_OLDEST_DUE:
 class TestAllQueryTypesSameData:
 
     def test_different_results_for_query_seen_and_due(self, user, tag):
-        # Ideally, we want to submit different QUERY_*'s with the same data (shown in the table below) and same tags
-        # (TAG_IDS_COMMON), and show that each query returns a different question.  The exception to this is the following
-        # combination, which returns the same question for given tag(s):
-        #   QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_DUE_OR_UNSEEN
+        # Ideally, we want to test each of the QUERY_*'s with the same data (shown in the table below) and same tags
+        # (TAG_IDS_COMMON), and show that each query returns a different question.  The exceptions to this are the following
+        # queries, which return the same question for the given tag(s):
+        #   QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE  (always true)
+        #   QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_DUE_OR_UNSEEN == QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG (true for this set of data)
+        
+        #   Q: Will these always return the same question for the given tag(s)?
+        #      QUERY_OLDEST_DUE_OR_UNSEEN
+        #      QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG
+        #   A: No.  
+        #       QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG looks at Schedule.added ("oldest viewed")
+        #       QUERY_OLDEST_DUE_OR_UNSEEN        looks at Schedule.next
 
         # Test data:
         # ----------
@@ -364,7 +372,7 @@ class TestAllQueryTypesSameData:
         
         # Overlapping queries:
         # --------------------
-        #  QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_DUE_OR_UNSEEN
+        #  QUERY_UNSEEN == QUERY_UNSEEN_THEN_OLDEST_DUE == QUERY_OLDEST_DUE_OR_UNSEEN == QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG
 
         
         # For by oldest-viewed tag (QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG), create questions such that:
