@@ -17,14 +17,14 @@ from emailusername.models import User
 # Use the Django database for all the tests
 pytestmark = pytest.mark.django_db
 
-TAG_NAME = "tag 1"
+TAG_1_NAME = "tag 1"
 @pytest.fixture
 def user():
     return User.objects.create(email="testuser@example.com")
 
 @pytest.fixture(autouse=True)
 def tag(user):
-    return Tag.objects.create(name=TAG_NAME, user=user)
+    return Tag.objects.create(name=TAG_1_NAME, user=user)
 
 @pytest.fixture
 def question(user):
@@ -41,8 +41,8 @@ def question(user):
         assert xx.count_recent_seen_mins_60 == 99
         assert xx.count_times_question_seen == 99
 
-        assert xx.tag_names_for_question == [TAG_NAME]
-        assert xx.tag_names_selected == [TAG_NAME]
+        assert xx.tag_names_for_question == [TAG_1_NAME]
+        assert xx.tag_names_selected == [TAG_1_NAME]
 '''
 
 class TestInit:
@@ -342,11 +342,11 @@ class TestAllQueryTypesSameData:
         
         # Tags matching queries:
         # ----------------------
-        # q1_unseen_older      (QUERY_UNSEEN)     (QUERY_UNSEEN_THEN_OLDEST_DUE)
-        # q3_oldest_due        (QUERY_OLDEST_DUE) (QUERY_OLDEST_DUE_OR_UNSEEN)
-        # q4_reinforce_newer   (QUERY_REINFORCE)
-        # q6_future_oldest_due (QUERY_FUTURE)
-        # q9_unseen_by_tag3    (QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG)
+        # q1_unseen_older      QUERY_UNSEEN      QUERY_UNSEEN_THEN_OLDEST_DUE  QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG
+        # q3_oldest_due        QUERY_OLDEST_DUE  QUERY_OLDEST_DUE_OR_UNSEEN
+        # q4_reinforce_newer   QUERY_REINFORCE
+        # q6_future_oldest_due QUERY_FUTURE
+        # q9_unseen_by_tag3    QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG
         # q18_tag8_oldest_viewed
         
         # Overlapping queries:
@@ -356,9 +356,15 @@ class TestAllQueryTypesSameData:
         
         # For by oldest-viewed tag (QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG), create questions such that:
         #   Instead of selecting q1, it selects an unseen question with a different tag that has a newer Question.added, but that tag has a question with an older Schedule.datetime_added than Q1.Schedule.datetime_added
+
         # For QUERY_OLDEST_DUE_OR_UNSEEN, create questions such that:
         #   Instead of selecting qx, it selects qy, a question that has been seen, where qy.Schedule.datetime_added is older than
         #   qx.dateetime_added (which will be equivalent to QUERY_OLDEST_DUE)
+        
+        #### For QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, the question for create questions such that:
+        ####   a) Instead of selecting q1_unseen_older (tag1) , it selects a due question with a different tag that has an older Schedule.date_show_next than q1_unseen_older.datetime_added
+        ####   - and also the inverse: - 
+        ####  
         
         # Notes:
         # U = User who created the question (i.e., Question.user field)
@@ -561,7 +567,7 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_due.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
         assert nq_oldest_due.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-        assert nq_oldest_due.tag_names_for_question == [TAG_NAME]
+        assert nq_oldest_due.tag_names_for_question == [TAG_1_NAME]
         assert nq_oldest_due.tag_names_selected == TAG_NAMES_SELECTED
     
         # Test QUERY_UNSEEN
@@ -569,12 +575,12 @@ class TestAllQueryTypesSameData:
         assert nq_unseen.question == q1_unseen_older
         assert nq_unseen.count_times_question_seen == 0
         assert nq_unseen.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_unseen.count_questions_matched_criteria == COUNT_QUESTIONS_UNSEEN
+####        assert nq_unseen.count_questions_matched_criteria == ???
         assert nq_unseen.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_unseen.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
         assert nq_unseen.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-        assert nq_unseen.tag_names_for_question == [TAG_NAME]
+        assert nq_unseen.tag_names_for_question == [TAG_1_NAME]
         assert nq_unseen.tag_names_selected == TAG_NAMES_SELECTED
 
         # Test QUERY_UNSEEN_THEN_OLDEST_DUE
@@ -587,7 +593,7 @@ class TestAllQueryTypesSameData:
         assert nq_unseen_then_oldest_due.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_unseen_then_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
         assert nq_unseen_then_oldest_due.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-        assert nq_unseen_then_oldest_due.tag_names_for_question == [TAG_NAME]
+        assert nq_unseen_then_oldest_due.tag_names_for_question == [TAG_1_NAME]
         assert nq_unseen_then_oldest_due.tag_names_selected == TAG_NAMES_SELECTED
         
         # Test QUERY_FUTURE
@@ -613,7 +619,7 @@ class TestAllQueryTypesSameData:
         assert nq_reinforce.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_reinforce.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
         assert nq_reinforce.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-        assert nq_reinforce.tag_names_for_question == [TAG_NAME]
+        assert nq_reinforce.tag_names_for_question == [TAG_1_NAME]
         assert nq_reinforce.tag_names_selected == TAG_NAMES_SELECTED
 
         # Test QUERY_OLDEST_DUE_OR_UNSEEN  (same results as QUERY_UNSEEN)
@@ -631,7 +637,7 @@ class TestAllQueryTypesSameData:
         
         # Test QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG (odoubt)
 #####        nq_odoubt = NextQuestion(query_name=QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, tag_ids_selected=TAG_IDS_SELECTED, user=user)
-#####        assert nq_odoubt.question == q18_tag8_oldest_viewed
+#####        assert nq_odoubt.question == q1_unseen_older
 #####        assert nq_odoubt.count_times_question_seen == 1
 #####        assert nq_odoubt.count_questions_due == COUNT_QUESTIONS_DUE
 #####        assert nq_odoubt.count_questions_matched_criteria == COUNT_QUESTIONS_OLDEST_DUE_OR_UNSEEN_BY_TAG

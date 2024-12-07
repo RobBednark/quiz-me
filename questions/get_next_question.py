@@ -285,7 +285,7 @@ class NextQuestion:
         # For those tags, get the newest Schedule.datetime_added.  
         # If there are no schedules for a tag, then get the oldest Question.datetime_added.
         # Choose the tag with the oldest of those dates, and use the oldest unseen Question.datetime_added for that tag.
-        # Note: do not want to go by unseen_question.datetime_added, because I don't want to see multiple questions from the same tag in a row.  That would be the same as QUERY_UNSEEN.
+        # Note: do not want use only unseen_question.datetime_added, because I don't want to see multiple questions from the same tag in a row.  That would be the same as QUERY_UNSEEN.
 
         subquery_newest_schedule_dateadded_for_tag = Schedule.objects.filter(
             question__questiontag__tag=OuterRef('pk'),
