@@ -657,6 +657,7 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_due_or_unseen.tag_names_selected == TAG_NAMES_COMMON
         
         # Test QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG (odoubt)
+        # tag1 is the oldest-viewed tag (unseen -99w).
 #####        nq_odoubt = NextQuestion(query_name=QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, tag_ids_selected=TAG_IDS_COMMON, user=user)
 #####        assert nq_odoubt.question == q1_unseen_older
 #####        assert nq_odoubt.count_times_question_seen == 1
@@ -666,7 +667,7 @@ class TestAllQueryTypesSameData:
 #####        assert nq_odoubt.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
 #####        assert nq_odoubt.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
 #####        assert nq_odoubt.count_recent_seen_mins_60 == COUNT_RECENT_SEEN_MINS_60
-#####        assert nq_odoubt.tag_names_for_question == TAG_NAMES_Q18_TAG8_OLDEST_VIEWED
+#####        assert nq_odoubt.tag_names_for_question == TAG_1_NAME
 #####        assert nq_odoubt.tag_names_selected == TAG_NAMES_COMMON
         
         # Test QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG
