@@ -55,8 +55,7 @@ class NextQuestion:
         self._get_count_recent_seen()
         self._get_count_questions_due()
         self._get_count_questions_unseen()
-        if self.count_times_question_seen is None:
-            self._get_count_times_question_seen()
+        self._get_count_times_question_seen()
         
     def _get_count_questions_due(self):
         # Given self._queryset__questions_tagged,
