@@ -39,6 +39,10 @@ class NextQuestion:
         
         self._queryset__questions_tagged = None
 
+        self._queryset__questions_tagged = Question.objects.filter(
+            user=self._user,
+            questiontag__tag__id__in=self._tag_ids_selected_expanded)
+
         self._get_question()
         self._get_all_counts()
 
@@ -56,6 +60,7 @@ class NextQuestion:
         self._get_count_questions_due()
         self._get_count_questions_unseen()
         self._get_count_times_question_seen()
+        self.count_questions_tagged = self._queryset__questions_tagged.distinct().count()
         
     def _get_count_questions_due(self):
         # Given self._queryset__questions_tagged,
@@ -63,10 +68,6 @@ class NextQuestion:
         # Returns: None
         # Side effects: set this attribute:
         #   self.count_questions_due
-        if self._queryset__questions_tagged is None:
-            self._queryset__questions_tagged = Question.objects.filter(
-                user=self._user,
-                questiontag__tag__id__in=self._tag_ids_selected_expanded)
 
         subquery_latest_dateshownext_for_question = Schedule.objects.filter(
             question=OuterRef('pk'),
@@ -113,18 +114,9 @@ class NextQuestion:
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are due, i.e., with the newest schedule with a date_show_next in the past.  Of those, find the question with the oldest Schedule.date_show_next.
         # Side effects: set the following attributes:
         #   self.question
-        #   self.count_questions_tagged
         
-        # Find questions created by the user with selected tags
-        # Get "tagged_questions" (questions that have one or more tag_ids).
-        questions_tagged = Question.objects.filter(
-            user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected_expanded
-        )
-        self._queryset__questions_tagged = questions_tagged
-
         # Get "scheduled_questions" (tagged_questions that have at least one schedule).
-        scheduled_questions = questions_tagged.filter(schedule__isnull=False)
+        scheduled_questions = self._queryset__questions_tagged.filter(schedule__isnull=False)
         
         # schedules -- all Schedules for the user for each question, newest first by datetime_added
         # OuterRef('pk') refers to the question.pk for each question
@@ -157,8 +149,6 @@ class NextQuestion:
         else: 
             raise ValueError(f"Unknown query name for get_next_question_due: [{self._query_name}]")
 
-        self.count_questions_tagged = questions_tagged.distinct().count()
-
     def _get_next_question_oldest_due_or_unseen(self):
         ####### TODO: naming - what to call this?  
         #######     oldest_due_or_unseen
@@ -174,13 +164,6 @@ class NextQuestion:
         #   -or-, if no Schedules for a question (unseen), then:
         #   b) the oldest Question.datetime_added.
 
-        # Get questions with selected tags
-        questions_tagged = Question.objects.filter(
-            user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected_expanded
-        )
-        self._queryset__questions_tagged = questions_tagged
-    
         # Get the latest schedule for each question
         subquery_latest_schedule = Schedule.objects.filter(
             question=OuterRef('pk'),
@@ -189,7 +172,7 @@ class NextQuestion:
     
         # Annotate questions with either their latest schedule's date_show_next or their creation date
         # Coalesce() takes the first non-null value from the list of arguments.
-        questions = questions_tagged.annotate(
+        questions = self._queryset__questions_tagged.annotate(
             due_or_unseen_date=Coalesce(
                 Subquery(subquery_latest_schedule.values('date_show_next')[:1]),  # due date
                 F('datetime_added')  # date the unseen question was added
@@ -199,9 +182,6 @@ class NextQuestion:
         # Order by the oldest due/created date and get the first one
         self.question = questions.order_by('due_or_unseen_date').first()
         
-        # Set counts
-        self.count_questions_tagged = questions_tagged.distinct().count()
-
     def _get_next_question_oldest_due_or_unseen_by_tag(self):
         pass
 
@@ -209,23 +189,13 @@ class NextQuestion:
         # Find all questions created by user which have one or more of tag_ids_selected.  Of those questions, find the ones that are unseen, i.e., have no schedules.  Of those, return the one with the oldest datetime_added.
         # Side effects: set the following attributes:
         #   self.question
-        #   self.count_questions_tagged
         
-        # Find questions created by the user with selected tags
-        questions_tagged = Question.objects.filter(
-            user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected_expanded
-        )
-        self._queryset__questions_tagged = questions_tagged
-
         # Filter for unseen questions (no schedules)
-        unseen_questions = questions_tagged.filter(schedule__isnull=True)
+        unseen_questions = self._queryset__questions_tagged.filter(schedule__isnull=True)
 
         # Get the oldest unseen question based on datetime_added
         oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
         self.question = oldest_unseen_question
-        
-        self.count_questions_tagged = questions_tagged.distinct().count()
         
     def _get_next_question_unseen_by_oldest_viewed_tag(self):
         # "oldest-viewed tag" means the tag with the older of the oldest Schedule.datetime_viewed,  or if no Schedules, then the oldest Question.datetime_added.
@@ -270,13 +240,6 @@ class NextQuestion:
                 user=self._user,
                 schedule__isnull=True
             ).order_by('datetime_added').first()
-
-        # Set counts
-        self.count_questions_tagged = Question.objects.filter(
-            user=self._user,
-            questiontag__tag__id__in=self._tag_ids_selected_expanded
-        ).distinct().count()
-        # Count the number of tags that have at least one unseen question
 
     def _get_next_question_unseen_then_oldest_due(self):
         self._get_next_question_unseen()
