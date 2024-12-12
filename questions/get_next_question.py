@@ -54,8 +54,7 @@ class NextQuestion:
         
         self._get_count_recent_seen()
         self._get_count_questions_due()
-        if self.count_questions_unseen is None:
-            self._get_count_questions_unseen()
+        self._get_count_questions_unseen()
         if self.count_times_question_seen is None:
             self._get_count_times_question_seen()
         
@@ -86,9 +85,8 @@ class NextQuestion:
         # Returns: None
         # Side effects: set this attribute:
         #   self.count_questions_unseen
-        if self.count_questions_unseen is None:
-            self.count_questions_unseen = self._queryset__questions_tagged.filter(
-                schedule__isnull=True).distinct().count()
+        self.count_questions_unseen = self._queryset__questions_tagged.filter(
+            schedule__isnull=True).distinct().count()
         
     def _get_count_recent_seen(self):
         # Side effects: set these attributes:
