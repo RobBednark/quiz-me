@@ -27,7 +27,7 @@ class NextQuestion:
         self.count_questions_due = None  # questions due (date_show_next < now); does NOT include unseen questions
         self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
         self.count_questions_unseen = None  
-        self.count_questions_tagged = None
+        self.count_questions_tagged = None  # questions with at least one tag in self._tag_ids_selected_expanded
         self.count_recent_seen_mins_30 = None  # questions seen in the last 30 minutes
         self.count_recent_seen_mins_60 = None  # questions seen in the last 60 minutes
         self.count_times_question_seen = None
