@@ -35,7 +35,6 @@ def question(user):
         assert xx.question == ...
 
         assert xx.count_questions_due == 99
-        assert xx.count_questions_matched_criteria == 99
         assert xx.count_questions_tagged == 99
         assert xx.count_recent_seen_mins_30 == 99
         assert xx.count_recent_seen_mins_60 == 99
@@ -76,7 +75,6 @@ class Test__QUERY_UNSEEN:
         assert nq.question == question
 
         assert nq.count_questions_due == 0
-        assert nq.count_questions_matched_criteria == 1
         assert nq.count_recent_seen_mins_30 == 0
         assert nq.count_recent_seen_mins_60 == 0
         assert nq.count_questions_tagged == 1
@@ -583,7 +581,6 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_due.question == q3_oldest_due
         assert nq_oldest_due.count_times_question_seen == 1
         assert nq_oldest_due.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_oldest_due.count_questions_matched_criteria == COUNT_QUESTIONS_DUE
         assert nq_oldest_due.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_oldest_due.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -596,7 +593,6 @@ class TestAllQueryTypesSameData:
         assert nq_unseen.question == q1_unseen_older
         assert nq_unseen.count_times_question_seen == 0
         assert nq_unseen.count_questions_due == COUNT_QUESTIONS_DUE
-####        assert nq_unseen.count_questions_matched_criteria == ???
         assert nq_unseen.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_unseen.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -609,7 +605,6 @@ class TestAllQueryTypesSameData:
         assert nq_unseen_then_oldest_due.question == q1_unseen_older
         assert nq_unseen_then_oldest_due.count_times_question_seen == 0
         assert nq_unseen_then_oldest_due.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_unseen_then_oldest_due.count_questions_matched_criteria == COUNT_QUESTIONS_UNSEEN_AND_DUE
         assert nq_unseen_then_oldest_due.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_unseen_then_oldest_due.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_unseen_then_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -622,7 +617,6 @@ class TestAllQueryTypesSameData:
         assert nq_future.question == q6_future_oldest_due
         assert nq_future.count_times_question_seen == 2
         assert nq_future.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_future.count_questions_matched_criteria == COUNT_QUESTIONS_FUTURE
         assert nq_future.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_future.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_future.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -635,7 +629,6 @@ class TestAllQueryTypesSameData:
         assert nq_reinforce.question == q4_reinforce_newer
         assert nq_reinforce.count_times_question_seen == 1
         assert nq_reinforce.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_reinforce.count_questions_matched_criteria == COUNT_QUESTIONS_REINFORCE
         assert nq_reinforce.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_reinforce.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_reinforce.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -648,7 +641,6 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_due_or_unseen.question == q1_unseen_older
         assert nq_oldest_due_or_unseen.count_times_question_seen == 0
         assert nq_oldest_due_or_unseen.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_oldest_due_or_unseen.count_questions_matched_criteria == COUNT_QUESTIONS_WITH_TAG
         assert nq_oldest_due_or_unseen.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_oldest_due_or_unseen.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_oldest_due_or_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -662,7 +654,6 @@ class TestAllQueryTypesSameData:
 #####        assert nq_odoubt.question == q1_unseen_older
 #####        assert nq_odoubt.count_times_question_seen == 1
 #####        assert nq_odoubt.count_questions_due == COUNT_QUESTIONS_DUE
-#####        assert nq_odoubt.count_questions_matched_criteria == COUNT_QUESTIONS_OLDEST_DUE_OR_UNSEEN_BY_TAG
 #####        assert nq_odoubt.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
 #####        assert nq_odoubt.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
 #####        assert nq_odoubt.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -675,7 +666,6 @@ class TestAllQueryTypesSameData:
         assert nq_unseen_by_tag.question == q9_unseen_by_tag3
         assert nq_unseen_by_tag.count_times_question_seen == 0
         assert nq_unseen_by_tag.count_questions_due == COUNT_QUESTIONS_DUE
-        assert nq_unseen_by_tag.count_questions_matched_criteria == COUNT_QUESTIONS_UNSEEN_BY_OLDEST_VIEWED_TAG
         assert nq_unseen_by_tag.count_questions_tagged == COUNT_QUESTIONS_WITH_TAG
         assert nq_unseen_by_tag.count_questions_unseen == COUNT_QUESTIONS_UNSEEN
         assert nq_unseen_by_tag.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -707,7 +697,6 @@ class TestAllQueryTypesSameData:
         assert nq_unseen_then_oldest_due.question == q15_tag5_due_nm
         assert nq_unseen_then_oldest_due.count_times_question_seen == 1
         assert nq_unseen_then_oldest_due.count_questions_due == 1
-        assert nq_unseen_then_oldest_due.count_questions_matched_criteria == 1
         assert nq_unseen_then_oldest_due.count_questions_tagged == 1
         assert nq_unseen_then_oldest_due.count_questions_unseen == 0
         assert nq_unseen_then_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -724,7 +713,6 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_due_or_unseen.question == q15_tag5_due_nm
         assert nq_oldest_due_or_unseen.count_times_question_seen == 1
         assert nq_oldest_due_or_unseen.count_questions_due == 1
-        assert nq_oldest_due_or_unseen.count_questions_matched_criteria == 2
         assert nq_oldest_due_or_unseen.count_questions_tagged == 2
         assert nq_oldest_due_or_unseen.count_questions_unseen == 1
         assert nq_oldest_due_or_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -742,7 +730,6 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_due_None.question is None
         assert nq_oldest_due_None.count_times_question_seen == 0
         assert nq_oldest_due_None.count_questions_due == 0
-        assert nq_oldest_due_None.count_questions_matched_criteria == 0
         assert nq_oldest_due_None.count_questions_tagged == 1
         assert nq_oldest_due_None.count_questions_unseen == 1
         assert nq_oldest_due_None.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -755,7 +742,6 @@ class TestAllQueryTypesSameData:
         assert nq_unseen_none.question is None
         assert nq_unseen_none.count_times_question_seen == 0
         assert nq_unseen_none.count_questions_due == 1
-        assert nq_unseen_none.count_questions_matched_criteria == 0
         assert nq_unseen_none.count_questions_tagged == 1
         assert nq_unseen_none.count_questions_unseen == 0
         assert nq_unseen_none.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -768,7 +754,6 @@ class TestAllQueryTypesSameData:
         assert nq_unseen_then_oldest_due.question is None
         assert nq_unseen_then_oldest_due.count_times_question_seen == 0
         assert nq_unseen_then_oldest_due.count_questions_due == 0
-        assert nq_unseen_then_oldest_due.count_questions_matched_criteria == 0
         assert nq_unseen_then_oldest_due.count_questions_tagged == 1
         assert nq_unseen_then_oldest_due.count_questions_unseen == 0
         assert nq_unseen_then_oldest_due.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -783,7 +768,6 @@ class TestAllQueryTypesSameData:
         assert nq_future.question is None
         assert nq_future.count_times_question_seen == 0
         assert nq_future.count_questions_due == 1
-        assert nq_future.count_questions_matched_criteria == 0
         assert nq_future.count_questions_tagged == 1
         assert nq_future.count_questions_unseen == 0
         assert nq_future.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -798,7 +782,6 @@ class TestAllQueryTypesSameData:
         assert nq_reinforce.question is None
         assert nq_reinforce.count_times_question_seen == 0
         assert nq_reinforce.count_questions_due == 0
-        assert nq_reinforce.count_questions_matched_criteria == 0
         assert nq_reinforce.count_questions_tagged == 2
         assert nq_reinforce.count_questions_unseen == 1
         assert nq_reinforce.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -813,7 +796,6 @@ class TestAllQueryTypesSameData:
         assert nq_oldest_due_or_unseen.question is None
         assert nq_oldest_due_or_unseen.count_times_question_seen == 0
         assert nq_oldest_due_or_unseen.count_questions_due == 0
-        assert nq_oldest_due_or_unseen.count_questions_matched_criteria == 0
         assert nq_oldest_due_or_unseen.count_questions_tagged == 0
         assert nq_oldest_due_or_unseen.count_questions_unseen == 0
         assert nq_oldest_due_or_unseen.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -828,7 +810,6 @@ class TestAllQueryTypesSameData:
 ####        assert nq_unseen_by_tag.question is None
 ####        assert nq_unseen_by_tag.count_times_question_seen == 0
 ####        assert nq_unseen_by_tag.count_questions_due == 1
-####        assert nq_unseen_by_tag.count_questions_matched_criteria == 0
 ####        assert nq_unseen_by_tag.count_questions_tagged == 2
 ####        assert nq_unseen_by_tag.count_questions_unseen == 0
 ####        assert nq_unseen_by_tag.count_recent_seen_mins_30 == COUNT_RECENT_SEEN_MINS_30
@@ -859,7 +840,6 @@ class TestQueryUnseenByOldestViewedTag:
 
         assert nq.question == q3
         assert nq.count_questions_tagged == 4
-        assert nq.count_questions_matched_criteria == 2
         assert nq.count_questions_unseen == 2
         assert nq.tag_names_for_question == [tag3.name]
         assert set(nq.tag_names_selected) == set([tag1.name, tag2.name, tag3.name])
@@ -878,7 +858,6 @@ class TestQueryUnseenByOldestViewedTag:
 
         assert nq.question == q1
         assert nq.count_questions_tagged == 2
-        assert nq.count_questions_matched_criteria == 2
         assert nq.count_questions_unseen == 2
         assert nq.tag_names_for_question == [tag1.name]
         assert set(nq.tag_names_selected) == set([tag1.name, tag2.name])
@@ -904,7 +883,6 @@ class TestQueryUnseenByOldestViewedTag:
 
         assert nq.question == q2
         assert nq.count_questions_tagged == 4
-        assert nq.count_questions_matched_criteria == 2
         assert nq.count_questions_unseen == 3
         assert nq.tag_names_for_question == [tag2.name]
         assert set(nq.tag_names_selected) == set([tag1.name, tag2.name, tag3.name])
@@ -926,7 +904,6 @@ class TestQueryUnseenByOldestViewedTag:
 
         assert nq.question is None
         assert nq.count_questions_tagged == 2
-        assert nq.count_questions_matched_criteria == 0
         assert nq.count_questions_unseen == 0
         assert nq.tag_names_for_question == []
         assert set(nq.tag_names_selected) == set([tag1.name, tag2.name])
@@ -952,7 +929,6 @@ class TestQueryUnseenByOldestViewedTag:
 
         assert nq.question == q2
         assert nq.count_questions_tagged == 4
-        assert nq.count_questions_matched_criteria == 2
         assert nq.count_questions_unseen == 2
         assert nq.tag_names_for_question == [tag1.name]
         assert set(nq.tag_names_selected) == set([tag1.name, tag2.name])

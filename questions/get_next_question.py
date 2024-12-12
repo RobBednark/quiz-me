@@ -25,7 +25,6 @@ class NextQuestion:
         self._tag_ids_selected_implicit_descendants = self._tag_ids_selected_expanded - set(self._tag_ids_selected)
         
         self.count_questions_due = None  # questions due (date_show_next < now); does NOT include unseen questions
-        self.count_questions_matched_criteria = None  # all criteria, e.g., tags, unseen, due, ...
         self.count_questions_unseen = None  
         self.count_questions_tagged = None  # questions with at least one tag in self._tag_ids_selected_expanded
         self.count_recent_seen_mins_30 = None  # questions seen in the last 30 minutes
@@ -47,7 +46,6 @@ class NextQuestion:
         # Returns: None
         # Side effects: set the following attributes:
         #   self.count_questions_due
-        #   self.count_questions_matched_criteria
         #   self.count_questions_unseen
         #   self.count_questions_tagged
         #   self.count_recent_seen_mins_30
@@ -56,9 +54,6 @@ class NextQuestion:
         
         if self.count_questions_due is None:
             self._get_count_questions_due()
-        if (self.count_questions_matched_criteria is None) or \
-           (self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE):
-            self._get_count_questions_matched_criteria()
         if self.count_questions_unseen is None:
             self._get_count_questions_unseen()
         if self.count_recent_seen_mins_30 is None:
@@ -85,39 +80,6 @@ class NextQuestion:
         self.count_questions_due = self._queryset__questions_tagged.annotate(
             latest_date_show_next=Subquery(subquery_latest_dateshownext_for_question.values('date_show_next')[:1])
         ).filter(Q(latest_date_show_next__lte=timezone.now())
-        ).distinct().count()
-    
-    def _get_count_questions_matched_criteria(self):
-        if self._query_name in [QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE]:
-            # assert: it was already set in _get_count_questions_due()
-            pass
-        elif self._query_name == QUERY_UNSEEN:
-            # assert: it was already set in _get_count_questions_unseen()
-            pass
-        elif self._query_name == QUERY_UNSEEN_THEN_OLDEST_DUE:
-            self._get_count_questions_matched_criteria_unseen_then_oldest_due()
-        elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN:
-            pass
-        elif self._query_name == QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG:
-            pass
-        else:
-            raise ValueError(f'Invalid query name in _get_count_questions_matched_criteria: [{self._query_name}]')
-
-    def _get_count_questions_matched_criteria_unseen_then_oldest_due(self):
-        now = timezone.now()
-        
-        # Subquery to get the most recent schedule for each question
-        subquery_latest_schedule_for_question = Schedule.objects.filter(
-            question=OuterRef('pk'),
-            user=self._user
-        ).order_by('-datetime_added')
-
-        # Count of questions that are either unseen or due based on their latest schedule
-        self.count_questions_matched_criteria = self._queryset__questions_tagged.annotate(
-            latest_date_show_next=Subquery(subquery_latest_schedule_for_question.values('date_show_next')[:1])
-        ).filter(
-            Q(schedule__isnull=True) |  # Unseen questions
-            Q(latest_date_show_next__lte=now)  # Due questions
         ).distinct().count()
     
     def _get_count_questions_unseen(self):
@@ -157,7 +119,6 @@ class NextQuestion:
         # Side effects: set the following attributes:
         #   self.question
         #   self.count_questions_tagged
-        #   self.count_questions_matched_criteria
         
         # Find questions created by the user with selected tags
         # Get "tagged_questions" (questions that have one or more tag_ids).
@@ -202,10 +163,6 @@ class NextQuestion:
             raise ValueError(f"Unknown query name for get_next_question_due: [{self._query_name}]")
 
         self.count_questions_tagged = questions_tagged.distinct().count()
-        self.count_questions_matched_criteria = scheduled_questions.distinct().count()
-        if self._query_name != QUERY_FUTURE:
-            self.count_questions_due = self.count_questions_matched_criteria
-            
 
     def _get_next_question_oldest_due_or_unseen(self):
         ####### TODO: naming - what to call this?  
@@ -249,7 +206,6 @@ class NextQuestion:
         
         # Set counts
         self.count_questions_tagged = questions_tagged.distinct().count()
-        self.count_questions_matched_criteria = questions.count()
 
     def _get_next_question_oldest_due_or_unseen_by_tag(self):
         pass
@@ -259,7 +215,6 @@ class NextQuestion:
         # Side effects: set the following attributes:
         #   self.question
         #   self.count_questions_tagged
-        #   self.count_questions_matched_criteria
         
         # Find questions created by the user with selected tags
         questions_tagged = Question.objects.filter(
@@ -276,8 +231,6 @@ class NextQuestion:
         self.question = oldest_unseen_question
         
         self.count_questions_tagged = questions_tagged.distinct().count()
-        self.count_questions_matched_criteria = unseen_questions.distinct().count()
-        self.count_questions_unseen = self.count_questions_matched_criteria
         
     def _get_next_question_unseen_by_oldest_viewed_tag(self):
         # "oldest-viewed tag" means the tag with the older of the oldest Schedule.datetime_viewed,  or if no Schedules, then the oldest Question.datetime_added.
@@ -329,7 +282,6 @@ class NextQuestion:
             questiontag__tag__id__in=self._tag_ids_selected_expanded
         ).distinct().count()
         # Count the number of tags that have at least one unseen question
-        self.count_questions_matched_criteria = oldest_tags.distinct().count()
 
     def _get_next_question_unseen_then_oldest_due(self):
         self._get_next_question_unseen()
