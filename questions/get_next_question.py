@@ -52,12 +52,11 @@ class NextQuestion:
         #   self.count_recent_seen_mins_60
         #   self.count_times_question_seen
         
+        self._get_count_recent_seen()
         if self.count_questions_due is None:
             self._get_count_questions_due()
         if self.count_questions_unseen is None:
             self._get_count_questions_unseen()
-        if self.count_recent_seen_mins_30 is None:
-            self._get_count_recent_seen()
         if self.count_times_question_seen is None:
             self._get_count_times_question_seen()
         
