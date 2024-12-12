@@ -53,8 +53,7 @@ class NextQuestion:
         #   self.count_times_question_seen
         
         self._get_count_recent_seen()
-        if self.count_questions_due is None:
-            self._get_count_questions_due()
+        self._get_count_questions_due()
         if self.count_questions_unseen is None:
             self._get_count_questions_unseen()
         if self.count_times_question_seen is None:
