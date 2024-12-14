@@ -197,13 +197,8 @@ class NextQuestion:
         oldest_unseen_question = unseen_questions.order_by('datetime_added').first()
         self.question = oldest_unseen_question
         
-    def _get_next_question_unseen_by_oldest_viewed_tag(self):
+    def _get_oldest_viewed_tag(self, only_unseen_tags):
         # "oldest-viewed tag" means the tag with the older of the oldest Schedule.datetime_viewed,  or if no Schedules, then the oldest Question.datetime_added.
-        # Find all tags that have at least one unseen question.
-        # For those tags, get the newest Schedule.datetime_added.  
-        # If there are no schedules for a tag, then get the oldest Question.datetime_added.
-        # Choose the tag with the oldest of those dates, and use the oldest unseen Question.datetime_added for that tag.
-        # Note: we don't want to use only unseen_question.datetime_added, because I don't want to see multiple questions from the same tag in a row.  That could be the same as QUERY_UNSEEN.
 
         subquery_newest_schedule_dateadded_for_tag = Schedule.objects.filter(
             question__questiontag__tag=OuterRef('pk'),
@@ -220,9 +215,15 @@ class NextQuestion:
         # That won't matter, since we're ordering my relevant_date, selecting only the first (oldest) one.
         oldest_tags = Tag.objects.filter(
             questiontag__question__user=self._user,
-            questiontag__question__schedule__isnull=True,  # only select tags with unseen questions
             id__in=self._tag_ids_selected_expanded
-        ).annotate(
+        )
+
+        if only_unseen_tags:
+            oldest_tags = oldest_tags.filter(
+                questiontag__question__schedule__isnull=True  # only select tags with unseen questions
+            )
+
+        oldest_tags = oldest_tags.annotate(
             newest_schedule_dateadded_for_tag=Subquery(subquery_newest_schedule_dateadded_for_tag),
             oldest_unseen_question_dateadded_for_tag=Subquery(subquery_oldest_unseen_question_dateadded_for_tag),
             relevant_date=Coalesce( # use the first non-null value (the newest schedule date if it exists, otherwise the oldest question date)
@@ -230,7 +231,18 @@ class NextQuestion:
                 F('oldest_unseen_question_dateadded_for_tag')
             )
         ).order_by('relevant_date')
+
         oldest_tag = oldest_tags.first()
+        return oldest_tag        
+    def _get_next_question_unseen_by_oldest_viewed_tag(self):
+        # "oldest-viewed tag" means the tag with the older of the oldest Schedule.datetime_viewed,  or if no Schedules, then the oldest Question.datetime_added.
+        # Find all tags that have at least one unseen question.
+        # For those tags, get the newest Schedule.datetime_added.  
+        # If there are no schedules for a tag, then get the oldest Question.datetime_added.
+        # Choose the tag with the oldest of those dates, and use the oldest unseen Question.datetime_added for that tag.
+        # Note: we don't want to use only unseen_question.datetime_added, because I don't want to see multiple questions from the same tag in a row.  That could be the same as QUERY_UNSEEN.
+
+        oldest_tag = self._get_oldest_viewed_tag(only_unseen_tags=True)
 
         # Get the oldest unseen question for the oldest tag
         self.question = None
