@@ -22,14 +22,10 @@ QUERY_CHOICES = (
     (QUERY_REINFORCE, f'{QUERY_REINFORCE}: notes due before now, ordered by date seen descending'),
     (QUERY_OLDEST_DUE, f'{QUERY_OLDEST_DUE}: notes due before now, ordered by due date ascending'),
     (QUERY_FUTURE, f'{QUERY_FUTURE}: notes due after now, ordered by due date ascending'),
-    # (QUERY_LAST_SEEN_BY_TAG, f'{QUERY_LAST_SEEN_BY_TAG}: find the oldest last_seen date for each tag; show note from the oldest tag (tags with notes but no schedules should be shown first)'),
     (QUERY_OLDEST_DUE_OR_UNSEEN, f'{QUERY_OLDEST_DUE_OR_UNSEEN}: for each question, Schedule.date_show_next, or if no Schedules, then Question.datetime_added'),
     (QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, f'{QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG}: For each question, look at Schedule.datetime_added, or if no Schedules (unseen), then the Question.datetime_added.'),  # This is by oldest viewed tag.  Could also be called QUERYY_OLDEST_DUE_OR_UNSEEN_BY_OLDEST_VIEWED_TAG, but I chose to shorten it.
     (QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, f'{QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG}: "oldest-viewed tag" is the tag with the oldest Schedule.datetime_added.  Or, if no Schedules, then the oldest Question.datetime_added.'),
-    # (QUERY_REINFORCE_THEN_UNSEEN, f'{QUERY_REINFORCE_THEN_UNSEEN}: REINFORCE, then UNSEEN'),
-    # (QUERY_REINFORCE_THEN_UNSEEN_THEN_FUTURE, f'{QUERY_REINFORCE_THEN_UNSEEN_THEN_FUTURE}: REINFORCE, then UNSEEN, then FUTURE'),
     (QUERY_UNSEEN_THEN_OLDEST_DUE, f'{QUERY_UNSEEN_THEN_OLDEST_DUE}: UNSEEN, then DUE'),
-    # (QUERY_UNSEEN_THEN_OLDEST_DUE_THEN_FUTURE, f'{QUERY_UNSEEN_THEN_OLDEST_DUE_THEN_FUTURE}: UNSEEN, then DUE, then FUTURE'),
 )
 
 ALL_QUERY_NAMES = (
