@@ -1,7 +1,7 @@
 import os
 
-from django.db.models import Case, F, Min, OuterRef, Q, Subquery, When
-from django.db.models.functions import Coalesce
+from django.db.models import Case, F, OuterRef, Q, Subquery, When
+from django.db.models.functions import Coalesce, Least
 from django.utils import timezone
 
 from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_OLDEST_DUE_OR_UNSEEN, QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
@@ -225,7 +225,15 @@ class NextQuestion:
             oldest_tags = oldest_tags.filter(
                 questiontag__question__schedule__isnull=True  # only select tags with unseen questions
             )
+        ONE_THOUSAND_YEARS_IN_WEEKS = 52 * 1000  # A big future date, to avoid a NULL value for Least(), because sqlite considers NULL to be the smallest value.
 
+        # In the following query, I initially used Min() instead of Least(), which didn't require the Coalesce() functions.
+        # The Min() solution worked in sqlite, but for Postgresql, it cannot take the Min() of two timestamp-with-timezone's:
+        #   min(timestamp with time zone, timestamp with time zone)
+        # Coalesce is needed because Least() in sqlite (which is used for the tests) considers null to be the smallest value (whereas Postgres doesn't).
+        # However, if there's a NULL value (from Schedule.dateadded), we want to use the non-NULL value (from Question.datetime_added).
+        # Coalesce() -- use the first non-null value from the list of arguments.
+        # Note that the following query is very slow: 2 seconds for 4500 attempts, 3700 questiontags, 260 tags, 2500 questions
         oldest_tags = oldest_tags.annotate(
             newest_schedule_dateadded_for_tag=Subquery(subquery_newest_schedule_dateadded_for_tag),
             oldest_unseen_question_dateadded_for_tag=Subquery(subquery_oldest_unseen_question_dateadded_for_tag),
@@ -233,7 +241,10 @@ class NextQuestion:
                 When(
                     newest_schedule_dateadded_for_tag__isnull=False,
                     oldest_unseen_question_dateadded_for_tag__isnull=False,
-                    then=Min(F('newest_schedule_dateadded_for_tag'), F('oldest_unseen_question_dateadded_for_tag'))
+                    then=Least(
+                        Coalesce(F('newest_schedule_dateadded_for_tag'), timezone.now() + timezone.timedelta(weeks=ONE_THOUSAND_YEARS_IN_WEEKS)),
+                        Coalesce(F('oldest_unseen_question_dateadded_for_tag'), timezone.now() + timezone.timedelta(weeks=ONE_THOUSAND_YEARS_IN_WEEKS))
+                    )
                 ),
                 When(
                     newest_schedule_dateadded_for_tag__isnull=True,
