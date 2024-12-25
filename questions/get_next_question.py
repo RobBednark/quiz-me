@@ -1,16 +1,11 @@
-import os
-
 from django.db.models import Case, F, OuterRef, Q, Subquery, When
-from django.db.models.functions import Coalesce, Least
+from django.db.models.functions import Coalesce, Greatest
 from django.utils import timezone
 
 from questions.forms import QUERY_OLDEST_DUE, QUERY_FUTURE, QUERY_REINFORCE, QUERY_UNSEEN, QUERY_OLDEST_DUE_OR_UNSEEN, QUERY_OLDEST_DUE_OR_UNSEEN_BY_TAG, QUERY_UNSEEN_BY_OLDEST_VIEWED_TAG, QUERY_UNSEEN_THEN_OLDEST_DUE
 from questions.get_tag_hierarchy import expand_all_tag_ids, get_tag_hierarchy
 from questions.models import Question, Schedule, Tag
 from questions.VerifyTagIds import VerifyTagIds
-
-debug_print = eval(os.environ.get('QM_DEBUG_PRINT', 'False'))
-debug_sql = eval(os.environ.get('QM_DEBUG_SQL', 'False'))
 
 class NextQuestion:
     def __init__(self, query_name, tag_ids_selected, user):
@@ -201,21 +196,24 @@ class NextQuestion:
         self.question = oldest_unseen_question
         
     def _get_oldest_viewed_tag(self, only_unseen_tags):
-        # "oldest-viewed tag" means the tag with the older of the oldest Schedule.datetime_viewed,  or if no Schedules, then the oldest Question.datetime_added.
+        # "oldest-viewed tag" means the tag with the oldest last-viewed-time question.
+        # "last-viewed time" for a question is
+        #     Schedule.datetime_added for the latest Schedule
+        #  -or, if no Schedules,-
+        #     Question.datetime_added.
 
         subquery_newest_schedule_dateadded_for_tag = Schedule.objects.filter(
             question__questiontag__tag=OuterRef('pk'),
             user=self._user
-        ).order_by('-datetime_added').values('datetime_added')[:1]
+        ).order_by('-datetime_added').values('datetime_added')[0:1]
 
-        subquery_oldest_unseen_question_dateadded_for_tag = Question.objects.filter(
+        subquery_newest_unseen_question_dateadded_for_tag = Question.objects.filter(
             questiontag__tag=OuterRef('pk'),
             user=self._user,
             schedule__isnull=True
-        ).order_by('datetime_added').values('datetime_added')[:1]
+        ).order_by('-datetime_added').values('datetime_added')[0:1]
 
-        # oldest_tags may result in multiple matches per tag (multiple unseen questions), with each one of those for the same tag having the same relevant_date.
-        # That won't matter, since we're ordering by relevant_date, selecting only the first (oldest) one.
+        # Since the filter is joining on the QuestionTag and Question models, tags that have no questions will be excluded,
         oldest_tags = Tag.objects.filter(
             questiontag__question__user=self._user,
             id__in=self._tag_ids_selected_expanded
@@ -225,38 +223,43 @@ class NextQuestion:
             oldest_tags = oldest_tags.filter(
                 questiontag__question__schedule__isnull=True  # only select tags with unseen questions
             )
-        ONE_THOUSAND_YEARS_IN_WEEKS = 52 * 1000  # A big future date, to avoid a NULL value for Least(), because sqlite considers NULL to be the smallest value.
-
+        
         # In the following query, I initially used Min() instead of Least(), which didn't require the Coalesce() functions.
         # The Min() solution worked in sqlite, but for Postgresql, it cannot take the Min() of two timestamp-with-timezone's:
         #   min(timestamp with time zone, timestamp with time zone)
         # Coalesce is needed because Least() in sqlite (which is used for the tests) considers null to be the smallest value (whereas Postgres doesn't).
         # However, if there's a NULL value (from Schedule.dateadded), we want to use the non-NULL value (from Question.datetime_added).
         # Coalesce() -- use the first non-null value from the list of arguments.
-        # Note that the following query is very slow: 2 seconds for 4500 attempts, 3700 questiontags, 260 tags, 2500 questions
+        # Note that the following query is very slow: 2.4 seconds for 4500 attempts, 3700 questiontags, 260 tags, 2500 questions, with the
+        # EXPLAIN showing 278k loops for a number of the subplans.
+        
         oldest_tags = oldest_tags.annotate(
             newest_schedule_dateadded_for_tag=Subquery(subquery_newest_schedule_dateadded_for_tag),
-            oldest_unseen_question_dateadded_for_tag=Subquery(subquery_oldest_unseen_question_dateadded_for_tag),
-            relevant_date=Case(
+            newest_unseen_question_dateadded_for_tag=Subquery(subquery_newest_unseen_question_dateadded_for_tag),
+            last_viewed_date=Case(
                 When(
                     newest_schedule_dateadded_for_tag__isnull=False,
-                    oldest_unseen_question_dateadded_for_tag__isnull=False,
-                    then=Least(
-                        Coalesce(F('newest_schedule_dateadded_for_tag'), timezone.now() + timezone.timedelta(weeks=ONE_THOUSAND_YEARS_IN_WEEKS)),
-                        Coalesce(F('oldest_unseen_question_dateadded_for_tag'), timezone.now() + timezone.timedelta(weeks=ONE_THOUSAND_YEARS_IN_WEEKS))
+                    newest_unseen_question_dateadded_for_tag__isnull=False,
+                    then=Greatest(  # use the newest date
+                        F('newest_schedule_dateadded_for_tag'),
+                        F('newest_unseen_question_dateadded_for_tag'),
                     )
                 ),
-                When(
+                When(  # assert: there are no schedules for this tag, but there are unseen questions
                     newest_schedule_dateadded_for_tag__isnull=True,
-                    then=F('oldest_unseen_question_dateadded_for_tag')
+                    then=F('newest_unseen_question_dateadded_for_tag')
                 ),
+                # assert: if neither of the above When's match, then:
+                #     a) newest_schedule_dateadded_for_tag_isnull=False  (there are schedules)
+                #    -and-
+                #     b) newest_unseen_question_dateadded_for_tag_isnull=True  (there are no unseen questions)
                 default=F('newest_schedule_dateadded_for_tag')
             )
-        ).distinct().order_by('relevant_date')
+        ).distinct().order_by('last_viewed_date')
         
-        oldest_tag = oldest_tags.first()
-        self.oldest_viewed_tag = oldest_tag
-        return oldest_tag        
+        self.oldest_viewed_tag = oldest_tags.first()
+
+        return self.oldest_viewed_tag        
 
     def _get_next_question_unseen_by_oldest_viewed_tag(self):
         # "oldest-viewed tag" means the tag with the older of the oldest Schedule.datetime_viewed,  or if no Schedules, then the oldest Question.datetime_added.
