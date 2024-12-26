@@ -15,7 +15,7 @@ class Command(BaseCommand):
         # question_tags = models.QuestionTag.objects.filter(tag__in=user_tags)
         for num, question in enumerate(questions.order_by('id')):
             question_ = question.question.replace(CHAR_CR, '')
-            print(f'\n=== [{num + 1}] ============================= id=[{question.id}] ==')
+            print(f'\n======================================== id=[{question.id}] ==')
             print('Q: ', question_)
             print('questiontag_set : %s' % [str(question_tag.tag.name) for question_tag in question.questiontag_set.all()])
             print('datetime_added  =[%s]' % question.datetime_added)
@@ -28,3 +28,5 @@ class Command(BaseCommand):
             else:
                 print("-" * 80)
                 print("(no answer)")
+        print("-" * 80)
+        print(f'Total number of questions: {models.Question.objects.count()}')
