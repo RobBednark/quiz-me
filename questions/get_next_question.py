@@ -233,28 +233,17 @@ class NextQuestion:
         # Note that the following query is very slow: 2.4 seconds for 4500 attempts, 3700 questiontags, 260 tags, 2500 questions, with the
         # EXPLAIN showing 278k loops for a number of the subplans.
         
+        ONE_THOUSAND_YEARS_IN_WEEKS = 52 * 1000  # A date way in the past, to avoid a NULL value for Greatest(), because sqlite returns NULL if there is one.
+        
         oldest_tags = oldest_tags.annotate(
             newest_schedule_dateadded_for_tag=Subquery(subquery_newest_schedule_dateadded_for_tag),
             newest_unseen_question_dateadded_for_tag=Subquery(subquery_newest_unseen_question_dateadded_for_tag),
-            last_viewed_date=Case(
-                When(
-                    newest_schedule_dateadded_for_tag__isnull=False,
-                    newest_unseen_question_dateadded_for_tag__isnull=False,
-                    then=Greatest(  # use the newest date
-                        F('newest_schedule_dateadded_for_tag'),
-                        F('newest_unseen_question_dateadded_for_tag'),
-                    )
-                ),
-                When(  # assert: there are no schedules for this tag, but there are unseen questions
-                    newest_schedule_dateadded_for_tag__isnull=True,
-                    then=F('newest_unseen_question_dateadded_for_tag')
-                ),
-                # assert: if neither of the above When's match, then:
-                #     a) newest_schedule_dateadded_for_tag_isnull=False  (there are schedules)
-                #    -and-
-                #     b) newest_unseen_question_dateadded_for_tag_isnull=True  (there are no unseen questions)
-                default=F('newest_schedule_dateadded_for_tag')
-            )
+            last_viewed_date=(
+                        Greatest(
+                            Coalesce(F('newest_schedule_dateadded_for_tag'), timezone.now() - timezone.timedelta(weeks=ONE_THOUSAND_YEARS_IN_WEEKS)),
+                            Coalesce(F('newest_unseen_question_dateadded_for_tag'), timezone.now() - timezone.timedelta(weeks=ONE_THOUSAND_YEARS_IN_WEEKS))
+                        )
+            ),
         ).distinct().order_by('last_viewed_date')
         
         self.oldest_viewed_tag = oldest_tags.first()

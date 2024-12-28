@@ -24,13 +24,13 @@ class TagQuestionRelationshipInline(admin.TabularInline):
 class AnswerAdmin(admin.ModelAdmin):
     # Show questions that are linked with this answer
     inlines = [AnswerQuestionRelationshipInline]
-    list_display = ['id', 'datetime_added', 'datetime_updated', 'user', 'answer']
+    list_display = ['id', 'datetime_added', 'datetime_updated', 'user', 'answer', 'question_display']
     formfield_overrides = {
         models.TextField: {'widget': AdminPagedownWidget},
     }
     # enable searching for Answer's on these two fields
     search_fields = ['answer', 'question__question']
-
+    
     def get_form(self, request, obj=None, **kwargs):
         '''Default the user field to the current user.'''
         form = super().get_form(request, obj, **kwargs)
@@ -38,6 +38,16 @@ class AnswerAdmin(admin.ModelAdmin):
             form.base_fields['user'].initial = request.user
         return form
 
+    def question_display(self, obj):
+        # Show all questions associated with this answer
+        questions = obj.question_set.all()
+        return ", ".join([
+            f"Q{question.pk}: {question.question[:50]}..." if len(question.question) > 50 
+            else f"Q{question.pk}: {question.question}" 
+            for question in questions
+        ])
+
+    question_display.short_description = 'Question(s)'
 
 
 class AttemptAdmin(admin.ModelAdmin):
@@ -55,7 +65,6 @@ class AttemptAdmin(admin.ModelAdmin):
             tag.name for tag in obj.question.tag_set.all()
         ])
     tags_display.short_description = "Tags"
-
 
 class QuestionTagAdmin(admin.ModelAdmin):
     # exclude questions, otherwise questions will be shown as a vertical inline as well as the horizontal inline
