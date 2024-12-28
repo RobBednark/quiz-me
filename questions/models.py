@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 from dateutil.relativedelta import relativedelta
 
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 
 from emailusername.models import User
@@ -40,6 +42,13 @@ class Question(CreatedBy):
 
     def __str__(self):
         return '<Question id=[%s] question=[%s] datetime_added=[%s]>' % (self.id, self.question, self.datetime_added)
+
+@receiver(post_delete, sender=Question)
+def delete_answer(sender, instance, **kwargs):
+    # After a Question is deleted, delete its Answer if there is one.
+    if instance.answer:
+        instance.answer.delete()
+
 
 
 class Answer(CreatedBy):
@@ -160,3 +169,4 @@ class Schedule(CreatedBy):
                           self.interval_unit, interval_num, type(interval_num), exception))
                 raise
         return super(Schedule, self).save(*args, **kwargs)
+    
