@@ -30,7 +30,7 @@ class CreatedBy(models.Model):
 
 class Question(CreatedBy):
     question = models.TextField()
-    answer = models.ForeignKey('Answer', on_delete=models.SET_NULL, null=True, blank=True)
+    answer = models.ForeignKey('Answer', on_delete=models.CASCADE, null=True, blank=True)
     # attempt_set
     # questiontag_set
     # schedule_set
