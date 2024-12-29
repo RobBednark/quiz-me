@@ -36,11 +36,15 @@ class Command(BaseCommand):
         self._set_user_and_tag_hierarchy()
         with open(options['csv_file'], 'r') as file:
             reader = csv.DictReader(file)
+            if self._options['dry_run']:
+                self.stdout.write(self.style.WARNING('DRY RUN: no changes made.\n'))
             for self._row_num, self._row in enumerate(reader):
                 self.stdout.write(f"Processing row [{self._row_num+1}]: {self._row}")
                 if self._is_main_tag_valid():
                     self._process_tag_renames()
                     self._process_add_lineages()
+            if self._options['dry_run']:
+                self.stdout.write(self.style.WARNING('DRY RUN: no changes made.\n'))
     
     def _set_user_and_tag_hierarchy(self):
         self._user = User.objects.get(id=self._options['user_id'])
@@ -63,7 +67,7 @@ class Command(BaseCommand):
 
         if main_tag_id not in self._tag_hierarchy:
             self.stdout.write(self.style.ERROR(
-                f'ERROR: Row [{self._row_num+1}]: [{COLUMN_NAME_TAG_ID}] id [{self._row[COLUMN_NAME_TAG_ID]}] does not exist.'
+                f'ERROR: Row [{self._row_num+1}]: [{COLUMN_NAME_TAG_ID}] id [{self._row[COLUMN_NAME_TAG_ID]}] does not exist.\n'
             ))
             self._main_tag_id = None
             return False
@@ -73,7 +77,7 @@ class Command(BaseCommand):
     def _is_valid_tag_id(self, tag_id, col_name):
         if tag_id not in self._tag_hierarchy:
             self.stdout.write(self.style.ERROR(
-                f'ERROR: id=[{tag_id}] in column=[{col_name}] is not a valid id.'
+                f'ERROR: id=[{tag_id}] in column=[{col_name}] is not a valid id.\n'
             ))
             return False
         return True
@@ -97,21 +101,15 @@ class Command(BaseCommand):
                     # verify that the lineage doesn't already exist
                     if parent_tag.id in self._tag_hierarchy[child_tag.id]['parents']:
                         self.stdout.write(self.style.ERROR(
-                            f'ERROR: relationship to be added already exists:'
-                            f' parent_id=[{parent_tag.id}] parent_name=[{parent_tag.name}]'
-                            f' child_id=[{child_tag.id}] child_name=[{child_tag.name}]'
+                            f'ERROR: already exists: [{parent_tag.name}] ({parent_tag.id}) => [{child_tag.name}] ({child_tag.id})'
                         ))
                         continue
                     self.stdout.write(self.style.SUCCESS(
-                        f"Adding relationship:\n"
-                        f"  parent_id  =[{parent_tag.id}]\n"
-                        f"  parent_name=[{parent_tag.name}]\n"
-                        f"  child_id   =[{child_tag.id}]\n"
-                        f"  child_name =[{child_tag.name}]\n"
+                        f"CHANGE: Adding relationship: [{parent_tag.name}] => [{child_tag.name}]\n"
                     ))
                     if self._options['dry_run']:
-                        self.stdout.write(self.style.WARNING('DRY RUN: no changes made.\n'))
                         continue
+
                     TagLineage.objects.create(
                         parent_tag=parent_tag,
                         child_tag=child_tag, 
@@ -121,20 +119,13 @@ class Command(BaseCommand):
                     # verify that the lineage exists
                     if parent_tag.id not in self._tag_hierarchy[child_tag.id]['parents']:
                         self.stdout.write(self.style.ERROR(
-                            f'ERROR: relationship to be removed does not exist:'
-                            f' parent_id=[{parent_tag.id}] parent_name=[{parent_tag.name}]'
-                            f' child_id=[{child_tag.id}] child_name=[{child_tag.name}]'
+                            f'ERROR: relationship to be removed does not exist: [{parent_tag.name}] ({parent_tag.id}) => [{child_tag.name}] ({child_tag.id})'
                         ))
                         continue
                     self.stdout.write(self.style.SUCCESS(
-                        f"Removing relationship:\n"
-                        f"  parent_id  =[{parent_tag.id}]\n"
-                        f"  parent_name=[{parent_tag.name}]\n"
-                        f"  child_id   =[{child_tag.id}]\n"
-                        f"  child_name =[{child_tag.name}]\n"
+                        f"CHANGE: Removing relationship: [{parent_tag.name}] ({parent_tag.id}) => [{child_tag.name}] ({child_tag.id})\n"
                     ))
                     if self._options['dry_run']:
-                        self.stdout.write(self.style.WARNING('DRY RUN: no changes made.\n'))
                         continue
                     TagLineage.objects.filter(
                         user=self._user,
@@ -152,16 +143,9 @@ class Command(BaseCommand):
                 ))
                 return
             self.stdout.write(self.style.SUCCESS(
-                f"Renaming from:\n"
-                f"   id=[{self._main_tag.id}]"
-                f" name=[{old_name}]\n"
-                f"to:\n"
-                f"   id=[{self._main_tag.id}]"
-                f" name=[{tag_new_name}]\n"
+                f"CHANGE: Rename: [{old_name}] ({self._main_tag.id}) => [{tag_new_name}] ({self._main_tag.id})\n"
             ))
-            if self._options['dry_run']:
-                self.stdout.write(self.style.WARNING(f'DRY RUN: no changes made.\n'))
-            else:
+            if not self._options['dry_run']:
                 self._main_tag.name = tag_new_name
                 self._main_tag.save()
                 # A change was made, so update the tag hierarchy
