@@ -235,10 +235,10 @@ ERROR: Row [1]: missing the required column: [Tag ID]
     def _csv_write_all_happy_paths(self, writer, tag1, tag2, tag3, tag4):
         writer.writerow({
             COLUMN_NAME_TAG_ID: tag1.id,
-            COLUMN_NAME_CHILD_TAG_IDS_TO_ADD: f"{tag4.id}",
-            COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE: f"{tag2.id}",
+            COLUMN_NAME_CHILD_TAG_IDS_TO_ADD: tag4.id,
+            COLUMN_NAME_CHILD_TAG_IDS_TO_REMOVE: tag2.id,
             COLUMN_NAME_TAG_RENAME: "renamed_tag_1",
-            COLUMN_NAME_PARENT_TAG_IDS_TO_ADD: f"{tag3.id}",
+            COLUMN_NAME_PARENT_TAG_IDS_TO_ADD: tag3.id,
         })
         writer.writerow({
             COLUMN_NAME_TAG_ID: tag3.id,
@@ -284,31 +284,12 @@ ERROR: Row [1]: missing the required column: [Tag ID]
         call_command('import_tags', csv_file=tmp_filepath, user_id=user.id)
         expected_stdout = f'''\
 Processing row [1]: {{'Tag ID': '{tag1.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '{tag4.id}', 'ACTION: Child Tag IDs to Remove': '{tag2.id}', 'ACTION: Tag Rename': 'renamed_tag_1', 'ACTION: Parent Tag IDs to Add': '{tag3.id}', 'ACTION: Parent Tag IDs to Remove': ''}}
-Renaming from:
-   id=[{tag1.id}] name=[tag 1]
-to:
-   id=[{tag1.id}] name=[renamed_tag_1]
-Adding relationship:
-  parent_id  =[{tag1.id}]
-  parent_name=[renamed_tag_1]
-  child_id   =[{tag4.id}]
-  child_name =[tag 4]
-Removing relationship:
-  parent_id  =[{tag1.id}]
-  parent_name=[renamed_tag_1]
-  child_id   =[{tag2.id}]
-  child_name =[tag 2]
-Adding relationship:
-  parent_id  =[{tag3.id}]
-  parent_name=[tag 3]
-  child_id   =[{tag1.id}]
-  child_name =[renamed_tag_1]
+CHANGE: Rename: [tag 1] ({tag1.id}) => [renamed_tag_1] ({tag1.id})
+CHANGE: Adding relationship: [renamed_tag_1] => [tag 4]
+CHANGE: Removing relationship: [renamed_tag_1] ({tag1.id}) => [tag 2] ({tag2.id})
+CHANGE: Adding relationship: [tag 3] => [renamed_tag_1]
 Processing row [2]: {{'Tag ID': '{tag3.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '', 'ACTION: Child Tag IDs to Remove': '', 'ACTION: Tag Rename': '', 'ACTION: Parent Tag IDs to Add': '', 'ACTION: Parent Tag IDs to Remove': '{tag1.id}'}}
-Removing relationship:
-  parent_id  =[{tag1.id}]
-  parent_name=[renamed_tag_1]
-  child_id   =[{tag3.id}]
-  child_name =[tag 3]
+CHANGE: Removing relationship: [renamed_tag_1] ({tag1.id}) => [tag 3] ({tag3.id})
 '''
         assert expected_stdout == capsys.readouterr().out
         
@@ -357,36 +338,14 @@ Removing relationship:
 
         call_command('import_tags', csv_file=tmp_filepath, user_id=user.id, dry_run=True)
         expected_stdout = f'''\
+DRY RUN: no changes made.
 Processing row [1]: {{'Tag ID': '{tag1.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '{tag4.id}', 'ACTION: Child Tag IDs to Remove': '{tag2.id}', 'ACTION: Tag Rename': 'renamed_tag_1', 'ACTION: Parent Tag IDs to Add': '{tag3.id}', 'ACTION: Parent Tag IDs to Remove': ''}}
-Renaming from:
-   id=[{tag1.id}] name=[tag 1]
-to:
-   id=[{tag1.id}] name=[renamed_tag_1]
-DRY RUN: no changes made.
-Adding relationship:
-  parent_id  =[{tag1.id}]
-  parent_name=[tag 1]
-  child_id   =[{tag4.id}]
-  child_name =[tag 4]
-DRY RUN: no changes made.
-Removing relationship:
-  parent_id  =[{tag1.id}]
-  parent_name=[tag 1]
-  child_id   =[{tag2.id}]
-  child_name =[tag 2]
-DRY RUN: no changes made.
-Adding relationship:
-  parent_id  =[{tag3.id}]
-  parent_name=[tag 3]
-  child_id   =[{tag1.id}]
-  child_name =[tag 1]
-DRY RUN: no changes made.
+CHANGE: Rename: [tag 1] ({tag1.id}) => [renamed_tag_1] ({tag1.id})
+CHANGE: Adding relationship: [tag 1] => [tag 4]
+CHANGE: Removing relationship: [tag 1] ({tag1.id}) => [tag 2] ({tag2.id})
+CHANGE: Adding relationship: [tag 3] => [tag 1]
 Processing row [2]: {{'Tag ID': '{tag3.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '', 'ACTION: Child Tag IDs to Remove': '', 'ACTION: Tag Rename': '', 'ACTION: Parent Tag IDs to Add': '', 'ACTION: Parent Tag IDs to Remove': '{tag1.id}'}}
-Removing relationship:
-  parent_id  =[{tag1.id}]
-  parent_name=[tag 1]
-  child_id   =[{tag3.id}]
-  child_name =[tag 3]
+CHANGE: Removing relationship: [tag 1] ({tag1.id}) => [tag 3] ({tag3.id})
 DRY RUN: no changes made.
 '''
         assert expected_stdout == capsys.readouterr().out
@@ -468,9 +427,9 @@ ERROR: Row [2]: [Tag ID] id [99999] does not exist.
 Processing row [3]: {{'Tag ID': '{tag1.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '99999', 'ACTION: Child Tag IDs to Remove': '', 'ACTION: Tag Rename': '', 'ACTION: Parent Tag IDs to Add': '', 'ACTION: Parent Tag IDs to Remove': ''}}
 ERROR: id=[99999] in column=[ACTION: Child Tag IDs to Add] is not a valid id.
 Processing row [4]: {{'Tag ID': '{tag1.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '', 'ACTION: Child Tag IDs to Remove': '{tag2.id}', 'ACTION: Tag Rename': '', 'ACTION: Parent Tag IDs to Add': '', 'ACTION: Parent Tag IDs to Remove': ''}}
-ERROR: relationship to be removed does not exist: parent_id=[{tag1.id}] parent_name=[tag 1] child_id=[{tag2.id}] child_name=[tag 2]
+ERROR: relationship to be removed does not exist: [tag 1] ({tag1.id}) => [tag 2] ({tag2.id})
 Processing row [5]: {{'Tag ID': '{tag3.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '{tag4.id}', 'ACTION: Child Tag IDs to Remove': '', 'ACTION: Tag Rename': '', 'ACTION: Parent Tag IDs to Add': '', 'ACTION: Parent Tag IDs to Remove': ''}}
-ERROR: relationship to be added already exists: parent_id=[{tag3.id}] parent_name=[tag 3] child_id=[{tag4.id}] child_name=[tag 4]
+ERROR: already exists: [tag 3] ({tag3.id}) => [tag 4] ({tag4.id})
 Processing row [6]: {{'Tag ID': '{tag1.id}', 'Tag Name': '', 'Child Tag Names': '', 'ACTION: Child Tag IDs to Add': '', 'ACTION: Child Tag IDs to Remove': '', 'ACTION: Tag Rename': 'tag 1', 'ACTION: Parent Tag IDs to Add': '', 'ACTION: Parent Tag IDs to Remove': ''}}
 ERROR: id=[{tag1.id}] already has the name [tag 1]
 '''
